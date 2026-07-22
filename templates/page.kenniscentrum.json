@@ -1,0 +1,54 @@
+{
+  "sections": {
+    "kc_hero": {
+      "type": "kc-hero",
+      "blocks": {
+        "chip_1": {
+          "type": "chip",
+          "settings": {
+            "label": "Langer thuis wonen"
+          }
+        },
+        "chip_2": {
+          "type": "chip",
+          "settings": {
+            "label": "Inbraakpreventie"
+          }
+        },
+        "chip_3": {
+          "type": "chip",
+          "settings": {
+            "label": "Voor mantelzorgers"
+          }
+        }
+      },
+      "block_order": ["chip_1", "chip_2", "chip_3"],
+      "settings": {
+        "eyebrow": "Langer Thuis Kenniscentrum",
+        "heading": "Alles over langer thuis wonen, veilig en gerust.",
+        "sub": "Alles wat u wilt weten over langer zelfstandig thuis wonen. Onafhankelijke kennis, praktische tips en slimme oplossingen.",
+        "chips_label": "Populair:"
+      }
+    },
+    "kc_bridge": {
+      "type": "kc-bridge",
+      "settings": {
+        "eyebrow": "Van begrip naar de juiste stap",
+        "heading": "Niet zeker welke ondersteuning past?",
+        "text": "Elke familie is anders. Beantwoord een paar eenvoudige vragen en ontdek welke ondersteuning logisch is voor jullie situatie.",
+        "cta_label": "Start de Keuzehulp"
+      }
+    },
+    "kc_cta": {
+      "type": "kc-cta-band",
+      "settings": {
+        "eyebrow": "Van kennis naar de juiste oplossing",
+        "heading": "Weet je genoeg? Bekijk de pakketten die hierbij passen.",
+        "text": "Onze gidsen helpen je kiezen. Onze pakketten maken het waar, met een vertrouwd gezicht dat met je meedenkt.",
+        "primary_label": "Bekijk pakketten",
+        "secondary_label": "Gratis adviesgesprek"
+      }
+    }
+  },
+  "order": ["kc_hero", "kc_bridge", "kc_cta"]
+}

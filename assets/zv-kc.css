@@ -1,0 +1,310 @@
+/*
+  zv-kc.css — Zo Veilig Kenniscentrum component library
+  Ported from the design pack (kc/kenniscentrum.css).
+
+  Two deliberate differences from the design pack:
+  1. Typography inherits the theme font (Titillium, per BRAND_REFERENCE). The design pack
+     renders these components in Hanken Grotesk. Layout and weights are unchanged.
+  2. Everything is scoped under .zv-kc so generic class names (.wrap, .btn, .sec, .eyebrow)
+     cannot collide with Dawn's base.css.
+*/
+
+.zv-kc {
+  --ink: #1a1230;
+  --indigo: #322469;
+  --indigo-2: #473a86;
+  --indigo-soft: #efecf7;
+  --cream: #fdfaf2;
+  --paper: #fffdf8;
+  --sand: #efe9d6;
+  --sand-2: #e6dfca;
+  --gold: #e4a311;
+  --gold-lt: #f5c84a;
+  --belt: #b67e0a;
+  --gold-soft: #fbf0d4;
+  --rood: #c52e2f;
+  --red-soft: #fbe6e5;
+  --ok: #2f8f5b;
+  --ok-soft: #e3f0e8;
+  --blauw: #00509f;
+  --blauw-soft: #e6ecf6;
+  --line: #e4dac4;
+  --line-2: #d8cdb4;
+  --muted: #6f6786;
+  --muted-2: #8c84a6;
+  --shadow-sm: 0 12px 26px -22px rgba(26, 18, 48, 0.4);
+  --shadow-md: 0 24px 50px -38px rgba(26, 18, 48, 0.5);
+  color: var(--ink);
+}
+
+.zv-kc .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3.4vw, 48px);
+}
+.zv-kc .sec {
+  padding: clamp(46px, 5vw, 76px) 0;
+}
+.zv-kc .eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--belt);
+}
+
+/* buttons */
+.zv-kc .btn {
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 22px;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.14s, box-shadow 0.14s, background 0.14s;
+}
+.zv-kc .btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.zv-kc .btn--ink {
+  background: var(--indigo);
+  color: #fff;
+  box-shadow: 0 2px 0 #211748;
+}
+.zv-kc .btn--ink:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #211748, 0 12px 24px -12px rgba(33, 23, 72, 0.6);
+}
+.zv-kc .btn--onlight {
+  background: rgba(58, 42, 6, 0.08);
+  border: 1.6px solid rgba(58, 42, 6, 0.3);
+  color: #3a2a06;
+}
+.zv-kc .btn--onlight:hover {
+  background: rgba(58, 42, 6, 0.16);
+}
+
+/* accessible focus (a11y) */
+.zv-kc a:focus-visible,
+.zv-kc button:focus-visible {
+  outline: 3px solid var(--gold-lt);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.zv-kc .kc-hero {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: #281c54;
+  display: flex;
+  align-items: center;
+  min-height: clamp(360px, 42vw, 560px);
+}
+.zv-kc .kc-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--kc-hero-img, none) center 28% / cover no-repeat;
+}
+.zv-kc .kc-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+      95deg,
+      rgba(26, 18, 48, 0.94) 0%,
+      rgba(26, 18, 48, 0.8) 28%,
+      rgba(26, 18, 48, 0.45) 50%,
+      rgba(26, 18, 48, 0.14) 70%,
+      rgba(26, 18, 48, 0.04) 100%
+    ),
+    linear-gradient(180deg, rgba(26, 18, 48, 0.14) 0%, rgba(26, 18, 48, 0) 32%, rgba(26, 18, 48, 0.4) 100%);
+}
+.zv-kc .kc-hero .wrap {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(48px, 6vw, 82px);
+  padding-bottom: clamp(48px, 6vw, 78px);
+}
+.zv-kc .kc-hero .eyebrow {
+  color: var(--gold-lt);
+}
+.zv-kc .kc-hero h1 {
+  font-size: clamp(36px, 5.2vw, 62px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin-top: 14px;
+  max-width: 17ch;
+  text-wrap: balance;
+  color: #fff;
+}
+.zv-kc .kc-hero .sub {
+  font-size: clamp(16px, 1.7vw, 20px);
+  font-weight: 500;
+  color: #d7d0f0;
+  margin-top: 18px;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+.zv-kc .kc-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  align-items: center;
+}
+.zv-kc .kc-chips .lbl {
+  font-size: 13px;
+  font-weight: 700;
+  color: #bcb2e0;
+}
+.zv-kc .kc-chips a {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #efeaff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 7px 14px;
+  text-decoration: none;
+  transition: background 0.14s;
+}
+.zv-kc .kc-chips a:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.zv-kc .kc-hero-stats {
+  display: flex;
+  gap: clamp(20px, 4vw, 52px);
+  flex-wrap: wrap;
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+.zv-kc .kc-hero-stats .s b {
+  display: block;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.zv-kc .kc-hero-stats .s span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #bcb2e0;
+}
+
+/* ============================================================
+   MANTELZORG BRIDGE (naar de Keuzehulp)
+   ============================================================ */
+.zv-kc .mz-bridge {
+  background: linear-gradient(120deg, #20154a 0%, #322160 100%);
+  border-radius: 22px;
+  padding: clamp(26px, 3vw, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  box-shadow: 0 34px 66px -42px rgba(26, 18, 48, 0.75);
+}
+.zv-kc .mz-bridge .mz-tx {
+  max-width: 58ch;
+}
+.zv-kc .mz-bridge .eyebrow {
+  color: var(--gold-lt);
+}
+.zv-kc .mz-bridge h3 {
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.016em;
+  line-height: 1.08;
+  margin-top: 9px;
+}
+.zv-kc .mz-bridge p {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #cdc6e8;
+  margin-top: 11px;
+  line-height: 1.55;
+}
+.zv-kc .mz-bridge .mz-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--gold);
+  color: #26190a;
+  font-size: 15px;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 15px 26px;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.55);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.zv-kc .mz-bridge .mz-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.65);
+}
+.zv-kc .mz-bridge .mz-cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================
+   CTA BAND (kennis naar oplossing)
+   ============================================================ */
+.zv-kc .cta-band {
+  background: linear-gradient(120deg, var(--gold) 0%, var(--gold-lt) 100%);
+}
+.zv-kc .cta-band .wrap {
+  padding-top: clamp(40px, 4vw, 58px);
+  padding-bottom: clamp(40px, 4vw, 58px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.zv-kc .cta-band .ct-tx {
+  max-width: 60ch;
+}
+.zv-kc .cta-band .eyebrow {
+  color: #7a560a;
+}
+.zv-kc .cta-band h2 {
+  font-size: clamp(24px, 2.8vw, 34px);
+  font-weight: 900;
+  color: #3a2a06;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+  margin-top: 8px;
+}
+.zv-kc .cta-band p {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #5c4410;
+  margin-top: 9px;
+  line-height: 1.5;
+}
+.zv-kc .cta-band .ct-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

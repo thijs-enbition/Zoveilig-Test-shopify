@@ -1,0 +1,78 @@
+/*
+  zv-base.css — Zo Veilig design tokens
+  Loaded globally from layout/theme.liquid. New ZV sections reference these vars;
+  never hardcode brand hex or font in a section. Dawn's own colour schemes
+  (config/settings_data.json) carry the palette for Dawn sections; these vars carry
+  it for the custom ZV sections + shared UI (buttons, consent banner).
+  Authority: ../../BRAND_REFERENCE.md · CLAUDE.md
+*/
+
+:root {
+  /* Brand palette (BRAND_REFERENCE.md) */
+  --zv-indigo: #322469;
+  --zv-geel:   #E4A311;
+  --zv-rood:   #C52E2F;
+  --zv-blauw:  #27519B;
+  --zv-zand:   #DFD9C9;
+
+  /* Semantic roles — reference these, not the raw palette, in components */
+  --zv-ink:            var(--zv-indigo);   /* default text / headings */
+  --zv-accent:         var(--zv-geel);     /* primary CTA on dark surfaces */
+  --zv-danger:         var(--zv-rood);     /* alerts / sale badges only */
+  --zv-surface-warm:   var(--zv-zand);     /* soft card / section surface */
+  --zv-on-dark:        #FFFFFF;
+  --zv-focus-ring:     var(--zv-geel);     /* visible focus (a11y) */
+
+  /* Typography — Titillium Web (Shopify font library; loaded via theme settings) */
+  --zv-font: 'Titillium Web', var(--font-body-family, Arial, sans-serif);
+  --zv-weight-regular: 400;
+  --zv-weight-semibold: 600;
+  --zv-weight-bold: 700;
+
+  /* Type ramp (fluid-ish; refine from the Design File as needed) */
+  --zv-fs-eyebrow: 0.8125rem;   /* 13px */
+  --zv-fs-body:    1rem;        /* 16px */
+  --zv-fs-h4:      1.25rem;
+  --zv-fs-h3:      1.5rem;
+  --zv-fs-h2:      2rem;
+  --zv-fs-h1:      clamp(2rem, 5vw, 3rem);
+  --zv-lh-tight: 1.15;
+  --zv-lh-body:  1.6;
+
+  /* Spacing scale (4/8-pt) */
+  --zv-space-1: 4px;
+  --zv-space-2: 8px;
+  --zv-space-3: 12px;
+  --zv-space-4: 16px;
+  --zv-space-5: 24px;
+  --zv-space-6: 32px;
+  --zv-space-7: 48px;
+  --zv-space-8: 64px;
+  --zv-space-9: 96px;
+
+  /* Radius */
+  --zv-radius-sm: 6px;
+  --zv-radius-md: 12px;
+  --zv-radius-pill: 999px;
+}
+
+/* Accessible focus for interactive ZV elements */
+.zv [tabindex]:focus-visible,
+.zv a:focus-visible,
+.zv button:focus-visible {
+  outline: 3px solid var(--zv-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Privacy badge used on NAMI (géén camera) — surfaced as a feature */
+.zv-badge--privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zv-space-2);
+  padding: var(--zv-space-1) var(--zv-space-3);
+  border-radius: var(--zv-radius-pill);
+  background: var(--zv-surface-warm);
+  color: var(--zv-ink);
+  font-weight: var(--zv-weight-semibold);
+  font-size: var(--zv-fs-eyebrow);
+}

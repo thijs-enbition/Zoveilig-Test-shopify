@@ -1,0 +1,83 @@
+{{ 'zv-kc.css' | asset_url | stylesheet_tag }}
+
+<div class="zv-kc">
+  <div class="sec">
+    <div class="wrap">
+      <div class="mz-bridge">
+        <div class="mz-tx">
+          {%- if section.settings.eyebrow != blank -%}
+            <span class="eyebrow">{{ section.settings.eyebrow | escape }}</span>
+          {%- endif -%}
+
+          {%- if section.settings.heading != blank -%}
+            <h3>{{ section.settings.heading | escape }}</h3>
+          {%- endif -%}
+
+          {%- if section.settings.text != blank -%}
+            <p>{{ section.settings.text | escape }}</p>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.cta_label != blank -%}
+          <a
+            class="mz-cta"
+            href="{{ section.settings.cta_link | default: '#' }}"
+            data-zv-event="finder_start"
+            data-zv-source="kenniscentrum_bridge"
+          >
+            {{- section.settings.cta_label | escape }}
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M5 12h14M13 6l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "KC bridge naar Keuzehulp",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Van begrip naar de juiste stap"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Kop",
+      "default": "Niet zeker welke ondersteuning past?"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Tekst",
+      "default": "Elke familie is anders. Beantwoord een paar eenvoudige vragen en ontdek welke ondersteuning logisch is voor jullie situatie."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Knoptekst",
+      "default": "Start de Keuzehulp"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Knoplink (Keuzehulp)",
+      "info": "Verwijst naar de Keuzehulp, bijvoorbeeld /pages/keuzehulp"
+    }
+  ],
+  "presets": [{ "name": "KC bridge naar Keuzehulp" }]
+}
+{% endschema %}

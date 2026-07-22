@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zoveilig.nl/schemas/pricing.config.json",
+  "title": "Zo Veilig pricing configuration",
+  "description": "Typed configuration layer for customer-facing pricing. Every money value carries BOTH an integer amountCents (machine truth, avoids float drift) and the exact display string as approved in the design pack, so presentation can be reproduced byte for byte. Values that conflict across sources are represented as Unresolved and MUST NOT be silently defaulted.",
+  "type": "object",
+  "required": ["meta", "currency", "lines", "surcharges", "addons", "bundles", "activation", "contractTerm", "unresolved"],
+  "additionalProperties": false,
+
+  "$defs": {
+    "Money": {
+      "type": "object",
+      "required": ["amountCents", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "amountCents": { "type": "integer", "minimum": 0, "description": "Integer cents. Never a float." },
+        "display": { "type": "string", "description": "Exact customer-visible string from the approved design. Reproduce verbatim." },
+        "per": { "type": "string", "description": "Exact period suffix as shown, for example '/mnd' or ' p/m'." }
+      }
+    },
+    "UnpricedLabel": {
+      "type": "object",
+      "description": "A tier or item that is deliberately not yet priced.",
+      "required": ["status", "display"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "PRICE_PENDING" },
+        "display": { "type": "string", "description": "Exact placeholder text shown to customers, for example 'Prijs volgt'." }
+      }
+    },
+    "Unresolved": {
+      "type": "object",
+      "description": "A value that conflicts across approved sources. Deliberately has no single value. Consuming code MUST fail loudly rather than pick a candidate.",
+      "required": ["status", "reason", "candidates"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "const": "UNRESOLVED" },
+        "reason": { "type": "string" },
+        "candidates": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["source"],
+            "additionalProperties": true,
+            "properties": {
+              "source": { "type": "string", "description": "File the value was extracted from." },
+              "model": { "type": "string", "enum": ["flat", "formula"] },
+              "amountCents": { "type": "integer", "minimum": 0 },
+              "display": { "type": "string" },
+              "formula": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "Tier": {
+      "type": "object",
+      "required": ["id", "name", "platform", "price"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "description": "Customer-visible tier name." },
+        "platform": { "type": "string", "description": "Hardware platform, for example 'NAMI aiAware'." },
+        "hook": { "type": "string" },
+        "sub": { "type": "string", "description": "Verbatim spec line shown under the price." },
+        "price": {
+          "oneOf": [{ "$ref": "#/$defs/Money" }, { "$ref": "#/$defs/UnpricedLabel" }]
+        },
+        "features": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Line": {
+      "type": "object",
+      "required": ["id", "displayName", "cat", "pricingStatus", "tiers"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "enum": ["langer-thuis", "mijn-thuis", "veilig-onderweg"] },
+        "displayName": { "type": "string", "description": "Canonical customer-facing label. Internal working names are not used here." },
+        "internalName": { "type": "string", "description": "Working name found in the design pack CLAUDE.md, retained for traceability only." },
+        "cat": { "type": "string", "enum": ["living", "security", "persoonlijk"], "description": "Route parameter ?cat=" },
+        "pricingStatus": { "type": "string", "enum": ["FINAL", "PLACEHOLDER", "PENDING", "DISPUTED"] },
+        "tiers": { "type": "array", "items": { "$ref": "#/$defs/Tier" } }
+      }
+    },
+    "Addon": {
+      "type": "object",
+      "required": ["id", "name", "billing", "price"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "sku": { "type": "string", "description": "Must equal the Odoo Internal Reference." },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "billing": { "type": "string", "enum": ["monthly", "oneoff"] },
+        "price": {
+          "oneOf": [{ "$ref": "#/$defs/Money" }, { "$ref": "#/$defs/UnpricedLabel" }, { "$ref": "#/$defs/Unresolved" }]
+        }
+      }
+    },
+    "Bundle": {
+      "type": "object",
+      "required": ["id", "name", "includes", "priceWas", "priceNow"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "badge": { "type": "string" },
+        "includes": { "type": "array", "items": { "type": "string" } },
+        "priceWas": { "$ref": "#/$defs/Money" },
+        "priceNow": { "$ref": "#/$defs/Money" },
+        "verified": { "type": "boolean", "description": "True only when priceWas equals the sum of its components at listed prices." }
+      }
+    }
+  },
+
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["extractedFrom", "extractedOn", "principle"],
+      "additionalProperties": false,
+      "properties": {
+        "extractedFrom": { "type": "string" },
+        "extractedOn": { "type": "string" },
+        "principle": { "type": "string" }
+      }
+    },
+    "currency": { "const": "EUR" },
+    "vat": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ratePercent": { "type": "number" },
+        "inclusive": { "type": "boolean" },
+        "displayLabel": { "type": "string" }
+      }
+    },
+    "lines": { "type": "array", "items": { "$ref": "#/$defs/Line" } },
+    "surcharges": { "type": "array", "items": { "$ref": "#/$defs/Addon" } },
+    "addons": { "type": "array", "items": { "$ref": "#/$defs/Addon" } },
+    "bundles": { "type": "array", "items": { "$ref": "#/$defs/Bundle" } },
+    "activation": {
+      "description": "Payment due today. Conflicts across three approved sources, so it is Unresolved by design.",
+      "$ref": "#/$defs/Unresolved"
+    },
+    "contractTerm": {
+      "description": "Contract length. Conflicts across approved sources, so it is Unresolved by design.",
+      "$ref": "#/$defs/Unresolved"
+    },
+    "paymentMethods": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "oneoff": { "type": "array", "items": { "type": "string" } },
+        "recurring": { "type": "array", "items": { "type": "string" } },
+        "notice": { "type": "string" }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "description": "Verbatim customer-visible pricing labels. Changing any string here changes customer-visible behaviour.",
+      "additionalProperties": { "type": "string" }
+    },
+    "unresolved": {
+      "type": "array",
+      "description": "Index of every open question. Must be empty before pricing goes live.",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["blocker", "high", "medium", "low"] },
+          "summary": { "type": "string" },
+          "sources": { "type": "array", "items": { "type": "string" } },
+          "owner": { "type": "string" }
+        }
+      }
+    }
+  }
+}

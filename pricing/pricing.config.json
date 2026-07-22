@@ -1,0 +1,317 @@
+{
+  "$schema": "./pricing.schema.json",
+
+  "meta": {
+    "version": "2.0.0",
+    "status": "WORKING_SOURCE_OF_TRUTH",
+    "decidedOn": "2026-07-16",
+    "decidedBy": "Operator commercial decisions, 2026-07-16",
+    "principle": "This file holds INPUTS only. Every derived value (initial commitment, amount due today, indicative contract value) is computed once by build_pricing.py and emitted to pricing.generated.json plus snippets/zv-pricing.liquid. No page, cart, configurator, confirmation or analytics event may compute or hardcode a price or duration independently.",
+    "supersedes": "pricing.config.json v1.0.0 (extraction of the design pack, 2026-07-16)"
+  },
+
+  "currency": "EUR",
+
+  "rounding": {
+    "method": "ROUND_HALF_UP",
+    "unit": "integer_cents",
+    "decimalPlaces": 2,
+    "note": "Currency-safe. All money is integer cents. Never float. Banker's rounding is explicitly rejected: 1.5 x 2495 = 3742.5 must round to 3743, not 3742."
+  },
+
+  "vat": { "ratePercent": 21, "inclusive": true, "displayLabel": "Btw (21%, inbegrepen)" },
+
+  "activation": {
+    "id": "activation-installation",
+    "amountCents": 4900,
+    "display": "€ 49,00",
+    "label": "Eenmalige activatie en installatie",
+    "billing": "oneoff",
+    "collectedBy": "shopify",
+    "note": "Centrally configurable. Change here only, never in a page component."
+  },
+
+  "commitment": {
+    "id": "initial-commitment",
+    "multiplier": 1.5,
+    "basis": "monthlyRecurringPrice",
+    "label": "Eerste vooruitbetaling",
+    "billing": "oneoff",
+    "collectedBy": "shopify",
+    "note": "This is NOT an activation fee and must never be labelled 'Pakketactivatie'. It is a prepayment representing 1.5 monthly periods.",
+    "creditTreatment": {
+      "status": "UNRESOLVED",
+      "selected": null,
+      "blocks": "indicativeContractValue",
+      "question": "How does Odoo apply the 1.5x prepayment against the contract invoices?",
+      "options": [
+        {
+          "id": "credited",
+          "label": "Credited against the first 1.5 months of invoicing",
+          "recurringMonthsBilled": "termMonths - 1.5",
+          "note": "Recurring invoicing resumes after the credited period."
+        },
+        {
+          "id": "separate",
+          "label": "Separate non-refundable commitment payment, not credited",
+          "recurringMonthsBilled": "termMonths",
+          "note": "All term months are invoiced in addition to the prepayment."
+        }
+      ],
+      "openQuestionsForOdooAdmin": [
+        "Is the 1.5x prepayment credited against the first 1.5 months of invoices?",
+        "Or is it a separate non-refundable commitment payment?",
+        "Does recurring invoicing begin immediately, or after the credited period?",
+        "How is the half-month component represented in Odoo?"
+      ]
+    }
+  },
+
+  "contract": {
+    "defaultTermMonths": 36,
+    "storedPer": "package",
+    "options": [
+      { "months": 12, "enabled": false, "requiresApproval": true },
+      { "months": 24, "enabled": false, "requiresApproval": true },
+      { "months": 36, "enabled": true, "requiresApproval": false, "isDefault": true }
+    ],
+    "rule": "Only commercially enabled durations may be displayed for the selected package. No page may contain a duration independently."
+  },
+
+  "lines": [
+    {
+      "id": "langer-thuis",
+      "displayName": "Langer Thuis",
+      "cat": "living",
+      "pricingStatus": "CURRENT_WORKING",
+      "packages": [
+        {
+          "id": "inzicht",
+          "name": "Inzicht",
+          "platform": "NAMI aiAware",
+          "hook": "Weet dat de dag normaal en veilig is begonnen.",
+          "sub": "NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer",
+          "monthlyRecurringPrice": { "amountCents": 1995, "display": "€19,95", "per": "/mnd" },
+          "termMonths": 36
+        },
+        {
+          "id": "zeker",
+          "name": "Zeker",
+          "platform": "NAMI aiCare",
+          "badge": "Meest gekozen",
+          "hook": "Zie subtiele veranderingen vóór het misgaat.",
+          "sub": "NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer",
+          "monthlyRecurringPrice": { "amountCents": 2495, "display": "€24,95", "per": "/mnd" },
+          "termMonths": 36
+        },
+        {
+          "id": "beschermd",
+          "name": "Beschermd",
+          "platform": "Climax",
+          "hook": "Complete bescherming met 24/7 meldkamer.",
+          "sub": "Climax · 1 centrale/hub, 2 magneetcontacten, 2 PIR, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer",
+          "monthlyRecurringPrice": { "amountCents": 3995, "display": "€39,95", "per": "/mnd" },
+          "termMonths": 36
+        }
+      ]
+    },
+    {
+      "id": "mijn-thuis",
+      "displayName": "Mijn Thuis",
+      "cat": "security",
+      "pricingStatus": "CURRENT_WORKING",
+      "note": "Price levels intentionally match Langer Thuis for the current build.",
+      "packages": [
+        {
+          "id": "alert",
+          "name": "Alert",
+          "platform": "NAMI Alarm15",
+          "platformMappingConfidence": "inferred_from_price_level",
+          "hook": "Slim alarm dat u zelf in de gaten houdt.",
+          "sub": "NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera",
+          "monthlyRecurringPrice": { "amountCents": 1995, "display": "€19,95", "per": "/mnd" },
+          "termMonths": 36
+        },
+        {
+          "id": "protect",
+          "name": "Protect",
+          "platform": "Climax",
+          "platformMappingConfidence": "inferred_from_price_level",
+          "hook": "Alarm met 24/7 meldkamer die meekijkt.",
+          "sub": "Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel",
+          "monthlyRecurringPrice": { "amountCents": 2495, "display": "€24,95", "per": "/mnd" },
+          "termMonths": 36
+        },
+        {
+          "id": "vista",
+          "name": "Vista",
+          "platform": "Alarm.com",
+          "platformMappingConfidence": "inferred_from_price_level",
+          "hook": "Complete beveiliging met meldkamer én camera.",
+          "sub": "Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera",
+          "monthlyRecurringPrice": { "amountCents": 3995, "display": "€39,95", "per": "/mnd" },
+          "termMonths": 36
+        }
+      ]
+    },
+    {
+      "id": "veilig-onderweg",
+      "displayName": "Veilig Onderweg",
+      "cat": "persoonlijk",
+      "pricingStatus": "PENDING",
+      "packages": [
+        {
+          "id": "vo-sos",
+          "name": "SOS",
+          "platform": "LioGo",
+          "hook": "Eén druk verbindt u met de meldkamer.",
+          "sub": "Prijs en specs volgen",
+          "monthlyRecurringPrice": { "status": "PRICE_PENDING", "display": "Prijs volgt" },
+          "purchasable": false
+        },
+        {
+          "id": "vo-zorg",
+          "name": "Zorg",
+          "platform": "LioGo",
+          "hook": "24/7 zorgprofessionals regelen opvolging.",
+          "sub": "Prijs en specs volgen",
+          "monthlyRecurringPrice": { "status": "PRICE_PENDING", "display": "Prijs volgt" },
+          "purchasable": false
+        }
+      ]
+    }
+  ],
+
+  "surcharges": [
+    {
+      "id": "extra-etage",
+      "name": "Per extra etage",
+      "description": "Alle abonnementen: +€4 p/m per extra etage.",
+      "billing": "monthly",
+      "purchasable": true,
+      "price": { "amountCents": 400, "display": "+€4", "per": "/mnd" }
+    }
+  ],
+
+  "addons": [
+    { "id": "vista-home-camera", "name": "Vista Home camera", "description": "Zicht binnen. Zie meteen wat er gebeurt, niet alleen dát er iets gebeurt.", "category": "Zicht", "billing": "monthly", "purchasable": true, "price": { "amountCents": 995, "display": "€ 9,95", "per": "/mnd" } },
+    { "id": "vista-entry-deurbel", "name": "Vista Entry deurbel", "description": "Beeld bij de voordeur. Zie en spreek wie er aanbelt, waar je ook bent.", "category": "Zicht", "billing": "monthly", "purchasable": true, "price": { "amountCents": 995, "display": "€ 9,95", "per": "/mnd" } },
+    { "id": "securitas-meldkamer", "name": "Securitas Meldkamer", "description": "24/7 monitoring. Maakt van Aware of Secure een bewaakt pakket, hulp wordt geregeld.", "category": "Service", "billing": "monthly", "purchasable": true, "price": { "amountCents": 1000, "display": "€ 10,00", "per": "/mnd" } },
+    { "id": "connected-support", "name": "Connected Support", "description": "Service- & supportlaag. Persoonlijke hulp bij installatie, instellingen en vragen.", "category": "Service", "billing": "monthly", "purchasable": true, "price": { "amountCents": 495, "display": "€ 4,95", "per": "/mnd" } },
+    { "id": "alarmcom-domotica", "sku": "ABO-DOMOTICA", "name": "Alarm.com Domotica", "description": "Slimme-woning aansturing. Verlichting, sloten en thermostaat in één app.", "category": "Slim wonen", "billing": "monthly", "purchasable": true, "price": { "amountCents": 400, "display": "€ 4,00", "per": "/mnd" }, "note": "Working price set to EUR 4,00. The EUR 4,95 reference in oplossingen/pages.jsx is superseded." },
+    { "id": "combi-regel", "name": "Combi-regel", "description": "2 producten op 1 Alarm.com-abonnement, met korting. Eén app, één rekening.", "category": "Combi", "billing": "monthly", "purchasable": true, "price": { "amountCents": 995, "display": "€ 9,95", "per": "/mnd" } },
+    {
+      "id": "ontzorgpakket",
+      "sku": "ABO-ONTZORG",
+      "name": "Ontzorgpakket",
+      "description": "Onderhoud en batterijservice.",
+      "category": "Service",
+      "billing": "monthly",
+      "purchasable": false,
+      "displayAs": "upcoming",
+      "price": { "status": "PRICE_PENDING", "display": "Prijs volgt" },
+      "note": "Price not confirmed. Must NOT enter the cart with any amount. The EUR 4,95 on the confirmation mockup is not authorised."
+    }
+  ],
+
+  "bundles": [
+    {
+      "id": "camera-deurbel",
+      "name": "Camera + Deurbel",
+      "badge": "Basis",
+      "includes": ["vista-home-camera", "vista-entry-deurbel"],
+      "priceNow": { "amountCents": 1595, "display": "€ 15,95", "per": "/mnd" },
+      "priceWas": { "amountCents": 1990, "display": "€ 19,90", "per": "/mnd" },
+      "priceWasVerified": true,
+      "note": "Was-price retained: verifiably 2 x EUR 9,95 from published component prices."
+    },
+    {
+      "id": "volledig-gerust",
+      "name": "Volledig gerust",
+      "badge": "Meest gekozen",
+      "includes": ["Secure+ alarm", "securitas-meldkamer", "vista-home-camera"],
+      "priceNow": { "amountCents": 2495, "display": "€ 24,95", "per": "/mnd" },
+      "priceWas": null,
+      "priceWasVerified": false,
+      "note": "Was-price removed. Component price for Secure+ alarm is unpublished, so EUR 29,90 cannot be verified."
+    },
+    {
+      "id": "zorg-opvolging",
+      "name": "Zorg & opvolging",
+      "badge": "Voor een dierbare",
+      "includes": ["LioGo Guard valdetectie", "securitas-meldkamer", "Meekijken met de familie"],
+      "priceNow": { "amountCents": 1995, "display": "€ 19,95", "per": "/mnd" },
+      "priceWas": null,
+      "priceWasVerified": false,
+      "note": "Was-price removed. Component prices for LioGo Guard and Meekijken met de familie are unpublished, so EUR 24,90 cannot be verified."
+    }
+  ],
+
+  "tracking": {
+    "momentA": {
+      "event": "purchase",
+      "valueSource": "initialPaymentDueToday",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is activationPrice + initialCommitmentAmount. Never send activationPrice alone.",
+      "extraParams": ["monthlyRecurringPrice", "indicativeContractValue", "termMonths", "packageId"]
+    },
+    "momentB": {
+      "event": "contract_signed_offline",
+      "valueSource": "indicativeContractValue",
+      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until commitment.creditTreatment is resolved.",
+      "status": "BLOCKED_PENDING_ODOO"
+    }
+  },
+
+  "labels": {
+    "activation": "Eenmalige activatie en installatie",
+    "commitment": "Eerste vooruitbetaling",
+    "monthlyAfter": "Daarna per maand",
+    "dueToday": "Vandaag te betalen",
+    "indicativeContractValue": "Indicatieve totale contractwaarde, inclusief eenmalige kosten",
+    "contractDuration": "Looptijd",
+    "package": "Pakket",
+    "addons": "Uitbreidingen",
+    "monthlyRecurring": "Maandbedrag",
+    "vatLine": "Btw (21%, inbegrepen)",
+    "oneoffHeading": "Eenmalig · vandaag via iDEAL / creditcard",
+    "recurringHeading": "Maandelijks · via SEPA-incasso",
+    "sepaNotice": "Eerste SEPA-incasso na vooraankondiging (min. 5 dagen)",
+    "pricePending": "Prijs volgt",
+    "breakdownIntro": "Opbouw van dit bedrag",
+    "forbidden": {
+      "Pakketactivatie (1,5× maandbedrag)": "Mislabels the commitment as activation. Use labels.commitment.",
+      "Totaal over looptijd": "Hides that one-off charges are included. Use labels.indicativeContractValue."
+    }
+  },
+
+  "retired": [
+    { "id": "familie-plus", "kind": "package", "value": "Familie Plus at €49,95/mnd", "reason": "Retired taxonomy. Must not appear in any active customer flow. Do not auto-replace with another package; map each page to the current taxonomy." },
+    { "id": "activation-9900", "kind": "price", "value": "€99,00 activation", "reason": "Legacy or incorrect. Only reinstate if Zo Veilig supplies a separate installation product that genuinely costs €99,00. Never interchange with €49,00." },
+    { "id": "cart-total-7395", "kind": "total", "value": "€73,95 due today", "reason": "Represented €49,00 + one monthly payment, not €49,00 + 1.5 monthly. Invalid under the agreed commitment model." },
+    { "id": "domotica-495", "kind": "price", "value": "Domotica €4,95", "reason": "Superseded by €4,00." },
+    { "id": "ontzorg-495", "kind": "price", "value": "Ontzorgpakket €4,95", "reason": "Never authorised. Price unconfirmed." },
+    { "id": "term-24-default", "kind": "duration", "value": "24 months as default", "reason": "Default is now 36 months. 24 remains configurable but disabled." }
+  ],
+
+  "unresolved": [
+    {
+      "id": "ODOO_COMMITMENT_TREATMENT",
+      "severity": "blocker",
+      "summary": "Odoo administrator must confirm whether the 1.5x prepayment is credited against the first 1.5 months of invoices or is a separate non-refundable payment, when recurring invoicing starts, and how the half month is represented. Until confirmed, indicativeContractValue is computed both ways and neither is authoritative.",
+      "blocks": ["indicativeContractValue", "Moment B offline conversion value", "Shopify to Odoo billing reconciliation"],
+      "owner": "Odoo administrator"
+    },
+    {
+      "id": "MIJN_THUIS_PLATFORM_MAPPING",
+      "severity": "medium",
+      "summary": "Alert, Protect and Vista were mapped onto the NAMI Alarm15, Climax and Alarm.com platforms by matching price level, since the workbook supplied names and prices only. Confirm the mapping is correct.",
+      "owner": "Operator"
+    },
+    {
+      "id": "VEILIG_ONDERWEG_PRICING",
+      "severity": "medium",
+      "summary": "Veilig Onderweg remains unpriced and not purchasable.",
+      "owner": "Operator"
+    }
+  ]
+}

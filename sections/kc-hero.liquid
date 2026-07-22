@@ -1,0 +1,141 @@
+{{ 'zv-kc.css' | asset_url | stylesheet_tag }}
+
+<div class="zv-kc">
+  <section
+    class="kc-hero"
+    {% if section.settings.background != blank %}
+      style="--kc-hero-img: url('{{ section.settings.background | image_url: width: 1800 }}');"
+    {% endif %}
+  >
+    <div class="wrap">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h1>{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.sub != blank -%}
+        <p class="sub">{{ section.settings.sub | escape }}</p>
+      {%- endif -%}
+
+      {%- assign chips = section.blocks | where: 'type', 'chip' -%}
+      {%- if chips.size > 0 -%}
+        <div class="kc-chips">
+          {%- if section.settings.chips_label != blank -%}
+            <span class="lbl">{{ section.settings.chips_label | escape }}</span>
+          {%- endif -%}
+          {%- for block in chips -%}
+            <a
+              href="{{ block.settings.link | default: '#' }}"
+              data-zv-event="kc_topic_click"
+              data-zv-label="{{ block.settings.label | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              {{- block.settings.label | escape -}}
+            </a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- assign stats = section.blocks | where: 'type', 'stat' -%}
+      {%- if stats.size > 0 -%}
+        <div class="kc-hero-stats">
+          {%- for block in stats -%}
+            <div class="s" {{ block.shopify_attributes }}>
+              <b>{{ block.settings.value | escape }}</b>
+              <span>{{ block.settings.label | escape }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "KC hero",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background",
+      "label": "Achtergrondfoto"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Langer Thuis Kenniscentrum"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Kop (H1)",
+      "default": "Alles over langer thuis wonen, veilig en gerust."
+    },
+    {
+      "type": "textarea",
+      "id": "sub",
+      "label": "Subtekst",
+      "default": "Alles wat u wilt weten over langer zelfstandig thuis wonen. Onafhankelijke kennis, praktische tips en slimme oplossingen."
+    },
+    {
+      "type": "text",
+      "id": "chips_label",
+      "label": "Label voor populaire onderwerpen",
+      "default": "Populair:"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Populair onderwerp",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Langer thuis wonen"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "name": "Statistiek",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Waarde",
+          "default": "20 jaar"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Omschrijving",
+          "default": "ervaring in woningbeveiliging"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "KC hero",
+      "blocks": [
+        { "type": "chip", "settings": { "label": "Langer thuis wonen" } },
+        { "type": "chip", "settings": { "label": "Inbraakpreventie" } },
+        { "type": "chip", "settings": { "label": "Voor mantelzorgers" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

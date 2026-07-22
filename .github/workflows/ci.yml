@@ -1,0 +1,61 @@
+name: CI
+
+# Validation only. This workflow never deploys and needs no Shopify credentials.
+# Deployment happens through the Shopify GitHub integration (branch to theme).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  theme-check:
+    name: Theme Check (Liquid lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@latest
+
+      - name: Run Theme Check
+        env:
+          SHOPIFY_CLI_NO_ANALYTICS: '1'
+        # --fail-level error: warnings are reported but do not block.
+        # UnusedAssign warnings are expected while pages that consume the
+        # generated pricing variables are still being built.
+        run: shopify theme check --fail-level error
+
+  pricing:
+    name: Pricing integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Rebuild pricing from config
+        run: python3 scripts/build_pricing.py
+
+      - name: Fail if generated files are stale
+        # The generated snippet is committed. If rebuilding changes it, the
+        # committed version is out of date with pricing.config.json.
+        run: |
+          if ! git diff --quiet -- snippets/zv-pricing.liquid pricing/pricing.generated.json; then
+            echo "::error::Generated pricing files are stale."
+            echo "Run: python3 scripts/build_pricing.py  and commit the result."
+            git diff --stat -- snippets/zv-pricing.liquid pricing/pricing.generated.json
+            exit 1
+          fi
+          echo "Generated pricing files are up to date."
+
+      - name: Run pricing checks
+        # Verifies monthly prices, activation, initial payment, contract
+        # duration, indicative contract value, add-ons, analytics purchase
+        # value, and that no theme file carries a literal price or duration.
+        run: python3 scripts/check_pricing.py
