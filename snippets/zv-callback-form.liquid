@@ -1,0 +1,68 @@
+{%- comment -%}
+  Reusable "Bel mij terug" callback lead form.
+
+  Usage (from a package card or the package detail page):
+    {% render 'zv-callback-form',
+        item_id: pkg_sku, item_name: pkg_name, solution_category: cat,
+        monthly_price: pkg_price, cta_location: 'oplossingen_card',
+        keuzehulp_result: keuzehulp_result, endpoint: settings.callback_endpoint %}
+
+  The visitor only enters name, phone, preferred time, optional email and consent.
+  Package and journey context are hidden fields, pre-filled from the page, so nothing
+  already known is asked again. gclid/fbclid/utm are merged client-side from storage.
+
+  Submission: assets/zv-callback.js POSTs the lead as JSON to `endpoint` (the Odoo /
+  CRM callback webhook). No endpoint is invented here; if it is blank the form reports a
+  configuration error rather than silently dropping the lead.
+{%- endcomment -%}
+
+{%- assign uid = 'cb-' | append: item_id | append: '-' | append: cta_location | handleize -%}
+
+<form
+  class="zv-callback"
+  data-zv-callback
+  data-endpoint="{{ endpoint }}"
+  data-cta-location="{{ cta_location | escape }}"
+  data-item-id="{{ item_id | escape }}"
+  data-item-name="{{ item_name | escape }}"
+  data-solution-category="{{ solution_category | escape }}"
+  data-monthly-price="{{ monthly_price | escape }}"
+  {% if keuzehulp_result != blank %}data-keuzehulp-result="{{ keuzehulp_result | escape }}"{% endif %}
+  novalidate
+>
+  <div class="zv-cb-fields">
+    <label class="zv-cb-field">
+      <span>Naam</span>
+      <input type="text" name="name" autocomplete="name" required>
+    </label>
+
+    <label class="zv-cb-field">
+      <span>Telefoonnummer</span>
+      <input type="tel" name="phone" autocomplete="tel" inputmode="tel" required>
+    </label>
+
+    <label class="zv-cb-field">
+      <span>Wanneer kunnen we u bellen?</span>
+      <select name="preferred_callback_time" required>
+        <option value="zo-snel-mogelijk">Zo snel mogelijk</option>
+        <option value="ochtend">Ochtend (9-12)</option>
+        <option value="middag">Middag (12-17)</option>
+        <option value="avond">Avond (17-20)</option>
+      </select>
+    </label>
+
+    <label class="zv-cb-field">
+      <span>E-mailadres <em>(optioneel)</em></span>
+      <input type="email" name="email" autocomplete="email">
+    </label>
+  </div>
+
+  <label class="zv-cb-consent">
+    <input type="checkbox" name="consent" required>
+    <span>Ik geef toestemming dat Zo Veilig contact met mij opneemt over mijn aanvraag.</span>
+  </label>
+
+  <button type="submit" class="btn btn--gold zv-cb-submit">Bel mij terug</button>
+
+  <p class="zv-cb-status" role="status" aria-live="polite" hidden></p>
+</form>

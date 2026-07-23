@@ -1,0 +1,354 @@
+{%- comment -%}
+  Homepage hero, rendered from the Hero Banner metaobject.
+
+  Design source of truth: "Zo Veilig Homepage.html" (hero v2, wide media + overlapping card).
+  This is a 1:1 port. Layout, classes, animation and responsive behaviour are unchanged;
+  only the CONTENT and MEDIA are now metaobject-driven.
+
+  ------------------------------------------------------------------------------------------
+  ASSUMED METAOBJECT SCHEMA  ->  CONFIRM against your definition before trusting output.
+  Metaobject definitions are read from the store, which this session cannot query. If any
+  type handle or field key below differs from your actual definition, the field renders
+  blank silently. All assumptions are the Shopify defaults (snake_case of the field label)
+  and are collected here so a correction is a one-line change.
+
+    type handle : hero_banner
+    fields      : heading                (single line text)
+                  subheading             (single line text / multiline)
+                  background_video       (file reference -> video)
+                  background_image       (file reference -> image, used as poster)
+                  primary_button_text    (single line text)
+                  primary_button_url     (url)
+                  secondary_button_text  (single line text)
+                  secondary_button_url   (url)
+                  dark_overlay           (true/false)
+                  active                 (true/false)
+
+  Requires "Storefronts / Web" access enabled on the hero_banner definition so that
+  shop.metaobjects.hero_banner is available in Liquid.
+
+  Bullets: the Hero Banner metaobject has no bullets field, so the three hero bullets are
+  section blocks (editable in the Theme Editor, not hardcoded). Recommend adding a list
+  field to the metaobject later if you want them centralised with the rest of the hero.
+  ------------------------------------------------------------------------------------------
+{%- endcomment -%}
+
+{%- liquid
+  assign hero = null
+  for entry in shop.metaobjects.hero_banner.values
+    if entry.active and hero == null
+      assign hero = entry
+    endif
+  endfor
+-%}
+
+{%- if hero -%}
+  {%- assign poster_url = '' -%}
+  {%- if hero.background_image != blank -%}
+    {%- assign poster_url = hero.background_image | image_url: width: 1600 -%}
+  {%- endif -%}
+
+  <section class="hero" data-section-id="{{ section.id }}">
+    <div class="hero-media">
+      <div class="hero-video-slot{% unless hero.dark_overlay %} no-overlay{% endunless %}">
+        {%- if hero.background_video != blank -%}
+          {%- comment -%} Blurred full-bleed fill layer {%- endcomment -%}
+          <video
+            class="hero-video-bg"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            {% if poster_url != blank %}poster="{{ poster_url }}"{% endif %}
+            aria-hidden="true"
+            tabindex="-1"
+          >
+            {%- for source in hero.background_video.sources -%}
+              <source src="{{ source.url }}" type="{{ source.mime_type }}">
+            {%- endfor -%}
+          </video>
+
+          {%- comment -%} Sharp contained foreground layer {%- endcomment -%}
+          <video
+            class="hero-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            {% if poster_url != blank %}poster="{{ poster_url }}"{% endif %}
+            aria-hidden="true"
+            tabindex="-1"
+          >
+            {%- for source in hero.background_video.sources -%}
+              <source src="{{ source.url }}" type="{{ source.mime_type }}">
+            {%- endfor -%}
+          </video>
+        {%- elsif hero.background_image != blank -%}
+          {{ hero.background_image | image_url: width: 1600 | image_tag: class: 'hero-video', alt: '', aria-hidden: 'true', loading: 'eager' }}
+        {%- endif -%}
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-copy">
+          {%- if hero.heading != blank -%}
+            <h1>{{ hero.heading }}</h1>
+          {%- endif -%}
+
+          {%- if hero.subheading != blank -%}
+            <p class="sub">{{ hero.subheading }}</p>
+          {%- endif -%}
+
+          {%- if section.blocks.size > 0 -%}
+            <ul class="hero-bullets">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'bullet' and block.settings.text != blank -%}
+                  <li {{ block.shopify_attributes }}>
+                    <span class="bchk">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    {{ block.settings.text }}
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if hero.primary_button_text != blank or hero.secondary_button_text != blank -%}
+            <div class="hero-cta">
+              {%- if hero.primary_button_text != blank -%}
+                <a class="btn btn--gold" href="{{ hero.primary_button_url | default: '#' }}" data-zv-event="finder_start" data-zv-source="homepage_hero">
+                  {{- hero.primary_button_text }}
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              {%- endif -%}
+              {%- if hero.secondary_button_text != blank -%}
+                <a class="btn btn--light" href="{{ hero.secondary_button_url | default: '#' }}">
+                  {{- hero.secondary_button_text -}}
+                </a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <section class="hero" style="padding:48px;background:#281c54;color:#fff;font-family:sans-serif;">
+    <strong>Hero Banner</strong>: no active entry found. Create a Hero Banner metaobject with
+    Active = true, or confirm the type handle is <code>hero_banner</code> with Storefront access enabled.
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+.hero {
+  --indigo-deep: #281c54;
+  --indigo: #322469;
+  --gold: #e4a311;
+  --gold-lt: #f5c84a;
+  --ink: #1a1230;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  display: block;
+  background: var(--cream, #fdfaf2);
+}
+.hero-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 19 / 6;
+  width: 100%;
+  height: auto;
+  max-height: 86vh;
+  background: repeating-linear-gradient(135deg, #2d2156 0 22px, #281c54 22px 44px);
+}
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(18, 12, 38, 0.62) 0%, rgba(18, 12, 38, 0.34) 34%, rgba(18, 12, 38, 0.05) 58%, transparent 74%);
+}
+.hero-video-slot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--indigo-deep);
+  overflow: hidden;
+}
+.hero-video-slot .hero-video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  filter: blur(24px) saturate(1.15);
+  transform: scale(1.08);
+}
+.hero-video-slot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(30, 20, 64, 0.34);
+}
+.hero-video-slot.no-overlay::after {
+  display: none;
+}
+.hero-video-slot .hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  z-index: 2;
+  background: transparent;
+}
+.hero-card {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  padding: clamp(28px, 6vw, 88px);
+  padding-right: 48%;
+}
+.hero-card .hero-copy {
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.hero-card h1 {
+  color: #fff;
+  text-shadow: 0 3px 30px rgba(12, 8, 28, 0.7);
+  font-size: clamp(48px, 6.2vw, 92px);
+  font-weight: 900;
+  letter-spacing: -0.028em;
+  line-height: 1.02;
+  margin: 0;
+  text-wrap: balance;
+}
+.hero-card p.sub {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 16px rgba(12, 8, 28, 0.6);
+  max-width: 44ch;
+  font-size: clamp(16px, 1.35vw, 20px);
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 18px;
+}
+.hero-bullets {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.hero-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: clamp(16px, 1.5vw, 20px);
+  font-weight: 600;
+  color: #f1edff;
+  text-shadow: 0 1px 16px rgba(20, 14, 40, 0.5);
+}
+.hero-bullets .bchk {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+}
+.hero-bullets .bchk svg {
+  width: 15px;
+  height: 15px;
+  color: var(--indigo);
+}
+.hero-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  justify-content: flex-start;
+}
+.hero .btn {
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 22px;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.14s, box-shadow 0.14s;
+}
+.hero .btn svg { width: 18px; height: 18px; flex: none; }
+.hero .btn--gold { background: var(--gold); color: var(--ink); box-shadow: 0 2px 0 #b67e0a; }
+.hero .btn--gold:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #b67e0a, 0 10px 22px -12px rgba(180, 126, 10, 0.7); }
+.hero .btn--light { background: rgba(255, 255, 255, 0.16); color: #fff; border: 1.5px solid rgba(255, 255, 255, 0.5); }
+.hero .btn--light:hover { background: rgba(255, 255, 255, 0.26); }
+.hero a:focus-visible, .hero .btn:focus-visible { outline: 3px solid var(--gold-lt); outline-offset: 3px; }
+
+@media (max-width: 760px) {
+  .hero-media { min-height: 300px; aspect-ratio: 4 / 3; }
+  .hero-card { padding: 24px; padding-right: 24px; align-items: flex-start; }
+  .hero-card h1 { font-size: clamp(30px, 9vw, 44px); }
+  .hero-card p.sub { font-size: 15px; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Hero content and media come from the Hero Banner metaobject (Active = true). The bullet points below are editable here because the metaobject has no bullets field."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bullet",
+      "name": "Bullet",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Tekst" }
+      ]
+    }
+  ],
+  "max_blocks": 5,
+  "presets": [
+    {
+      "name": "Hero Banner",
+      "blocks": [
+        { "type": "bullet", "settings": { "text": "Bescherm uw woning én uw dierbaren" } },
+        { "type": "bullet", "settings": { "text": "Altijd een oplossing die bij uw situatie past" } },
+        { "type": "bullet", "settings": { "text": "Uit te breiden met meldkamer en opvolging" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

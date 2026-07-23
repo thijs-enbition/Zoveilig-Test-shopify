@@ -1,0 +1,129 @@
+{%- comment -%}
+  Homepage trust bar, rendered from the partner metaobject.
+
+  Design source of truth: "Zo Veilig Homepage.html" (<section class="trustbar">).
+  1:1 port. Only the label and the partner logos become CMS-driven.
+
+  Metaobject: partner
+    internal_name, partner_name, logo (image), description, website (url),
+    display_order (number), active (true/false)
+
+  Rendering rules: active == true only, sorted ascending by display_order,
+  multiple entries supported. The first chip keeps the ".sec" modifier so the
+  Securitas lockup renders slightly larger, exactly as in the design.
+
+  The label ("Beveiligd met bewezen partners") is a section setting because it
+  is section chrome, not partner data.
+{%- endcomment -%}
+
+{%- liquid
+  assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
+-%}
+
+{%- if partners.size > 0 -%}
+  <section class="trustbar" aria-label="{{ section.settings.label | default: 'Partners' | escape }}">
+    <div class="wrap">
+      {%- if section.settings.label != blank -%}
+        <span class="tb-label">{{ section.settings.label }}</span>
+      {%- endif -%}
+      <div class="tb-logos">
+        {%- for partner in partners -%}
+          {%- capture chip_class -%}tb-chip{% if forloop.first %} sec{% endif %}{%- endcapture -%}
+          {%- if partner.logo != blank -%}
+            {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
+            {%- if partner.website != blank -%}
+              <a class="{{ chip_class }}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+              </a>
+            {%- else -%}
+              <span class="{{ chip_class }}">
+                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+              </span>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <section class="trustbar">
+    <div class="wrap" style="padding:22px;font-family:sans-serif;color:#6f6786;">
+      <strong>Trust / Partners</strong>: no active partner entries. Add partner metaobjects with Active = true.
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+.trustbar {
+  --paper: #fffdf8;
+  --line: #e4dac4;
+  --muted: #6f6786;
+  background: var(--cream, #fdfaf2);
+  border-bottom: 1px solid var(--line);
+}
+.trustbar .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 22px clamp(20px, 3.4vw, 48px);
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 44px);
+  flex-wrap: wrap;
+}
+.trustbar .tb-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  flex: none;
+}
+.trustbar .tb-logos {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.trustbar .tb-chip {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 26px -22px rgba(26, 18, 48, 0.4);
+}
+.trustbar .tb-chip img {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+.trustbar .tb-chip.sec img {
+  height: 30px;
+}
+@media (max-width: 760px) {
+  .trustbar .wrap { gap: 16px; }
+  .trustbar .tb-label { flex: 1 0 100%; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Trust / Partners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Beveiligd met bewezen partners"
+    },
+    {
+      "type": "paragraph",
+      "content": "Logos come from the partner metaobject (Active = true), sorted by display_order."
+    }
+  ],
+  "presets": [{ "name": "Trust / Partners" }]
+}
+{% endschema %}

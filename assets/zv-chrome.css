@@ -1,0 +1,115 @@
+/*
+  zv-chrome.css — Zo Veilig shared storefront chrome.
+  Ported 1:1 from the design pack (zv/chrome.css): tokens, buttons, util bar, nav, footer,
+  and the generic page-hero band.
+
+  Difference from the design source: the universal reset (* { margin:0 }), html, body, a and
+  img global rules are intentionally omitted. Dawn's base.css already owns those globally, and
+  overriding them here would affect every Dawn-rendered page. The component classes below
+  (.util, .sf-nav, .foot, .btn, .wrap) do not collide with Dawn's own class names.
+*/
+
+:root {
+  --ink: #1a1230;
+  --indigo: #322469;
+  --indigo-2: #473a86;
+  --indigo-deep: #281c54;
+  --indigo-soft: #efecf7;
+  --paper: #ffffff;
+  --cream: #fdfaf2;
+  --band: #f4f0e6;
+  --band-2: #efe9da;
+  --gold: #e4a311;
+  --gold-lt: #f5c84a;
+  --belt: #b67e0a;
+  --gold-soft: #fbf0d4;
+  --rood: #c52e2f;
+  --red: #e24b4a;
+  --blauw: #00509f;
+  --ok: #2f8f5b;
+  --line: #e7e0cf;
+  --line-2: #dcd2bd;
+  --muted: #6f6786;
+  --muted-2: #8c84a6;
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 clamp(20px, 3.6vw, 52px); }
+.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.24em; text-transform: uppercase; }
+
+/* buttons */
+.btn { font-weight: 800; font-size: 15px; border: none; border-radius: 999px; padding: 15px 26px; line-height: 1; display: inline-flex; align-items: center; gap: 10px; transition: transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s; white-space: nowrap; color: #fff; text-decoration: none; cursor: pointer; }
+.btn svg { width: 18px; height: 18px; }
+.btn--gold { background: var(--gold); color: var(--ink); box-shadow: 0 10px 26px -12px rgba(180, 126, 10, 0.85); }
+.btn--gold:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -14px rgba(180, 126, 10, 0.95); color: var(--ink); }
+.btn--indigo { background: var(--indigo); color: #fff; }
+.btn--indigo:hover { transform: translateY(-2px); background: var(--indigo-2); color: #fff; }
+.btn--ghost { background: #fff; color: var(--indigo); border: 1.5px solid var(--line-2); }
+.btn--ghost:hover { transform: translateY(-2px); background: var(--cream); border-color: var(--indigo); color: var(--indigo); }
+.btn--ghost-light { background: rgba(255, 255, 255, 0.07); color: #fff; border: 1.5px solid rgba(255, 255, 255, 0.55); backdrop-filter: blur(4px); }
+.btn--ghost-light:hover { background: rgba(255, 255, 255, 0.16); border-color: #fff; color: #fff; }
+
+/* utility bar */
+.util { background: var(--indigo-deep); color: #d7d0f0; font-size: 12.5px; font-weight: 600; }
+.util .wrap { display: flex; align-items: center; justify-content: space-between; height: 38px; gap: 16px; }
+.util .u-l { display: flex; align-items: center; gap: 9px; }
+.util .u-l .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(47, 143, 91, 0.7); animation: zvpulse 2.4s infinite; }
+@keyframes zvpulse { 0% { box-shadow: 0 0 0 0 rgba(47, 143, 91, 0.6); } 70% { box-shadow: 0 0 0 7px rgba(47, 143, 91, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 143, 91, 0); } }
+.util .u-r { display: flex; align-items: center; gap: 22px; }
+.util .u-r a { color: #d7d0f0; font-weight: 700; transition: color 0.15s; text-decoration: none; }
+.util .u-r a:hover { color: #fff; }
+.util .u-r .ph { color: #fff; display: flex; align-items: center; gap: 7px; }
+.util .u-r .ph svg { width: 14px; height: 14px; }
+@media (max-width: 720px) { .util .u-l span.long { display: none; } .util .u-r .hideph { display: none; } }
+
+/* nav */
+.sf-nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, 0.92); backdrop-filter: saturate(160%) blur(10px); -webkit-backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--line); }
+.sf-nav .wrap { height: 78px; display: flex; align-items: center; gap: 34px; }
+.sf-logo img { height: 36px; width: auto; }
+.sf-logo .sf-logo-text { font-size: 22px; font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; }
+.sf-links { display: flex; gap: 30px; list-style: none; margin: 0 0 0 8px; padding: 0; }
+.sf-links a { font-size: 15px; font-weight: 700; color: #3a3550; padding: 6px 0; position: relative; transition: color 0.15s; white-space: nowrap; text-decoration: none; }
+.sf-links a:hover { color: var(--indigo); }
+.sf-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -2px; height: 2.5px; background: var(--gold); border-radius: 2px; transition: right 0.2s; }
+.sf-links a:hover::after, .sf-links li.active a::after { right: 0; }
+.sf-links li.active a { color: var(--indigo); }
+.sf-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.sf-icn { width: 22px; height: 22px; color: var(--indigo); }
+.sf-right .sf-iconlink { display: flex; color: var(--indigo); }
+.cart { position: relative; display: flex; color: var(--indigo); }
+.cart .dot { position: absolute; top: -7px; right: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
+@media (max-width: 980px) { .sf-links { display: none; } }
+
+/* footer */
+.foot { background: var(--indigo); color: #cdc6e8; padding: clamp(48px, 5vw, 72px) 0 0; }
+.foot a { color: #cdc6e8; text-decoration: none; }
+.foot-cols { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: clamp(24px, 4vw, 56px); padding-bottom: 44px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+@media (max-width: 860px) { .foot-cols { grid-template-columns: 1fr 1fr; gap: 34px 28px; } }
+@media (max-width: 520px) { .foot-cols { grid-template-columns: 1fr; } }
+.foot-brand img { height: 38px; width: auto; margin-bottom: 16px; }
+.foot-brand p { font-size: 14px; font-weight: 500; color: #a89fd0; line-height: 1.6; max-width: 30ch; }
+.foot-brand .fb-call { display: inline-flex; align-items: center; gap: 9px; margin-top: 18px; font-size: 15px; font-weight: 800; color: #fff; }
+.foot-brand .fb-call svg { width: 18px; height: 18px; color: var(--gold-lt); }
+.foot-col h4 { font-size: 11.5px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #8579c4; margin-bottom: 16px; }
+.foot-col a { display: block; font-size: 14.5px; font-weight: 600; color: #cdc6e8; padding: 6px 0; transition: color 0.15s; }
+.foot-col a:hover { color: #fff; }
+.foot-partners { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 30px 0; }
+.fp-logos { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.fp-chip { background: rgba(255, 255, 255, 0.95); border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; justify-content: center; }
+.fp-chip img { height: 24px; width: auto; display: block; }
+.fp-chip.sec img { height: 30px; }
+.fp-note { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; color: #a89fd0; }
+.foot-base { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 22px 0 30px; border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 13px; font-weight: 600; color: #9b92c8; }
+.foot-base .fb-links { display: flex; gap: 22px; flex-wrap: wrap; }
+.foot-base a { color: #9b92c8; }
+.foot-base a:hover { color: #fff; }
+
+/* generic page hero band reused by content pages */
+.page-hero { position: relative; background: var(--indigo-deep); color: #fff; overflow: hidden; padding: clamp(48px, 6vw, 92px) 0 clamp(40px, 4.5vw, 64px); }
+.page-hero::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, #2d2156 0 22px, #281c54 22px 44px); opacity: 0.55; }
+.page-hero .wrap { position: relative; z-index: 1; }
+.page-hero .crumbs { font-size: 13px; font-weight: 700; color: #b9b0e0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.page-hero .crumbs a { color: #b9b0e0; }
+.page-hero .crumbs a:hover { color: #fff; }
+.page-hero .eyebrow { color: var(--gold-lt); margin-top: 20px; display: block; }
+.page-hero h1 { font-size: clamp(34px, 5vw, 60px); font-weight: 900; letter-spacing: -0.025em; line-height: 1.02; margin-top: 14px; max-width: 20ch; text-wrap: balance; }
+.page-hero p.lead { font-size: clamp(16px, 1.7vw, 20px); font-weight: 500; color: #e4dffb; margin-top: 18px; max-width: 56ch; line-height: 1.55; }
