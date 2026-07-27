@@ -40,7 +40,7 @@
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l7 2.2v6.1c0 4.6-3 8-7 9.7-4-1.7-7-5.1-7-9.7V4.7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                 Zo Veilig
               </span>
-              <p>{{ faq.answer }}</p>
+              {{ faq.answer | metafield_tag }}
             </div>
           </article>
         {%- endfor -%}

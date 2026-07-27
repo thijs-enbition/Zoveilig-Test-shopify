@@ -41,9 +41,13 @@
             </div>
           {%- endif -%}
         </div>
-        {%- if cta.image != blank -%}
-          <div class="fs-media">{{ cta.image | image_url: width: 680 | image_tag: alt: cta.heading, loading: 'lazy' }}</div>
-        {%- endif -%}
+        <div class="lio-guide">
+          {%- if cta.image != blank -%}
+            {{ cta.image | image_url: width: 680 | image_tag: alt: cta.heading, loading: 'lazy' }}
+          {%- else -%}
+            <img src="{{ 'lio-finder-guide.png' | asset_url }}" alt="Lio, de Keuzehulp van Zo Veilig" loading="lazy" width="340" height="340">
+          {%- endif -%}
+        </div>
       </div>
     </div>
   </section>
@@ -64,6 +68,8 @@
 .finder-sec.theme-gold .fs-copy p { color: #5c4410; }
 .fs-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
 .fs-media img { width: 100%; height: auto; display: block; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.4)); }
+.finder-sec .lio-guide { display: flex; justify-content: center; }
+.finder-sec .lio-guide img { width: clamp(240px, 26vw, 340px); height: auto; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.4)); }
 @media (max-width: 900px) { .finder-grid { grid-template-columns: 1fr; gap: 32px; } }
 {% endstylesheet %}
 
