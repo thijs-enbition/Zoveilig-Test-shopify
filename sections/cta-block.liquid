@@ -1,0 +1,79 @@
+{%- comment -%}
+  Reusable CTA block. 1:1 port of the homepage .finder-sec band.
+  Content from the cta_block metaobject: internal_name, heading, description, image,
+  primary_button_text, primary_button_link, secondary_button_text, secondary_button_link,
+  theme, active.
+
+  Renders one entry: the one whose internal_name matches the section setting, else the
+  first active entry. The `theme` field selects the band colour.
+{%- endcomment -%}
+
+{%- liquid
+  assign blocks = shop.metaobjects.cta_block.values | where: 'active', true
+  assign cta = null
+  assign wanted = section.settings.internal_name | strip
+  for b in blocks
+    if wanted != blank and b.internal_name == wanted
+      assign cta = b
+    endif
+  endfor
+  if cta == null and blocks.size > 0
+    assign cta = blocks.first
+  endif
+-%}
+
+{%- if cta -%}
+  <section class="finder-sec theme-{{ cta.theme | default: 'indigo' }}">
+    <div class="wrap">
+      <div class="finder-grid">
+        <div class="fs-copy">
+          {%- if cta.eyebrow != blank -%}<span class="eyebrow">{{ cta.eyebrow }}</span>{%- endif -%}
+          {%- if cta.heading != blank -%}<h2>{{ cta.heading }}</h2>{%- endif -%}
+          {%- if cta.description != blank -%}<p>{{ cta.description }}</p>{%- endif -%}
+          {%- if cta.primary_button_text != blank or cta.secondary_button_text != blank -%}
+            <div class="fs-btns">
+              {%- if cta.primary_button_text != blank -%}
+                <a class="btn btn--gold" href="{{ cta.primary_button_link | default: '#' }}" data-cta-location="cta_block" data-zv-finder>{{ cta.primary_button_text }}</a>
+              {%- endif -%}
+              {%- if cta.secondary_button_text != blank -%}
+                <a class="btn btn--ghost-light" href="{{ cta.secondary_button_link | default: '#' }}">{{ cta.secondary_button_text }}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+        {%- if cta.image != blank -%}
+          <div class="fs-media">{{ cta.image | image_url: width: 680 | image_tag: alt: cta.heading, loading: 'lazy' }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <section class="finder-sec theme-indigo"><div class="wrap"><p style="padding:40px;color:#d8d2ef;">CTA block: geen actieve cta_block entries.</p></div></section>
+{%- endif -%}
+
+{% stylesheet %}
+.finder-sec { position: relative; overflow: hidden; color: #fff; padding: clamp(46px, 5vw, 78px) 0; background: var(--indigo-deep); }
+.finder-sec.theme-gold { background: linear-gradient(120deg, var(--gold) 0%, var(--gold-lt) 100%); color: #3a2a06; }
+.finder-sec.theme-indigo { background: var(--indigo-deep); }
+.finder-sec::before { content: ""; position: absolute; width: 620px; height: 620px; border-radius: 50%; right: -160px; top: -220px; background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%); }
+.finder-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 472px; gap: clamp(36px, 5vw, 72px); align-items: center; }
+.fs-copy .eyebrow { color: var(--gold-lt); display: block; }
+.finder-sec.theme-gold .fs-copy .eyebrow { color: #7a560a; }
+.fs-copy h2 { font-size: clamp(30px, 3.6vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; margin-top: 12px; }
+.fs-copy p { font-size: clamp(16px, 1.6vw, 20px); font-weight: 500; color: #d8d2ef; margin-top: 18px; max-width: 46ch; line-height: 1.5; }
+.finder-sec.theme-gold .fs-copy p { color: #5c4410; }
+.fs-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.fs-media img { width: 100%; height: auto; display: block; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.4)); }
+@media (max-width: 900px) { .finder-grid { grid-template-columns: 1fr; gap: 32px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CTA block",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "internal_name", "label": "Internal name (optioneel)", "info": "Vul de internal_name van een cta_block in. Leeg = eerste actieve." }
+  ],
+  "presets": [{ "name": "CTA block" }]
+}
+{% endschema %}

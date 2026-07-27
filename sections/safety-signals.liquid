@@ -1,0 +1,57 @@
+{%- comment -%}
+  Safety Signals: a reusable row of interface signal chips (the notification examples
+  from the design, e.g. "SOS verstuurd", "Bezoeker aan de deur").
+  Content from the safety_signal metaobject: internal_name, label, icon, signal_type,
+  display_order, active. active only, sorted by display_order.
+
+  signal_type drives the chip colour (info / alert / success), matching the design's
+  coloured notification variants.
+{%- endcomment -%}
+
+{%- liquid
+  assign signals = shop.metaobjects.safety_signal.values | where: 'active', true | sort: 'display_order'
+-%}
+
+{%- if signals.size > 0 -%}
+  <section class="signals">
+    <div class="wrap">
+      {%- if section.settings.heading != blank -%}<h2 class="sig-head">{{ section.settings.heading }}</h2>{%- endif -%}
+      <div class="sig-row">
+        {%- for sig in signals -%}
+          <div class="sig-chip sig--{{ sig.signal_type | default: 'info' }}">
+            <span class="sig-ic">
+              {%- if sig.icon != blank -%}{{ sig.icon | image_url: width: 44 | image_tag: alt: '', loading: 'lazy' }}{%- endif -%}
+            </span>
+            <span class="sig-label">{{ sig.label }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <section class="signals"><div class="wrap"><p style="text-align:center;color:var(--muted);padding:30px;">Safety signals: geen actieve safety_signal entries.</p></div></section>
+{%- endif -%}
+
+{% stylesheet %}
+.signals { padding: clamp(30px, 4vw, 52px) 0; background: var(--paper); }
+.sig-head { text-align: center; font-size: clamp(20px, 2.2vw, 28px); font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; margin-bottom: 22px; }
+.sig-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+.sig-chip { display: inline-flex; align-items: center; gap: 11px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 18px 12px 12px; box-shadow: 0 12px 30px -22px rgba(26, 18, 48, 0.4); }
+.sig-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; background: var(--indigo-soft); color: var(--indigo); }
+.sig-ic img { width: 24px; height: 24px; object-fit: contain; }
+.sig-label { font-size: 14.5px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.sig--alert .sig-ic { background: #fdeceb; color: var(--red); }
+.sig--success .sig-ic { background: #e3f0e8; color: var(--ok); }
+.sig--info .sig-ic { background: var(--indigo-soft); color: var(--indigo); }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Safety signals",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Kop (optioneel)" }
+  ],
+  "presets": [{ "name": "Safety signals" }]
+}
+{% endschema %}

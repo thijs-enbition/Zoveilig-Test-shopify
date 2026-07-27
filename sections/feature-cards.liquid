@@ -1,0 +1,79 @@
+{%- comment -%}
+  Feature cards. 1:1 port of the homepage .bucket-grid.
+  Content from the feature_card metaobject: internal_name, eyebrow, heading, description,
+  image, icon, link_text, link, display_order, active. active only, sorted by display_order.
+{%- endcomment -%}
+
+{%- liquid
+  assign cards = shop.metaobjects.feature_card.values | where: 'active', true | sort: 'display_order'
+-%}
+
+{%- if cards.size > 0 -%}
+  <section class="platform">
+    <div class="wrap">
+      <div class="pf-intro">
+        {%- if section.settings.eyebrow != blank -%}<span class="eyebrow" style="color:var(--belt);">{{ section.settings.eyebrow }}</span>{%- endif -%}
+        {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+      </div>
+      <div class="bucket-grid">
+        {%- for card in cards -%}
+          {%- capture href -%}{{ card.link | default: '#' }}{%- endcapture -%}
+          <a class="bucket" href="{{ href }}">
+            <div class="bk-top">
+              <span class="bk-ic">
+                {%- if card.icon != blank -%}{{ card.icon | image_url: width: 72 | image_tag: alt: '', loading: 'lazy' }}
+                {%- elsif card.image != blank -%}{{ card.image | image_url: width: 72 | image_tag: alt: '', loading: 'lazy' }}{%- endif -%}
+              </span>
+              <span class="bk-no">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+            </div>
+            {%- if card.heading != blank -%}<h3>{{ card.heading }}</h3>{%- endif -%}
+            {%- if card.description != blank -%}<p>{{ card.description }}</p>{%- endif -%}
+            {%- if card.eyebrow != blank -%}<span class="bk-tag">{{ card.eyebrow }}</span>{%- endif -%}
+            {%- if card.link_text != blank -%}
+              <span class="bk-link">{{ card.link_text }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            {%- endif -%}
+          </a>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <section class="platform"><div class="wrap"><p style="text-align:center;color:var(--muted);padding:40px;">Feature cards: geen actieve feature_card entries.</p></div></section>
+{%- endif -%}
+
+{% stylesheet %}
+.platform { padding: clamp(46px, 5vw, 76px) 0; background: var(--cream); }
+.platform .pf-intro { text-align: center; max-width: 680px; margin: 0 auto 40px; }
+.platform .pf-intro .eyebrow { display: block; }
+.platform .pf-intro h2 { font-size: clamp(28px, 3.4vw, 44px); font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; line-height: 1.05; margin-top: 10px; }
+.bucket-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1080px; margin: 0 auto; }
+.bucket { position: relative; display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 30px 26px 28px; overflow: hidden; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.bucket::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--gold); transform: scaleX(0.34); transform-origin: left; transition: transform 0.25s; }
+.bucket:hover { transform: translateY(-6px); box-shadow: 0 36px 70px -34px rgba(26, 18, 48, 0.55), 0 4px 10px -5px rgba(26, 18, 48, 0.18); border-color: var(--line-2); }
+.bucket:hover::before { transform: scaleX(1); }
+.bk-top { display: flex; align-items: center; justify-content: space-between; }
+.bk-ic { width: 58px; height: 58px; color: var(--indigo); background: #efecf7; border-radius: 15px; display: grid; place-items: center; }
+.bk-ic svg, .bk-ic img { width: 36px; height: 36px; object-fit: contain; }
+.bk-no { font-size: 13px; font-weight: 900; color: var(--gold); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.bucket h3 { font-size: 25px; font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; line-height: 1.08; margin-top: 22px; }
+.bucket p { font-size: 15px; font-weight: 500; color: #5b5374; margin-top: 11px; line-height: 1.55; flex: 1; }
+.bk-tag { align-self: flex-start; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--belt); background: var(--gold-soft); border-radius: 999px; padding: 5px 11px; margin-top: 14px; }
+.bk-link { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: var(--indigo); margin-top: 16px; white-space: nowrap; }
+.bk-link svg { width: 17px; height: 17px; transition: transform 0.18s; }
+.bucket:hover .bk-link svg { transform: translateX(4px); }
+@media (max-width: 900px) { .bucket-grid { grid-template-columns: 1fr; max-width: 460px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Feature cards",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Eén platform. Voor thuis. Voor onderweg." },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Bescherm wat voor u dierbaar is" }
+  ],
+  "presets": [{ "name": "Feature cards" }]
+}
+{% endschema %}
