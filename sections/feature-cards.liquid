@@ -27,7 +27,8 @@
               <span class="bk-no">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
             </div>
             {%- if card.heading != blank -%}<h3>{{ card.heading }}</h3>{%- endif -%}
-            {%- if card.description != blank -%}<p>{{ card.description }}</p>{%- endif -%}
+            {%- comment -%} NB: the metaobject field key is 'descripbtion' (typo in the definition, immutable once created). {%- endcomment -%}
+            {%- if card.descripbtion != blank -%}<p>{{ card.descripbtion }}</p>{%- endif -%}
             {%- if card.eyebrow != blank -%}<span class="bk-tag">{{ card.eyebrow }}</span>{%- endif -%}
             {%- if card.link_text != blank -%}
               <span class="bk-link">{{ card.link_text }}
