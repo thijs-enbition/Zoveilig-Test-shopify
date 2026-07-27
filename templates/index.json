@@ -24,6 +24,15 @@
       "type": "cta-block",
       "settings": { "internal_name": "" }
     },
+    "story": {
+      "type": "story",
+      "settings": {
+        "eyebrow": "Ons verhaal",
+        "heading": "Veiligheid is veranderd. Wij ook.",
+        "text": "Twintig jaar geleden begonnen we met het beschermen van woningen. Vandaag beschermen we ook de mensen die er wonen.",
+        "link_text": "Lees ons verhaal"
+      }
+    },
     "faq": {
       "type": "faq",
       "settings": { "eyebrow": "Uit de praktijk", "heading": "Vragen die we vaak horen" }
@@ -44,6 +53,7 @@
     "trust",
     "features",
     "finder_cta",
+    "story",
     "faq",
     "testimonials"
   ]
