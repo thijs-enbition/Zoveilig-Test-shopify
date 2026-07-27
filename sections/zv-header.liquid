@@ -36,7 +36,7 @@
       {%- if section.settings.logo != blank -%}
         {{ section.settings.logo | image_url: height: 72 | image_tag: alt: shop.name, loading: 'eager', widths: '72, 144, 216' }}
       {%- else -%}
-        <span class="sf-logo-text">{{ shop.name }}</span>
+        <img src="{{ 'zo-veilig-logo.png' | asset_url }}" alt="{{ shop.name | escape }}" width="150" height="45">
       {%- endif -%}
     </a>
 

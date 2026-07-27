@@ -1,0 +1,60 @@
+/* Lio milestone popup. Funnel-only, event-triggered (never static decoration). */
+.zv-lio {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  transform: translateY(24px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.32s;
+}
+.zv-lio.is-visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.zv-lio__bubble {
+  background: #fff;
+  border: 2px solid var(--indigo, #322469);
+  border-radius: 16px 16px 4px 16px;
+  padding: 10px 16px;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--indigo, #322469);
+  box-shadow: 0 12px 30px -14px rgba(26, 18, 48, 0.5);
+  margin: 0 22px -8px 0;
+  white-space: nowrap;
+}
+.zv-lio__img {
+  width: 120px;
+  height: auto;
+  filter: drop-shadow(0 18px 26px rgba(26, 18, 48, 0.35));
+}
+.zv-lio__close {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: var(--indigo, #322469);
+  color: #fff;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.4);
+}
+@media (max-width: 600px) {
+  .zv-lio__img { width: 92px; }
+  .zv-lio__bubble { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zv-lio { transition: opacity 0.2s; transform: none; }
+}

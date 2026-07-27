@@ -1,0 +1,26 @@
+{%- comment -%}
+  Lio, the funnel helper. Rendered once (in theme.liquid), hidden by default.
+  The controller (zv-lio.js) swaps the image + message at decision milestones.
+  Design rule honoured: Lio appears only at funnel milestones (event-triggered),
+  never as static decoration in the shell, header or footer.
+
+  Milestone art (from the design pack):
+    hoi          -> "Hoi!"                greeting on entering the funnel
+    bekijk       -> "Bekijk dit!"         a package is opened
+    winkelwagen  -> "In de winkelwagen!"  a package is added to the cart
+    keuze        -> "Goede keuze!"        order confirmed
+{%- endcomment -%}
+<div
+  class="zv-lio"
+  data-zv-lio
+  hidden
+  data-img-hoi="{{ 'lio-mood-hoi.png' | asset_url }}"
+  data-img-bekijk="{{ 'lio-mood-bekijk.png' | asset_url }}"
+  data-img-winkelwagen="{{ 'lio-mood-winkelwagen.png' | asset_url }}"
+  data-img-keuze="{{ 'lio-mood-keuze.png' | asset_url }}"
+  aria-live="polite"
+>
+  <button type="button" class="zv-lio__close" data-zv-lio-close aria-label="Sluiten">&times;</button>
+  <div class="zv-lio__bubble"><span data-zv-lio-msg>Hoi!</span></div>
+  <img class="zv-lio__img" data-zv-lio-img src="{{ 'lio-mood-hoi.png' | asset_url }}" alt="Lio, de helper van Zo Veilig" width="120" height="120">
+</div>
