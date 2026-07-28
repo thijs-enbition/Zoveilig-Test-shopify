@@ -1,6 +1,49 @@
 {
   "sections": {
-    "oplossingen": { "type": "oplossingen", "settings": {} }
+    "oplossingen": {
+      "type": "oplossingen",
+      "blocks": {
+        "living": {
+          "type": "category",
+          "settings": {
+            "cat_key": "living",
+            "label": "Langer Thuis",
+            "sublabel": "Zorg & inzicht",
+            "collection": "langer-thuis",
+            "panel_heading": "Langer veilig thuis wonen",
+            "panel_sub": "Zelfstandig thuis blijven wonen, met een oogje in het zeil wanneer dat nodig is."
+          }
+        },
+        "security": {
+          "type": "category",
+          "settings": {
+            "cat_key": "security",
+            "label": "Mijn Thuis",
+            "sublabel": "Beveiliging",
+            "collection": "mijn-thuis",
+            "panel_heading": "Uw woning beschermd",
+            "panel_sub": "Beschermd tegen inbraak, brand en onraad, met een melding zodra er iets gebeurt."
+          }
+        },
+        "persoonlijk": {
+          "type": "category",
+          "settings": {
+            "cat_key": "persoonlijk",
+            "label": "Veilig Onderweg",
+            "sublabel": "Onderweg",
+            "collection": "veilig-onderweg",
+            "panel_heading": "Veiligheid, ook onderweg",
+            "panel_sub": "Persoonlijke veiligheid met hulp op een druk op de knop."
+          }
+        }
+      },
+      "block_order": ["living", "security", "persoonlijk"],
+      "settings": {
+        "eyebrow": "Onze oplossingen",
+        "heading": "Altijd een oplossing die bij uw situatie past",
+        "finder_url": "/#keuzehulp"
+      }
+    }
   },
   "order": ["oplossingen"]
 }
