@@ -6,7 +6,12 @@
 
 <section class="story">
   <div class="wrap">
-    <div class="story-stage"{% if section.settings.image != blank %} style="background-image:url('{{ section.settings.image | image_url: width: 1600 }}');"{% endif %}>
+    {%- if section.settings.image != blank -%}
+      {%- assign story_img = section.settings.image | image_url: width: 1600 -%}
+    {%- else -%}
+      {%- assign story_img = 'ons-verhaal.jpg' | asset_url -%}
+    {%- endif -%}
+    <div class="story-stage" style="background-image:url('{{ story_img }}');">
       <div class="story-card">
         {%- if section.settings.eyebrow != blank -%}<span class="eyebrow">{{ section.settings.eyebrow }}</span>{%- endif -%}
         {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}

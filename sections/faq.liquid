@@ -45,6 +45,33 @@
           </article>
         {%- endfor -%}
       </div>
+
+      {%- if section.settings.close_heading != blank -%}
+        <div class="cq-close">
+          <h3>{{ section.settings.close_heading }}</h3>
+          {%- if section.settings.close_text != blank -%}<p>{{ section.settings.close_text }}</p>{%- endif -%}
+          <div class="cq-actions">
+            {%- if section.settings.btn1_label != blank -%}
+              <a class="btn btn--gold" href="{{ section.settings.btn1_link | default: '#' }}" data-zv-finder>
+                {{ section.settings.btn1_label }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            {%- endif -%}
+            {%- if section.settings.btn2_label != blank -%}
+              <a class="btn btn--ghost" href="{{ section.settings.btn2_link | default: '#' }}">
+                {{ section.settings.btn2_label }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            {%- endif -%}
+            {%- if section.settings.btn3_label != blank -%}
+              <a class="btn btn--ghost" href="{{ section.settings.btn3_link | default: '#' }}">
+                {{ section.settings.btn3_label }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
     </div>
   </section>
 {%- elsif request.design_mode -%}
@@ -69,6 +96,10 @@
 .cq-a p { font-size: 14.5px; font-weight: 500; color: #5b5374; margin-top: 8px; line-height: 1.55; }
 @media (max-width: 900px) { .cq-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .cq-grid { grid-template-columns: 1fr; max-width: 460px; } }
+.cq-close { margin: clamp(36px, 4vw, 52px) auto 0; max-width: 820px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: clamp(28px, 3vw, 44px); text-align: center; box-shadow: 0 20px 44px -30px rgba(26, 18, 48, 0.4); }
+.cq-close h3 { font-size: clamp(22px, 2.4vw, 30px); font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; text-wrap: balance; }
+.cq-close p { font-size: 16px; font-weight: 500; color: var(--muted); margin: 14px auto 0; line-height: 1.6; max-width: 60ch; }
+.cq-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; margin-top: 26px; }
 {% endstylesheet %}
 
 {% schema %}
@@ -78,7 +109,16 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Uit de praktijk" },
     { "type": "text", "id": "heading", "label": "Kop", "default": "Vragen die we vaak horen" },
-    { "type": "text", "id": "category", "label": "Categorie-filter (optioneel)", "info": "Laat leeg om alle vragen te tonen. Vul een categorie in om te filteren." }
+    { "type": "text", "id": "category", "label": "Categorie-filter (optioneel)", "info": "Laat leeg om alle vragen te tonen. Vul een categorie in om te filteren." },
+    { "type": "header", "content": "Afsluitkaart" },
+    { "type": "text", "id": "close_heading", "label": "Kop", "default": "Niet zeker welke ondersteuning past?" },
+    { "type": "textarea", "id": "close_text", "label": "Tekst", "default": "Elke familie is anders. Beantwoord een paar eenvoudige vragen en ontdek welke ondersteuning logisch is voor jullie situatie." },
+    { "type": "text", "id": "btn1_label", "label": "Knop 1", "default": "Start de Keuzehulp" },
+    { "type": "url", "id": "btn1_link", "label": "Knop 1 link" },
+    { "type": "text", "id": "btn2_label", "label": "Knop 2", "default": "Bezoek het kenniscentrum" },
+    { "type": "url", "id": "btn2_link", "label": "Knop 2 link" },
+    { "type": "text", "id": "btn3_label", "label": "Knop 3", "default": "Waar kunnen we u mee helpen?" },
+    { "type": "url", "id": "btn3_link", "label": "Knop 3 link" }
   ],
   "presets": [{ "name": "FAQ" }]
 }
