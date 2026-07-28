@@ -28,18 +28,21 @@
 </section>
 
 {% stylesheet %}
-.story { padding: clamp(40px, 5vw, 72px) 0; background: var(--cream); }
-.story-stage { position: relative; display: flex; align-items: center; border-radius: 8px; overflow: visible; min-height: clamp(320px, 34vw, 460px); background-size: cover; background-position: center; background-color: var(--indigo-deep); }
-.story-stage::after { content: ""; position: absolute; inset: 0; border-radius: 8px; background: linear-gradient(90deg, rgba(26, 18, 48, 0.1) 0%, rgba(26, 18, 48, 0) 55%); pointer-events: none; }
-.story-card { position: relative; z-index: 2; background: var(--cream); max-width: 430px; margin: 0 0 0 clamp(-8px, 3vw, 56px); padding: clamp(28px, 3vw, 44px); border-radius: 16px; box-shadow: 0 30px 60px -34px rgba(26, 18, 48, 0.5); }
+.story { padding: clamp(56px, 6vw, 104px) 0; background: var(--paper); }
+/* Focal point 60% 30% keeps the woman and her mother central and every face visible. */
+.story-stage { position: relative; display: flex; align-items: center; border-radius: 8px; overflow: visible; min-height: clamp(420px, 46vw, 560px); background-size: cover; background-position: 60% 30%; background-repeat: no-repeat; background-color: #cdbfae; box-shadow: 0 40px 90px -54px rgba(26, 18, 48, 0.6); }
+.story-stage::after { content: ""; position: absolute; inset: 0; border-radius: 8px; background: linear-gradient(90deg, rgba(40, 28, 84, 0.34), rgba(40, 28, 84, 0) 52%); pointer-events: none; }
+/* Negative left margin overlaps the card onto the image for depth (per design). */
+.story-card { position: relative; z-index: 2; background: var(--cream); max-width: 430px; margin: 0 0 0 clamp(-56px, -3.5vw, -20px); padding: clamp(32px, 3.4vw, 48px); border-radius: 6px; box-shadow: 0 40px 80px -40px rgba(26, 18, 48, 0.6); }
 .story-card .eyebrow { color: var(--belt); display: block; }
-.story-card h2 { font-size: clamp(26px, 3vw, 40px); font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; line-height: 1.06; margin-top: 12px; }
+.story-card h2 { font-size: clamp(26px, 3vw, 40px); font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; line-height: 1.04; margin-top: 13px; text-wrap: balance; }
 .story-card p { font-size: 16px; font-weight: 500; color: #5b5374; margin-top: 16px; line-height: 1.6; }
-.story-card .sc-link { display: inline-flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; color: var(--indigo); margin-top: 20px; text-decoration: none; }
+.story-card .sc-link { display: inline-flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 800; color: var(--rood); margin-top: 22px; letter-spacing: 0.02em; text-decoration: none; }
 .story-card .sc-link svg { width: 18px; height: 18px; transition: transform 0.18s; }
 .story-card .sc-link:hover svg { transform: translateX(4px); }
+/* On small screens keep the card below the faces (image anchored to the top). */
 @media (max-width: 760px) {
-  .story-stage { align-items: flex-end; }
+  .story-stage { align-items: flex-end; background-position: 50% 22%; }
   .story-card { margin: 0 16px -28px; max-width: none; }
 }
 {% endstylesheet %}

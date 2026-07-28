@@ -1,7 +1,13 @@
 {%- comment -%}
-  Feature cards. 1:1 port of the homepage .bucket-grid.
-  Content from the feature_card metaobject: internal_name, eyebrow, heading, description,
-  image, icon, link_text, link, display_order, active. active only, sorted by display_order.
+  Platform buckets. 1:1 port of the homepage .platform / .bucket-grid section.
+  Content from the feature_card metaobject: internal_name, eyebrow (used as the
+  .bk-meta label row), heading, descripbtion (field key is a typo, immutable),
+  image, icon, link_text, link, display_order, active. active only, sorted by
+  display_order.
+
+  The design gives each bucket a fixed inline SVG icon beside its number (not an
+  uploaded image). We render that icon by metaobject handle, so the tile is never
+  empty; an uploaded icon/image on the metaobject overrides it when set.
 {%- endcomment -%}
 
 {%- liquid
@@ -12,27 +18,68 @@
   <section class="platform">
     <div class="wrap">
       <div class="pf-intro">
-        {%- if section.settings.eyebrow != blank -%}<span class="eyebrow" style="color:var(--belt);">{{ section.settings.eyebrow }}</span>{%- endif -%}
+        {%- if section.settings.eyebrow != blank -%}<span class="eyebrow">{{ section.settings.eyebrow }}</span>{%- endif -%}
         {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+        {%- if section.settings.show_whoinfo -%}
+          <div class="whoinfo">
+            <button class="whoinfo-btn" type="button" aria-expanded="false" aria-controls="whoinfoPanel-{{ section.id }}">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>
+              {{ section.settings.whoinfo_label | default: 'Voor wie is dit?' }}
+            </button>
+            <div class="whoinfo-panel" id="whoinfoPanel-{{ section.id }}" role="region" aria-label="Voor wie is welk pakket bedoeld?">
+              <div class="wi-grid">
+                {%- for b in section.blocks -%}
+                  {%- if b.type == 'whocol' -%}
+                    <div class="wi-col" {{ b.shopify_attributes }}>
+                      {%- if b.settings.title != blank -%}<h4>{{ b.settings.title }}</h4>{%- endif -%}
+                      <ul>
+                        {%- for n in (1..3) -%}
+                          {%- assign lbl = 'row' | append: n | append: '_label' -%}
+                          {%- assign txt = 'row' | append: n | append: '_text' -%}
+                          {%- if b.settings[txt] != blank -%}
+                            <li><b>{{ b.settings[lbl] }}</b> {{ b.settings[txt] }}</li>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
       </div>
+
       <div class="bucket-grid">
         {%- for card in cards -%}
-          {%- capture href -%}{{ card.link | default: '#' }}{%- endcapture -%}
-          <a class="bucket" href="{{ href }}">
+          {%- assign handle = card.system.handle -%}
+          <a class="bucket" href="{{ card.link | default: '#' }}">
             <div class="bk-top">
               <span class="bk-ic">
-                {%- if card.icon != blank -%}{{ card.icon | image_url: width: 72 | image_tag: alt: '', loading: 'lazy' }}
-                {%- elsif card.image != blank -%}{{ card.image | image_url: width: 72 | image_tag: alt: '', loading: 'lazy' }}{%- endif -%}
+                {%- if card.icon != blank -%}{{ card.icon | image_url: width: 116 | image_tag: alt: '', loading: 'lazy' }}
+                {%- elsif card.image != blank -%}{{ card.image | image_url: width: 116 | image_tag: alt: '', loading: 'lazy' }}
+                {%- else -%}
+                  {%- case handle -%}
+                    {%- when 'langer-thuis' -%}
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="#322469"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" fill="none" stroke="#e24b4a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {%- when 'mijn-thuis' -%}
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M14 33 L32 17 L50 33" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 31 V52 H45 V31" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 34 L40 37 V44 C40 49 32 52 32 52 C32 52 24 49 24 44 V37 Z" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28.5 43 l2.6 2.6 l4.4 -5" fill="none" stroke="#e24b4a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {%- when 'veilig-onderweg' -%}
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M13 55 H42" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="49" r="4.6" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 51 L39 47 M31 50 L34 41 M33 49 L43 52" fill="none" stroke="#322469" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="20" r="9" fill="none" stroke="#e24b4a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 15 V25 M11 20 H21" fill="none" stroke="#e24b4a" stroke-width="2.8" stroke-linecap="round"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="18" stroke="#322469" stroke-width="3.4"/><path d="M32 24v16M24 32h16" stroke="#e24b4a" stroke-width="3.4" stroke-linecap="round"/></svg>
+                  {%- endcase -%}
+                {%- endif -%}
               </span>
               <span class="bk-no">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
             </div>
             {%- if card.heading != blank -%}<h3>{{ card.heading }}</h3>{%- endif -%}
-            {%- comment -%} NB: the metaobject field key is 'descripbtion' (typo in the definition, immutable once created). {%- endcomment -%}
+            {%- comment -%} NB: the metaobject field key is 'descripbtion' (typo in the definition, immutable). {%- endcomment -%}
             {%- if card.descripbtion != blank -%}<p>{{ card.descripbtion }}</p>{%- endif -%}
-            {%- if card.eyebrow != blank -%}<span class="bk-tag">{{ card.eyebrow }}</span>{%- endif -%}
+            {%- if card.eyebrow != blank -%}<div class="bk-meta">{{ card.eyebrow }}</div>{%- endif -%}
             {%- if card.link_text != blank -%}
               <span class="bk-link">{{ card.link_text }}
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             {%- endif -%}
           </a>
@@ -45,36 +92,97 @@
 {%- endif -%}
 
 {% stylesheet %}
-.platform { padding: clamp(46px, 5vw, 76px) 0; background: var(--cream); }
-.platform .pf-intro { text-align: center; max-width: 680px; margin: 0 auto 40px; }
-.platform .pf-intro .eyebrow { display: block; }
-.platform .pf-intro h2 { font-size: clamp(28px, 3.4vw, 44px); font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; line-height: 1.05; margin-top: 10px; }
-.bucket-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1080px; margin: 0 auto; }
-.bucket { position: relative; display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 30px 26px 28px; overflow: hidden; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
-.bucket::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--gold); transform: scaleX(0.34); transform-origin: left; transition: transform 0.25s; }
+.platform { background: var(--band); padding: clamp(56px, 6vw, 100px) 0; }
+.platform .pf-intro { text-align: center; max-width: 760px; margin: 0 auto clamp(40px, 4vw, 60px); }
+.platform .pf-intro .eyebrow { display: block; color: var(--belt); }
+.platform .pf-intro h2 { font-size: clamp(28px, 3.4vw, 44px); font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; line-height: 1.05; margin-top: 14px; text-wrap: balance; }
+.bucket-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.bucket { position: relative; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; padding: 38px 32px 30px; overflow: hidden; text-decoration: none; color: inherit; background: linear-gradient(180deg, #fffdf8 0%, #f9f3e6 100%); box-shadow: 0 12px 30px -20px rgba(26, 18, 48, 0.4), 0 2px 5px -3px rgba(26, 18, 48, 0.12); transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s; }
+.bucket::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--gold); transform: scaleX(0.34); transform-origin: left; transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
 .bucket:hover { transform: translateY(-6px); box-shadow: 0 36px 70px -34px rgba(26, 18, 48, 0.55), 0 4px 10px -5px rgba(26, 18, 48, 0.18); border-color: var(--line-2); }
 .bucket:hover::before { transform: scaleX(1); }
-.bk-top { display: flex; align-items: center; justify-content: space-between; }
-.bk-ic { width: 58px; height: 58px; color: var(--indigo); background: #efecf7; border-radius: 15px; display: grid; place-items: center; }
+.bk-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.bk-ic { width: 58px; height: 58px; color: var(--indigo); background: #efecf7; border-radius: 15px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(50, 36, 105, 0.08); }
 .bk-ic svg, .bk-ic img { width: 36px; height: 36px; object-fit: contain; }
 .bk-no { font-size: 13px; font-weight: 900; color: var(--gold); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
 .bucket h3 { font-size: 25px; font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; line-height: 1.08; margin-top: 22px; }
 .bucket p { font-size: 15px; font-weight: 500; color: #5b5374; margin-top: 11px; line-height: 1.55; flex: 1; }
-.bk-tag { align-self: flex-start; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--belt); background: var(--gold-soft); border-radius: 999px; padding: 5px 11px; margin-top: 14px; }
+.bk-meta { font-size: 12px; font-weight: 800; letter-spacing: 0.05em; color: var(--muted); text-transform: uppercase; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 .bk-link { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: var(--indigo); margin-top: 16px; white-space: nowrap; }
 .bk-link svg { width: 17px; height: 17px; transition: transform 0.18s; }
 .bucket:hover .bk-link svg { transform: translateX(4px); }
-@media (max-width: 900px) { .bucket-grid { grid-template-columns: 1fr; max-width: 460px; } }
+@media (max-width: 880px) { .bucket-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; } }
+
+/* "Voor wie is dit?" info popover */
+.whoinfo { position: relative; display: inline-block; margin-top: 22px; }
+.whoinfo-btn { display: inline-flex; align-items: center; gap: 9px; background: var(--paper); color: var(--indigo); border: 1.5px solid var(--line-2); border-radius: 999px; padding: 10px 18px; font-size: 14px; font-weight: 800; line-height: 1; font-family: inherit; cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s; }
+.whoinfo-btn:hover, .whoinfo-btn:focus-visible { border-color: var(--gold); background: var(--cream); transform: translateY(-1px); box-shadow: 0 12px 26px -14px rgba(180, 126, 10, 0.5); outline: none; }
+.whoinfo-btn svg { width: 18px; height: 18px; color: var(--belt); }
+.whoinfo-panel { position: absolute; left: 50%; top: calc(100% + 14px); transform: translateX(-50%) translateY(-6px); width: min(940px, 88vw); background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; text-align: left; box-shadow: 0 44px 84px -42px rgba(26, 18, 48, 0.65), 0 8px 20px -12px rgba(26, 18, 48, 0.28); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.18s, transform 0.18s, visibility 0.18s; z-index: 30; }
+.whoinfo:hover .whoinfo-panel, .whoinfo:focus-within .whoinfo-panel, .whoinfo.open .whoinfo-panel { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.whoinfo-panel::before { content: ""; position: absolute; left: 50%; top: -8px; transform: translateX(-50%) rotate(45deg); width: 16px; height: 16px; background: var(--cream); border-left: 1px solid var(--line); border-top: 1px solid var(--line); }
+.wi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+.wi-col h4 { font-size: 15px; font-weight: 900; color: var(--indigo); letter-spacing: -0.01em; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 2.5px solid var(--gold); display: inline-block; }
+.wi-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.wi-col li { position: relative; padding-left: 17px; font-size: 13.5px; font-weight: 600; color: #5b5374; line-height: 1.45; }
+.wi-col li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+.wi-col li b { color: var(--ink); font-weight: 800; }
+@media (max-width: 720px) { .wi-grid { grid-template-columns: 1fr; gap: 18px; } }
 {% endstylesheet %}
+
+{% javascript %}
+document.querySelectorAll('.whoinfo').forEach(function (wi) {
+  var btn = wi.querySelector('.whoinfo-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = wi.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function (e) {
+    if (!wi.contains(e.target)) { wi.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { wi.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+  });
+});
+{% endjavascript %}
 
 {% schema %}
 {
   "name": "Feature cards",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Eén platform. Voor thuis. Voor onderweg." },
-    { "type": "text", "id": "heading", "label": "Kop", "default": "Bescherm wat voor u dierbaar is" }
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Eén platform. Voor thuis. Voor onderweg. Voor elkaar." },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Bescherm wat voor u dierbaar is" },
+    { "type": "header", "content": "Voor wie is dit? (popover)" },
+    { "type": "checkbox", "id": "show_whoinfo", "label": "Toon 'Voor wie is dit?'", "default": true },
+    { "type": "text", "id": "whoinfo_label", "label": "Knoptekst", "default": "Voor wie is dit?" }
   ],
-  "presets": [{ "name": "Feature cards" }]
+  "blocks": [
+    {
+      "type": "whocol",
+      "name": "Voor-wie kolom",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel" },
+        { "type": "text", "id": "row1_label", "label": "Rij 1 label" },
+        { "type": "text", "id": "row1_text", "label": "Rij 1 tekst" },
+        { "type": "text", "id": "row2_label", "label": "Rij 2 label" },
+        { "type": "text", "id": "row2_text", "label": "Rij 2 tekst" },
+        { "type": "text", "id": "row3_label", "label": "Rij 3 label" },
+        { "type": "text", "id": "row3_text", "label": "Rij 3 tekst" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Feature cards",
+      "blocks": [
+        { "type": "whocol", "settings": { "title": "Langer Thuis", "row1_label": "Inzicht", "row1_text": "voor wie af en toe een geruststellend seintje wil", "row2_label": "Zeker", "row2_text": "voor wie eerder wil weten wanneer er iets verandert", "row3_label": "Beschermd", "row3_text": "voor wie geen risico wil nemen als snelle hulp nodig is" } },
+        { "type": "whocol", "settings": { "title": "Mijn Thuis", "row1_label": "Alert", "row1_text": "voor wie zelf de regie wil houden", "row2_label": "Protect", "row2_text": "voor wie professionele beveiliging wil", "row3_label": "Vista", "row3_text": "voor wie niets aan het toeval wil overlaten" } },
+        { "type": "whocol", "settings": { "title": "Veilig Onderweg", "row1_label": "Alarm", "row1_text": "voor wie met een druk op de knop direct hulp wil kunnen inschakelen", "row2_label": "Locatie", "row2_text": "voor wie gevonden wil worden waar dan ook, dankzij GPS", "row3_label": "Beschermd", "row3_text": "voor wie ook geholpen wil worden bij een val, ook als hij zelf niets kan doen" } }
+      ]
+    }
+  ]
 }
 {% endschema %}

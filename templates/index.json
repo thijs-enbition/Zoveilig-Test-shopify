@@ -15,9 +15,16 @@
     },
     "features": {
       "type": "feature-cards",
+      "blocks": {
+        "w1": { "type": "whocol", "settings": { "title": "Langer Thuis", "row1_label": "Inzicht", "row1_text": "voor wie af en toe een geruststellend seintje wil", "row2_label": "Zeker", "row2_text": "voor wie eerder wil weten wanneer er iets verandert", "row3_label": "Beschermd", "row3_text": "voor wie geen risico wil nemen als snelle hulp nodig is" } },
+        "w2": { "type": "whocol", "settings": { "title": "Mijn Thuis", "row1_label": "Alert", "row1_text": "voor wie zelf de regie wil houden", "row2_label": "Protect", "row2_text": "voor wie professionele beveiliging wil", "row3_label": "Vista", "row3_text": "voor wie niets aan het toeval wil overlaten" } },
+        "w3": { "type": "whocol", "settings": { "title": "Veilig Onderweg", "row1_label": "Alarm", "row1_text": "voor wie met een druk op de knop direct hulp wil kunnen inschakelen", "row2_label": "Locatie", "row2_text": "voor wie gevonden wil worden waar dan ook, dankzij GPS", "row3_label": "Beschermd", "row3_text": "voor wie ook geholpen wil worden bij een val, ook als hij zelf niets kan doen" } }
+      },
+      "block_order": ["w1", "w2", "w3"],
       "settings": {
-        "eyebrow": "Eén platform. Voor thuis. Voor onderweg.",
-        "heading": "Bescherm wat voor u dierbaar is"
+        "eyebrow": "Eén platform. Voor thuis. Voor onderweg. Voor elkaar.",
+        "heading": "Bescherm wat voor u dierbaar is",
+        "show_whoinfo": true
       }
     },
     "finder_cta": {
@@ -43,7 +50,16 @@
     },
     "faq": {
       "type": "faq",
-      "settings": { "eyebrow": "Uit de praktijk", "heading": "Vragen die we vaak horen" }
+      "settings": {
+        "eyebrow": "Uit de praktijk",
+        "heading": "Vragen die we vaak horen",
+        "btn1_label": "Start de Keuzehulp",
+        "btn1_link": "/#keuzehulp",
+        "btn2_label": "Bezoek het kenniscentrum",
+        "btn2_link": "/pages/kenniscentrum",
+        "btn3_label": "Waar kunnen we u mee helpen?",
+        "btn3_link": "/search"
+      }
     },
     "testimonials": {
       "type": "testimonials",
