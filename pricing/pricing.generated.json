@@ -214,26 +214,26 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 36,
-      "monthlyRecurringPriceCents": 2495,
-      "monthlyDisplay": "€ 24,95",
-      "initialCommitmentAmountCents": 3743,
-      "initialCommitmentDisplay": "€ 37,43",
+      "monthlyRecurringPriceCents": 3495,
+      "monthlyDisplay": "€ 34,95",
+      "initialCommitmentAmountCents": 5243,
+      "initialCommitmentDisplay": "€ 52,43",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 8643,
-      "initialPaymentDueTodayDisplay": "€ 86,43",
+      "initialPaymentDueTodayCents": 10143,
+      "initialPaymentDueTodayDisplay": "€ 101,43",
       "indicativeContractValue": {
         "status": "UNRESOLVED_PENDING_ODOO",
         "selectedMethod": null,
         "methods": {
           "credited": {
-            "cents": 94721,
-            "display": "€ 947,21",
+            "cents": 130721,
+            "display": "€ 1.307,21",
             "recurringMonthsBilled": 34.5
           },
           "separate": {
-            "cents": 98463,
-            "display": "€ 984,63",
+            "cents": 135963,
+            "display": "€ 1.359,63",
             "recurringMonthsBilled": 36
           }
         },

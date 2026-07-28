@@ -66,7 +66,7 @@ for p in priced:
           f"{p['name']} monthly matches config",
           f"generated={p['monthlyRecurringPriceCents']} config={cfg_monthly[p['id']]}")
 expected_levels = {"inzicht": 1995, "zeker": 2495, "beschermd": 3995,
-                   "alert": 1995, "protect": 2495, "vista": 3995}
+                   "alert": 1995, "protect": 3495, "vista": 3995}
 for pid, cents in expected_levels.items():
     check(cfg_monthly.get(pid) == cents, f"{pid} is {cents} cents",
           f"got {cfg_monthly.get(pid)}")

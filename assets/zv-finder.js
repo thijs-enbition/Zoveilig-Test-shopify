@@ -8,21 +8,23 @@
   and drives the full flow (question -> question -> result). Fires the finder_*
   measurement events via window.ZVMeasurement.
 
-  Prices shown here are the design's working prices; the storefront source of truth
-  for price/SKU remains Shopify Products. The result CTA links to the package.
+  Prices are never hardcoded here: they come from the finder_key -> product map the
+  theme injects (Shopify Products are the single source of truth for price/SKU).
+  A package with no purchasable product shows 'Prijs volgt'. The result CTA links to
+  the package and, when available, adds it to the cart.
 */
 (function (window, document) {
   'use strict';
 
   var META = {
-    secure: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Alert', platform: 'NAMI Alarm15', h1: 'Slim alarm dat u zelf in de gaten houdt.', price: '€19,95', per: '/mnd', sub: 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' },
-    guard: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Protect', platform: 'Climax · incl. meldkamer', popular: true, h1: 'Alarm met 24/7 meldkamer die meekijkt.', price: '€34,95', per: '/mnd', sub: 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' },
-    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · incl. camera', h1: 'Complete beveiliging met meldkamer én camera.', price: '€39,95', per: '/mnd', sub: 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' },
-    aware: { seg: 'B', segLabel: 'Langer Thuis', name: 'Inzicht', platform: 'NAMI aiAware', h1: 'Weet dat de dag normaal en veilig is begonnen.', price: '€19,95', per: '/mnd', sub: 'NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer' },
-    aware_plus: { seg: 'B', segLabel: 'Langer Thuis', name: 'Zeker', platform: 'NAMI aiCare', popular: true, h1: 'Zie subtiele veranderingen voordat het misgaat.', price: '€24,95', per: '/mnd', sub: 'NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR · geen meldkamer' },
-    care: { seg: 'B', segLabel: 'Langer Thuis', name: 'Beschermd', platform: 'Climax', h1: 'Complete bescherming met 24/7 meldkamer.', price: '€39,95', per: '/mnd', sub: 'Climax · centrale, magneetcontacten, PIR, paniekknoppen en rookmelders · incl. meldkamer' },
-    liogo_solo: { seg: 'C', segLabel: 'Veilig Onderweg', name: 'Paniek Meldkamer', platform: 'Indigo', h1: 'Eén druk verbindt u met de meldkamer.', price: 'Prijs volgt', per: '', sub: 'Prijs en specs volgen' },
-    liogo_guard: { seg: 'C', segLabel: 'Veilig Onderweg', name: 'Zorgmeldkamer', platform: 'Indigo', h1: '24/7 zorgprofessionals regelen opvolging.', price: 'Prijs volgt', per: '', sub: 'Prijs en specs volgen' }
+    secure: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Alert', platform: 'NAMI Alarm15', h1: 'Slim alarm dat u zelf in de gaten houdt.', sub: 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' },
+    guard: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Protect', platform: 'Climax · incl. meldkamer', popular: true, h1: 'Alarm met 24/7 meldkamer die meekijkt.', sub: 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' },
+    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · incl. camera', h1: 'Complete beveiliging met meldkamer én camera.', sub: 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' },
+    aware: { seg: 'B', segLabel: 'Langer Thuis', name: 'Inzicht', platform: 'NAMI aiAware', h1: 'Weet dat de dag normaal en veilig is begonnen.', sub: 'NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer' },
+    aware_plus: { seg: 'B', segLabel: 'Langer Thuis', name: 'Zeker', platform: 'NAMI aiCare', popular: true, h1: 'Zie subtiele veranderingen voordat het misgaat.', sub: 'NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR · geen meldkamer' },
+    care: { seg: 'B', segLabel: 'Langer Thuis', name: 'Beschermd', platform: 'Climax', h1: 'Complete bescherming met 24/7 meldkamer.', sub: 'Climax · centrale, magneetcontacten, PIR, paniekknoppen en rookmelders · incl. meldkamer' },
+    liogo_solo: { seg: 'C', segLabel: 'Veilig Onderweg', name: 'Paniek Meldkamer', platform: 'Indigo', h1: 'Eén druk verbindt u met de meldkamer.', sub: 'Prijs en specs volgen' },
+    liogo_guard: { seg: 'C', segLabel: 'Veilig Onderweg', name: 'Zorgmeldkamer', platform: 'Indigo', h1: '24/7 zorgprofessionals regelen opvolging.', sub: 'Prijs en specs volgen' }
   };
 
   var LINE = {
@@ -72,15 +74,22 @@
   function personIcon() {
     return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
   }
-  function pkgCardHtml(key, primary) {
+  // Format cents as a Dutch euro string at runtime (no literal price in source).
+  function money(cents) {
+    var e = Math.floor(cents / 100), c = cents % 100;
+    return '€' + e + ',' + (c < 10 ? '0' : '') + c;
+  }
+  function pkgCardHtml(key, primary, products) {
     var p = META[key];
+    var prod = products && products[key];
+    var priceHtml = (prod && prod.priceCents) ? '<b>' + money(prod.priceCents) + '</b>/mnd' : 'Prijs volgt';
     var cls = 'kh-pkg' + (primary ? ' is-primary' : '');
     return '<a class="' + cls + '" href="#" data-pkg="' + key + '">' +
       (primary && p.popular ? '<span class="kh-pkg-flag">Meest gekozen</span>' : '') +
       '<span class="kh-pkg-seg">' + esc(p.segLabel) + '</span>' +
       '<span class="kh-pkg-name">' + esc(p.name) + '</span>' +
       '<span class="kh-pkg-hook">' + esc(p.h1) + '</span>' +
-      '<span class="kh-pkg-price"><b>' + esc(p.price) + '</b>' + esc(p.per) + '</span>' +
+      '<span class="kh-pkg-price">' + priceHtml + '</span>' +
       '</a>';
   }
 
@@ -130,7 +139,7 @@
       var r = route(answers);
       var p = META[r.primary];
       if (ZV.push) ZV.push('finder_result_view', { recommended_pakket: r.primary, segment: p.seg });
-      var altsHtml = r.alts.map(function (k) { return pkgCardHtml(k, false); }).join('');
+      var altsHtml = r.alts.map(function (k) { return pkgCardHtml(k, false, products); }).join('');
       var prod = products[r.primary];
       var detailUrl = (prod && prod.url) || resultUrl;
       var cta = '<a class="btn btn--gold" href="' + esc(detailUrl) + '" data-pkg="' + r.primary + '">Bekijk dit pakket</a>';
@@ -144,7 +153,7 @@
         '<div class="kh-body">' +
         '<p class="kh-reason">' + esc(r.reason) + '</p>' +
         '<p class="kh-line">' + esc(LINE[p.segLabel] || '') + '</p>' +
-        pkgCardHtml(r.primary, true) +
+        pkgCardHtml(r.primary, true, products) +
         (altsHtml ? '<div class="kh-alts-h">Ook interessant</div><div class="kh-alts">' + altsHtml + '</div>' : '') +
         '<div class="kh-result-cta">' + cta +
         '<button type="button" class="kh-restart" data-restart>Opnieuw beginnen</button></div>' +

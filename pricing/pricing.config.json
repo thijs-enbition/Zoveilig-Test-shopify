@@ -168,8 +168,8 @@
           "hook": "Alarm met 24/7 meldkamer die meekijkt.",
           "sub": "Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel",
           "monthlyRecurringPrice": {
-            "amountCents": 2495,
-            "display": "€24,95",
+            "amountCents": 3495,
+            "display": "€34,95",
             "per": "/mnd"
           },
           "termMonths": 36
