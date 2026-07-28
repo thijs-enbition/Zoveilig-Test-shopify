@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <div class="kh-card">
+      <div class="kh-card" data-zv-finder-app data-result-url="{{ section.settings.finder_url | default: '/pages/oplossingen' }}">
         <div class="kh-head">
           <span class="kh-brand"><span class="kh-dot"></span>{{ section.settings.card_eyebrow }}</span>
           <span class="kh-lead">{{ section.settings.card_sub }}</span>
@@ -83,7 +83,30 @@
 .kh-radio { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-2); }
 .kh-opts a:hover .kh-radio { border-color: var(--gold); }
 .kh-foot { padding: 8px 26px 22px; font-size: 12.5px; font-weight: 700; color: var(--muted); text-align: right; }
+.kh-opt { width: 100%; display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; cursor: pointer; font-family: inherit; text-align: left; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+.kh-opt:hover { border-color: var(--indigo); transform: translateY(-1px); box-shadow: 0 12px 26px -18px rgba(26, 18, 48, 0.5); }
+.kh-back { background: none; border: none; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer; padding: 0 0 10px; }
+.kh-reason { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.kh-line { font-size: 13.5px; font-weight: 500; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+.kh-pkg { display: block; position: relative; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px; margin-top: 16px; text-decoration: none; color: var(--ink); transition: border-color 0.15s, box-shadow 0.15s; }
+.kh-pkg.is-primary { border-color: var(--indigo); box-shadow: 0 12px 30px -18px rgba(50, 36, 105, 0.4); }
+.kh-pkg:hover { border-color: var(--indigo); }
+.kh-pkg-flag { position: absolute; top: 14px; right: 16px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--belt); }
+.kh-pkg-seg { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); }
+.kh-pkg-name { display: block; font-size: 21px; font-weight: 900; color: var(--indigo); letter-spacing: -0.01em; line-height: 1.1; margin-top: 2px; }
+.kh-pkg-hook { display: block; font-size: 13.5px; font-weight: 600; color: #5b5374; margin-top: 6px; line-height: 1.4; }
+.kh-pkg-price { display: block; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.kh-pkg-price b { font-size: 22px; font-weight: 900; color: var(--ink); letter-spacing: -0.01em; }
+.kh-alts-h { font-size: 11.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 22px; }
+.kh-alts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.kh-alts .kh-pkg { margin-top: 8px; }
+.kh-alts .kh-pkg-name { font-size: 17px; }
+.kh-alts .kh-pkg-hook { display: none; }
+.kh-result-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 22px; }
+.kh-result-cta .btn { border-radius: 12px; }
+.kh-restart { background: none; border: none; font-family: inherit; font-size: 13.5px; font-weight: 800; color: var(--indigo); cursor: pointer; }
 @media (max-width: 900px) { .finder-grid { grid-template-columns: 1fr; gap: 32px; } }
+@media (max-width: 520px) { .kh-alts { grid-template-columns: 1fr; } }
 {% endstylesheet %}
 
 {% schema %}
