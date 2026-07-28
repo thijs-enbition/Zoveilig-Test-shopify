@@ -84,6 +84,13 @@
       '</a>';
   }
 
+  // finder_key -> { url, variantId, available, priceCents } from the theme (real products).
+  function productMap() {
+    var node = document.querySelector('[data-zv-finder-products]');
+    if (!node) return {};
+    try { return JSON.parse(node.textContent || '{}'); } catch (e) { return {}; }
+  }
+
   function initApp(root) {
     if (root.__zvFinder) return;
     root.__zvFinder = true;
@@ -91,6 +98,7 @@
     var step = 0;
     var started = false;
     var resultUrl = root.getAttribute('data-result-url') || '/pages/oplossingen';
+    var products = productMap();
 
     function render() {
       if (step < QUESTIONS.length) renderQuestion();
@@ -123,6 +131,12 @@
       var p = META[r.primary];
       if (ZV.push) ZV.push('finder_result_view', { recommended_pakket: r.primary, segment: p.seg });
       var altsHtml = r.alts.map(function (k) { return pkgCardHtml(k, false); }).join('');
+      var prod = products[r.primary];
+      var detailUrl = (prod && prod.url) || resultUrl;
+      var cta = '<a class="btn btn--gold" href="' + esc(detailUrl) + '" data-pkg="' + r.primary + '">Bekijk dit pakket</a>';
+      if (prod && prod.available && prod.variantId) {
+        cta += '<button type="button" class="btn btn--indigo kh-add" data-variant="' + esc(prod.variantId) + '" data-pkg="' + r.primary + '">In winkelwagen</button>';
+      }
       root.innerHTML =
         '<div class="kh-head"><span class="kh-brand"><span class="kh-dot"></span>Uw persoonlijke advies</span>' +
         '<span class="kh-lead">' + esc(p.segLabel) + '</span>' +
@@ -132,9 +146,28 @@
         '<p class="kh-line">' + esc(LINE[p.segLabel] || '') + '</p>' +
         pkgCardHtml(r.primary, true) +
         (altsHtml ? '<div class="kh-alts-h">Ook interessant</div><div class="kh-alts">' + altsHtml + '</div>' : '') +
-        '<div class="kh-result-cta"><a class="btn btn--gold" href="' + esc(resultUrl) + '" data-pkg="' + r.primary + '">Bekijk dit pakket</a>' +
+        '<div class="kh-result-cta">' + cta +
         '<button type="button" class="kh-restart" data-restart>Opnieuw beginnen</button></div>' +
         '</div>';
+    }
+
+    // Add-to-cart from the finder result: real Shopify cart, add_to_cart on confirm.
+    function addToCart(btn) {
+      var variantId = btn.getAttribute('data-variant');
+      var pkg = btn.getAttribute('data-pkg');
+      if (!variantId) return;
+      btn.disabled = true;
+      btn.textContent = 'Bezig...';
+      window.fetch('/cart/add.js', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+      }).then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+        .then(function (line) {
+          if (ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || pkg, item_name: (META[pkg] || {}).name, item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: 'keuzehulp_result' });
+          document.dispatchEvent(new CustomEvent('zv:cart:added'));
+          window.location.href = '/cart';
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'In winkelwagen'; });
     }
 
     root.addEventListener('click', function (e) {
@@ -147,6 +180,8 @@
         render();
         return;
       }
+      var add = e.target.closest && e.target.closest('.kh-add');
+      if (add) { addToCart(add); return; }
       if (e.target.closest && e.target.closest('[data-back]')) { if (step > 0) step--; render(); return; }
       if (e.target.closest && e.target.closest('[data-restart]')) {
         answers = {}; step = 0; started = false;

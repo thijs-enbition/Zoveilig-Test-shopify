@@ -10,6 +10,21 @@
 {%- assign opts = section.blocks | where: 'type', 'option' -%}
 
 <section class="finder-sec">
+  {%- comment -%} finder_key -> product map, read by zv-finder.js to route results to real products {%- endcomment -%}
+  {%- capture finder_products -%}
+    {%- assign kh = collections[section.settings.collection] | default: collections['keuzehulp-pakketten'] -%}
+    {%- assign first = true -%}
+    {
+    {%- for p in kh.products -%}
+      {%- assign fk = p.metafields.custom.finder_key -%}
+      {%- if fk != blank -%}
+        {%- unless first %},{% endunless -%}{%- assign first = false -%}
+        "{{ fk }}":{"url":{{ p.url | json }},"variantId":"{{ p.selected_or_first_available_variant.id }}","available":{{ p.available | default: false }},"priceCents":{{ p.price | default: 0 }}}
+      {%- endif -%}
+    {%- endfor -%}
+    }
+  {%- endcapture -%}
+  <script type="application/json" data-zv-finder-products>{{ finder_products | strip }}</script>
   <div class="wrap">
     <div class="finder-grid">
       <div class="fs-copy">
@@ -17,7 +32,6 @@
         {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
         {%- if section.settings.text != blank -%}<p>{{ section.settings.text }}</p>{%- endif -%}
         <div class="lio-guide">
-          <span class="lio-bubble">Hoi!</span>
           <img src="{{ 'lio-finder-guide.png' | asset_url }}" alt="Lio, de Keuzehulp van Zo Veilig" loading="lazy" width="320" height="320">
         </div>
       </div>
@@ -61,7 +75,6 @@
 .fs-copy p { font-size: clamp(16px, 1.6vw, 20px); font-weight: 500; color: #d8d2ef; margin-top: 18px; max-width: 44ch; line-height: 1.5; }
 .lio-guide { position: relative; margin-top: 22px; width: max-content; }
 .lio-guide img { width: clamp(220px, 24vw, 320px); height: auto; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.45)); }
-.lio-bubble { position: absolute; top: 6px; left: -6px; background: #fff; color: var(--indigo); font-weight: 900; font-size: 18px; padding: 8px 16px; border-radius: 14px 14px 14px 4px; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5); }
 
 .kh-card { background: var(--cream); color: var(--ink); border-radius: 22px; overflow: hidden; box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.6); }
 .kh-head { padding: 22px 26px 0; }
@@ -126,7 +139,8 @@
     { "type": "text", "id": "question", "label": "Vraag", "default": "Voor wie zoekt u ondersteuning?" },
     { "type": "text", "id": "question_sub", "label": "Vraag-subtekst", "default": "Zo stemmen we het advies af op de juiste persoon." },
     { "type": "text", "id": "footer_text", "label": "Voettekst", "default": "Kies een antwoord om verder te gaan" },
-    { "type": "url", "id": "finder_url", "label": "Keuzehulp-link" }
+    { "type": "url", "id": "finder_url", "label": "Fallback-link (als een pakket geen product heeft)" },
+    { "type": "collection", "id": "collection", "label": "Pakketten-collectie", "info": "Standaard: keuzehulp-pakketten. Producten met een custom.finder_key metafield." }
   ],
   "blocks": [
     {
