@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0.0",
+  "edge_functions_version": "1.0.0",
+  "shopify_integration_version": "1.0.0",
+  "notes": "Gate 1 baseline. schema_version tracks migrations 000-003,005. 004_rpc and 006_reporting_views are Gate 2 and are intentionally NOT present yet."
+}
