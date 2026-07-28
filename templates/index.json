@@ -65,11 +65,12 @@
       "type": "testimonials",
       "settings": {
         "heading": "Wat onze klanten zeggen",
-        "subtext": "Echte beoordelingen van Zo Veilig-klanten.",
+        "subtext": "Echte beoordelingen van Zo Veilig-klanten op Trustpilot",
         "score": "4,7",
         "stars": 5,
-        "meta": "Uitstekend, 650 beoordelingen",
-        "trustpilot_url": "https://www.trustpilot.com/review/zoveilig.nl"
+        "rating_word": "Uitstekend",
+        "review_count": "650",
+        "trustpilot_url": "https://www.trustpilot.com/review/zoveilig.nl?languages=all&stars=5"
       }
     }
   },

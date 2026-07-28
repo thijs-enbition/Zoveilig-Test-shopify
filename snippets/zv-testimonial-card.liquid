@@ -1,17 +1,22 @@
 {%- comment -%}
-  One testimonial card. Rendered from a testimonial metaobject passed as `t`.
-  Fields: quote, customer_name, customer_context, customer_image, rating.
+  One Trustpilot-style review card. Rendered from a testimonial metaobject passed as `t`.
+  Fields: review_title, quote, customer_name, customer_context, customer_image, rating.
+  1:1 with the design .rv-card (green Trustpilot stars, title, body, by-line, verified).
 {%- endcomment -%}
 {%- liquid
   assign rating = t.rating | plus: 0
+  if rating <= 0
+    assign rating = 5
+  endif
   assign initials = t.customer_name | slice: 0, 1 | upcase
 -%}
 <article class="rv-card">
-  {%- if rating > 0 -%}
-    <span class="rv-stars" aria-label="{{ rating }} van 5 sterren">
-      {%- for i in (1..5) -%}<svg viewBox="0 0 24 24" fill="{% if i <= rating %}#00b67a{% else %}#d8cdb4{% endif %}" width="16" height="16" aria-hidden="true"><path d="M12 2l3 6.3 6.9.9-5 4.8 1.2 6.8L12 17.8 5.9 20.8 7.1 14l-5-4.8 6.9-.9z"/></svg>{%- endfor -%}
-    </span>
-  {%- endif -%}
+  <div class="rv-cstars" aria-label="{{ rating }} van 5 sterren">
+    {%- for i in (1..5) -%}
+      <span class="tp-star{% if i > rating %} off{% endif %}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.7 5.9 20.4l1.4-6.8L2.2 9l6.9-.7L12 2z"/></svg></span>
+    {%- endfor -%}
+  </div>
+  {%- if t.review_title != blank -%}<h4>{{ t.review_title }}</h4>{%- endif -%}
   {%- if t.quote != blank -%}<p class="rv-body">{{ t.quote }}</p>{%- endif -%}
   <div class="rv-by">
     <span class="rv-ava">
@@ -21,5 +26,6 @@
       {%- if t.customer_name != blank -%}<div class="rv-name">{{ t.customer_name }}</div>{%- endif -%}
       {%- if t.customer_context != blank -%}<div class="rv-date">{{ t.customer_context }}</div>{%- endif -%}
     </div>
+    <span class="rv-verif"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#2f8f5b"/><path d="M8.4 12.2l2.3 2.3 4.7-5.1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Geverifieerd</span>
   </div>
 </article>
