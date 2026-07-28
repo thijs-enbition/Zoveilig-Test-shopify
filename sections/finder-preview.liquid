@@ -1,0 +1,132 @@
+{%- comment -%}
+  Homepage Keuzehulp preview (.finder-sec). 1:1 port of the design:
+  LEFT  = eyebrow + heading + text + Lio (with a "Hoi!" bubble)
+  RIGHT = the Keuzehulp quiz card (question 1 of 4 + answer options)
+
+  The answer options are section blocks. Each links to the full Keuzehulp with its
+  answer, so the homepage card is the entry point to the finder.
+{%- endcomment -%}
+
+{%- assign opts = section.blocks | where: 'type', 'option' -%}
+
+<section class="finder-sec">
+  <div class="wrap">
+    <div class="finder-grid">
+      <div class="fs-copy">
+        {%- if section.settings.eyebrow != blank -%}<span class="eyebrow">{{ section.settings.eyebrow }}</span>{%- endif -%}
+        {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+        {%- if section.settings.text != blank -%}<p>{{ section.settings.text }}</p>{%- endif -%}
+        <div class="lio-guide">
+          <span class="lio-bubble">Hoi!</span>
+          <img src="{{ 'lio-finder-guide.png' | asset_url }}" alt="Lio, de Keuzehulp van Zo Veilig" loading="lazy" width="320" height="320">
+        </div>
+      </div>
+
+      <div class="kh-card">
+        <div class="kh-head">
+          <span class="kh-brand"><span class="kh-dot"></span>{{ section.settings.card_eyebrow }}</span>
+          <span class="kh-lead">{{ section.settings.card_sub }}</span>
+          <div class="kh-progress"><span style="width:{{ 100 | divided_by: section.settings.total_steps }}%"></span></div>
+        </div>
+        <div class="kh-body">
+          <span class="kh-step">{{ section.settings.step_label }}</span>
+          {%- if section.settings.question != blank -%}<h3>{{ section.settings.question }}</h3>{%- endif -%}
+          {%- if section.settings.question_sub != blank -%}<p class="kh-qsub">{{ section.settings.question_sub }}</p>{%- endif -%}
+          <ul class="kh-opts">
+            {%- for block in opts -%}
+              <li {{ block.shopify_attributes }}>
+                <a href="{{ block.settings.link | default: section.settings.finder_url | default: '#' }}" data-zv-finder data-cta-location="homepage_keuzehulp">
+                  <span class="kh-ic">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </span>
+                  <span class="kh-label">{{ block.settings.label }}</span>
+                  <span class="kh-radio" aria-hidden="true"></span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+        {%- if section.settings.footer_text != blank -%}<div class="kh-foot">{{ section.settings.footer_text }}</div>{%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.finder-sec { position: relative; overflow: hidden; color: #fff; padding: clamp(46px, 5vw, 80px) 0; background: var(--indigo-deep); }
+.finder-sec::before { content: ""; position: absolute; width: 620px; height: 620px; border-radius: 50%; right: -160px; top: -220px; background: radial-gradient(circle, rgba(198, 46, 47, 0.28), transparent 70%); pointer-events: none; }
+.finder-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 472px; gap: clamp(36px, 5vw, 72px); align-items: center; }
+.fs-copy .eyebrow { color: var(--gold-lt); display: block; }
+.fs-copy h2 { font-size: clamp(30px, 3.6vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; margin-top: 12px; }
+.fs-copy p { font-size: clamp(16px, 1.6vw, 20px); font-weight: 500; color: #d8d2ef; margin-top: 18px; max-width: 44ch; line-height: 1.5; }
+.lio-guide { position: relative; margin-top: 22px; width: max-content; }
+.lio-guide img { width: clamp(220px, 24vw, 320px); height: auto; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.45)); }
+.lio-bubble { position: absolute; top: 6px; left: -6px; background: #fff; color: var(--indigo); font-weight: 900; font-size: 18px; padding: 8px 16px; border-radius: 14px 14px 14px 4px; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5); }
+
+.kh-card { background: var(--cream); color: var(--ink); border-radius: 22px; overflow: hidden; box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.6); }
+.kh-head { padding: 22px 26px 0; }
+.kh-brand { display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
+.kh-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); }
+.kh-lead { display: block; font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+.kh-progress { height: 4px; border-radius: 999px; background: var(--line); margin-top: 18px; overflow: hidden; }
+.kh-progress span { display: block; height: 100%; background: var(--gold); border-radius: 999px; }
+.kh-body { padding: 22px 26px 8px; }
+.kh-step { font-size: 11.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.kh-body h3 { font-size: clamp(20px, 2.2vw, 26px); font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; line-height: 1.1; margin-top: 8px; }
+.kh-qsub { font-size: 14.5px; font-weight: 600; color: var(--muted); margin-top: 8px; }
+.kh-opts { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.kh-opts a { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; text-decoration: none; color: var(--ink); transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+.kh-opts a:hover { border-color: var(--indigo); transform: translateY(-1px); box-shadow: 0 12px 26px -18px rgba(26, 18, 48, 0.5); }
+.kh-ic { flex: none; width: 40px; height: 40px; border-radius: 11px; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; }
+.kh-ic svg { width: 22px; height: 22px; }
+.kh-label { flex: 1; font-size: 15.5px; font-weight: 800; color: var(--indigo); letter-spacing: -0.01em; }
+.kh-radio { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-2); }
+.kh-opts a:hover .kh-radio { border-color: var(--gold); }
+.kh-foot { padding: 8px 26px 22px; font-size: 12.5px; font-weight: 700; color: var(--muted); text-align: right; }
+@media (max-width: 900px) { .finder-grid { grid-template-columns: 1fr; gap: 32px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Keuzehulp preview",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Linkerkolom" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Zo Veilig Keuzehulp" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Niet zeker wat bij u past?" },
+    { "type": "textarea", "id": "text", "label": "Tekst", "default": "Lio stelt u een paar korte vragen en zoekt de ondersteuning die past bij uw situatie." },
+    { "type": "header", "content": "Keuzehulp-kaart" },
+    { "type": "text", "id": "card_eyebrow", "label": "Kaart-label", "default": "Zo Veilig Keuzehulp" },
+    { "type": "text", "id": "card_sub", "label": "Kaart-subtekst", "default": "In 4 korte vragen naar het juiste pad" },
+    { "type": "range", "id": "total_steps", "label": "Aantal stappen", "min": 2, "max": 6, "step": 1, "default": 4 },
+    { "type": "text", "id": "step_label", "label": "Stap-label", "default": "Vraag 1 · Stap 1 van 4" },
+    { "type": "text", "id": "question", "label": "Vraag", "default": "Voor wie zoekt u ondersteuning?" },
+    { "type": "text", "id": "question_sub", "label": "Vraag-subtekst", "default": "Zo stemmen we het advies af op de juiste persoon." },
+    { "type": "text", "id": "footer_text", "label": "Voettekst", "default": "Kies een antwoord om verder te gaan" },
+    { "type": "url", "id": "finder_url", "label": "Keuzehulp-link" }
+  ],
+  "blocks": [
+    {
+      "type": "option",
+      "name": "Antwoord",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Voor mezelf" },
+        { "type": "url", "id": "link", "label": "Link (optioneel)" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Keuzehulp preview",
+      "blocks": [
+        { "type": "option", "settings": { "label": "Voor mezelf" } },
+        { "type": "option", "settings": { "label": "Voor mijn ouder(s)" } },
+        { "type": "option", "settings": { "label": "Voor mijn partner" } },
+        { "type": "option", "settings": { "label": "Voor een ander familielid" } },
+        { "type": "option", "settings": { "label": "Voor iemand voor wie ik zorg" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
