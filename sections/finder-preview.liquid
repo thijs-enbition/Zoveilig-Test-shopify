@@ -9,7 +9,7 @@
 
 {%- assign opts = section.blocks | where: 'type', 'option' -%}
 
-<section class="finder-sec">
+<section class="finder-sec" id="keuzehulp">
   {%- comment -%} finder_key -> product map, read by zv-finder.js to route results to real products {%- endcomment -%}
   {%- capture finder_products -%}
     {%- assign kh = collections[section.settings.collection] | default: collections['keuzehulp-pakketten'] -%}
