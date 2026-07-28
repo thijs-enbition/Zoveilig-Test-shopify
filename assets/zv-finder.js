@@ -109,7 +109,17 @@
     var resultUrl = root.getAttribute('data-result-url') || '/pages/oplossingen';
     var products = productMap();
 
+    // Tell the Lio guide which mood to show, mirroring the design's lio-stage model:
+    // home (fresh start) -> product (answering) -> recommend (result) -> purchase (CTA).
+    function emitLioStage() {
+      var stage = 'product';
+      if (step >= QUESTIONS.length) stage = 'recommend';
+      else if (step === 0 && Object.keys(answers).length === 0) stage = 'home';
+      window.dispatchEvent(new CustomEvent('lio-stage', { detail: stage }));
+    }
+
     function render() {
+      emitLioStage();
       if (step < QUESTIONS.length) renderQuestion();
       else renderResult();
     }
@@ -165,6 +175,7 @@
       var variantId = btn.getAttribute('data-variant');
       var pkg = btn.getAttribute('data-pkg');
       if (!variantId) return;
+      window.dispatchEvent(new CustomEvent('lio-stage', { detail: 'purchase' }));
       btn.disabled = true;
       btn.textContent = 'Bezig...';
       window.fetch('/cart/add.js', {
@@ -191,6 +202,8 @@
       }
       var add = e.target.closest && e.target.closest('.kh-add');
       if (add) { addToCart(add); return; }
+      var view = e.target.closest && e.target.closest('.kh-result-cta a[data-pkg]');
+      if (view) { window.dispatchEvent(new CustomEvent('lio-stage', { detail: 'purchase' })); }
       if (e.target.closest && e.target.closest('[data-back]')) { if (step > 0) step--; render(); return; }
       if (e.target.closest && e.target.closest('[data-restart]')) {
         answers = {}; step = 0; started = false;
