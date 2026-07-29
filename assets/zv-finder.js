@@ -33,6 +33,9 @@
     'Veilig Onderweg': 'Persoonlijke veiligheid, ook buitenshuis en onderweg, met hulp op één druk op de knop.'
   };
 
+  // Constant reassurance bullets on the recommended-package card (1:1 with the design).
+  var TRUST = ['Securitas Preferred Partner', 'NL meldkamer 24/7', 'Lokaal team in Almere'];
+
   var QUESTIONS = [
     { id: 'q1', title: 'Voor wie zoekt u ondersteuning?', help: 'Zo stemmen we het advies af op de juiste persoon.', options: [
       { id: 'mezelf', label: 'Voor mezelf' }, { id: 'ouder', label: 'Voor mijn ouder(s)' }, { id: 'partner', label: 'Voor mijn partner' }, { id: 'familie', label: 'Voor een ander familielid' }, { id: 'zorg', label: 'Voor iemand voor wie ik zorg' } ] },
@@ -78,19 +81,6 @@
   function money(cents) {
     var e = Math.floor(cents / 100), c = cents % 100;
     return '€' + e + ',' + (c < 10 ? '0' : '') + c;
-  }
-  function pkgCardHtml(key, primary, products) {
-    var p = META[key];
-    var prod = products && products[key];
-    var priceHtml = (prod && prod.priceCents) ? '<b>' + money(prod.priceCents) + '</b>/mnd' : 'Prijs volgt';
-    var cls = 'kh-pkg' + (primary ? ' is-primary' : '');
-    return '<a class="' + cls + '" href="#" data-pkg="' + key + '">' +
-      (primary && p.popular ? '<span class="kh-pkg-flag">Meest gekozen</span>' : '') +
-      '<span class="kh-pkg-seg">' + esc(p.segLabel) + '</span>' +
-      '<span class="kh-pkg-name">' + esc(p.name) + '</span>' +
-      '<span class="kh-pkg-hook">' + esc(p.h1) + '</span>' +
-      '<span class="kh-pkg-price">' + priceHtml + '</span>' +
-      '</a>';
   }
 
   // finder_key -> { url, variantId, available, priceCents } from the theme (real products).
@@ -145,49 +135,67 @@
         '<div class="kh-foot">Kies een antwoord om verder te gaan</div>';
     }
 
-    function renderResult() {
-      var r = route(answers);
-      var p = META[r.primary];
-      if (ZV.push) ZV.push('finder_complete', { recommended_pakket: r.primary, segment: p.seg });
-      var altsHtml = r.alts.map(function (k) { return pkgCardHtml(k, false, products); }).join('');
-      var prod = products[r.primary];
-      var detailUrl = (prod && prod.url) || resultUrl;
-      var cta = '<a class="btn btn--gold" href="' + esc(detailUrl) + '" data-pkg="' + r.primary + '">Bekijk dit pakket</a>';
-      if (prod && prod.available && prod.variantId) {
-        cta += '<button type="button" class="btn btn--indigo kh-add" data-variant="' + esc(prod.variantId) + '" data-pkg="' + r.primary + '">In winkelwagen</button>';
-      }
-      root.innerHTML =
-        '<div class="kh-head"><span class="kh-brand"><span class="kh-dot"></span>Uw persoonlijke advies</span>' +
-        '<span class="kh-lead">' + esc(p.segLabel) + '</span>' +
-        '<div class="kh-progress"><span style="width:100%"></span></div></div>' +
-        '<div class="kh-body">' +
-        '<p class="kh-reason">' + esc(r.reason) + '</p>' +
-        '<p class="kh-line">' + esc(LINE[p.segLabel] || '') + '</p>' +
-        pkgCardHtml(r.primary, true, products) +
-        (altsHtml ? '<div class="kh-alts-h">Ook interessant</div><div class="kh-alts">' + altsHtml + '</div>' : '') +
-        '<div class="kh-result-cta">' + cta +
-        '<button type="button" class="kh-restart" data-restart>Opnieuw beginnen</button></div>' +
-        '</div>';
+    // Decorative product badge (viewBox 132, red disc behind the icon) from zv-product-icons.js.
+    function badgeHtml(key) { return (window.ZVP && window.ZVP.badge) ? window.ZVP.badge(key) : ''; }
+    // Price is data-driven: from the Shopify product map (finder_key -> product), never hardcoded.
+    function priceLine(key) {
+      var prod = products[key];
+      if (prod && prod.priceCents) return money(prod.priceCents) + '<span>/mnd</span>';
+      return 'Prijs volgt';
+    }
+    // One package line: badge + supplier (platform) + name + price. mini = alternative variant.
+    function plHtml(key, mini) {
+      var m = META[key];
+      return '<div class="pl' + (mini ? ' mini' : '') + '">' +
+        '<span class="pl-badge">' + badgeHtml(key) + '</span>' +
+        '<div class="pl-tx">' +
+          '<div class="pl-plat">' + esc(m.platform || m.segLabel) + (m.popular ? '<span class="pl-pop">Meest gekozen</span>' : '') + '</div>' +
+          '<div class="pl-name">' + esc(m.name) + '</div>' +
+          '<div class="pl-price">' + priceLine(key) + '</div>' +
+        '</div></div>';
     }
 
-    // Add-to-cart from the finder result: real Shopify cart, add_to_cart on confirm.
-    function addToCart(btn) {
-      var variantId = btn.getAttribute('data-variant');
-      var pkg = btn.getAttribute('data-pkg');
-      if (!variantId) return;
-      window.dispatchEvent(new CustomEvent('lio-stage', { detail: 'purchase' }));
-      btn.disabled = true;
-      btn.textContent = 'Bezig...';
-      window.fetch('/cart/add.js', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
-      }).then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
-        .then(function (line) {
-          if (ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || pkg, item_name: (META[pkg] || {}).name, item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: 'keuzehulp_result' });
-          document.dispatchEvent(new CustomEvent('zv:cart:added'));
-          window.location.href = '/cart';
-        })
-        .catch(function () { btn.disabled = false; btn.textContent = 'In winkelwagen'; });
+    function renderResult() {
+      var r = route(answers);
+      var m = META[r.primary];
+      if (ZV.push) ZV.push('finder_complete', { recommended_pakket: r.primary, segment: m.seg });
+      var prod = products[r.primary];
+      var detailUrl = (prod && prod.url) || resultUrl;   // specific package/solution page, not generic
+
+      var altsHtml = r.alts.map(function (k) {
+        var ap = products[k];
+        var altUrl = (ap && ap.url) || resultUrl;
+        return '<a class="alt" href="' + esc(altUrl) + '" data-pkg="' + k + '">' +
+          plHtml(k, true) +
+          '<div class="alt-sub">' + esc(META[k].sub) + '</div>' +
+          '<svg class="alt-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' +
+          '</a>';
+      }).join('');
+      var trust = TRUST.map(function (t) { return '<span><i></i>' + esc(t) + '</span>'; }).join('');
+      var arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+
+      root.innerHTML =
+        '<div class="kh-head"><span class="kh-brand"><span class="kh-dot"></span>Zo Veilig Keuzehulp</span>' +
+        '<span class="kh-lead">In ' + QUESTIONS.length + ' korte vragen naar het juiste pad</span>' +
+        '<div class="kh-progress"><span style="width:100%"></span></div></div>' +
+        '<div class="kh-body kh-result">' +
+          '<div class="res-top"><div class="res-eyebrow">Voor uw situatie</div><span class="res-seg">Aanbevolen pad</span></div>' +
+          '<div class="res-pathway"><span class="rp-line">' + esc(m.segLabel) + '</span>' +
+            (LINE[m.segLabel] ? '<p class="rp-desc">' + esc(LINE[m.segLabel]) + '</p>' : '') +
+            '<p class="rp-reason">' + esc(r.reason) + '</p></div>' +
+          '<div class="res-substep">Binnen dit pad raden wij aan</div>' +
+          '<div class="res-card">' +
+            plHtml(r.primary, false) +
+            '<p class="res-h1">' + esc(m.h1) + '</p>' +
+            '<div class="res-trust">' + trust + '</div>' +
+            '<div class="res-cta-row">' +
+              '<a class="btn-gold" href="' + esc(detailUrl) + '" data-pkg="' + r.primary + '">Bekijk dit pakket' + arrow + '</a>' +
+              (altsHtml ? '<button type="button" class="btn-ghost kh-alts-toggle" aria-expanded="false" aria-controls="kh-alts-panel">Bekijk alternatieven</button>' : '') +
+          '</div></div>' +
+          (altsHtml ? '<div class="res-alts" id="kh-alts-panel" hidden><div class="res-alts-h">Ook passend bij uw antwoorden</div>' + altsHtml + '</div>' : '') +
+          '<button type="button" class="res-restart" data-restart>' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/></svg>Opnieuw beginnen</button>' +
+        '</div>';
     }
 
     root.addEventListener('click', function (e) {
@@ -200,9 +208,18 @@
         render();
         return;
       }
-      var add = e.target.closest && e.target.closest('.kh-add');
-      if (add) { addToCart(add); return; }
-      var view = e.target.closest && e.target.closest('.kh-result-cta a[data-pkg]');
+      var toggle = e.target.closest && e.target.closest('.kh-alts-toggle');
+      if (toggle) {
+        var panel = root.querySelector('.res-alts');
+        if (panel) {
+          var opening = panel.hasAttribute('hidden');
+          if (opening) { panel.removeAttribute('hidden'); } else { panel.setAttribute('hidden', ''); }
+          toggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+          toggle.textContent = opening ? 'Verberg alternatieven' : 'Bekijk alternatieven';
+        }
+        return;
+      }
+      var view = e.target.closest && e.target.closest('.res-cta-row a[data-pkg]');
       if (view) { window.dispatchEvent(new CustomEvent('lio-stage', { detail: 'purchase' })); }
       if (e.target.closest && e.target.closest('[data-back]')) { if (step > 0) step--; render(); return; }
       if (e.target.closest && e.target.closest('[data-restart]')) {
