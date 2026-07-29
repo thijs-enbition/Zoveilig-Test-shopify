@@ -33,7 +33,7 @@
       {%- for b in sols -%}
         <button class="catnav__t{% if forloop.first %} on{% endif %}" type="button" role="tab"
           aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="panel-{{ b.settings.anchor }}"
-          data-opl-tab="{{ b.settings.anchor }}" data-zv-event="solution_view" data-solution-type="{{ b.settings.anchor }}"
+          data-opl-tab="{{ b.settings.anchor }}" data-zv-event="solution_view" data-solution-type="{{ b.settings.anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}"
           data-cta-name="tab_{{ b.settings.anchor }}" data-cta-position="oplossingen_subnav" {{ b.shopify_attributes }}>
           <b>{{ b.settings.eyebrow }}</b><span>{{ b.settings.sublabel }}</span>
         </button>
@@ -103,7 +103,7 @@
               {%- assign price_known = false -%}{%- if p.price and p.price > 0 -%}{%- assign price_known = true -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
-                       data-zv-event="package_view" data-solution-type="{{ anchor }}" data-package-name="{{ short_name | escape }}"
+                       data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                        data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
                        data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
                        data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
@@ -138,7 +138,7 @@
                   <div class="pcard__cta">
                     <a class="btn btn--ghost" href="{{ p.url }}" data-zv-detail data-finder-key="{{ fk }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                     {%- if price_known and v.available -%}
-                      <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                      <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- endif -%}
                   </div>
                 </div>
@@ -271,6 +271,7 @@
   </script>
 
   <div class="pb-scrim" id="opl-modal" role="presentation" hidden></div>
+  <div class="addcart" id="opl-cart" role="dialog" aria-label="Winkelwagen" aria-modal="true" hidden></div>
 </div>
 {%- elsif request.design_mode -%}
   <div style="padding:60px;text-align:center;color:#6f6786;">Oplossingen: voeg "Oplossing" blokken toe.</div>
@@ -508,7 +509,44 @@
 .pbd-deploy li .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--belt); margin-top: 7px; }
 .pbd-deploy li b { color: var(--indigo); }
 
-@media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct, .why__link svg { transition: none; } .pb-scrim, .pb-panel { animation: none; } }
+/* ---- add-to-cart confirmation drawer (VERBATIM addcart-*) ---- */
+.addcart { position: fixed; inset: 0; z-index: 210; }
+.addcart[hidden] { display: none; }
+.addcart__scrim { position: absolute; inset: 0; background: rgba(26, 18, 48, 0.4); animation: acFade 0.2s ease; }
+@keyframes acFade { from { opacity: 0; } to { opacity: 1; } }
+.addcart__panel { position: absolute; top: 0; right: 0; height: 100%; width: min(620px, 52vw); background: var(--paper); box-shadow: -30px 0 70px -30px rgba(26, 18, 48, 0.5); display: flex; flex-direction: column; animation: acSlide 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes acSlide { from { transform: translateX(100%); } to { transform: none; } }
+.addcart__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 32px; border-bottom: 1px solid var(--line); }
+.addcart__t { display: flex; align-items: center; gap: 11px; font-size: 16px; font-weight: 900; color: var(--indigo); letter-spacing: -0.01em; }
+.addcart__chk { width: 30px; height: 30px; border-radius: 50%; background: #2f8f5b; display: grid; place-items: center; flex: none; }
+.addcart__chk svg { width: 17px; height: 17px; color: #fff; }
+.addcart__x { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+.addcart__x:hover { border-color: var(--indigo); color: var(--indigo); }
+.addcart__body { flex: 1; overflow: auto; padding: 26px 32px; }
+.addcart__count { font-size: 14px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+.addcart__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.addcart__row { display: flex; flex-direction: column; gap: 0; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 0; overflow: hidden; }
+.addcart__rowtop { display: flex; align-items: center; gap: 14px; padding: 17px 18px; }
+.addcart__info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.addcart__name { font-size: 17px; font-weight: 800; color: var(--indigo); }
+.addcart__sku { font-size: 12px; font-weight: 600; color: var(--belt); }
+.addcart__meta { font-size: 12px; font-weight: 600; color: var(--muted); }
+.addcart__price { font-size: 16px; font-weight: 900; color: var(--indigo); flex: none; }
+.addcart__rm { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; flex: none; }
+.addcart__rm:hover { border-color: var(--red); color: var(--red); }
+.addcart__note { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 14px; line-height: 1.45; }
+.addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 20px; text-align: center; }
+.addcart__foot { padding: 16px 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.addcart__go { display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 800; font-size: 15px; color: var(--ink); background: var(--gold); border-radius: 12px; padding: 14px; text-decoration: none; box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
+.addcart__go svg { width: 17px; height: 17px; }
+.addcart__go:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--belt), 0 12px 24px -12px rgba(180, 126, 10, 0.7); }
+.addcart__cont { font-family: inherit; font-weight: 800; font-size: 14px; color: var(--indigo); background: transparent; border: 2px solid var(--indigo); border-radius: 12px; padding: 12px; cursor: pointer; }
+.addcart__cont:hover { background: var(--indigo-soft); }
+@media (max-width: 760px) { .addcart__panel { width: 92vw; } }
+.pcard__direct[aria-busy="true"], .pb-buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
+.pcard__err { color: var(--red-deep); font-size: 12.5px; font-weight: 700; margin-top: 6px; }
+
+@media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct, .why__link svg { transition: none; } .pb-scrim, .pb-panel, .addcart__scrim, .addcart__panel { animation: none; } }
 {% endstylesheet %}
 
 {% javascript %}
@@ -526,16 +564,19 @@
     if (ZV && typeof ZV.track === 'function') { try { ZV.track(name, detail || {}); } catch (e) {} }
   }
 
+  var shownId = null;
   function show(id, push) {
     if (!panels[id]) return;
+    var changed = id !== shownId;
     tabs.forEach(function (t) {
       var on = t.getAttribute('data-opl-tab') === id;
       t.classList.toggle('on', on);
       t.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== id; });
-    if (push && history.replaceState) { try { history.replaceState(null, '', '#' + id); } catch (e) {} }
-    fire('solution_tab_select', { solution: id });
+    if (push && history.pushState) { try { history.pushState({ opl: id }, '', '#' + id); } catch (e) {} }
+    shownId = id;
+    if (changed) fire('solution_tab_select', { solution: id });   // no duplicate on repeat activation
   }
 
   tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-opl-tab'), true); }); });
@@ -548,9 +589,24 @@
   });
 
   /* ---------- shared cart helper (Shopify line item properties) ---------- */
-  function addToCart(variantId, properties, redirect, btn) {
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function money(cents) { return '€' + (cents / 100).toFixed(2).replace('.', ','); }
+
+  function updateCartCount(cart) {
+    var n = cart ? cart.item_count : 0;
+    document.querySelectorAll('.cart-count-bubble, [data-cart-count], .cart-count').forEach(function (el) {
+      var span = el.querySelector('span[aria-hidden="true"]') || el;
+      span.textContent = n;
+      el.classList.remove('hidden'); el.hidden = false;
+    });
+    try { document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: { cart: cart } })); } catch (e) {}
+  }
+
+  function addToCart(variantId, properties, mode, btn) {
     if (!variantId || (btn && btn.dataset.busy === '1')) return;
-    if (btn) { btn.dataset.busy = '1'; btn.disabled = true; }
+    var label = '';
+    if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
+    var errEl = btn && btn.parentNode && btn.parentNode.querySelector('.pcard__err'); if (errEl) errEl.remove();
     return window.fetch('/cart/add.js', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: [{ id: variantId, quantity: 1, properties: properties || {} }] })
@@ -559,13 +615,134 @@
       .then(function (line) {
         var ZV = window.ZVMeasurement;
         if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
-        window.location.href = redirect || '/cart';
+        if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }
+        if (mode === 'checkout') { window.location.href = '/checkout'; return; }
+        return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+          updateCartCount(cart);
+          openCart(cart);
+        });
       })
       .catch(function () {
         fire('add_to_cart_error', { sku: properties && properties['SKU'] });
-        if (btn) { btn.dataset.busy = ''; btn.disabled = false; }
+        if (btn) {
+          btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label;
+          if (btn.parentNode && !btn.parentNode.querySelector('.pcard__err')) {
+            var e = document.createElement('div'); e.className = 'pcard__err'; e.setAttribute('role', 'alert');
+            e.textContent = 'Toevoegen mislukt. Probeer het opnieuw.'; btn.parentNode.appendChild(e);
+          }
+        }
       });
   }
+
+  /* ---------- add-to-cart confirmation drawer (Shopify /cart.js backed) ---------- */
+  var cartEl = document.getElementById('opl-cart');
+  var cartLastFocus = null, cartKey = null;
+
+  function cartRowHtml(it) {
+    var p = it.properties || {};
+    var name = p['Pakket'] || it.product_title || '';
+    var sku = p['SKU'] || it.sku || '';
+    var extra = [];
+    if (p['Oplossing']) extra.push(p['Oplossing']);
+    if (p['Woning']) extra.push('>100 m²');
+    var meta = extra.length ? '<span class="addcart__meta">' + esc(extra.join(' · ')) + '</span>' : '';
+    return '<li class="addcart__row"><div class="addcart__rowtop"><div class="addcart__info">' +
+      '<span class="addcart__name">' + esc(name) + '</span>' +
+      (sku ? '<span class="addcart__sku">SKU · ' + esc(sku) + '</span>' : '') + meta +
+      '</div><span class="addcart__price">' + (it.original_line_price != null ? money(it.original_line_price) : '') + '</span>' +
+      '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(name) + '">×</button></div></li>';
+  }
+
+  function renderCart(cart) {
+    var items = (cart && cart.items) || [];
+    var list = items.length ? items.map(cartRowHtml).join('') : '';
+    var body = items.length
+      ? '<div class="addcart__count">' + cart.item_count + ' ' + (cart.item_count === 1 ? 'item' : 'items') + ' in winkelwagen</div>' +
+        '<ul class="addcart__list">' + list + '</ul>' +
+        '<p class="addcart__note">Sommige prijzen bevestigen we bij het afronden.</p>'
+      : '<p class="addcart__empty">Uw winkelwagen is leeg.</p>';
+    cartEl.innerHTML =
+      '<div class="addcart__scrim" data-cart-close></div>' +
+      '<aside class="addcart__panel" role="document">' +
+        '<header class="addcart__head"><div class="addcart__t"><span class="addcart__chk">' +
+          '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</span>Toegevoegd aan winkelwagen</div>' +
+          '<button type="button" class="addcart__x" data-cart-close aria-label="Sluiten">×</button></header>' +
+        '<div class="addcart__body">' + body + '</div>' +
+        '<footer class="addcart__foot">' +
+          '<button type="button" class="addcart__cont" data-cart-close>Verder winkelen</button>' +
+          '<a class="addcart__go" href="/checkout" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' +
+          '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>' +
+        '</footer></aside>';
+  }
+
+  function openCart(cart) {
+    cartLastFocus = document.activeElement;
+    renderCart(cart);
+    cartEl.hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    var x = cartEl.querySelector('.addcart__x'); if (x) x.focus();
+    cartKey = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeCart(); return; }
+      if (e.key === 'Tab') {
+        var f = [].slice.call(cartEl.querySelectorAll('button, [href]')).filter(function (el) { return el.offsetParent !== null; });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', cartKey, true);
+  }
+
+  function closeCart() {
+    cartEl.hidden = true; cartEl.innerHTML = '';
+    document.documentElement.style.overflow = ''; document.body.style.overflow = '';
+    if (cartKey) { document.removeEventListener('keydown', cartKey, true); cartKey = null; }
+    if (cartLastFocus && cartLastFocus.focus) cartLastFocus.focus();
+    cartLastFocus = null;
+  }
+
+  cartEl.addEventListener('click', function (e) {
+    if (e.target.closest('[data-cart-close]')) { closeCart(); return; }
+    var rm = e.target.closest('[data-cart-remove]');
+    if (rm) {
+      window.fetch('/cart/change.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: rm.getAttribute('data-cart-remove'), quantity: 0 }) })
+        .then(function (r) { return r.json(); })
+        .then(function (cart) { updateCartCount(cart); renderCart(cart); var x = cartEl.querySelector('.addcart__x'); if (x) x.focus(); });
+    }
+  });
+
+  /* categorise a card's checked options into { woning, terms[], addons[] } */
+  function readCardOptions(card) {
+    var out = { woning: '', terms: [], addons: [] };
+    if (!card) return out;
+    card.querySelectorAll('.pcard__plus').forEach(function (det) {
+      var head = det.querySelector('summary');
+      var label = head ? head.textContent.trim().toLowerCase() : '';
+      det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
+        var opt = inp.closest('.pcard__plus-opt');
+        var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
+        if (!name) return;
+        if (label.indexOf('woning') === 0) out.woning = 'Groter dan 100 m² (+€4/mnd per etage)';
+        else if (label.indexOf('abonnement') === 0) out.terms.push(name);
+        else out.addons.push(name);
+      });
+    });
+    return out;
+  }
+
+  /* fire package_option_select on any option toggle (deduped by not firing on unchanged) */
+  page.addEventListener('change', function (e) {
+    var inp = e.target.closest && e.target.closest('.pcard__plus-opt input');
+    if (!inp) return;
+    var card = inp.closest('.pcard'), opt = inp.closest('.pcard__plus-opt');
+    var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
+    var addBtn = card && card.querySelector('[data-zv-add]');
+    if (addBtn) { var o = readCardOptions(card); addBtn.setAttribute('data-selected-term', o.terms.join(', ')); addBtn.setAttribute('data-selected-addon', o.addons.join(', ')); }
+    fire('package_option_select', { solution: card && card.dataset.solutionType, package: card && card.dataset.packageSku, option: name, selected: inp.checked });
+  });
 
   /* card-level "In winkelwagen": collect any checked uitbreidingen/abonnementen too */
   page.addEventListener('click', function (e) {
@@ -574,23 +751,16 @@
     var card = btn.closest('.pcard');
     var d = card ? card.dataset : {};
     var panel = card && card.closest('[data-opl-panel]');
+    var o = readCardOptions(card);
     var props = {
       'Pakket': d.packageName || '', 'SKU': d.packageSku || '',
       'Oplossing': (panel && panel.getAttribute('aria-label')) || d.solutionType || '',
       'Bron': 'Oplossingen'
     };
-    if (card) {
-      card.querySelectorAll('.pcard__plus').forEach(function (det) {
-        var head = det.querySelector('summary');
-        var label = head ? head.textContent.trim() : 'Optie';
-        det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
-          var opt = inp.closest('.pcard__plus-opt');
-          var name = opt ? (opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '') : '';
-          if (name) props[label] = (props[label] ? props[label] + ', ' : '') + name;
-        });
-      });
-    }
-    addToCart(d.variantId, props, '/cart', btn);
+    if (o.woning) props['Woning'] = o.woning;
+    if (o.terms.length) props['Abonnement'] = o.terms.join(', ');
+    if (o.addons.length) props['Uitbreidingen'] = o.addons.join(', ');
+    addToCart(d.variantId, props, 'drawer', btn);
   });
 
   /* ============================================================
@@ -600,9 +770,7 @@
   try { DATA = JSON.parse(document.getElementById('opl-modal-data').textContent); } catch (e) { DATA = { hw: {}, pkg: {} }; }
   var scrim = document.getElementById('opl-modal');
   var lastFocused = null, keyHandler = null, activePanel = null;
-
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function fmtCents(c) { return '€' + (c / 100).toFixed(2).replace('.', ','); }
+  var fmtCents = money;   // shared formatter (defined above)
   var ICON = {
     check: '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     cart: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 4h3l2.2 12.2a2 2 0 0 0 2 1.6h7.1a2 2 0 0 0 2-1.55L22 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.6" fill="currentColor"/><circle cx="19" cy="21" r="1.6" fill="currentColor"/></svg>',
@@ -763,7 +931,9 @@
         'Bron': 'Oplossingen'
       };
       if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
-      addToCart(actor.getAttribute('data-variant'), props, buy ? '/checkout' : '/cart', actor);
+      var variant = actor.getAttribute('data-variant');
+      closeModal();   // design closes the detail modal, then shows the cart confirmation
+      addToCart(variant, props, buy ? 'checkout' : 'drawer', null);
     }
   });
 
