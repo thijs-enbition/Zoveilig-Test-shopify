@@ -53,7 +53,11 @@
       <div class="bucket-grid">
         {%- for card in cards -%}
           {%- assign handle = card.system.handle -%}
-          <a class="bucket" href="{{ card.link | default: '#' }}">
+          {%- comment -%} Buckets are the primary nav into the Oplossingen page, anchored per solution. {%- endcomment -%}
+          {%- capture bucket_href -%}{{ routes.root_url }}/pages/oplossingen#{{ handle }}{%- endcapture -%}
+          <a class="bucket" href="{{ bucket_href | replace: '//pages', '/pages' }}"
+            data-zv-event="solution_view" data-solution-name="{{ card.heading | escape }}" data-solution-type="{{ handle }}"
+            data-cta-name="bucket_{{ handle }}" data-cta-position="homepage_buckets">
             <div class="bk-top">
               <span class="bk-ic">
                 {%- if card.icon != blank -%}{{ card.icon | image_url: width: 116 | image_tag: alt: '', loading: 'lazy' }}

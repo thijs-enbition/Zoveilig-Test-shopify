@@ -3,46 +3,69 @@
     "oplossingen": {
       "type": "oplossingen",
       "blocks": {
-        "living": {
-          "type": "category",
+        "langer_thuis": {
+          "type": "solution",
           "settings": {
-            "cat_key": "living",
-            "label": "Langer Thuis",
-            "sublabel": "Zorg & inzicht",
+            "anchor": "langer-thuis",
+            "eyebrow": "Langer Thuis",
+            "sublabel": "Een dierbare thuis",
+            "headline": "Weet dat het goed met ze gaat.",
+            "trust": "Zie wanneer de dag goed is begonnen\nOntvang alleen een melding wanneer er iets verandert\nUit te breiden van een extra oogje in het zeil tot professionele zorgopvolging",
+            "hero_asset": "opl-hero-langer-thuis.jpg",
+            "hero_pos": "center 38%",
+            "hero_cta_label": "Vind uw oplossing",
+            "hero_cta_url": "/#keuzehulp",
             "collection": "langer-thuis",
-            "panel_heading": "Langer veilig thuis wonen",
-            "panel_sub": "Zelfstandig thuis blijven wonen, met een oogje in het zeil wanneer dat nodig is."
+            "pak_heading": "Kies uw ondersteuningsniveau",
+            "pak_sub": "Van een extra oogje in het zeil tot een compleet vangnet. Altijd privacy-first, zonder camera. Alle abonnementen: +€4 p/m per extra etage.",
+            "compare_label": "Niet zeker welk ondersteuningsniveau bij u past?",
+            "compare_url": "/#keuzehulp",
+            "uitbreidingen": "Huisdier-upgrade|€0,00\nExtra sensoren|€0,00\nExtra toegangspunten|€0,00"
           }
         },
-        "security": {
-          "type": "category",
+        "mijn_thuis": {
+          "type": "solution",
           "settings": {
-            "cat_key": "security",
-            "label": "Mijn Thuis",
-            "sublabel": "Beveiliging",
+            "anchor": "mijn-thuis",
+            "eyebrow": "Mijn Thuis",
+            "sublabel": "Uw woning",
+            "headline": "Meer dan een alarmsysteem. Een veilig thuis.",
+            "trust": "Altijd beschermd, ook als u niet thuis bent\nProactieve beveiliging die verdachte situaties vroegtijdig signaleert\nProfessionele meldkamer wanneer u dat wilt",
+            "hero_asset": "opl-hero-mijn-thuis.jpg",
+            "hero_pos": "center",
+            "hero_cta_label": "Vind uw oplossing",
+            "hero_cta_url": "/#keuzehulp",
             "collection": "mijn-thuis",
-            "panel_heading": "Uw woning beschermd",
-            "panel_sub": "Beschermd tegen inbraak, brand en onraad, met een melding zodra er iets gebeurt."
+            "pak_heading": "Kies uw beschermingsniveau",
+            "pak_sub": "Iedere woning is anders. Daarom kiest u zelf hoeveel bescherming het beste past bij uw situatie. Alle abonnementen: +€4 p/m per extra etage.",
+            "compare_label": "Niet zeker welk beschermingsniveau bij u past?",
+            "compare_url": "/#keuzehulp",
+            "uitbreidingen": "Extra sensoren|€0,00\nExtra toegangspunten|€0,00\nCamera-uitbreiding|€0,00"
           }
         },
-        "persoonlijk": {
-          "type": "category",
+        "veilig_onderweg": {
+          "type": "solution",
           "settings": {
-            "cat_key": "persoonlijk",
-            "label": "Veilig Onderweg",
+            "anchor": "veilig-onderweg",
+            "eyebrow": "Veilig Onderweg",
             "sublabel": "Onderweg",
+            "headline": "Veilig, waar u ook bent.",
+            "trust": "GPS-paniekknop voor onderweg\nAutomatische valdetectie\nSecuritas-meldkamer inbegrepen",
+            "hero_asset": "opl-hero-veilig-onderweg.jpg",
+            "hero_pos": "center",
+            "hero_cta_label": "Vind uw oplossing",
+            "hero_cta_url": "/#keuzehulp",
             "collection": "veilig-onderweg",
-            "panel_heading": "Veiligheid, ook onderweg",
-            "panel_sub": "Persoonlijke veiligheid met hulp op een druk op de knop."
+            "pak_heading": "Kies uw beschermingsniveau onderweg",
+            "pak_sub": "Paniek Meldkamer en Zorgmeldkamer. Prijzen en specificaties volgen binnenkort.",
+            "compare_label": "Niet zeker welk pakket bij u past?",
+            "compare_url": "/#keuzehulp",
+            "note": "Veilig Onderweg wordt binnenkort geactiveerd zodra de prijzen definitief zijn."
           }
         }
       },
-      "block_order": ["living", "security", "persoonlijk"],
-      "settings": {
-        "eyebrow": "Onze oplossingen",
-        "heading": "Altijd een oplossing die bij uw situatie past",
-        "finder_url": "/#keuzehulp"
-      }
+      "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg"],
+      "settings": {}
     }
   },
   "order": ["oplossingen"]
