@@ -60,16 +60,20 @@ priced = [p for p in gen["packages"] if p.get("purchasable")]
 activation = cfg["activation"]["amountCents"]
 multiplier = Decimal(str(cfg["commitment"]["multiplier"]))
 
-print("\n1. Monthly price consistency")
+print("\n1. Monthly price consistency (single source of truth)")
 for p in priced:
     check(p["monthlyRecurringPriceCents"] == cfg_monthly[p["id"]],
-          f"{p['name']} monthly matches config",
+          f"{p['name']} monthly matches central config",
           f"generated={p['monthlyRecurringPriceCents']} config={cfg_monthly[p['id']]}")
-expected_levels = {"inzicht": 1995, "zeker": 2495, "beschermd": 3995,
-                   "alert": 1995, "protect": 3495, "vista": 3995}
-for pid, cents in expected_levels.items():
-    check(cfg_monthly.get(pid) == cents, f"{pid} is {cents} cents",
-          f"got {cfg_monthly.get(pid)}")
+# Provisional prices are NOT asserted against a hard-coded amount list. Only the
+# single-source link (generated == config) is enforced above. Non-Onderweg package
+# prices carry pricingStatus CURRENT_WORKING and remain provisional until they are
+# commercially confirmed; asserting fixed cent values here would fail CI whenever a
+# provisional price is legitimately updated. Commercial status is reported in check 10.
+for p in priced:
+    check(bool(p["monthlyRecurringPriceCents"]) and p["monthlyRecurringPriceCents"] > 0,
+          f"{p['name']} carries a positive provisional price",
+          f"status={p.get('pricingStatus')} cents={p['monthlyRecurringPriceCents']}")
 
 print("\n2. Activation price consistency")
 check(activation == 4900, "activation is EUR 49,00", f"got {activation}")
@@ -190,6 +194,26 @@ else:
                or dur_re.search(f.read_text(encoding='utf-8', errors='ignore'))
                for f in scan_files):
         check(True, "no theme file carries an independent price or duration")
+
+print("\n10. Commercial pricing status (confirmed vs provisional)")
+# Reflects the real commercial status rather than assuming every price is final.
+# Veilig Onderweg / LioGo is the only line whose pricing decision is settled: it is
+# locked as PRICE_PENDING (not purchasable) until an amount is commercially set.
+# Every other line is a provisional working price that may change until confirmed.
+KNOWN_STATUSES = {"CURRENT_WORKING", "PRICE_PENDING", "COMMERCIALLY_CONFIRMED"}
+for p in gen["packages"]:
+    st = p.get("pricingStatus")
+    check(st in KNOWN_STATUSES, f"{p['name']} declares a known pricing status", f"status={st}")
+    if p["lineId"] == "veilig-onderweg":
+        check(st == "PRICE_PENDING" and not p["purchasable"],
+              f"{p['name']} (Onderweg/LioGo) locked as PRICE_PENDING, not purchasable",
+              f"status={st} purchasable={p['purchasable']}")
+    label = {"CURRENT_WORKING": "PROVISIONAL", "PRICE_PENDING": "PENDING (locked)",
+             "COMMERCIALLY_CONFIRMED": "CONFIRMED"}.get(st, st)
+    print(f"        {p['lineName']}/{p['name']}: {label}")
+# Add-ons: confirmed amounts live in config; provisional ones display 'Prijs volgt'.
+check(cfg["labels"]["pricePending"] == "Prijs volgt",
+      "central pending label is 'Prijs volgt' (used for all provisional add-ons)")
 
 print("\n" + "=" * 60)
 if failures:

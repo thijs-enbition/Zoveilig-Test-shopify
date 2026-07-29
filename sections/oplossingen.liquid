@@ -107,6 +107,14 @@
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specs volgen' -%}
               {%- endcase -%}
               {%- assign v = p.selected_or_first_available_variant -%}
+              {%- comment -%}
+                PRICING STATUS (single source of truth: Shopify variant + pricing.config.json):
+                - Package monthly price is read live from the Shopify variant ({{ p.price }}), never hard-coded here.
+                - Veilig Onderweg / LioGo (liogo_solo, liogo_guard) is PRICE_PENDING → price 0 → "Prijs volgt".
+                - Langer Thuis / Mijn Thuis package prices are CURRENT_WORKING (provisional, not yet commercially final).
+                - All optional add-ons (uitbreidingen, abonnementen) are provisional → shown as "Prijs volgt", not a literal.
+                Confirmed amounts must live only in pricing.config.json / snippets/zv-pricing.liquid (CI check #9 enforces this).
+              {%- endcomment -%}
               {%- assign price_known = false -%}{%- if p.price and p.price > 0 -%}{%- assign price_known = true -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
@@ -131,13 +139,14 @@
                     <details class="pcard__plus">
                       <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                       {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
+                      {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
                       {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
-                        <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: '€0,00' | strip }}</span></label>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
                       {%- endif -%}{%- endfor -%}
                     </details>
                     <details class="pcard__plus">
                       <summary>Abonnementen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">+€4,00/mnd</span></label>
+                      <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                       <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                     </details>
                   {%- endif -%}
@@ -1018,7 +1027,7 @@
         { "type": "textarea", "id": "pak_sub", "label": "Pakketten-subtekst" },
         { "type": "text", "id": "compare_label", "label": "Vergelijk-link tekst", "default": "Niet zeker welk niveau bij u past?" },
         { "type": "url", "id": "compare_url", "label": "Vergelijk-link" },
-        { "type": "textarea", "id": "uitbreidingen", "label": "Uitbreidingen (Naam|Prijs, 1 per regel)", "default": "Huisdier-upgrade|€0,00\nExtra sensoren|€0,00\nExtra toegangspunten|€0,00" },
+        { "type": "textarea", "id": "uitbreidingen", "label": "Uitbreidingen (Naam of Naam|Prijs, 1 per regel; leeg = 'Prijs volgt')", "default": "Huisdier-upgrade\nExtra sensoren\nExtra toegangspunten" },
         { "type": "text", "id": "note", "label": "Binnenkort-notitie (optioneel)" },
         { "type": "header", "content": "Waarom Zo Veilig" },
         { "type": "text", "id": "why_heading", "label": "Kop", "default": "Waarom kiezen zoveel mensen voor Zo Veilig?" },
