@@ -143,7 +143,8 @@
                   {%- endif -%}
 
                   <div class="pcard__cta">
-                    <a class="btn btn--ghost" href="{{ p.url }}" data-zv-detail data-finder-key="{{ fk }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
+                    <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %}" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- if price_known and v.available -%}
                       <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- endif -%}
@@ -951,10 +952,10 @@
   page.addEventListener('click', function (e) {
     var trg = e.target.closest && e.target.closest('[data-zv-detail]');
     if (!trg) return;
+    e.preventDefault();   // it's a <button>, but guard against any default just in case
     var panel = trg.closest('[data-opl-panel]');
     var fk = trg.getAttribute('data-finder-key');
-    if (!panel || !fk || !DATA.pkg[fk]) return;   // no data → let the link fall through to the product page
-    e.preventDefault();
+    if (!panel || !fk || !DATA.pkg[fk]) return;   // missing data → do nothing (never navigate away)
     openModal(panel, fk);
   });
 
