@@ -21,8 +21,8 @@ One‑line definitions of the platform's key terms. See the [reference architect
 | **Last‑touch attribution** | Values updated on each interaction (e.g. `last_page_url`) reflecting the most recent context. |
 | **Source of truth** | The single authoritative location for a thing; the Git repository for schema, and one system of record per business‑data type. |
 | **Idempotency** | The property that processing the same event more than once (e.g. a retried webhook) produces no duplicate data; anchored on `shopify_order_id` and the order‑line unique index. |
-| **RLS (Row‑Level Security)** | Postgres access control enabled on every table with no policies, so only the RLS‑exempt `service_role` can access rows (deny‑by‑default). |
-| **service_role** | The privileged Supabase key used only inside Edge Functions/tooling; never present in the storefront/browser. |
+| **RLS (Row‑Level Security)** | Postgres access control enabled on every table with no policies, so the Data‑API roles `anon` and `authenticated` receive no rows (deny‑by‑default); privileged roles (`postgres`, owners, `service_role`, `BYPASSRLS`) operate outside RLS. |
+| **service_role** | The privileged Supabase key used only inside Edge Functions/tooling; it bypasses RLS and is never present in the storefront/browser. |
 | **Edge Function** | A Supabase server‑side function that is the secure boundary between the storefront and the database (`capture-lead`, `shopify-order-webhook`). |
 | **Reporting view** (`vw_*`) | A read‑only SQL view exposing a governed, PII‑minimised slice of operational data to BI tools, so dashboards never query base tables. |
 | **Deployment registry** | `internal.deployment_registry`, a private‑schema table recording each environment deployment's versions and git SHA. |

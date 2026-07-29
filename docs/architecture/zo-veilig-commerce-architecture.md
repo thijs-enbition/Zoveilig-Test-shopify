@@ -42,7 +42,7 @@ To prevent anyone assuming features already exist, the following are **explicitl
 1. **Separation of ownership.** Each system owns one thing well; no system is forced to be a CRM/ERP it isn't.
 2. **Repository is the source of truth.** Every environment is reproducible from Git → migrations → DEV → Production. Production is never the canonical schema.
 3. **Secure server‑side boundary.** The storefront never holds a service‑role key and never writes to protected tables directly; all writes go through Supabase Edge Functions.
-4. **Deny by default.** RLS is enabled on every table with no policies, so only the RLS‑exempt `service_role` (used only inside Edge Functions) can read/write.
+4. **Deny by default.** RLS is enabled on every table with no policies, so the Data‑API roles `anon` and `authenticated` are denied all rows. Privileged roles (`postgres`, table owners, `service_role`, and any `BYPASSRLS` role) operate outside RLS; application access goes only through Edge Functions using `service_role`, and the storefront never holds a privileged key.
 5. **Idempotency everywhere money is involved.** Paid‑order processing is safe under webhook retries.
 6. **Snapshot the commercials.** Prices/SKUs/names are captured at the moment of selection and order, so later catalogue changes never rewrite history.
 7. **Audit the important transitions.** `status_history` records who/what/why for every meaningful state change.
@@ -365,7 +365,7 @@ flowchart TB
 | `status_history` | Edge Functions; Ops tooling | Edge Functions; reporting; audit | Storefront; `anon` | Storefront | Audit integrity; append‑only via server side. |
 | `internal.deployment_registry` | Deployment tooling (`service_role`) | Platform/DevOps | Storefront; `anon`; `authenticated` | Storefront; `anon`; `authenticated` | Deployment metadata in a private, non‑Data‑API schema. |
 
-Enforcement today: **RLS enabled, no policies** ⇒ `anon`/`authenticated` are denied on every table; `service_role` (used only inside Edge Functions and tooling) is the sole accessor. The storefront never holds `service_role`.
+Enforcement today: **RLS enabled, no policies** ⇒ the Data‑API roles `anon` and `authenticated` are denied all rows. Privileged roles — `postgres`, table owners, `service_role`, and any `BYPASSRLS` role — are not constrained by RLS; application access happens only through Edge Functions using `service_role`, and the storefront never holds a privileged key.
 
 ### 6.1 Data ownership matrix (system of record)
 

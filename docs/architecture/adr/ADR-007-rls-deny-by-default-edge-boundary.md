@@ -7,10 +7,10 @@
 The storefront must never hold a service-role key or write to protected tables directly.
 
 ## Decision
-RLS is enabled on every table with no policies, so only the RLS-exempt service role accesses rows. All writes go through Supabase Edge Functions; no service-role key ever reaches the browser.
+RLS is enabled on every table with no policies, so the Data-API roles `anon` and `authenticated` are denied all rows. Privileged roles (`postgres`, table owners, `service_role`, and any `BYPASSRLS` role) operate outside RLS; all application access goes through Supabase Edge Functions using `service_role`, and no service-role key ever reaches the browser.
 
 ## Consequences
-Strong security posture; `anon`/`authenticated` are denied by default; Edge Functions are the sole, auditable write path.
+Strong security posture; the storefront (which only ever uses `anon`) is denied by default; Edge Functions are the sole, auditable application write path.
 
 ## Related
 ADR-003, ADR-005
