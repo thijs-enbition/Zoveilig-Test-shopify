@@ -20,7 +20,18 @@
             "pak_sub": "Van een extra oogje in het zeil tot een compleet vangnet. Altijd privacy-first, zonder camera. Alle abonnementen: +€4 p/m per extra etage.",
             "compare_label": "Niet zeker welk ondersteuningsniveau bij u past?",
             "compare_url": "/#keuzehulp",
-            "uitbreidingen": "Huisdier-upgrade|€0,00\nExtra sensoren|€0,00\nExtra toegangspunten|€0,00"
+            "uitbreidingen": "Huisdier-upgrade|€0,00\nExtra sensoren|€0,00\nExtra toegangspunten|€0,00",
+            "why_heading": "Waarom kiezen zoveel mensen voor Zo Veilig?",
+            "why_1_img": "opl-why-living-1.jpg",
+            "why_1_title": "Gerust, ook als u er niet bent.",
+            "why_1_body": "Met de familie-app ziet u in één oogopslag of alles verloopt zoals gebruikelijk. U ontvangt alleen een melding wanneer daar aanleiding voor is, zodat u niet onnodig hoeft te controleren.",
+            "why_1_link_label": "Ontdek de familie-app",
+            "why_1_link_url": "/#keuzehulp",
+            "why_2_img": "opl-why-living-2.png",
+            "why_2_title": "Geen camera’s. Wel een oogje in het zeil.",
+            "why_2_body": "Slimme sensoren herkennen veranderingen in dagelijkse routines, zonder beelden of geluid op te nemen. Zo blijft een dierbare zelfstandig wonen, met behoud van privacy.",
+            "why_2_link_label": "Lees hoe het werkt",
+            "why_2_link_url": "/pages/kenniscentrum"
           }
         },
         "mijn_thuis": {
@@ -40,7 +51,18 @@
             "pak_sub": "Iedere woning is anders. Daarom kiest u zelf hoeveel bescherming het beste past bij uw situatie. Alle abonnementen: +€4 p/m per extra etage.",
             "compare_label": "Niet zeker welk beschermingsniveau bij u past?",
             "compare_url": "/#keuzehulp",
-            "uitbreidingen": "Extra sensoren|€0,00\nExtra toegangspunten|€0,00\nCamera-uitbreiding|€0,00"
+            "uitbreidingen": "Extra sensoren|€0,00\nExtra toegangspunten|€0,00\nCamera-uitbreiding|€0,00",
+            "why_heading": "Waarom kiezen zoveel mensen voor Zo Veilig?",
+            "why_1_img": "opl-why-security-1.jpg",
+            "why_1_title": "Altijd gerust",
+            "why_1_body": "Uw woning wordt dag en nacht beschermd. Niet alleen door snel te reageren op een alarm, maar ook door verdachte situaties vroegtijdig te signaleren.",
+            "why_1_link_label": "Ontdek proactieve beveiliging",
+            "why_1_link_url": "/#keuzehulp",
+            "why_2_img": "opl-why-security-2.png",
+            "why_2_title": "Altijd een stap voor",
+            "why_2_body": "Zie wie er aanbelt voordat u opendoet. Ontvang meldingen op uw telefoon en spreek met bezoekers, waar u ook bent.",
+            "why_2_link_label": "Ontdek camera-verificatie",
+            "why_2_link_url": "/pages/kenniscentrum"
           }
         },
         "veilig_onderweg": {
@@ -60,7 +82,17 @@
             "pak_sub": "Paniek Meldkamer en Zorgmeldkamer. Prijzen en specificaties volgen binnenkort.",
             "compare_label": "Niet zeker welk pakket bij u past?",
             "compare_url": "/#keuzehulp",
-            "note": "Veilig Onderweg wordt binnenkort geactiveerd zodra de prijzen definitief zijn."
+            "why_heading": "Waarom kiezen zoveel mensen voor Zo Veilig?",
+            "why_1_img": "opl-why-onderweg-1.png",
+            "why_1_title": "Veilig, ook buiten de deur",
+            "why_1_body": "Eén druk op de knop verbindt u direct met de meldkamer, waar u ook bent. Onderweg net zo gerust als thuis.",
+            "why_1_link_label": "Bekijk Altijd Dichtbij",
+            "why_1_link_url": "/#keuzehulp",
+            "why_2_img": "opl-why-onderweg-2.jpg",
+            "why_2_title": "Een val meldt zichzelf",
+            "why_2_body": "Automatische valdetectie alarmeert de meldkamer, ook als u zelf niet meer kunt drukken.",
+            "why_2_link_label": "Hoe valdetectie werkt",
+            "why_2_link_url": "/pages/kenniscentrum"
           }
         }
       },

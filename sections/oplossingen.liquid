@@ -11,9 +11,15 @@
   A scoped reset neutralises Dawn's base margins (the design relies on a global *{margin:0}).
   GTM: every CTA exposes data-* hooks (no analytics logic here).
 
-  Deferred to next stages (scoped, not built here): the "Meer informatie" detail modal
-  (breakout.jsx), the slide-in cart drawer + add-ons/abonnementen, and the Waarom/steps/tech
-  bands. "Meer informatie" links to the product page; "In winkelwagen" adds the variant.
+  Includes, per solution: hero + partner strip + package grid, the "Waarom Zo Veilig" cards
+  (block settings), and — shared below the active panel — the Stappen and Partners bands.
+  "Meer informatie" opens the accessible "breakout" detail modal (data island #opl-modal-data,
+  keyed by finder_key; focus-trap, Escape, restore-focus, no bg scroll). Add-to-cart posts to
+  /cart/add.js with line item properties (Pakket/SKU/Oplossing/Platform/Bron/Woning). Without
+  JS, "Meer informatie" falls back to the product page.
+
+  Deferred to a separate milestone (by design): a custom slide-in cart drawer (we navigate to
+  /cart instead), and the GTM/GA4/Consent wiring (only data-* hooks are emitted here).
 {%- endcomment -%}
 
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
@@ -98,7 +104,9 @@
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                        data-zv-event="package_view" data-solution-type="{{ anchor }}" data-package-name="{{ short_name | escape }}"
-                       data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}">
+                       data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                       data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                       data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
                 {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
                 {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
                 <div class="pcard__foot">
@@ -128,7 +136,7 @@
                   {%- endif -%}
 
                   <div class="pcard__cta">
-                    <a class="btn btn--ghost" href="{{ p.url }}" data-zv-event="product_select" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    <a class="btn btn--ghost" href="{{ p.url }}" data-zv-detail data-finder-key="{{ fk }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                     {%- if price_known and v.available -%}
                       <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- endif -%}
@@ -148,8 +156,121 @@
           </div>
         {%- endif -%}
       </section>
+
+      {%- comment -%} Waarom Zo Veilig — WhyBlock (design shows the first two feature rows). {%- endcomment -%}
+      {%- if b.settings.why_heading != blank and b.settings.why_1_img != blank -%}
+        <section class="why" data-section-name="{{ anchor }}">
+          <div class="why__head">
+            <span class="why__eye"><span class="d"></span>Waarom Zo Veilig</span>
+            <h3>{{ b.settings.why_heading }}</h3>
+          </div>
+          <div class="why__grid">
+            {%- for i in (1..2) -%}
+              {%- assign kimg = 'why_' | append: i | append: '_img' -%}
+              {%- assign ktitle = 'why_' | append: i | append: '_title' -%}
+              {%- assign kbody = 'why_' | append: i | append: '_body' -%}
+              {%- assign klabel = 'why_' | append: i | append: '_link_label' -%}
+              {%- assign kurl = 'why_' | append: i | append: '_link_url' -%}
+              {%- assign wimg = b.settings[kimg] -%}
+              {%- if wimg != blank -%}
+                <article class="why__card">
+                  <div class="why__ph"><img src="{{ wimg | asset_url }}" alt="{{ b.settings[ktitle] | escape }}" loading="lazy" width="800" height="600"></div>
+                  <h4>{{ b.settings[ktitle] }}</h4>
+                  <p>{{ b.settings[kbody] }}</p>
+                  {%- if b.settings[klabel] != blank -%}
+                    <a class="why__link" href="{{ b.settings[kurl] | default: '#panel-' | append: anchor }}" data-zv-event="why_link" data-solution-type="{{ anchor }}" data-cta-name="why_{{ i }}" data-cta-position="{{ anchor }}_why">{{ b.settings[klabel] }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                  {%- endif -%}
+                </article>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </section>
+      {%- endif -%}
     </div>
   {%- endfor -%}
+
+  {%- comment -%} Stappen + Partners are solution-agnostic; rendered once below the active panel. {%- endcomment -%}
+  <section class="stappen" data-section-name="stappen">
+    <h3>Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt.</h3>
+    <p class="st-sub">Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt.</p>
+    <div class="steprow">
+      <div class="stap">
+        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg></div>
+        <div><span class="sk">Online</span><b>Direct online regelen</b><p>Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt.</p></div>
+      </div>
+      <div class="stap">
+        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+        <div><span class="sk">Advies</span><b>Persoonlijk advies</b><p>Twijfelt u? Samen kiezen we de oplossing die het beste bij uw situatie past.</p></div>
+      </div>
+      <div class="stap">
+        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="M5 11l3 3"/></svg></div>
+        <div><span class="sk">Montage</span><b>Vakkundige installatie</b><p>Onze monteurs installeren alles professioneel en zorgen dat u direct aan de slag kunt.</p></div>
+      </div>
+      <div class="stap hl">
+        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0"/><rect x="3.5" y="12" width="3.5" height="6" rx="1.6"/><rect x="17" y="12" width="3.5" height="6" rx="1.6"/><path d="M19 18v.6a2.4 2.4 0 0 1-2.4 2.4H13"/></svg></div>
+        <div><span class="sk">Altijd</span><b>Ook daarna bereikbaar</b><p>Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt.</p>
+          <a class="belbtn" href="tel:0880123456" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>088 012 3456</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="partners" data-section-name="partners">
+    <div class="partners__t">
+      <div class="eb">De beste technologie</div>
+      <h4>De beste technologie. Eén vertrouwd aanspreekpunt.</h4>
+      <p>Wij kiezen niet voor één merk, maar voor de beste technologie die past bij uw situatie. Daarom werken we samen met toonaangevende partners zoals Alarm.com, Climax, NAMI en Securitas. Zo profiteert u van innovatieve en betrouwbare oplossingen, terwijl u voor advies, installatie en service altijd één vast aanspreekpunt heeft: Zo Veilig.</p>
+    </div>
+    <div class="partners__logos">
+      <span class="logochip sec"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="34"></span>
+      <span class="logochip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="30"></span>
+      <span class="logochip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="30"></span>
+      <span class="logochip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="30"></span>
+    </div>
+  </section>
+
+  {%- comment -%}
+    Modal data island — the "Wat zit er in het pakket" contents, per-onderdeel specs,
+    "Ideaal voor / Typische opstelling" and de >100 m²-optie. Canonieke ontwerp-data
+    (breakout.jsx), gesleuteld op finder_key. Prijs/voorraad/variant komen live van de
+    Shopify-productkaart; deze data levert alleen de beschrijvende inhoud.
+  {%- endcomment -%}
+  <script type="application/json" id="opl-modal-data">
+  {
+    "hw": {
+      "hub": {"name":"NAMI Hub","kind":"Centrale","tagline":"De centrale die alle sensoren verbindt en met de meldkamer praat.","specs":[["Afmetingen","110 × 110 × 30 mm"],["Verbinding","WiFi + 4G-backup"],["Voeding","USB-C adapter"],["Bereik","Hele woning"],["Privacy","Geen camera, geen microfoon"]]},
+      "wifisensor": {"name":"Wi-Fi Activity Sensor","kind":"Leefstijl-sensor","tagline":"Herkent het dagritme via WiFi-sensing, volledig zonder camera of geluid.","specs":[["Type","Wi-Fi sensing plug"],["Dekking","~100 m² / 1.200 ft² (met 3 sensoren)"],["Verbinding","WiFi 2,4 GHz"],["Detectie","Leefpatroon-signalen"],["Privacy","Geen beeld of geluid"]]},
+      "deursensor": {"name":"Door Sensor","kind":"Magneetcontact · Thread","sku":"ZV-P004","tagline":"Meldt openen en sluiten van de voordeur, achterdeur of een raam.","specs":[["Afmetingen sensor","50,5 × 32,0 × 21,9 mm"],["Afmetingen magneet","27,0 × 12,0 × 12,4 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 4 jaar"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
+      "pir": {"name":"PIR Motion Sensor","kind":"Bewegingssensor · Thread","sku":"ZV-P001","tagline":"Ziet beweging per kamer, zodat afwijkingen in de routine opvallen.","specs":[["Afmetingen (H×B×D)","65,0 × 44,0 × 44,0 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 2 jaar"],["Detectiebereik","6 m bij 110° gezichtsveld"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
+      "paniek": {"name":"Draagbare paniekknop","kind":"Alarmknop","sku":"ZV-P009","tagline":"Eén druk verbindt met de meldkamer, om de pols of hals te dragen.","specs":[["Afmetingen","45 × 35 × 12 mm"],["Draagwijze","Pols of hals"],["Waterdicht","IP67"],["Batterij","Tot 1 jaar"],["Bereik","Hele woning"]]},
+      "rook": {"name":"Slimme rook- en brandmelder","kind":"Brandbeveiliging","sku":"ZV-P005","tagline":"Meldt rook direct bij de meldkamer én in de familie-app.","specs":[["Afmetingen","Ø 110 × 38 mm"],["Sensor","Foto-elektrisch"],["Batterij","10 jaar, verzegeld"],["Melding","Meldkamer + app"],["Norm","EN 14604"]]},
+      "familieapp": {"name":"Familie-app","kind":"Dienst","tagline":"Rustig meekijken met het dagritme, samen met de familie.","specs":[["Platform","iOS + Android"],["Gebruikers","Tot 6 familieleden"],["Inzicht","Dagritme en meldingen"],["Kosten","Inbegrepen"]]},
+      "zorgmeld": {"name":"24/7 Zorgmeldkamer","kind":"Dienst","tagline":"Professionals nemen bij een melding direct de opvolging over.","specs":[["Bemensing","24 uur, 7 dagen"],["Opvolging","Professionele hulpverlening"],["Partner","Securitas"],["Reactietijd","Direct"]]},
+      "meldkamer": {"name":"24/7 Securitas meldkamer","kind":"Dienst","tagline":"Nederlandse meldkamer die bij alarm meekijkt en opvolging regelt.","specs":[["Bemensing","24 uur, 7 dagen"],["Opvolging","Professionele opvolging"],["Partner","Securitas"],["Reactietijd","Direct"]]},
+      "codepaneel": {"name":"Codepaneel","kind":"Bediening","sku":"ZV-P007","tagline":"Schakel het alarm in en uit met een pincode of tag bij de deur.","specs":[["Afmetingen","130 × 90 × 20 mm"],["Bediening","Pincode of tag"],["Batterij","Tot 2 jaar"],["Montage","Bij de voordeur"]]},
+      "gpsknop": {"name":"GPS-paniekknop","kind":"Persoonlijk alarm","sku":"ZV-P013","tagline":"Onderweg en thuis: één druk verbindt met de meldkamer, mét locatie.","specs":[["Afmetingen","52 × 42 × 15 mm"],["Locatie","GPS + mobiel netwerk"],["Batterij","Tot 5 dagen"],["Waterdicht","IP67"],["Val","Automatische detectie"]]},
+      "valdetectie": {"name":"Automatische valdetectie","kind":"Dienst","tagline":"Alarmeert de meldkamer bij een val, ook als u zelf niet kunt drukken.","specs":[["Werking","Bewegings- en impactsensor"],["Melding","Automatisch naar meldkamer"],["Locatie","GPS gedeeld"],["Kosten","Inbegrepen"]]},
+      "alarmpod": {"name":"Alarm Pod","kind":"Centrale · Wi-Fi + Thread","tagline":"De centrale die de sensoren verbindt en het alarm aanstuurt.","specs":[["Afmetingen (H×B×D)","95,0 × 95,0 × 35,0 mm"],["Voeding","DC 5V · Max 1A"],["Backup-batterij","Tot 3 uur"],["Alarmsterkte","98 dB"],["Protocol","IEEE 802.11b/g/n, IEEE 802.15.4"],["Draadloos","Wi-Fi 2,4 GHz, Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +45 °C · 0% tot 90% R.H."],["Certificering","CE, FCC, MIC, ROHS"]]},
+      "senseplug": {"name":"NAMI SensePlug","kind":"Wi-Fi sensing plug","tagline":"Wi-Fi sensing plug die beweging en aanwezigheid detecteert zonder camera.","specs":[["Type","Wi-Fi sensing plug"],["Verbinding","WiFi 2,4 GHz"],["Detectie","Beweging en aanwezigheid"],["Privacy","Geen beeld of geluid"]]},
+      "alarmhub": {"name":"Alarm.com Hub","kind":"Centrale","sku":"ZV-P017","tagline":"De Alarm.com-centrale voor de camera-opstelling en 24/7 meldkamer.","specs":[["Platform","Alarm.com"],["Verbinding","WiFi + 4G-backup"],["Voeding","USB-C adapter"],["Bereik","Hele woning"]]},
+      "cam_in": {"name":"Binnencamera","kind":"Camera","sku":"ZV-P014","tagline":"Live meekijken binnen, met beeldverificatie bij een melding.","specs":[["Resolutie","1080p HD"],["Zicht","Dag en nacht"],["Verbinding","WiFi"],["Plaatsing","Binnen"]]},
+      "cam_out": {"name":"Buitencamera","kind":"Camera","sku":"ZV-P015","tagline":"Weerbestendige buitencamera die het erf en de gevel in beeld houdt.","specs":[["Resolutie","1080p HD"],["Zicht","Dag en nacht"],["Weerbestendig","IP66"],["Plaatsing","Buiten"]]},
+      "deurbel2": {"name":"Videodeurbel","kind":"Camera","sku":"ZV-P016","tagline":"Zie en spreek wie er aanbelt, waar u ook bent.","specs":[["Beeld","1080p, groothoek"],["Audio","Twee-richting"],["Voeding","Bedraad of accu"],["Plaatsing","Bij de voordeur"]]}
+    },
+    "pkg": {
+      "aware": {"name":"Inzicht","plat":"NAMI aiAware","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer","tier":[{"id":"hub"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"aiAware biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij Wi-Fi-sensing dekt aiAware grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× Wi-Fi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"]]}},
+      "aware_plus": {"name":"Zeker","plat":"NAMI aiCare","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer","tier":[{"id":"alarmpod"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"pir","qty":2},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"aiCare bouwt voort op aiAware en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft aiCare opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde CareTech-platformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× Wi-Fi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"],["2× PIR Motion Sensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
+      "care": {"name":"Beschermd","plat":"Climax","hook":"Complete bescherming met 24/7 meldkamer.","sub":"Climax · 1 centrale/hub, 2 magneetcontacten, 2 PIR, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer","tier":[{"id":"hub"},{"id":"pir","qty":2},{"id":"deursensor","qty":2},{"id":"rook","qty":2},{"id":"paniek"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 rookmelder","2 magneetcontacten en PIR"]}},
+      "secure": {"name":"Alert","plat":"NAMI Alarm15","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera","tier":[{"id":"alarmpod"},{"id":"senseplug"},{"id":"pir"},{"id":"deursensor"},{"id":"codepaneel"}],"plus":{"price":"+€4 p/m","items":["1 SensePlug","1 sensor"]}},
+      "guard": {"name":"Protect","plat":"Climax · incl. meldkamer","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel","tier":[{"id":"hub"},{"id":"codepaneel"},{"id":"rook"},{"id":"pir"},{"id":"deursensor"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
+      "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera","tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
+      "liogo_solo": {"name":"Paniek Meldkamer","plat":"Indigo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specs volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
+      "liogo_guard": {"name":"Zorgmeldkamer","plat":"Indigo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specs volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
+    }
+  }
+  </script>
+
+  <div class="pb-scrim" id="opl-modal" role="presentation" hidden></div>
 </div>
 {%- elsif request.design_mode -%}
   <div style="padding:60px;text-align:center;color:#6f6786;">Oplossingen: voeg "Oplossing" blokken toe.</div>
@@ -247,16 +368,163 @@
 .pgnote span { font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
 @media (max-width: 820px) { .vhero__copy { max-width: none; } }
 @media (max-width: 720px) { .pgrid, .pgrid[data-n="2"], .pgrid[data-n="3"] { --cols: 1; max-width: 420px; } }
-@media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct { transition: none; } }
+
+/* ---- Waarom Zo Veilig (VERBATIM) ---- */
+.opl-page .why { padding: clamp(48px, 5vw, 84px) clamp(24px, 3.4vw, 60px); background: var(--paper); border-top: 1px solid var(--line); }
+.why__head { max-width: 760px; margin: 0 auto clamp(26px, 3vw, 44px); text-align: center; }
+.why__eye { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--belt); }
+.why__eye .d { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.why__head h3 { margin-top: 12px; font-size: clamp(26px, 3vw, 40px); font-weight: 900; letter-spacing: -0.02em; color: var(--indigo); line-height: 1.08; text-wrap: balance; }
+.why__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(22px, 3.2vw, 40px); max-width: 1080px; margin: 0 auto; }
+.why__card { display: flex; flex-direction: column; }
+.why__ph { position: relative; aspect-ratio: 4/3; border-radius: 20px; overflow: hidden; background: var(--sand-2); box-shadow: 0 28px 56px -30px rgba(26, 18, 48, 0.5), 0 4px 12px -7px rgba(26, 18, 48, 0.3); }
+.why__ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.why__ph::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 55%, rgba(37, 26, 77, 0.22) 100%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.why__card h4 { margin-top: 20px; font-size: clamp(20px, 2.1vw, 27px); font-weight: 900; letter-spacing: -0.015em; color: var(--ink); line-height: 1.12; text-wrap: balance; }
+.why__card p { margin-top: 11px; font-size: 15.5px; line-height: 1.6; color: var(--muted); }
+.why__link { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; font-size: 15px; font-weight: 800; color: var(--belt); text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.2s; align-self: flex-start; }
+.why__link:hover { border-color: var(--gold); }
+.why__link svg { width: 18px; height: 18px; transition: transform 0.2s; }
+.why__link:hover svg { transform: translateX(4px); }
+@media (max-width: 820px) { .why__grid { grid-template-columns: 1fr; } }
+
+/* ---- Direct online geregeld / Stappen (VERBATIM) ---- */
+.opl-page .stappen { padding: clamp(40px, 4vw, 60px) clamp(24px, 3.4vw, 56px); background: var(--cream); border-top: 1px solid var(--line); }
+.stappen h3 { text-align: center; color: var(--indigo); font-size: clamp(24px, 2.8vw, 32px); font-weight: 900; letter-spacing: -0.015em; line-height: 1.1; }
+.stappen .st-sub { text-align: center; font-size: 15px; font-weight: 600; color: var(--muted); margin-top: 11px; }
+.steprow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin: 38px auto 0; max-width: 1180px; }
+@media (max-width: 880px) { .steprow { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .steprow { grid-template-columns: 1fr; } }
+.stap { display: flex; gap: 14px; }
+.stap .sic { width: 50px; height: 50px; flex: none; border-radius: 13px; background: var(--paper); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
+.stap .sic svg { width: 25px; height: 25px; color: var(--indigo); }
+.stap.hl .sic { background: var(--indigo); border-color: var(--indigo); }
+.stap.hl .sic svg { color: var(--gold-lt); }
+.stap .sk { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); }
+.stap b { display: block; font-size: 16px; font-weight: 900; color: var(--ink); margin-top: 2px; line-height: 1.2; }
+.stap p { font-size: 13.5px; font-weight: 500; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+.stap .belbtn { display: inline-flex; align-items: center; gap: 7px; margin-top: 11px; font-size: 13px; font-weight: 800; color: var(--indigo); background: var(--sand); border: none; border-radius: 9px; padding: 9px 13px; cursor: pointer; font-family: inherit; text-decoration: none; }
+.stap .belbtn svg { width: 15px; height: 15px; }
+
+/* ---- Partners / technology band (VERBATIM) ---- */
+.opl-page .partners { background: radial-gradient(64% 120% at 95% 0%, rgba(197, 46, 47, 0.42) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 3% 102%, rgba(0, 80, 159, 0.6) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #262a64 100%); color: #fff; padding: clamp(34px, 3.4vw, 48px) clamp(24px, 3.4vw, 56px); display: grid; grid-template-columns: 1fr auto; gap: 28px 48px; align-items: center; }
+.partners__t { max-width: 42ch; }
+.partners__t .eb { font-size: 11.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-lt); }
+.partners__t h4 { font-size: clamp(20px, 2vw, 26px); font-weight: 900; line-height: 1.12; margin-top: 11px; letter-spacing: -0.01em; }
+.partners__t p { font-size: 14.5px; font-weight: 500; color: #cdc6e8; margin-top: 10px; line-height: 1.5; }
+.partners__logos { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.logochip { background: #fff; border-radius: 13px; padding: 14px 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.5); }
+.logochip img { height: 30px; width: auto; }
+.logochip.sec img { height: 34px; }
+@media (max-width: 880px) { .partners { grid-template-columns: 1fr; } .partners__logos { justify-content: flex-start; } }
+
+/* ---- Meer informatie modal / breakout (VERBATIM pb-*/pbd-*) ---- */
+.pb-scrim { position: fixed; inset: 0; z-index: 200; background: rgba(20, 14, 40, 0.62); backdrop-filter: blur(6px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease both; }
+.pb-scrim[hidden] { display: none; }
+@keyframes pbFade { from { opacity: 0; } to { opacity: 1; } }
+.pb-panel { width: min(1060px, 97vw); height: 100%; display: flex; flex-direction: column; color: #fff; background: radial-gradient(64% 120% at 96% 0%, rgba(197, 46, 47, 0.34) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 2% 102%, rgba(0, 80, 159, 0.5) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #242a5f 100%); box-shadow: -50px 0 120px -40px rgba(0, 0, 0, 0.72); animation: pbSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes pbSlide { from { transform: translateX(46px); opacity: 0.3; } to { transform: none; opacity: 1; } }
+.pb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: clamp(20px, 2.4vw, 30px) clamp(20px, 2.8vw, 38px) clamp(16px, 1.8vw, 22px); border-bottom: 1px solid rgba(255, 255, 255, 0.13); }
+.pb-eye { display: inline-flex; align-items: center; gap: 9px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-lt); }
+.pb-eye .d { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.pb-title { font-size: clamp(22px, 2.4vw, 30px); font-weight: 900; letter-spacing: -0.015em; margin-top: 10px; line-height: 1.06; }
+.pb-lead { font-size: 14px; font-weight: 500; color: #cdc6e8; margin-top: 9px; max-width: 62ch; line-height: 1.5; }
+.pb-lead b { color: #fff; font-weight: 800; }
+.pb-x { flex: none; width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #fff; display: grid; place-items: center; cursor: pointer; transition: background 0.15s; }
+.pb-x svg { width: 20px; height: 20px; } .pb-x:hover { background: rgba(255, 255, 255, 0.18); }
+.pb-body { flex: 1; overflow-y: auto; padding: clamp(20px, 2.6vw, 32px) clamp(20px, 2.8vw, 38px) clamp(28px, 3vw, 40px); }
+.pb-buy { width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 9px; border: none; border-radius: 6px; padding: 14px 18px; font-family: inherit; font-weight: 900; font-size: 14.5px; cursor: pointer; margin-top: 14px; background: var(--gold); color: var(--ink); box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
+.pb-buy svg { width: 18px; height: 18px; }
+.pb-buy:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--belt), 0 12px 24px -12px rgba(180, 126, 10, 0.7); }
+.pb-buy[disabled] { opacity: 0.6; cursor: default; transform: none; }
+.pb-buy-2 { width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 7px; border: none; background: none; font-family: inherit; font-weight: 800; font-size: 13px; color: var(--indigo); cursor: pointer; margin-top: 9px; padding: 4px; }
+.pb-buy-2 svg { width: 15px; height: 15px; transition: transform 0.16s; }
+.pb-buy-2:hover svg { transform: translateX(3px); }
+.pbd-flag { display: inline-block; vertical-align: middle; margin-left: 12px; background: none; color: var(--gold-lt); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 0; padding: 0; }
+.pbd-switch { display: inline-flex; gap: 5px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 13px; padding: 5px; margin-bottom: 22px; flex-wrap: wrap; }
+.pbd-tab { border: none; background: transparent; color: #d3cdea; font-family: inherit; font-weight: 800; font-size: 13.5px; border-radius: 9px; padding: 9px 16px; cursor: pointer; transition: background 0.14s, color 0.14s; }
+.pbd-tab:hover { background: rgba(255, 255, 255, 0.08); }
+.pbd-tab.on { background: var(--paper); color: var(--indigo); box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.4); }
+.pbd-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+@media (max-width: 820px) { .pbd-main { grid-template-columns: 1fr; } }
+.pbd-left { background: var(--paper); color: var(--ink); border-radius: 8px; padding: 22px 24px 12px; box-shadow: 0 10px 30px -22px rgba(0, 0, 0, 0.5); }
+.pbd-sec-h { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--belt); padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.pbd-items { list-style: none; }
+.pbd-item { display: flex; gap: 13px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.pbd-item:last-child { border-bottom: none; }
+.pbd-ic { width: 22px; height: 22px; border-radius: 50%; background: #eaf3ee; display: grid; place-items: center; flex: none; margin-top: 2px; }
+.pbd-ic svg { width: 13px; height: 13px; color: var(--ok); }
+.pbd-it-body { flex: 1; min-width: 0; }
+.pbd-it-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.pbd-it-name { font-size: 16px; font-weight: 800; color: var(--indigo); line-height: 1.2; }
+.pbd-qty { color: var(--belt); font-weight: 900; margin-right: 5px; }
+.pbd-kind { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); background: none; border-radius: 0; padding: 0; }
+.pbd-it-tag { font-size: 13.5px; font-weight: 500; color: #5b5374; margin-top: 5px; line-height: 1.45; }
+.pbd-specs { display: grid; grid-template-columns: auto 1fr; gap: 9px 24px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pbd-spx { margin-top: 12px; }
+.pbd-spx summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--indigo); background: none; border: none; border-radius: 0; padding: 2px 0; transition: color 0.15s; }
+.pbd-spx summary:hover { color: var(--belt); }
+.pbd-spx summary::-webkit-details-marker { display: none; }
+.pbd-spx summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.pbd-spx[open] summary svg { transform: rotate(180deg); }
+.pbd-sec-toggle { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pbd-sec-toggle::-webkit-details-marker { display: none; }
+.pbd-sec-toggle svg { width: 17px; height: 17px; transition: transform 0.2s; }
+.pbd-pkg[open] .pbd-sec-toggle svg { transform: rotate(180deg); }
+.pbd-spec-k { font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+.pbd-spec-v { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+.pbd-buy { position: sticky; top: 0; display: flex; flex-direction: column; gap: 12px; }
+.pbd-buy-card { background: var(--paper); color: var(--ink); border-radius: 8px; padding: 22px 20px; box-shadow: 0 10px 30px -22px rgba(0, 0, 0, 0.5); border: 1px solid var(--gold); }
+.pbd-plat { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-2); }
+.pbd-buy-name { font-size: 21px; font-weight: 900; color: var(--indigo); line-height: 1.05; margin-top: 4px; letter-spacing: -0.01em; }
+.pbd-price { display: flex; align-items: baseline; gap: 7px; margin-top: 14px; }
+.pbd-amt { font-size: 30px; font-weight: 900; color: var(--ink); letter-spacing: -0.01em; }
+.pbd-per { font-size: 14px; font-weight: 700; color: var(--muted); }
+.pbd-sub { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-top: 5px; line-height: 1.4; }
+.pbd-buy-card .pb-buy { margin-top: 16px; }
+.pbd-plus { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: block; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.pbd-plus.on { background: #eef3ff; border-color: var(--indigo); }
+.pbd-plus-row { display: flex; align-items: flex-start; gap: 11px; }
+.pbd-plus input { width: 19px; height: 19px; margin-top: 1px; accent-color: #322469; flex: none; cursor: pointer; }
+.pbd-plus-t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pbd-plus-t span:first-child { font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--indigo); }
+.pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); }
+.pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.pbd-soon { display: flex; gap: 10px; margin-top: 16px; background: var(--indigo-soft); border: 1px solid #e2ddf1; border-radius: 8px; padding: 13px 14px; color: var(--indigo); }
+.pbd-soon svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.pbd-soon span { font-size: 12.5px; font-weight: 600; color: #4a4458; line-height: 1.45; }
+.pbd-guarantee { display: flex; gap: 11px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 8px; padding: 14px 16px; color: var(--gold-lt); }
+.pbd-guarantee svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.pbd-guarantee span { font-size: 12.5px; font-weight: 600; color: #cdc6e8; line-height: 1.45; }
+.pbd-guarantee b { color: #fff; font-weight: 800; }
+.pbd-info { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 22px; display: grid; gap: 18px; }
+.pbd-info-title { font-size: 15.5px; font-weight: 900; color: var(--belt); line-height: 1.3; }
+.pbd-info-body { font-size: 13.5px; font-weight: 500; color: #5b5374; line-height: 1.6; margin-top: 9px; }
+.pbd-info-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 560px) { .pbd-info-cols { grid-template-columns: 1fr; } }
+.pbd-info-p { font-size: 13.5px; font-weight: 500; color: #5b5374; line-height: 1.55; margin-top: 8px; }
+.pbd-deploy { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pbd-deploy li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; font-weight: 600; color: #5b5374; line-height: 1.45; }
+.pbd-deploy li .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--belt); margin-top: 7px; }
+.pbd-deploy li b { color: var(--indigo); }
+
+@media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct, .why__link svg { transition: none; } .pb-scrim, .pb-panel { animation: none; } }
 {% endstylesheet %}
 
 {% javascript %}
 (function () {
   var page = document.querySelector('[data-zv-oplossingen]');
   if (!page) return;
+
+  /* ---------- tab / panel switching + deep-link ---------- */
   var tabs = [].slice.call(page.querySelectorAll('[data-opl-tab]'));
   var panels = {};
   page.querySelectorAll('[data-opl-panel]').forEach(function (p) { panels[p.getAttribute('data-opl-panel')] = p; });
+
+  function fire(name, detail) {
+    var ZV = window.ZVMeasurement;
+    if (ZV && typeof ZV.track === 'function') { try { ZV.track(name, detail || {}); } catch (e) {} }
+  }
 
   function show(id, push) {
     if (!panels[id]) return;
@@ -267,11 +535,11 @@
     });
     Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== id; });
     if (push && history.replaceState) { try { history.replaceState(null, '', '#' + id); } catch (e) {} }
+    fire('solution_tab_select', { solution: id });
   }
 
   tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-opl-tab'), true); }); });
 
-  // Deep-link: homepage buckets link to /pages/oplossingen#langer-thuis etc.
   var hash = (location.hash || '').replace('#', '');
   if (hash && panels[hash]) show(hash, false);
   window.addEventListener('hashchange', function () {
@@ -279,21 +547,234 @@
     if (panels[h]) show(h, false);
   });
 
-  // "In winkelwagen": add the variant to the Shopify cart, fire add_to_cart, go to cart.
-  page.addEventListener('click', function (e) {
-    var btn = e.target.closest && e.target.closest('[data-zv-add]');
-    if (!btn) return;
-    var id = btn.getAttribute('data-variant');
-    if (!id) return;
-    btn.disabled = true;
-    window.fetch('/cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ id: id, quantity: 1 }] }) })
+  /* ---------- shared cart helper (Shopify line item properties) ---------- */
+  function addToCart(variantId, properties, redirect, btn) {
+    if (!variantId || (btn && btn.dataset.busy === '1')) return;
+    if (btn) { btn.dataset.busy = '1'; btn.disabled = true; }
+    return window.fetch('/cart/add.js', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ id: variantId, quantity: 1, properties: properties || {} }] })
+    })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (line) {
         var ZV = window.ZVMeasurement;
-        if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || btn.getAttribute('data-package-sku'), item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: btn.getAttribute('data-cta-position') });
-        window.location.href = '/cart';
+        if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
+        window.location.href = redirect || '/cart';
       })
-      .catch(function () { btn.disabled = false; });
+      .catch(function () {
+        fire('add_to_cart_error', { sku: properties && properties['SKU'] });
+        if (btn) { btn.dataset.busy = ''; btn.disabled = false; }
+      });
+  }
+
+  /* card-level "In winkelwagen": collect any checked uitbreidingen/abonnementen too */
+  page.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-zv-add]');
+    if (!btn) return;
+    var card = btn.closest('.pcard');
+    var d = card ? card.dataset : {};
+    var panel = card && card.closest('[data-opl-panel]');
+    var props = {
+      'Pakket': d.packageName || '', 'SKU': d.packageSku || '',
+      'Oplossing': (panel && panel.getAttribute('aria-label')) || d.solutionType || '',
+      'Bron': 'Oplossingen'
+    };
+    if (card) {
+      card.querySelectorAll('.pcard__plus').forEach(function (det) {
+        var head = det.querySelector('summary');
+        var label = head ? head.textContent.trim() : 'Optie';
+        det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
+          var opt = inp.closest('.pcard__plus-opt');
+          var name = opt ? (opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '') : '';
+          if (name) props[label] = (props[label] ? props[label] + ', ' : '') + name;
+        });
+      });
+    }
+    addToCart(d.variantId, props, '/cart', btn);
+  });
+
+  /* ============================================================
+     "Meer informatie" detail modal (breakout) — accessible drawer.
+     ============================================================ */
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('opl-modal-data').textContent); } catch (e) { DATA = { hw: {}, pkg: {} }; }
+  var scrim = document.getElementById('opl-modal');
+  var lastFocused = null, keyHandler = null, activePanel = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fmtCents(c) { return '€' + (c / 100).toFixed(2).replace('.', ','); }
+  var ICON = {
+    check: '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    cart: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 4h3l2.2 12.2a2 2 0 0 0 2 1.6h7.1a2 2 0 0 0 2-1.55L22 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.6" fill="currentColor"/><circle cx="19" cy="21" r="1.6" fill="currentColor"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  function cardsIn(panel) { return [].slice.call(panel.querySelectorAll('.pcard--tile')); }
+  function cardByFk(panel, fk) { var m = cardsIn(panel).filter(function (c) { return c.dataset.finderKey === fk; }); return m[0] || null; }
+
+  function itemHtml(entry) {
+    var hw = DATA.hw[entry.id]; if (!hw) return '';
+    var specs = '';
+    if (hw.specs && hw.specs.length) {
+      var rows = hw.specs.map(function (kv) { return '<span class="pbd-spec-k">' + esc(kv[0]) + '</span><span class="pbd-spec-v">' + esc(kv[1]) + '</span>'; }).join('');
+      specs = '<details class="pbd-spx"><summary>Specificaties' + ICON.chev + '</summary><div class="pbd-specs">' + rows + '</div></details>';
+    }
+    var qty = (entry.qty && entry.qty > 1) ? '<b class="pbd-qty">' + entry.qty + '×</b>' : '';
+    var kind = esc(hw.kind) + (hw.sku ? ' · ' + esc(hw.sku) : '');
+    return '<li class="pbd-item"><span class="pbd-ic">' + ICON.check + '</span><div class="pbd-it-body">' +
+      '<div class="pbd-it-top"><span class="pbd-it-name">' + qty + esc(hw.name) + '</span><span class="pbd-kind">' + kind + '</span></div>' +
+      '<p class="pbd-it-tag">' + esc(hw.tagline) + '</p>' + specs + '</div></li>';
+  }
+
+  function infoHtml(info) {
+    if (!info) return '';
+    var deploy = (info.deployment || []).map(function (d) {
+      return '<li><span class="dot"></span><span><b>' + esc(d[0]) + '</b> ' + esc(d[1]) + '</span></li>';
+    }).join('');
+    return '<div class="pbd-info"><div><div class="pbd-info-title">' + esc(info.introTitle) + '</div>' +
+      '<p class="pbd-info-body">' + esc(info.body) + '</p></div><div class="pbd-info-cols">' +
+      '<div><div class="pbd-sec-h">Ideaal voor</div><p class="pbd-info-p">' + esc(info.idealFor) + '</p></div>' +
+      '<div><div class="pbd-sec-h">Typische opstelling</div><ul class="pbd-deploy">' + deploy + '</ul></div></div></div>';
+  }
+
+  function render(panel, fk) {
+    var card = cardByFk(panel, fk); if (!card) return;
+    var d = card.dataset;
+    var pk = DATA.pkg[fk] || {};
+    var eyebrow = panel.getAttribute('aria-label') || '';
+    var name = pk.name || d.packageName || '';
+    var plat = pk.plat || '';
+    var priceKnown = d.priceKnown === 'true';
+    var available = d.available === 'true';
+    var buyable = priceKnown && available;
+    var baseCents = parseInt(d.priceCents, 10) || 0;
+
+    var tabsHtml = '';
+    var siblings = cardsIn(panel);
+    if (siblings.length > 1) {
+      tabsHtml = '<div class="pbd-switch" role="tablist" aria-label="Andere pakketten">' + siblings.map(function (c) {
+        var cfk = c.dataset.finderKey, cn = (DATA.pkg[cfk] && DATA.pkg[cfk].name) || c.dataset.packageName || cfk;
+        var on = cfk === fk;
+        return '<button type="button" role="tab" aria-selected="' + on + '" class="pbd-tab' + (on ? ' on' : '') + '" data-pb-tab="' + esc(cfk) + '">' + esc(cn) + '</button>';
+      }).join('') + '</div>';
+    }
+
+    var items = (pk.tier || []).map(itemHtml).join('');
+    var plusHtml = '';
+    if (pk.plus && buyable) {
+      plusHtml = '<label class="pbd-plus"><div class="pbd-plus-row"><input type="checkbox" data-pb-plus>' +
+        '<div style="flex:1"><div class="pbd-plus-t"><span>Woning groter dan 100 m²</span><span class="pbd-plus-pr">' + esc(pk.plus.price) + '</span></div>' +
+        '<div class="pbd-plus-items">Per extra etage: ' + esc((pk.plus.items || []).join(' + ')) + '</div></div></div></label>';
+    }
+    var buyHtml = buyable
+      ? '<button class="pb-buy" data-pb-add data-variant="' + esc(d.variantId) + '" data-cta-position="' + esc(d.solutionType) + '_modal">' + ICON.cart + 'In winkelwagen</button>' +
+        '<button class="pb-buy-2" data-pb-buy data-variant="' + esc(d.variantId) + '">Direct afrekenen' + ICON.arrow + '</button>'
+      : '<div class="pbd-soon">' + ICON.info + '<span>Prijs en specificaties volgen binnenkort. We bevestigen de prijs bij het afronden.</span></div>';
+
+    var flag = d.popular === 'true' ? '<span class="pbd-flag">Meest gekozen</span>' : '';
+    var lead = (plat ? '<b>' + esc(plat) + '. </b>' : '') + esc(pk.hook || '');
+    var sku = d.packageSku ? '<div class="pbd-plat" style="color:var(--belt);margin-top:6px">SKU · ' + esc(d.packageSku) + '</div>' : '';
+    var perHtml = (priceKnown && d.per) ? '<span class="pbd-per">' + esc(d.per) + '</span>' : '';
+
+    scrim.innerHTML =
+      '<div class="pb-panel" role="dialog" aria-modal="true" aria-label="' + esc(name) + ' · pakketdetails" tabindex="-1">' +
+        '<header class="pb-head"><div>' +
+          '<span class="pb-eye"><span class="d"></span>' + esc(eyebrow) + ' · pakket</span>' +
+          '<h3 class="pb-title">' + esc(name) + flag + '</h3>' +
+          '<p class="pb-lead">' + lead + '</p>' +
+        '</div><button class="pb-x" type="button" data-pb-close aria-label="Sluiten">' + ICON.x + '</button></header>' +
+        '<div class="pb-body">' + tabsHtml +
+          '<div class="pbd-main"><section class="pbd-left">' +
+            '<details class="pbd-pkg" open><summary class="pbd-sec-h pbd-sec-toggle">Wat zit er in het pakket' + ICON.chev + '</summary>' +
+            '<ul class="pbd-items">' + items + '</ul></details>' + infoHtml(pk.info) +
+          '</section><aside class="pbd-buy"><div class="pbd-buy-card">' +
+            '<div class="pbd-plat">' + esc(plat) + '</div><div class="pbd-buy-name">' + esc(name) + '</div>' + sku +
+            '<div class="pbd-price"><span class="pbd-amt" data-pb-amt data-base="' + baseCents + '">' + esc(d.price) + '</span>' + perHtml + '</div>' +
+            (pk.sub ? '<div class="pbd-sub">' + esc(pk.sub) + '</div>' : '') + plusHtml + buyHtml +
+          '</div><div class="pbd-guarantee">' + ICON.info + '<span>Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt <b>14 dagen bedenktijd</b> na levering.</span></div>' +
+          '</aside></div>' +
+        '</div>' +
+      '</div>';
+    scrim.dataset.fk = fk;
+  }
+
+  function focusables() { return [].slice.call(scrim.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')).filter(function (el) { return !el.disabled && el.offsetParent !== null; }); }
+
+  function openModal(panel, fk) {
+    activePanel = panel;
+    lastFocused = document.activeElement;
+    render(panel, fk);
+    scrim.hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    var closeBtn = scrim.querySelector('[data-pb-close]');
+    if (closeBtn) closeBtn.focus();
+    keyHandler = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+      if (e.key === 'Tab') {
+        var f = focusables(); if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', keyHandler, true);
+    fire('package_detail_open', { solution: panel.getAttribute('data-opl-panel'), package: fk });
+  }
+
+  function closeModal() {
+    scrim.hidden = true;
+    scrim.innerHTML = '';
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    if (keyHandler) { document.removeEventListener('keydown', keyHandler, true); keyHandler = null; }
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+    lastFocused = null; activePanel = null;
+  }
+
+  /* open trigger (progressive enhancement on the "Meer informatie" link) */
+  page.addEventListener('click', function (e) {
+    var trg = e.target.closest && e.target.closest('[data-zv-detail]');
+    if (!trg) return;
+    var panel = trg.closest('[data-opl-panel]');
+    var fk = trg.getAttribute('data-finder-key');
+    if (!panel || !fk || !DATA.pkg[fk]) return;   // no data → let the link fall through to the product page
+    e.preventDefault();
+    openModal(panel, fk);
+  });
+
+  /* modal interactions (delegated on the scrim) */
+  scrim.addEventListener('click', function (e) {
+    if (e.target === scrim) { closeModal(); return; }
+    var close = e.target.closest('[data-pb-close]'); if (close) { closeModal(); return; }
+    var tab = e.target.closest('[data-pb-tab]'); if (tab && activePanel) { render(activePanel, tab.getAttribute('data-pb-tab')); var c = scrim.querySelector('[data-pb-close]'); if (c) c.focus(); return; }
+    var add = e.target.closest('[data-pb-add]');
+    var buy = e.target.closest('[data-pb-buy]');
+    var actor = add || buy;
+    if (actor && activePanel) {
+      var fk = scrim.dataset.fk, card = cardByFk(activePanel, fk), d = card ? card.dataset : {}, pk = DATA.pkg[fk] || {};
+      var plusChecked = !!scrim.querySelector('[data-pb-plus]:checked');
+      var props = {
+        'Pakket': pk.name || d.packageName || '', 'SKU': d.packageSku || '',
+        'Oplossing': activePanel.getAttribute('aria-label') || '', 'Platform': pk.plat || '',
+        'Bron': 'Oplossingen'
+      };
+      if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
+      addToCart(actor.getAttribute('data-variant'), props, buy ? '/checkout' : '/cart', actor);
+    }
+  });
+
+  /* >100 m² checkbox recomputes the shown price live */
+  scrim.addEventListener('change', function (e) {
+    var box = e.target.closest('[data-pb-plus]'); if (!box) return;
+    var label = box.closest('.pbd-plus'); if (label) label.classList.toggle('on', box.checked);
+    var amt = scrim.querySelector('[data-pb-amt]'); if (!amt) return;
+    var base = parseInt(amt.getAttribute('data-base'), 10) || 0;
+    var card = activePanel && cardByFk(activePanel, scrim.dataset.fk);
+    amt.textContent = box.checked ? fmtCents(base + 400) : (card ? card.dataset.price : amt.textContent);
   });
 })();
 {% endjavascript %}
@@ -323,7 +804,19 @@
         { "type": "text", "id": "compare_label", "label": "Vergelijk-link tekst", "default": "Niet zeker welk niveau bij u past?" },
         { "type": "url", "id": "compare_url", "label": "Vergelijk-link" },
         { "type": "textarea", "id": "uitbreidingen", "label": "Uitbreidingen (Naam|Prijs, 1 per regel)", "default": "Huisdier-upgrade|€0,00\nExtra sensoren|€0,00\nExtra toegangspunten|€0,00" },
-        { "type": "text", "id": "note", "label": "Binnenkort-notitie (optioneel)" }
+        { "type": "text", "id": "note", "label": "Binnenkort-notitie (optioneel)" },
+        { "type": "header", "content": "Waarom Zo Veilig" },
+        { "type": "text", "id": "why_heading", "label": "Kop", "default": "Waarom kiezen zoveel mensen voor Zo Veilig?" },
+        { "type": "text", "id": "why_1_img", "label": "Kaart 1 · afbeelding (asset)" },
+        { "type": "text", "id": "why_1_title", "label": "Kaart 1 · titel" },
+        { "type": "textarea", "id": "why_1_body", "label": "Kaart 1 · tekst" },
+        { "type": "text", "id": "why_1_link_label", "label": "Kaart 1 · link-tekst" },
+        { "type": "url", "id": "why_1_link_url", "label": "Kaart 1 · link" },
+        { "type": "text", "id": "why_2_img", "label": "Kaart 2 · afbeelding (asset)" },
+        { "type": "text", "id": "why_2_title", "label": "Kaart 2 · titel" },
+        { "type": "textarea", "id": "why_2_body", "label": "Kaart 2 · tekst" },
+        { "type": "text", "id": "why_2_link_label", "label": "Kaart 2 · link-tekst" },
+        { "type": "url", "id": "why_2_link_url", "label": "Kaart 2 · link" }
       ]
     }
   ],
