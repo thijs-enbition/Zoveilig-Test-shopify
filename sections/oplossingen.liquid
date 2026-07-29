@@ -49,7 +49,7 @@
 
       <section class="hero" data-section-name="{{ anchor }}">
         <div class="vhero">
-          {%- if b.settings.hero_asset != blank -%}<img class="vhero__img" src="{{ b.settings.hero_asset | asset_url }}" alt="{{ b.settings.eyebrow | escape }}" style="object-position:{{ b.settings.hero_pos | default: 'center' }};" loading="lazy" width="1240" height="580">{%- endif -%}
+          {%- if b.settings.hero_asset != blank -%}<img class="vhero__img" src="{{ b.settings.hero_asset | asset_url }}" alt="{{ b.settings.eyebrow | escape }}" style="object-position:{{ b.settings.hero_pos | default: 'center' }};"{% if forloop.first %} loading="eager" fetchpriority="high"{% else %} loading="lazy"{% endif %} width="1240" height="580">{%- endif -%}
           <div class="vhero__copy">
             <span class="vhero__eye">{{ b.settings.eyebrow }}</span>
             {%- if b.settings.headline != blank -%}<h2>{{ b.settings.headline }}</h2>{%- endif -%}
