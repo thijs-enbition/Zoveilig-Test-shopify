@@ -43,7 +43,14 @@
 
   {%- for b in sols -%}
     {%- assign anchor = b.settings.anchor -%}
-    {%- assign coll = collections[b.settings.collection] -%}
+    {%- comment -%}
+      The `collection` setting is stored as a handle string in the JSON template, so
+      `b.settings.collection` is that string — resolve it through the `collections` lookup.
+      (Handle the object form too, in case it's ever set via the theme editor picker.)
+      NOTE: the products must be published to the Online Store channel or this is empty.
+    {%- endcomment -%}
+    {%- assign coll = b.settings.collection -%}
+    {%- if coll.products == blank -%}{%- assign coll = collections[b.settings.collection] -%}{%- endif -%}
     <div class="opl-panel" id="panel-{{ anchor }}" role="tabpanel" data-opl-panel="{{ anchor }}"
          aria-label="{{ b.settings.eyebrow | escape }}"{% unless forloop.first %} hidden{% endunless %}>
 
@@ -87,7 +94,7 @@
         {%- if coll and coll.products.size > 0 -%}
           <div class="pgrid" data-n="{{ coll.products.size }}">
             {%- for p in coll.products -%}
-              {%- assign fk = p.metafields.custom.finder_key -%}
+              {%- assign fk = p.metafields.custom.finder_key.value -%}
               {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}
               {%- case fk -%}
                 {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer' -%}
@@ -178,7 +185,9 @@
                   <h4>{{ b.settings[ktitle] }}</h4>
                   <p>{{ b.settings[kbody] }}</p>
                   {%- if b.settings[klabel] != blank -%}
-                    <a class="why__link" href="{{ b.settings[kurl] | default: '#panel-' | append: anchor }}" data-zv-event="why_link" data-solution-type="{{ anchor }}" data-cta-name="why_{{ i }}" data-cta-position="{{ anchor }}_why">{{ b.settings[klabel] }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    {%- assign wurl = b.settings[kurl] -%}
+                    {%- if wurl == blank -%}{%- assign wurl = '#' | append: anchor -%}{%- endif -%}
+                    <a class="why__link" href="{{ wurl }}" data-zv-event="why_link" data-solution-type="{{ anchor }}" data-cta-name="why_{{ i }}" data-cta-position="{{ anchor }}_why">{{ b.settings[klabel] }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                   {%- endif -%}
                 </article>
               {%- endif -%}
