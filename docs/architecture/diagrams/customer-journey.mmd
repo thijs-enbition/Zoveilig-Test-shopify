@@ -1,0 +1,17 @@
+flowchart TD
+    A["Anonymous visitor"] --> B["Journey ID (zv_journey_id)<br/>first-party, created on first interaction"]
+    B --> C["Website interaction<br/>Keuzehulp / solution pages"]
+    C --> D["Lead capture<br/>capture-lead Edge Function"]
+    D --> E["Package recommendation<br/>(finder result)"]
+    E --> F["Package selection<br/>+ commercial snapshot"]
+    F --> G["Shopify cart<br/>cart attributes: lead_reference, journey_id, sku"]
+    G --> H["Checkout + iDEAL"]
+    H --> I["Successful payment"]
+    I --> J["Shopify webhook orders/paid<br/>(HMAC verified)"]
+    J --> K["Commerce order<br/>upsert on shopify_order_id"]
+    K --> L["Commerce order lines<br/>package expanded via package_components"]
+    L --> M["Operational handover<br/>operational_handover_status = ready"]
+    M --> N["Phase 2: Odoo ERP<br/>invoicing / subscription / fulfilment"]
+
+    classDef future fill:#eee,stroke:#999,stroke-dasharray:5 5,color:#555;
+    class N future;

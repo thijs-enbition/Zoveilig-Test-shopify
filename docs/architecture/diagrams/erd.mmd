@@ -1,0 +1,127 @@
+erDiagram
+    LEADS ||--o{ PACKAGE_SELECTIONS : "intends to buy"
+    LEADS ||--o{ COMMERCE_ORDERS : "converts into"
+    PRODUCTS ||--o{ PACKAGE_COMPONENTS : "is a package of"
+    PRODUCTS ||--o{ PACKAGE_COMPONENTS : "is a component in"
+    PRODUCTS ||--o{ PACKAGE_SELECTIONS : "chosen as"
+    PRODUCTS ||--o{ COMMERCE_ORDER_LINES : "sold as"
+    PACKAGE_SELECTIONS ||--o{ COMMERCE_ORDERS : "is fulfilled by"
+    COMMERCE_ORDERS ||--o{ COMMERCE_ORDER_LINES : "expands into"
+
+    LEADS {
+        uuid id PK
+        text lead_reference UK "LEAD-YYYYMMDD-XXXXXX (generated)"
+        text journey_id UK "partial-unique when present"
+        text email
+        text phone
+        text email_normalized "generated, indexed"
+        text phone_normalized "generated, indexed"
+        text status "new..converted..closed (CHECK)"
+        text source
+        text utm_source_medium_campaign "+content/term (first-touch)"
+        text gclid_fbclid "click IDs (first-touch)"
+        text landing_page_referrer "first-touch"
+        text last_page_url "last-touch"
+        boolean marketing_consent
+        timestamptz consent_recorded_at
+        text privacy_policy_version
+        text odoo_lead_id "Phase 2"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    PRODUCTS {
+        uuid id PK
+        text sku UK "stable identifier"
+        text product_name
+        text product_type "package|hardware|service|activation|subscription|addon"
+        text solution_category
+        boolean active
+        text invoice_trigger "ordered|delivered|recurring|manual_review"
+        boolean requires_delivery
+        boolean requires_activation
+        boolean is_recurring
+        text odoo_product_id "Phase 2"
+    }
+
+    PACKAGE_COMPONENTS {
+        uuid id PK
+        uuid package_product_id FK "-> products (RESTRICT)"
+        uuid component_product_id FK "-> products (RESTRICT)"
+        numeric quantity "CHECK > 0"
+        boolean required
+        int sort_order
+        date valid_from
+        date valid_to
+    }
+
+    PACKAGE_SELECTIONS {
+        uuid id PK
+        uuid lead_id FK "-> leads (SET NULL)"
+        uuid package_product_id FK "-> products (RESTRICT)"
+        text package_sku_snapshot "commercial snapshot"
+        text package_name_snapshot
+        numeric monthly_amount
+        numeric activation_amount
+        numeric initial_payment_amount
+        int contract_term_months
+        text currency
+        text selection_source
+        timestamptz selected_at
+    }
+
+    COMMERCE_ORDERS {
+        uuid id PK
+        text order_reference UK "ORDER-YYYYMMDD-XXXXXX (generated)"
+        uuid lead_id FK "-> leads (SET NULL)"
+        uuid package_selection_id FK "-> package_selections (SET NULL)"
+        text shopify_order_id UK "idempotency anchor"
+        text shopify_order_name
+        text payment_status "pending..paid..refunded (CHECK)"
+        text sepa_status
+        text activation_status
+        text operational_handover_status "not_ready..completed (CHECK)"
+        numeric total_amount
+        numeric monthly_amount
+        numeric activation_amount
+        text odoo_sale_order_id "Phase 2"
+        timestamptz paid_at
+    }
+
+    COMMERCE_ORDER_LINES {
+        uuid id PK
+        uuid commerce_order_id FK "-> commerce_orders (CASCADE)"
+        uuid product_id FK "-> products (SET NULL)"
+        text sku_snapshot
+        text product_name_snapshot
+        text product_type_snapshot
+        numeric quantity_ordered
+        numeric unit_price
+        numeric tax_rate
+        numeric line_total
+        text invoice_trigger_snapshot
+        text odoo_sale_order_line_id "Phase 2"
+    }
+
+    STATUS_HISTORY {
+        uuid id PK
+        text entity_type "lead|commerce_order|package_selection"
+        uuid entity_id "SOFT reference (no FK)"
+        text previous_status
+        text new_status
+        text changed_by
+        text reason
+        jsonb metadata "webhook/correlation/idempotency ids, evidence"
+        timestamptz created_at
+    }
+
+    DEPLOYMENT_REGISTRY {
+        uuid id PK
+        text environment "dev|production"
+        text schema_version
+        text migration_head
+        text edge_functions_version
+        text shopify_integration_version
+        text git_sha
+        timestamptz deployed_at
+    }

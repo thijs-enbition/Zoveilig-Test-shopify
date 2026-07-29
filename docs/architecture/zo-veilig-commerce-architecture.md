@@ -19,6 +19,22 @@ The platform separates three concerns deliberately:
 
 Phase 1 delivers an anonymous‑to‑converted journey that is fully attributable and auditable, ends in a **manual operational handover** (no Odoo yet), and never exposes a secret to the browser. Gate 1 (the database foundation) is complete on a dedicated DEV project built entirely from version‑controlled migrations.
 
+### 1.1 What is NOT in scope (current exclusions)
+
+To prevent anyone assuming features already exist, the following are **explicitly out of scope** at this point (Phase 1 / Gate 1):
+
+- Authentication or customer login UI
+- Customer self‑service portal
+- Subscription management (create / change / cancel)
+- Automated Odoo synchronisation (Phase 2)
+- Payment reconciliation and dunning (Phase 3)
+- Email / marketing automation
+- AI assistants or automation (Phase 6)
+- Reporting dashboards, and the reporting role/views (Gate 2)
+- The Edge Functions, RPCs and storefront lead wiring (Gate 2/3 — designed, not built)
+
+**If a capability is not described in this document as *built*, assume it is not present.**
+
 ---
 
 ## 2. Architecture principles
@@ -32,6 +48,21 @@ Phase 1 delivers an anonymous‑to‑converted journey that is fully attributabl
 7. **Audit the important transitions.** `status_history` records who/what/why for every meaningful state change.
 8. **Data minimisation & consent.** PII is minimised, consent is recorded, logs are redacted, marketing attribution is consent‑aware.
 9. **Gated delivery.** Four approval gates; nothing proceeds without explicit sign‑off.
+
+### 2.1 Non‑negotiable principles (guardrails we never break)
+
+These are the architectural guardrails. Any proposal that violates one is rejected or escalated, never quietly accommodated.
+
+1. Production is never developed against.
+2. Git is always the source of truth.
+3. Schema changes require version‑controlled migrations.
+4. Operational data lives in Supabase.
+5. Shopify never becomes the CRM.
+6. Reporting never queries production operational tables directly — only read‑only views.
+7. New integrations must respect existing ownership boundaries.
+8. No feature bypasses the audit trail (`status_history`).
+9. Every deployment must be reversible.
+10. Every change must preserve data integrity (constraints, idempotency, snapshots).
 
 ---
 
@@ -336,6 +367,26 @@ flowchart TB
 
 Enforcement today: **RLS enabled, no policies** ⇒ `anon`/`authenticated` are denied on every table; `service_role` (used only inside Edge Functions and tooling) is the sole accessor. The storefront never holds `service_role`.
 
+### 6.1 Data ownership matrix (system of record)
+
+Distinct from *table* ownership above: which **system** is the authoritative source for each kind of business data. Every future integration should consult this first.
+
+| Business data | System of record | Held elsewhere as |
+|---|---|---|
+| Product catalogue | **Supabase** (`products`) | SKU mirrored in Shopify variants |
+| Package definitions (BOM) | **Supabase** (`package_components`) | — |
+| Customer lead & identity | **Supabase** (`leads`, `journey_id`) | references in Shopify cart/order attributes |
+| Marketing attribution | **Supabase** (`leads`, first/last‑touch) | click IDs originate in ad platforms |
+| Checkout | **Shopify** | — |
+| Payment | **Shopify** (iDEAL) | `payment_status` snapshot in Supabase |
+| Commerce/operational order | **Supabase** (`commerce_orders` + lines) | `shopify_order_id` reference |
+| Operational status / handover | **Supabase** (`operational_handover_status`) | — |
+| Invoice / subscription / finance | **Odoo** (Phase 2) | `odoo_*` reference fields pre‑wired |
+| Analytics events | **GA4 / Meta** | dataLayer + Shopify Custom Pixel |
+| Deployment versions | **Supabase** (`internal.deployment_registry`) | git SHA in the repo |
+
+**Rule:** exactly one system of record per data type; every other system holds *references or snapshots*, never a competing master copy.
+
 ---
 
 ## 7. Architectural decisions
@@ -354,6 +405,27 @@ Enforcement today: **RLS enabled, no policies** ⇒ `anon`/`authenticated` are d
 - **Why email is not globally unique.** One email can legitimately belong to multiple service recipients, households, packages or contracts. A global unique would wrongly merge distinct people/contracts. We match by reference → journey → normalised email/phone, and route ambiguity to manual review.
 - **Why phone is not globally unique.** Same reasoning: shared household numbers and multi‑recipient care. Normalised phone is indexed for matching, not constrained to uniqueness.
 - **Why package expansion exists.** A customer buys a "package", but operations must deliver and invoice its parts (hub, sensors, activation, recurring service). Expanding the package into `commerce_order_lines` via `package_components` produces the operational detail; storing only the package header would be insufficient for fulfilment and finance.
+
+### 7.1 Architecture Decision Record (ADR) register
+
+Every decision above is captured as a formal ADR under [`docs/architecture/adr/`](./adr/) so future contributors get the historical context without reading commit history.
+
+| ADR | Decision | Status | Date |
+|---|---|---|---|
+| ADR‑001 | Git is the source of truth | Accepted | 2026‑07‑29 |
+| ADR‑002 | Shopify is not the CRM | Accepted | 2026‑07‑29 |
+| ADR‑003 | Supabase owns operational data | Accepted | 2026‑07‑29 |
+| ADR‑004 | Odoo deferred to Phase 2 | Accepted | 2026‑07‑29 |
+| ADR‑005 | Reporting via SQL views (read‑only) | Accepted | 2026‑07‑29 |
+| ADR‑006 | Production is never the development environment | Accepted | 2026‑07‑29 |
+| ADR‑007 | Deny‑by‑default RLS + Edge Function boundary | Accepted | 2026‑07‑29 |
+| ADR‑008 | Idempotent paid‑order processing | Accepted | 2026‑07‑29 |
+| ADR‑009 | Email/phone are not globally unique | Accepted | 2026‑07‑29 |
+| ADR‑010 | journey_id for anonymous→known correlation | Accepted | 2026‑07‑29 |
+| ADR‑011 | operational_handover_status separate from activation_status | Accepted | 2026‑07‑29 |
+| ADR‑012 | Package expansion via package_components + snapshots | Accepted | 2026‑07‑29 |
+| ADR‑013 | Gated delivery (four approval gates) | Accepted | 2026‑07‑29 |
+| ADR‑014 | Deployment version registry in a private schema | Accepted | 2026‑07‑29 |
 
 ---
 
@@ -416,20 +488,22 @@ flowchart LR
 
 *Reviewed as a Senior Enterprise Architect against the post‑Gate‑1 state.*
 
+*Scores recalibrated with the lead architect at Gate 1 sign‑off. The sub‑10 scores reflect phases not yet built, not design shortcomings.*
+
 | Dimension | Score /10 | Rationale |
 |---|---|---|
-| Database design | **9** | Normalised, constrained, snapshotted, audited; idempotency anchors in place. |
-| Data ownership | **9** | Clear per‑system ownership; deny‑by‑default RLS; server‑side boundary. |
-| Governance | **9** | Repo‑first, versioned migrations, deployment registry, gated delivery. |
-| Scalability | **7** | Postgres + stateless Edge Functions scale well; rate‑limit store and high‑volume webhook throughput to be validated. |
-| Security | **8** | Strong posture (RLS, service‑role only, HMAC planned, log redaction); pen‑test + rate‑limit hardening pending. |
-| Maintainability | **8** | Clean migrations, plain‑English decisions, small surface; RPCs/tests still to come. |
-| Integration readiness | **7** | `odoo_*` fields + snapshots pre‑wire ERP; webhook/idempotency designed; not yet exercised end‑to‑end. |
-| Operational readiness | **6** | Handover state modelled; dashboard + runbooks not built; handover still manual. |
-| Reporting readiness | **6** | Views designed and approved‑in‑principle but not built (Gate 2). |
-| Future ERP readiness | **8** | Deliberate forward‑compat design; final SKU/Odoo mapping outstanding. |
+| Architecture | **9.5** | Clean separation of concerns; snapshotting, idempotency and audit designed in. |
+| Data ownership | **10** | One system of record per data type; deny‑by‑default; server‑side boundary. |
+| Governance | **10** | Repo‑first, versioned migrations, deployment registry, four‑gate discipline. |
+| Documentation | **10** | This reference doc + ADRs + glossary + diagrams, authored before implementation. |
+| Maintainability | **9** | Small, constrained surface; plain‑English decisions; modular docs. |
+| Scalability | **9** | Postgres + stateless Edge Functions; only high‑volume webhook/rate‑limit tuning remains. |
+| Security foundation | **9** | RLS deny‑by‑default, service‑role only, HMAC + log redaction designed; pen‑test/rate‑limit hardening pending. |
+| Future ERP readiness | **9** | `odoo_*` fields + snapshots pre‑wire ERP; final SKU/Odoo mapping outstanding. |
+| Reporting readiness | **8** | By design — views/role are Gate 2, not yet built. |
+| Operational readiness | **8** | By design — dashboard/runbooks arrive with Gate 2/3. |
 
-**Weighted overall: ~7.7 / 10** — a strong, disciplined foundation with the expected Phase‑1 gaps (functions, seed, reporting, dashboard) still ahead by design.
+**Overall: ~9.2 / 10** — a strong, disciplined foundation; the sub‑10 areas are deliberately deferred to later gates, not gaps in the design.
 
 **Strengths:** separation of concerns; repo‑first governance; deny‑by‑default security; idempotency and snapshotting; ERP forward‑compatibility; audit trail.
 
@@ -450,6 +524,31 @@ flowchart LR
 7. **Decide the manual‑review workflow owner** (who resolves ambiguous‑match leads) and where it surfaces.
 8. **Plan production backup/PITR verification** and monitoring/alerting before Gate 4.
 9. **Keep the four‑gate discipline** — build `004_rpc` and `006_reporting_views` only on explicit Gate 2 approval.
+
+---
+
+## Appendix A — Related documents
+
+- **ADRs:** [`docs/architecture/adr/`](./adr/) — formal decision records ADR‑001 … ADR‑014.
+- **Glossary:** [`docs/architecture/glossary.md`](./glossary.md) — one‑line definitions of every key term.
+- **Diagram sources:** [`docs/architecture/diagrams/`](./diagrams/) — the Mermaid `.mmd` sources (ERD, customer journey / data flow, solution architecture, roadmap), kept modular so individual diagrams can evolve without touching this document.
+
+## Appendix B — Documentation structure
+
+```text
+docs/
+├── architecture/
+│   ├── zo-veilig-commerce-architecture.md   ← this document (the reference)
+│   ├── adr/                                  ← ADR-001 … ADR-014
+│   ├── diagrams/                             ← erd.mmd, customer-journey.mmd, solution-architecture.mmd, roadmap.mmd
+│   └── glossary.md
+├── operations/                              ← runbooks (Gate 2/3)
+├── security/                                ← reporting security review, threat model (Gate 2)
+├── integrations/                            ← Shopify / Odoo integration specs (Phase 2)
+└── roadmap/                                 ← phase planning
+```
+
+The single reference document holds the narrative; ADRs, diagrams and glossary are modular so the reference does not become unwieldy over time.
 
 ---
 

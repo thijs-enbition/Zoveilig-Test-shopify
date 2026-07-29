@@ -1,0 +1,47 @@
+flowchart TB
+    subgraph CX["Customer experience — owned by Shopify"]
+        CU["Customer"] --> TH["Shopify theme (Liquid)"]
+        TH --> JS["Storefront JavaScript<br/>zv-finder / zv-lead / zv-callback"]
+    end
+
+    subgraph ANALYTICS["Analytics (separate lane)"]
+        GTM["GTM container"]
+        GA4["GA4"]
+        META["Meta Pixel + CAPI"]
+        GADS["Google Ads"]
+        PIXEL["Shopify Custom Pixel (purchase)"]
+    end
+
+    subgraph BOUNDARY["Secure server-side boundary — owned by Supabase"]
+        EF1["Edge Function: capture-lead"]
+        EF2["Edge Function: shopify-order-webhook"]
+        DB[("Supabase Postgres<br/>7 core tables + internal")]
+        VW["Reporting views (Gate 2)<br/>vw_* read-only"]
+        EF1 --> DB
+        EF2 --> DB
+        DB --> VW
+    end
+
+    subgraph OPS["Operations & reporting"]
+        DASH["Operations dashboard<br/>(manual handover)"]
+        BI["Power BI / Excel / Metabase (future)"]
+    end
+
+    subgraph ERP["Finance / ERP (Phase 2+)"]
+        ODOO["Odoo ERP"]
+        CRM["Future CRM integrations"]
+    end
+
+    JS -->|"POST (allowlist, CORS)"| EF1
+    JS -. dataLayer .-> GTM
+    GTM --> GA4 & META & GADS
+    PIXEL --> GA4 & META
+    TH -->|"cart attributes"| SHOP["Shopify checkout + iDEAL"]
+    SHOP -->|"orders/paid webhook (HMAC)"| EF2
+    VW --> DASH
+    VW --> BI
+    DB -->|"Phase 2 export (odoo_* fields)"| ODOO
+    ODOO --> CRM
+
+    classDef future fill:#eee,stroke:#999,stroke-dasharray:5 5,color:#555;
+    class BI,ODOO,CRM,PIXEL future;
