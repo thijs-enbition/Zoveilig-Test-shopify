@@ -208,7 +208,14 @@
   }
 
   function packageView(el, extra) {
-    return pushEcommerce('package_view', { currency: 'EUR', items: [itemFromEl(el)] }, ctaContext(el, extra));
+    return pushEcommerce('view_package', { currency: 'EUR', items: [itemFromEl(el)] }, ctaContext(el, extra));
+  }
+
+  // Call only after Shopify confirms the line was removed from the cart.
+  function removeFromCart(item, extra) {
+    var ec = { currency: 'EUR', items: item ? [item] : [] };
+    if (item && item.price) ec.value = Math.round(item.price * (item.quantity || 1) * 100) / 100;
+    return pushEcommerce('remove_from_cart', ec, extra);
   }
 
   // Call ONLY after Shopify confirms the line was added to the cart.
@@ -230,19 +237,26 @@
     return pushEcommerce('begin_checkout', ec);
   }
 
-  function solutionCategorySelect(category, el) { return push('solution_category_select', ctaContext(el, { solution_category: category })); }
-  function productFinderStart(el) { return push('product_finder_start', ctaContext(el)); }
+  function solutionCategorySelect(category, el) { return push('view_solution', ctaContext(el, { solution_category: category })); }
+  function productFinderStart(el) { return push('finder_start', ctaContext(el)); }
   function packageCompareClick(el) { return push('package_compare_click', ctaContext(el)); }
-  function packageOptionView(el, extra) { return push('package_option_view', ctaContext(el, extra)); }
-  function packageOptionSelect(el, option) { return push('package_option_select', ctaContext(el, option)); }
-  function phoneClick(el) { return push('phone_click', ctaContext(el, { phone: el && el.getAttribute ? el.getAttribute('href') : undefined })); }
+  function packageOptionView(el, extra) { return push('view_package', ctaContext(el, extra)); }
+  function packageOptionSelect(el, option) { return push('select_package', ctaContext(el, option)); }
+  // Privacy: no phone/email address goes on the dataLayer, only the click context.
+  function phoneClick(el) { return push('phone_click', ctaContext(el)); }
+  function emailClick(el) { return push('email_click', ctaContext(el)); }
 
-  // ---- Callback ("Bel mij terug") lead events -------------------------------
+  // ---- Page + generic events ------------------------------------------------
+  function pageView(extra) { return push('page_view', extra); }
+  function trackError(errorType, extra) { var p = extra || {}; p.error_type = errorType || p.error_type || 'unknown'; return push('error_event', p); }
+
+  // ---- Lead / callback / contact events -------------------------------------
   function callbackCtaClick(el) { return push('callback_cta_click', ctaContext(el)); }
-  function callbackFormStart(el) { return push('callback_form_start', ctaContext(el)); }
-  function callbackFormSubmit(el) { return push('callback_form_submit', ctaContext(el)); }
-  function callbackRequestSuccess(extra) { return push('callback_request_success', extra); }
-  function callbackRequestError(extra) { return push('callback_request_error', extra); }
+  function callbackFormStart(el) { return push('lead_form_start', ctaContext(el, { lead_type: 'callback' })); }
+  function callbackFormSubmit(el) { return push('lead_form_submit', ctaContext(el, { lead_type: 'callback' })); }
+  function callbackRequestSuccess(extra) { var p = extra || {}; if (!p.lead_type) p.lead_type = 'callback'; return push('callback_request', p); }
+  function callbackRequestError(extra) { var p = extra || {}; if (!p.error_type) p.error_type = 'callback_request'; return push('error_event', p); }
+  function contactSubmit(extra) { var p = extra || {}; if (!p.lead_type) p.lead_type = 'contact'; return push('contact_submit', p); }
 
   // Assemble the CRM / Odoo lead payload. Attribution is merged from storage.
   // Raw email is included ONLY because a callback lead legitimately needs a contact
@@ -262,7 +276,22 @@
     return lead;
   }
 
+  // Consent-gated attribution: capture (gclid/fbclid/utm_*) runs ONLY when a caller
+  // invokes this after the required consent is granted (see zv-track.js). It never runs
+  // automatically on page load, so no marketing identifiers are stored pre-consent.
+  function captureAttributionOnce() {
+    if (ZV.__attrCaptured) return;
+    captureAttribution();
+    ZV.__attrCaptured = true;
+  }
+
   ZV.getAttribution = getAttribution;
+  ZV.captureAttribution = captureAttributionOnce;
+  ZV.pageView = pageView;
+  ZV.removeFromCart = removeFromCart;
+  ZV.emailClick = emailClick;
+  ZV.contactSubmit = contactSubmit;
+  ZV.trackError = trackError;
   ZV.push = push;
   ZV.clearEcommerce = clearEcommerce;
   ZV.itemFromEl = itemFromEl;
@@ -284,7 +313,9 @@
   ZV.callbackRequestSuccess = callbackRequestSuccess;
   ZV.callbackRequestError = callbackRequestError;
   ZV.buildCallbackLead = buildCallbackLead;
+  ZV.phoneClick = phoneClick;
 
-  captureAttribution();
+  // NOTE: attribution is NOT captured here. zv-track.js calls ZV.captureAttribution()
+  // only after the visitor grants the required (marketing) consent.
   ZV.__initialised = true;
 })(window);

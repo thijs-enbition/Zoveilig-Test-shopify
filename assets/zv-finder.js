@@ -148,7 +148,7 @@
     function renderResult() {
       var r = route(answers);
       var p = META[r.primary];
-      if (ZV.push) ZV.push('finder_result_view', { recommended_pakket: r.primary, segment: p.seg });
+      if (ZV.push) ZV.push('finder_complete', { recommended_pakket: r.primary, segment: p.seg });
       var altsHtml = r.alts.map(function (k) { return pkgCardHtml(k, false, products); }).join('');
       var prod = products[r.primary];
       var detailUrl = (prod && prod.url) || resultUrl;
@@ -195,7 +195,7 @@
       if (opt) {
         if (!started) { started = true; if (ZV.push) ZV.push('finder_start', {}); }
         answers[QUESTIONS[step].id] = opt.getAttribute('data-opt');
-        if (ZV.push) ZV.push('finder_question_answer', { question_num: step + 1, answer_value: opt.getAttribute('data-opt') });
+        if (ZV.push) ZV.push('finder_answer', { question_num: step + 1, answer_value: opt.getAttribute('data-opt') });
         step++;
         render();
         return;
