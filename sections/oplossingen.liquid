@@ -1,3 +1,4 @@
+{%- comment -%} ZV-BUILD: drawer-fix-db378b0 {%- endcomment -%}
 {%- comment -%}
   Oplossingen landing page — 1:1 port of "Zo Veilig Oplossingspaginas.html" (pages.jsx).
   Structure: a category tab switcher (.catnav), and per category a full-width background-photo
@@ -440,12 +441,12 @@
 @media (max-width: 880px) { .partners { grid-template-columns: 1fr; } .partners__logos { justify-content: flex-start; } }
 
 /* Meer informatie modal / breakout (pb- and pbd- classes). NB: no bare asterisk-slash in this comment. */
-.pb-scrim { position: fixed; inset: 0; z-index: 9999; background: rgba(17, 14, 45, 0.52); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease both; }
+.pb-scrim { position: fixed; inset: 0; z-index: 9999; background: rgba(17, 14, 45, 0.52); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease; }
 .pb-scrim[hidden] { display: none; }
 /* Body scroll-lock while the drawer is open. JS sets top:-scrollY for exact restore. */
 body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
 @keyframes pbFade { from { opacity: 0; } to { opacity: 1; } }
-.pb-panel { position: relative; width: min(74vw, 1180px); max-width: calc(100vw - 200px); height: 100%; min-height: 100%; display: flex; flex-direction: column; color: #fff; background: radial-gradient(64% 120% at 96% 0%, rgba(197, 46, 47, 0.34) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 2% 102%, rgba(0, 80, 159, 0.5) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #242a5f 100%); box-shadow: -50px 0 120px -40px rgba(0, 0, 0, 0.72); animation: pbSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.pb-panel { position: relative; width: min(74vw, 1180px); max-width: calc(100vw - 200px); height: 100%; min-height: 100%; display: flex; flex-direction: column; color: #fff; background: radial-gradient(64% 120% at 96% 0%, rgba(197, 46, 47, 0.34) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 2% 102%, rgba(0, 80, 159, 0.5) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #242a5f 100%); box-shadow: -50px 0 120px -40px rgba(0, 0, 0, 0.72); animation: pbSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 @media (max-width: 1024px) { .pb-panel { width: 92vw; max-width: 92vw; } }
 @media (max-width: 640px) { .pb-panel { width: 100vw; max-width: 100vw; } }
 @keyframes pbSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
