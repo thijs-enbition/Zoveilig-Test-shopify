@@ -792,7 +792,8 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var list = items.map(cartRowHtml).join('');
     var tpl = document.getElementById('opl-cart-addons-tpl');
     var addons = '<div class="addcart__addons">' + (tpl ? tpl.innerHTML : '') + '</div>';
-    var count = cart ? (cart.item_count + (cart.item_count === 1 ? ' item in winkelwagen' : ' items in winkelwagen')) : '';
+    var n = items.length;   // number of line items (== cards shown), per spec
+    var count = n + (n === 1 ? ' item in winkelwagen' : ' items in winkelwagen');
     var body = items.length
       ? '<div class="addcart__count">' + count + '</div>' +
         '<ul class="addcart__list">' + list + '</ul>' +
