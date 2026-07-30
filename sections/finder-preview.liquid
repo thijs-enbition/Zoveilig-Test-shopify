@@ -75,9 +75,12 @@
 .finder-sec::before { content: ""; position: absolute; width: 620px; height: 620px; border-radius: 50%; right: -160px; top: -200px; background: radial-gradient(circle, rgba(228, 163, 17, 0.26), transparent 64%); pointer-events: none; }
 .finder-sec::after { content: ""; position: absolute; width: 520px; height: 520px; border-radius: 50%; left: -180px; bottom: -220px; background: radial-gradient(circle, rgba(0, 80, 159, 0.4), transparent 62%); pointer-events: none; }
 .finder-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 472px; gap: clamp(36px, 5vw, 80px); align-items: center; }
-.fs-copy .eyebrow { color: var(--gold-lt); display: block; }
-.fs-copy h2 { font-size: clamp(30px, 3.6vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; margin-top: 14px; text-wrap: balance; }
-.fs-copy p { font-size: clamp(16px, 1.6vw, 20px); font-weight: 500; color: #d8d2ef; margin-top: 18px; max-width: 46ch; line-height: 1.55; }
+/* Heading design-lock — colour + font declared directly so Dawn's global
+   `h1,h2,h3 { color: rgb(var(--color-foreground)) }` (a direct h2 rule that otherwise
+   beats the inherited white) cannot turn the large heading dark. Sizes/clamps unchanged. */
+.finder-sec .fs-copy .eyebrow { display: block; color: var(--zv-eyebrow-on-dark); font-family: var(--zv-heading-font); font-size: 12px; font-weight: 800; line-height: 18px; letter-spacing: 0.24em; text-transform: uppercase; }
+.finder-sec .fs-copy h2 { color: var(--zv-heading-on-dark); font-family: var(--zv-heading-font); font-size: clamp(30px, 3.6vw, 50px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.02; margin-top: 14px; text-wrap: balance; }
+.finder-sec .fs-copy p { color: var(--zv-body-on-dark); font-family: var(--zv-heading-font); font-size: clamp(16px, 1.6vw, 20px); font-weight: 500; margin-top: 18px; max-width: 46ch; line-height: 1.55; }
 .lio-guide { position: relative; margin-top: 22px; margin-left: -8px; width: max-content; will-change: transform; }
 .lio-guide img { width: clamp(260px, 26vw, 340px); height: auto; display: block; filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.48)); opacity: 1; transition: opacity 0.22s ease; animation: lioFloat 4.5s ease-in-out infinite; }
 @keyframes lioFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-9px) rotate(-0.6deg); } }
@@ -94,7 +97,7 @@
 .kh-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #f0b73a); border-radius: 999px; }
 .kh-body { padding: 16px 22px 6px; }
 .kh-step { font-size: 11.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.kh-body h3 { font-size: clamp(20px, 2.1vw, 24px); font-weight: 900; color: var(--indigo); letter-spacing: -0.015em; line-height: 1.12; margin-top: 6px; text-wrap: balance; }
+.finder-sec .kh-body h3 { color: var(--zv-heading-on-light); font-family: var(--zv-heading-font); font-size: clamp(20px, 2.1vw, 24px); font-weight: 900; letter-spacing: -0.015em; line-height: 1.12; margin-top: 6px; text-wrap: balance; }
 .kh-qsub { font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 6px; line-height: 1.4; }
 .kh-opts { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .kh-opts a { display: flex; align-items: center; gap: 13px; background: #fff; border: 1.5px solid var(--line); border-radius: 13px; padding: 12px 14px; min-height: 60px; text-decoration: none; color: var(--ink); transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }

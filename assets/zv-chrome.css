@@ -31,6 +31,14 @@
   --line-2: #dcd2bd;
   --muted: #6f6786;
   --muted-2: #8c84a6;
+
+  /* Heading design-lock tokens — immutable per the signed-off HTML. Declared directly on
+     each component so Dawn's `h1,h2,h3 { color: rgb(var(--color-foreground)) }` cannot leak in. */
+  --zv-heading-font: "Titillium Web", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --zv-heading-on-dark: #ffffff;   /* white heading on dark-purple background */
+  --zv-heading-on-light: #322469;  /* dark-purple heading on cream/light background */
+  --zv-eyebrow-on-dark: #f5c84a;   /* gold eyebrow on dark background */
+  --zv-body-on-dark: #d8d2ef;      /* lavender body text on dark background */
 }
 
 .wrap { max-width: 1280px; margin: 0 auto; padding: 0 clamp(20px, 3.6vw, 52px); }
