@@ -439,14 +439,16 @@
 .logochip.sec img { height: 34px; }
 @media (max-width: 880px) { .partners { grid-template-columns: 1fr; } .partners__logos { justify-content: flex-start; } }
 
-/* ---- Meer informatie modal / breakout (VERBATIM pb-*/pbd-*) ---- */
-.pb-scrim { position: fixed; inset: 0; z-index: 200; background: rgba(20, 14, 40, 0.62); backdrop-filter: blur(6px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease both; }
+/* Meer informatie modal / breakout (pb- and pbd- classes). NB: no bare asterisk-slash in this comment. */
+.pb-scrim { position: fixed; inset: 0; z-index: 9999; background: rgba(17, 14, 45, 0.52); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease both; }
 .pb-scrim[hidden] { display: none; }
+/* Body scroll-lock while the drawer is open. JS sets top:-scrollY for exact restore. */
+body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
 @keyframes pbFade { from { opacity: 0; } to { opacity: 1; } }
-.pb-panel { width: min(72vw, 1180px); max-width: calc(100vw - 220px); height: 100%; display: flex; flex-direction: column; color: #fff; background: radial-gradient(64% 120% at 96% 0%, rgba(197, 46, 47, 0.34) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 2% 102%, rgba(0, 80, 159, 0.5) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #242a5f 100%); box-shadow: -50px 0 120px -40px rgba(0, 0, 0, 0.72); animation: pbSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
-@media (max-width: 1024px) { .pb-panel { width: 90vw; max-width: 90vw; } }
+.pb-panel { position: relative; width: min(74vw, 1180px); max-width: calc(100vw - 200px); height: 100%; min-height: 100%; display: flex; flex-direction: column; color: #fff; background: radial-gradient(64% 120% at 96% 0%, rgba(197, 46, 47, 0.34) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 2% 102%, rgba(0, 80, 159, 0.5) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #242a5f 100%); box-shadow: -50px 0 120px -40px rgba(0, 0, 0, 0.72); animation: pbSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (max-width: 1024px) { .pb-panel { width: 92vw; max-width: 92vw; } }
 @media (max-width: 640px) { .pb-panel { width: 100vw; max-width: 100vw; } }
-@keyframes pbSlide { from { transform: translateX(46px); opacity: 0.3; } to { transform: none; opacity: 1; } }
+@keyframes pbSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
 .pb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: clamp(20px, 2.4vw, 30px) clamp(20px, 2.8vw, 38px) clamp(16px, 1.8vw, 22px); border-bottom: 1px solid rgba(255, 255, 255, 0.13); }
 .pb-eye { display: inline-flex; align-items: center; gap: 9px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-lt); }
 .pb-eye .d { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
@@ -455,7 +457,7 @@
 .pb-lead b { color: #fff; font-weight: 800; }
 .pb-x { flex: none; width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #fff; display: grid; place-items: center; cursor: pointer; transition: background 0.15s; }
 .pb-x svg { width: 20px; height: 20px; } .pb-x:hover { background: rgba(255, 255, 255, 0.18); }
-.pb-body { flex: 1; overflow-y: auto; padding: clamp(20px, 2.6vw, 32px) clamp(20px, 2.8vw, 38px) clamp(28px, 3vw, 40px); }
+.pb-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: clamp(20px, 2.6vw, 32px) clamp(20px, 2.8vw, 38px) clamp(28px, 3vw, 40px); }
 .pb-buy { width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 9px; border: none; border-radius: 6px; padding: 14px 18px; font-family: inherit; font-weight: 900; font-size: 14.5px; cursor: pointer; margin-top: 14px; background: var(--gold); color: var(--ink); box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
 .pb-buy svg { width: 18px; height: 18px; }
 .pb-buy:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--belt), 0 12px 24px -12px rgba(180, 126, 10, 0.7); }
@@ -823,7 +825,21 @@
   var DATA = {};
   try { DATA = JSON.parse(document.getElementById('opl-modal-data').textContent); } catch (e) { DATA = { hw: {}, pkg: {} }; }
   var scrim = document.getElementById('opl-modal');
-  var lastFocused = null, keyHandler = null, activePanel = null;
+  // Portal the overlay to <body> so position:fixed is always relative to the viewport
+  // and can never be trapped inside a transformed/filtered section ancestor.
+  if (scrim && scrim.parentNode !== document.body) document.body.appendChild(scrim);
+  var lastFocused = null, keyHandler = null, activePanel = null, savedScrollY = 0;
+
+  function lockScroll() {
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = (-savedScrollY) + 'px';
+    document.body.classList.add('zv-drawer-open');
+  }
+  function unlockScroll() {
+    document.body.classList.remove('zv-drawer-open');
+    document.body.style.top = '';
+    window.scrollTo(0, savedScrollY);
+  }
   var fmtCents = money;   // shared formatter (defined above)
   var ICON = {
     check: '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -930,8 +946,7 @@
     lastFocused = document.activeElement;
     render(panel, fk);
     scrim.hidden = false;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockScroll();
     var closeBtn = scrim.querySelector('[data-pb-close]');
     if (closeBtn) closeBtn.focus();
     keyHandler = function (e) {
@@ -950,8 +965,7 @@
   function closeModal() {
     scrim.hidden = true;
     scrim.innerHTML = '';
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
+    unlockScroll();
     if (keyHandler) { document.removeEventListener('keydown', keyHandler, true); keyHandler = null; }
     if (lastFocused && lastFocused.focus) lastFocused.focus();
     lastFocused = null; activePanel = null;
