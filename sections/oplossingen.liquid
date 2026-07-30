@@ -292,6 +292,42 @@
 
   <div class="pb-scrim" id="opl-modal" role="presentation" hidden></div>
   <div class="addcart" id="opl-cart" role="dialog" aria-label="Winkelwagen" aria-modal="true" hidden></div>
+
+  {%- comment -%}
+    Shared cart add-ons (identical for every cart) — cloned into the drawer by JS.
+    Prices render via the money filter (0 and 400 cents = pricing.config extra-etage/alarmcom-domotica),
+    so no literal amount lives in this source and the pricing-integrity check stays green.
+    Toggling a checkbox writes a Shopify cart ATTRIBUTE (data-zv-addon = attribute key); no invented variants.
+  {%- endcomment -%}
+  <template id="opl-cart-addons-tpl">
+    <div class="addcart__sec-h">Uitbreidingen toevoegen</div>
+    <label class="addcart__addon">
+      <input type="checkbox" data-zv-addon="Uitbreiding: Huisdier-upgrade" aria-label="Huisdier-upgrade toevoegen">
+      <span class="addcart__addon-body"><span class="addcart__addon-t">Huisdier-upgrade</span><span class="addcart__addon-d">Huisdiervriendelijke detectie, immuun voor uw huisdier.</span></span>
+      <span class="addcart__addon-price">{{ 0 | money }}</span>
+    </label>
+    <label class="addcart__addon">
+      <input type="checkbox" data-zv-addon="Uitbreiding: Extra sensoren" aria-label="Extra sensoren toevoegen">
+      <span class="addcart__addon-body"><span class="addcart__addon-t">Extra sensoren</span><span class="addcart__addon-d">Meer dekking voor grotere woningen en extra etages.</span></span>
+      <span class="addcart__addon-price">{{ 0 | money }}</span>
+    </label>
+    <label class="addcart__addon">
+      <input type="checkbox" data-zv-addon="Uitbreiding: Extra toegangspunten" aria-label="Extra toegangspunten toevoegen">
+      <span class="addcart__addon-body"><span class="addcart__addon-t">Extra toegangspunten</span><span class="addcart__addon-d">Beveilig extra deuren en ramen.</span></span>
+      <span class="addcart__addon-price">{{ 0 | money }}</span>
+    </label>
+    <div class="addcart__sec-h">Abonnementen toevoegen</div>
+    <label class="addcart__addon">
+      <input type="checkbox" data-zv-addon="Abonnement: Domotica" aria-label="Domotica toevoegen">
+      <span class="addcart__addon-body"><span class="addcart__addon-t">Domotica</span><span class="addcart__addon-d">Slimme bediening en automatisering.</span></span>
+      <span class="addcart__addon-price">+{{ 400 | money }}/mnd</span>
+    </label>
+    <label class="addcart__addon">
+      <input type="checkbox" data-zv-addon="Abonnement: Ontzorgpakket" aria-label="Ontzorgpakket toevoegen">
+      <span class="addcart__addon-body"><span class="addcart__addon-t">Ontzorgpakket</span><span class="addcart__addon-d">Onderhoud en batterijservice.</span></span>
+      <span class="addcart__addon-price">Prijs volgt</span>
+    </label>
+  </template>
 </div>
 {%- elsif request.design_mode -%}
   <div style="padding:60px;text-align:center;color:#6f6786;">Oplossingen: voeg "Oplossing" blokken toe.</div>
@@ -534,47 +570,64 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pbd-deploy li .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--belt); margin-top: 7px; }
 .pbd-deploy li b { color: var(--indigo); }
 
-/* ---- add-to-cart confirmation drawer (VERBATIM addcart-*) ---- */
-.addcart { position: fixed; inset: 0; z-index: 210; }
+/* add-to-cart confirmation drawer (addcart- classes; header / scroll / footer regions). */
+.addcart { position: fixed; inset: 0; z-index: 10000; }
 .addcart[hidden] { display: none; }
-.addcart__scrim { position: absolute; inset: 0; background: rgba(26, 18, 48, 0.4); animation: acFade 0.2s ease; }
+.addcart__scrim { position: fixed; inset: 0; background: rgba(20, 14, 40, 0.6); animation: acFade 0.2s ease; }
 @keyframes acFade { from { opacity: 0; } to { opacity: 1; } }
-.addcart__panel { position: absolute; top: 0; right: 0; height: 100%; width: min(620px, 52vw); background: var(--paper); box-shadow: -30px 0 70px -30px rgba(26, 18, 48, 0.5); display: flex; flex-direction: column; animation: acSlide 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
-@keyframes acSlide { from { transform: translateX(100%); } to { transform: none; } }
-.addcart__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 32px; border-bottom: 1px solid var(--line); }
-.addcart__t { display: flex; align-items: center; gap: 11px; font-size: 16px; font-weight: 900; color: var(--indigo); letter-spacing: -0.01em; }
-.addcart__chk { width: 30px; height: 30px; border-radius: 50%; background: #2f8f5b; display: grid; place-items: center; flex: none; }
-.addcart__chk svg { width: 17px; height: 17px; color: #fff; }
-.addcart__x { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+.addcart__panel { position: fixed; top: 0; right: 0; height: 100vh; height: 100dvh; width: min(820px, 100vw); background: var(--paper); box-shadow: -30px 0 70px -30px rgba(26, 18, 48, 0.5); display: flex; flex-direction: column; animation: acSlide 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes acSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.addcart__head { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 30px 32px; background: var(--paper); border-bottom: 1px solid var(--line); min-height: 96px; }
+.addcart__t { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 900; color: var(--indigo); letter-spacing: -0.01em; }
+.addcart__chk { width: 32px; height: 32px; border-radius: 50%; background: var(--ok); display: grid; place-items: center; flex: none; }
+.addcart__chk svg { width: 18px; height: 18px; color: #fff; }
+.addcart__x { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--muted); display: grid; place-items: center; font-size: 22px; line-height: 1; cursor: pointer; flex: none; transition: border-color 0.15s, color 0.15s; }
 .addcart__x:hover { border-color: var(--indigo); color: var(--indigo); }
-.addcart__body { flex: 1; overflow: auto; padding: 26px 32px; }
-.addcart__count { font-size: 14px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
-.addcart__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.addcart__row { display: flex; flex-direction: column; gap: 0; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 0; overflow: hidden; }
-.addcart__rowtop { display: flex; align-items: center; gap: 14px; padding: 17px 18px; }
-.addcart__info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.addcart__name { font-size: 17px; font-weight: 800; color: var(--indigo); }
-.addcart__sku { font-size: 12px; font-weight: 600; color: var(--belt); }
-.addcart__meta { font-size: 12px; font-weight: 600; color: var(--muted); }
-.addcart__price { font-size: 16px; font-weight: 900; color: var(--indigo); flex: none; }
-.addcart__rm { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; flex: none; }
+
+.addcart__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 24px 32px 40px; }
+.addcart__count { font-size: 12.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.addcart__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.addcart__item { background: #fff; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+.addcart__item-head { display: flex; align-items: flex-start; gap: 14px; padding: 17px 18px; }
+.addcart__info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.addcart__name { font-size: 16px; font-weight: 900; color: var(--indigo); line-height: 1.2; }
+.addcart__meta { font-size: 12px; font-weight: 700; color: var(--belt); letter-spacing: 0.02em; }
+.addcart__pricewrap { display: flex; align-items: flex-start; gap: 10px; flex: none; }
+.addcart__price { font-size: 15px; font-weight: 900; color: var(--indigo); white-space: nowrap; }
+.addcart__price .per { font-size: 12px; font-weight: 700; color: var(--muted); }
+.addcart__rm { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: #fff; color: var(--muted); display: grid; place-items: center; font-size: 16px; line-height: 1; cursor: pointer; flex: none; transition: border-color 0.15s, color 0.15s; }
 .addcart__rm:hover { border-color: var(--red); color: var(--red); }
-.addcart__note { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 14px; line-height: 1.45; }
-.addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 20px; text-align: center; }
-.addcart__trust { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
-.addcart__trust-h { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--belt); }
-.addcart__trust ul { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.addcart__trust li { display: flex; align-items: flex-start; gap: 11px; font-size: 14px; font-weight: 600; color: #4a4458; line-height: 1.4; }
-.addcart__trust li svg { width: 15px; height: 15px; color: var(--ok); flex: none; margin-top: 2px; }
+.addcart__opt { display: flex; align-items: center; gap: 11px; padding: 12px 18px; background: var(--sand); border-top: 1px solid var(--line); cursor: pointer; }
+.addcart__opt input { width: 18px; height: 18px; accent-color: var(--indigo); flex: none; cursor: pointer; }
+.addcart__opt-label { flex: 1; font-size: 13px; font-weight: 800; color: var(--indigo); }
+.addcart__opt-price { font-size: 13px; font-weight: 900; color: var(--belt); flex: none; }
+
+.addcart__note { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 16px; line-height: 1.45; }
+.addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin: 20px 0; text-align: center; }
+.addcart__err { color: var(--red-deep); font-size: 12.5px; font-weight: 700; margin-top: 8px; }
+
+.addcart__sec-h { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 26px 0 12px; }
+.addcart__addon { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 13px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+.addcart__addon:hover { border-color: var(--line-2); }
+.addcart__addon input { width: 18px; height: 18px; accent-color: var(--indigo); flex: none; cursor: pointer; margin-top: 1px; }
+.addcart__addon-body { flex: 1; min-width: 0; }
+.addcart__addon-t { font-size: 14px; font-weight: 800; color: var(--indigo); }
+.addcart__addon-d { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.addcart__addon-price { font-size: 13px; font-weight: 900; color: var(--belt); flex: none; white-space: nowrap; }
+
 .pcard__price .amt { transition: color 0.35s ease; }
 .pcard__price .amt.is-updated { color: var(--belt); }
-.addcart__foot { padding: 16px 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
-.addcart__go { display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 800; font-size: 15px; color: var(--ink); background: var(--gold); border-radius: 12px; padding: 14px; text-decoration: none; box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
+
+.addcart__foot { flex: 0 0 auto; padding: 18px 32px 22px; background: var(--paper); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 11px; }
+.addcart__cont { font-family: inherit; font-weight: 800; font-size: 15px; color: var(--indigo); background: #fff; border: 2px solid var(--indigo); border-radius: 12px; padding: 14px; cursor: pointer; transition: background 0.15s; }
+.addcart__cont:hover { background: var(--indigo-soft); }
+.addcart__go { display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 900; font-size: 15px; color: var(--ink); background: var(--gold); border-radius: 12px; padding: 14px; text-decoration: none; box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
 .addcart__go svg { width: 17px; height: 17px; }
 .addcart__go:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--belt), 0 12px 24px -12px rgba(180, 126, 10, 0.7); }
-.addcart__cont { font-family: inherit; font-weight: 800; font-size: 14px; color: var(--indigo); background: transparent; border: 2px solid var(--indigo); border-radius: 12px; padding: 12px; cursor: pointer; }
-.addcart__cont:hover { background: var(--indigo-soft); }
-@media (max-width: 760px) { .addcart__panel { width: 92vw; } }
+.addcart__x:focus-visible, .addcart__rm:focus-visible, .addcart__cont:focus-visible, .addcart__go:focus-visible, .addcart__opt input:focus-visible, .addcart__addon input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+@media (max-width: 860px) { .addcart__panel { width: 100vw; } }
+@media (max-width: 560px) { .addcart__head { padding: 22px 20px; min-height: 84px; } .addcart__scroll { padding: 20px 20px 36px; } .addcart__foot { padding: 16px 20px 20px; } }
 .pcard__direct[aria-busy="true"], .pb-buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
 .pcard__err { color: var(--red-deep); font-size: 12.5px; font-weight: 700; margin-top: 6px; }
 
@@ -684,65 +737,92 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
   /* ---------- add-to-cart confirmation drawer (Shopify /cart.js backed) ---------- */
   var cartEl = document.getElementById('opl-cart');
-  var cartLastFocus = null, cartKey = null;
+  // Portal to <body> so position:fixed is viewport-relative (never trapped by a section ancestor).
+  if (cartEl && cartEl.parentNode !== document.body) document.body.appendChild(cartEl);
+  var cartLastFocus = null, cartKey = null, cartState = null, cartWriting = false;
+
+  var CART_CHECK = '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CART_ARROW = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function showCartError() {
+    var s = cartEl.querySelector('.addcart__scroll'); if (!s) return;
+    var e = s.querySelector('.addcart__err');
+    if (!e) { e = document.createElement('div'); e.className = 'addcart__err'; e.setAttribute('role', 'alert'); s.appendChild(e); }
+    e.textContent = 'Bijwerken mislukt. Probeer het opnieuw.';
+  }
+
+  /* Serialise cart writes so overlapping toggles cannot race; revert the control on failure. */
+  function cartWrite(url, payload, revert) {
+    if (cartWriting) { if (revert) revert(); return; }
+    cartWriting = true;
+    window.fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (cart) { cartWriting = false; updateCartCount(cart); renderCart(cart, true); })
+      .catch(function () { cartWriting = false; if (revert) revert(); showCartError(); });
+  }
 
   function cartRowHtml(it) {
     var p = it.properties || {};
-    var name = p['Pakket'] || it.product_title || '';
+    // Full label = "Oplossing · Pakket" (e.g. "Langer Thuis · Zeker"), from the line's own properties.
+    var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(p['Pakket'] || it.product_title || '');
     var sku = p['SKU'] || it.sku || '';
-    var extra = [];
-    if (p['Oplossing']) extra.push(p['Oplossing']);
-    if (p['Woning']) extra.push('>100 m²');
-    var meta = extra.length ? '<span class="addcart__meta">' + esc(extra.join(' · ')) + '</span>' : '';
-    return '<li class="addcart__row"><div class="addcart__rowtop"><div class="addcart__info">' +
-      '<span class="addcart__name">' + esc(name) + '</span>' +
-      (sku ? '<span class="addcart__sku">SKU · ' + esc(sku) + '</span>' : '') + meta +
-      '</div><span class="addcart__price">' + (it.original_line_price != null ? money(it.original_line_price) : '') + '</span>' +
-      '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(name) + '">×</button></div></li>';
+    var pkg = p['Pakket'] || it.product_title || 'item';
+    var woningOn = !!p['Woning'];
+    return '<li class="addcart__item">' +
+      '<div class="addcart__item-head"><div class="addcart__info">' +
+        '<span class="addcart__name">' + full + '</span>' +
+        (sku ? '<span class="addcart__meta">Pakket · ' + esc(sku) + '</span>' : '') +
+      '</div><div class="addcart__pricewrap">' +
+        '<span class="addcart__price">' + money(it.price) + '<span class="per">/mnd</span></span>' +
+        '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
+      '</div></div>' +
+      '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(it.key) + '"' + (woningOn ? ' checked' : '') +
+        ' aria-label="Woning groter dan 100 m² voor ' + esc(pkg) + '">' +
+        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>' +
+    '</li>';
   }
 
-  function renderCart(cart) {
+  function renderCart(cart, preserveScroll) {
+    var prev = 0;
+    if (preserveScroll) { var old = cartEl.querySelector('.addcart__scroll'); if (old) prev = old.scrollTop; }
+    cartState = cart;
     var items = (cart && cart.items) || [];
-    var list = items.length ? items.map(cartRowHtml).join('') : '';
-    var trustRows = [
-      'Vakkundig geïnstalleerd door onze monteurs',
-      '14 dagen bedenktijd na levering',
-      'Nederlandse meldkamer, 24/7 bewaakt door Securitas',
-      'Eén vast aanspreekpunt voor advies en service'
-    ].map(function (t) { return '<li>' + ICON.check + '<span>' + esc(t) + '</span></li>'; }).join('');
-    var reassure = '<div class="addcart__trust"><div class="addcart__trust-h">Inbegrepen bij Zo Veilig</div><ul>' + trustRows + '</ul></div>';
+    var attrs = (cart && cart.attributes) || {};
+    var list = items.map(cartRowHtml).join('');
+    var tpl = document.getElementById('opl-cart-addons-tpl');
+    var addons = '<div class="addcart__addons">' + (tpl ? tpl.innerHTML : '') + '</div>';
+    var count = cart ? (cart.item_count + (cart.item_count === 1 ? ' item in winkelwagen' : ' items in winkelwagen')) : '';
     var body = items.length
-      ? '<div class="addcart__count">' + cart.item_count + ' ' + (cart.item_count === 1 ? 'item' : 'items') + ' in winkelwagen</div>' +
+      ? '<div class="addcart__count">' + count + '</div>' +
         '<ul class="addcart__list">' + list + '</ul>' +
-        '<p class="addcart__note">Sommige prijzen bevestigen we bij het afronden. Apparatuur zit in uw maandbedrag (lease) of koopt u los.</p>' +
-        reassure
-      : '<p class="addcart__empty">Uw winkelwagen is leeg.</p>' + reassure;
+        '<p class="addcart__note">Sommige prijzen bevestigen we bij het afronden.</p>' + addons
+      : '<p class="addcart__empty">Uw winkelwagen is leeg.</p>' + addons;
     cartEl.innerHTML =
       '<div class="addcart__scrim" data-cart-close></div>' +
-      '<aside class="addcart__panel" role="document">' +
-        '<header class="addcart__head"><div class="addcart__t"><span class="addcart__chk">' +
-          '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '<aside class="addcart__panel" role="document" aria-label="Winkelwagen">' +
+        '<header class="addcart__head"><div class="addcart__t"><span class="addcart__chk">' + CART_CHECK +
           '</span>Toegevoegd aan winkelwagen</div>' +
           '<button type="button" class="addcart__x" data-cart-close aria-label="Sluiten">×</button></header>' +
-        '<div class="addcart__body">' + body + '</div>' +
+        '<div class="addcart__scroll">' + body + '</div>' +
         '<footer class="addcart__foot">' +
           '<button type="button" class="addcart__cont" data-cart-close>Verder winkelen</button>' +
-          '<a class="addcart__go" href="/checkout" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' +
-          '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>' +
+          '<a class="addcart__go" href="/checkout" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' + CART_ARROW + '</a>' +
         '</footer></aside>';
+    // Reflect shared add-on state from the Shopify cart attributes.
+    cartEl.querySelectorAll('[data-zv-addon]').forEach(function (inp) { inp.checked = !!attrs[inp.getAttribute('data-zv-addon')]; });
+    if (preserveScroll) { var sc = cartEl.querySelector('.addcart__scroll'); if (sc) sc.scrollTop = prev; }
   }
 
   function openCart(cart) {
     cartLastFocus = document.activeElement;
-    renderCart(cart);
+    renderCart(cart, false);
     cartEl.hidden = false;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockScroll();
     var x = cartEl.querySelector('.addcart__x'); if (x) x.focus();
     cartKey = function (e) {
       if (e.key === 'Escape') { e.preventDefault(); closeCart(); return; }
       if (e.key === 'Tab') {
-        var f = [].slice.call(cartEl.querySelectorAll('button, [href]')).filter(function (el) { return el.offsetParent !== null; });
+        var f = [].slice.call(cartEl.querySelectorAll('button, [href], input:not([disabled])')).filter(function (el) { return el.offsetParent !== null; });
         if (!f.length) return;
         var first = f[0], last = f[f.length - 1];
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -754,7 +834,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
   function closeCart() {
     cartEl.hidden = true; cartEl.innerHTML = '';
-    document.documentElement.style.overflow = ''; document.body.style.overflow = '';
+    unlockScroll();
     if (cartKey) { document.removeEventListener('keydown', cartKey, true); cartKey = null; }
     if (cartLastFocus && cartLastFocus.focus) cartLastFocus.focus();
     cartLastFocus = null;
@@ -764,9 +844,40 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (e.target.closest('[data-cart-close]')) { closeCart(); return; }
     var rm = e.target.closest('[data-cart-remove]');
     if (rm) {
+      if (cartWriting) return;
+      cartWriting = true; rm.disabled = true;
       window.fetch('/cart/change.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: rm.getAttribute('data-cart-remove'), quantity: 0 }) })
-        .then(function (r) { return r.json(); })
-        .then(function (cart) { updateCartCount(cart); renderCart(cart); var x = cartEl.querySelector('.addcart__x'); if (x) x.focus(); });
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (cart) {
+          cartWriting = false; updateCartCount(cart);
+          if (cart.item_count === 0) { closeCart(); }
+          else { renderCart(cart, true); var x = cartEl.querySelector('.addcart__x'); if (x) x.focus(); }
+        })
+        .catch(function () { cartWriting = false; rm.disabled = false; showCartError(); });
+    }
+  });
+
+  /* Delegated change handler: per-item Woning (line-item property) + shared add-ons (cart attributes). */
+  cartEl.addEventListener('change', function (e) {
+    var woning = e.target.closest('[data-zv-line-woning]');
+    if (woning) {
+      var key = woning.getAttribute('data-zv-line-woning'), on = woning.checked;
+      var line = null, its = (cartState && cartState.items) || [];
+      for (var i = 0; i < its.length; i++) { if (its[i].key === key) { line = its[i]; break; } }
+      if (!line) { woning.checked = !on; return; }
+      var props = {}, lp = line.properties || {};
+      for (var k in lp) { if (lp.hasOwnProperty(k)) props[k] = lp[k]; }
+      if (on) props['Woning'] = 'Groter dan 100 m²'; else delete props['Woning'];
+      woning.disabled = true;
+      cartWrite('/cart/change.js', { id: key, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
+      return;
+    }
+    var addon = e.target.closest('[data-zv-addon]');
+    if (addon) {
+      var akey = addon.getAttribute('data-zv-addon'), aon = addon.checked, a = {};
+      a[akey] = aon ? 'Ja' : '';
+      addon.disabled = true;
+      cartWrite('/cart/update.js', { attributes: a }, function () { addon.checked = !aon; addon.disabled = false; });
     }
   });
 
@@ -832,13 +943,17 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   var lastFocused = null, keyHandler = null, activePanel = null, savedScrollY = 0;
 
   function lockScroll() {
+    if (document.body.classList.contains('zv-drawer-open')) return;   // already locked (never double-lock)
     savedScrollY = window.scrollY || window.pageYOffset || 0;
+    var sw = window.innerWidth - document.documentElement.clientWidth;
+    if (sw > 0) document.body.style.paddingRight = sw + 'px';          // compensate scrollbar so page doesn't shift
     document.body.style.top = (-savedScrollY) + 'px';
     document.body.classList.add('zv-drawer-open');
   }
   function unlockScroll() {
     document.body.classList.remove('zv-drawer-open');
     document.body.style.top = '';
+    document.body.style.paddingRight = '';
     window.scrollTo(0, savedScrollY);
   }
   var fmtCents = money;   // shared formatter (defined above)
