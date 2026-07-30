@@ -694,15 +694,38 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     card._priceT = setTimeout(function () { amtEl.classList.remove('is-updated'); }, 600);
   }
 
+  /* Keep the Dawn header badge in lock-step with the real Shopify cart.
+     Creates the .cart-count-bubble when the cart went from empty (Dawn omits it then),
+     updates the number, and removes it when the cart is empty — so the badge can never
+     show a stale non-zero count while /cart is empty. */
   function updateCartCount(cart) {
-    var n = cart ? cart.item_count : 0;
-    document.querySelectorAll('.cart-count-bubble, [data-cart-count], .cart-count').forEach(function (el) {
-      var span = el.querySelector('span[aria-hidden="true"]') || el;
-      span.textContent = n;
-      el.classList.remove('hidden'); el.hidden = false;
-    });
+    var n = (cart && cart.item_count) ? cart.item_count : 0;
+    var icon = document.getElementById('cart-icon-bubble');
+    var bubble = document.querySelector('.cart-count-bubble');
+    if (n > 0) {
+      if (!bubble && icon) {
+        bubble = document.createElement('div');
+        bubble.className = 'cart-count-bubble';
+        bubble.innerHTML = '<span aria-hidden="true"></span><span class="visually-hidden"></span>';
+        icon.appendChild(bubble);
+      }
+      if (bubble) {
+        var vis = bubble.querySelector('span[aria-hidden="true"]');
+        if (vis) vis.textContent = (n < 100 ? n : '');
+        var hid = bubble.querySelector('.visually-hidden');
+        if (hid) hid.textContent = n + (n === 1 ? ' item' : ' items');
+        bubble.hidden = false; bubble.classList.remove('hidden');
+      }
+    } else if (bubble && bubble.parentNode) {
+      bubble.parentNode.removeChild(bubble);        // empty cart -> no badge (matches Dawn's empty state)
+    }
+    document.querySelectorAll('[data-cart-count]').forEach(function (el) { el.textContent = n; });
     try { document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: { cart: cart } })); } catch (e) {}
   }
+
+  /* Self-heal on load: fetch the authoritative Shopify cart and reconcile the badge,
+     so a stale server-rendered count (e.g. left over from a cart emptied elsewhere) is corrected. */
+  window.fetch('/cart.js').then(function (r) { return r.json(); }).then(updateCartCount).catch(function () {});
 
   function addToCart(variantId, properties, mode, btn) {
     if (!variantId || (btn && btn.dataset.busy === '1')) return;
