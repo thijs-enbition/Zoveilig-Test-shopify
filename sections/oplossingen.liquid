@@ -694,31 +694,47 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     card._priceT = setTimeout(function () { amtEl.classList.remove('is-updated'); }, 600);
   }
 
-  /* Keep the Dawn header badge in lock-step with the real Shopify cart.
-     Creates the .cart-count-bubble when the cart went from empty (Dawn omits it then),
-     updates the number, and removes it when the cart is empty — so the badge can never
-     show a stale non-zero count while /cart is empty. */
+  /* Keep the header cart badge in lock-step with the real Shopify cart.
+     The active header is the custom zv-header (<a class="cart"><span class="dot">N</span>),
+     which only server-renders the dot when cart.item_count > 0 — so add/remove must
+     create it, update it, and remove it at zero. A Dawn .cart-count-bubble is handled too
+     as a fallback. The badge can never show a stale non-zero count while /cart is empty. */
   function updateCartCount(cart) {
     var n = (cart && cart.item_count) ? cart.item_count : 0;
+
+    // Custom Zo Veilig header: <a class="cart"> ... <span class="dot">N</span>
+    document.querySelectorAll('a.cart').forEach(function (link) {
+      var dot = link.querySelector('.dot');
+      if (n > 0) {
+        if (!dot) { dot = document.createElement('span'); dot.className = 'dot'; link.appendChild(dot); }
+        dot.textContent = n;
+      } else if (dot && dot.parentNode) {
+        dot.parentNode.removeChild(dot);            // empty cart -> no dot (matches the Liquid `if item_count > 0`)
+      }
+      link.setAttribute('aria-label', 'Winkelwagen, ' + n + ' artikelen');
+    });
+
+    // Dawn fallback header: .cart-count-bubble inside #cart-icon-bubble
     var icon = document.getElementById('cart-icon-bubble');
     var bubble = document.querySelector('.cart-count-bubble');
-    if (n > 0) {
-      if (!bubble && icon) {
-        bubble = document.createElement('div');
-        bubble.className = 'cart-count-bubble';
-        bubble.innerHTML = '<span aria-hidden="true"></span><span class="visually-hidden"></span>';
-        icon.appendChild(bubble);
+    if (icon || bubble) {
+      if (n > 0) {
+        if (!bubble && icon) {
+          bubble = document.createElement('div');
+          bubble.className = 'cart-count-bubble';
+          bubble.innerHTML = '<span aria-hidden="true"></span><span class="visually-hidden"></span>';
+          icon.appendChild(bubble);
+        }
+        if (bubble) {
+          var vis = bubble.querySelector('span[aria-hidden="true"]');
+          if (vis) vis.textContent = (n < 100 ? n : '');
+          bubble.hidden = false; bubble.classList.remove('hidden');
+        }
+      } else if (bubble && bubble.parentNode) {
+        bubble.parentNode.removeChild(bubble);
       }
-      if (bubble) {
-        var vis = bubble.querySelector('span[aria-hidden="true"]');
-        if (vis) vis.textContent = (n < 100 ? n : '');
-        var hid = bubble.querySelector('.visually-hidden');
-        if (hid) hid.textContent = n + (n === 1 ? ' item' : ' items');
-        bubble.hidden = false; bubble.classList.remove('hidden');
-      }
-    } else if (bubble && bubble.parentNode) {
-      bubble.parentNode.removeChild(bubble);        // empty cart -> no badge (matches Dawn's empty state)
     }
+
     document.querySelectorAll('[data-cart-count]').forEach(function (el) { el.textContent = n; });
     try { document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: { cart: cart } })); } catch (e) {}
   }

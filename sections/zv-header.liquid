@@ -69,6 +69,34 @@
   </div>
 </nav>
 
+{% javascript %}
+(function () {
+  // The .dot badge is server-rendered from cart.item_count, correct at page load but
+  // otherwise static. Reconcile it with the authoritative Shopify cart on load (so a
+  // stale count can never show while /cart is empty) and on the drawer's cart:refresh.
+  function syncCartDot(n) {
+    document.querySelectorAll('a.cart').forEach(function (link) {
+      var dot = link.querySelector('.dot');
+      if (n > 0) {
+        if (!dot) { dot = document.createElement('span'); dot.className = 'dot'; link.appendChild(dot); }
+        dot.textContent = n;
+      } else if (dot && dot.parentNode) {
+        dot.parentNode.removeChild(dot);
+      }
+      link.setAttribute('aria-label', 'Winkelwagen, ' + n + ' artikelen');
+    });
+  }
+  window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
+    .then(function (r) { return r.json(); })
+    .then(function (cart) { syncCartDot(cart && cart.item_count ? cart.item_count : 0); })
+    .catch(function () {});
+  document.addEventListener('cart:refresh', function (e) {
+    var c = e && e.detail && e.detail.cart;
+    syncCartDot(c && c.item_count ? c.item_count : 0);
+  });
+})();
+{% endjavascript %}
+
 {% schema %}
 {
   "name": "Zo Veilig header",
