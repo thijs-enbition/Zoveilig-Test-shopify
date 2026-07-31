@@ -1171,6 +1171,21 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var card = activePanel && cardByFk(activePanel, scrim.dataset.fk);
     amt.textContent = box.checked ? fmtCents(base + 400) : (card ? card.dataset.price : amt.textContent);
   });
+
+  /* Keuzehulp interlink: /pages/oplossingen?pakket=<finder_key> lands here, switches to that
+     package's solution tab and opens its "Meer informatie" modal. Package identity is the
+     custom.finder_key metafield — the same key the Keuzehulp recommends — so no IDs are hardcoded. */
+  function openPackageFromUrl() {
+    var fk;
+    try { fk = new URLSearchParams(location.search).get('pakket'); } catch (e) { fk = null; }
+    if (!fk) return;
+    var anchor = null;
+    for (var id in panels) { if (panels.hasOwnProperty(id) && cardByFk(panels[id], fk)) { anchor = id; break; } }
+    if (!anchor) return;
+    show(anchor, false);                                 // reveal the package's solution tab
+    if (DATA.pkg[fk]) openModal(panels[anchor], fk);     // open its Meer informatie modal
+  }
+  openPackageFromUrl();
 })();
 {% endjavascript %}
 

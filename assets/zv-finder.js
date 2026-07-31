@@ -160,11 +160,16 @@
       var m = META[r.primary];
       if (ZV.push) ZV.push('finder_complete', { recommended_pakket: r.primary, segment: m.seg });
       var prod = products[r.primary];
-      var detailUrl = (prod && prod.url) || resultUrl;   // specific package/solution page, not generic
+      // Deep-link to the Oplossingen page and open THIS package's "Meer informatie" modal
+      // (interlink by finder_key; the Oplossingen JS switches to the right tab + opens the modal).
+      function pkgUrl(fk) {
+        var base = resultUrl || '/pages/oplossingen';
+        return base + (base.indexOf('?') > -1 ? '&' : '?') + 'pakket=' + encodeURIComponent(fk);
+      }
+      var detailUrl = pkgUrl(r.primary);
 
       var altsHtml = r.alts.map(function (k) {
-        var ap = products[k];
-        var altUrl = (ap && ap.url) || resultUrl;
+        var altUrl = pkgUrl(k);
         return '<a class="alt" href="' + esc(altUrl) + '" data-pkg="' + k + '">' +
           plHtml(k, true) +
           '<div class="alt-sub">' + esc(META[k].sub) + '</div>' +
