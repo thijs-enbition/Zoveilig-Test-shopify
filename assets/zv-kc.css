@@ -584,3 +584,7 @@ a.tb-name:hover{border-color:var(--gold);transform:translateY(-1px);}
 @media (min-width: 721px) {
   .zv-kc .kc-hero .kc-chips { max-width: none; flex-wrap: nowrap; }
 }
+
+/* Match the design's global `a{text-decoration:none}` reset (Dawn underlines links by
+   default). Scoped to .zv-kc; colour left to each element so button/link colours stay. */
+.zv-kc a { text-decoration: none; }
