@@ -1,4 +1,5 @@
 {{ 'section-blog-post.css' | asset_url | stylesheet_tag }}
+{{ 'zv-article.css' | asset_url | stylesheet_tag }}
 
 <article class="article-template">
   {%- for block in section.blocks -%}
@@ -68,7 +69,7 @@
           class="article-template__content page-width page-width--narrow rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
           {{ block.shopify_attributes }}
         >
-          {{ article.content }}
+          <div class="zv-article">{{ article.content }}</div>
         </div>
 
       {%- when 'share' -%}
@@ -291,6 +292,22 @@
 <script type="application/ld+json">
   {{ article | structured_data }}
 </script>
+
+{% javascript %}
+/* Kenniscentrum article FAQ accordions (max-height toggle, ported from the design). */
+(function () {
+  document.querySelectorAll('.zv-article .faq-q').forEach(function (q) {
+    q.addEventListener('click', function () {
+      var item = q.closest('.faq-item');
+      if (!item) return;
+      var a = item.querySelector('.faq-a');
+      var open = item.classList.toggle('open');
+      q.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (a) a.style.maxHeight = open ? a.scrollHeight + 'px' : '0';
+    });
+  });
+})();
+{% endjavascript %}
 
 {% schema %}
 {
