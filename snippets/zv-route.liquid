@@ -4,43 +4,64 @@
           href="{% render 'zv-route', key: 'kc/langer-thuis-wonen' %}"
           href="{% render 'zv-route', key: 'pakket', pakket: 'aware_plus' %}"
 
-  Re-routing is a one-file change here (e.g. blog↔pages for articles, or the
+  Re-routing is a one-file change here (blog↔pages for articles, or the
   klantenservice spelling). Nothing else in the theme hardcodes these paths.
 
   Decisions locked in (flip here if needed):
     - Kenniscentrum articles → Shopify blog: /blogs/kenniscentrum/<slug>
-    - Service route spelling → /pages/klantenservice (prototype typo "klanterservice" fixed)
-    - Package deep-links → /pages/oplossingen?pakket=<finder_key> (opens "Meer informatie")
+    - Service route spelling → /pages/klantenservice (prototype typo fixed)
+    - Package deep-links → /pages/oplossingen?pakket=<finder_key>
 {%- endcomment -%}
 {%- liquid
   assign kc_blog = '/blogs/kenniscentrum/'
   case key
-    when 'home'            echo routes.root_url
-    when 'keuzehulp'       echo routes.root_url | append: '#keuzehulp'
-    when 'oplossingen'     echo '/pages/oplossingen'
-    when 'kenniscentrum'   echo '/pages/kenniscentrum'
-    when 'klantenservice'  echo '/pages/klantenservice'
-    when 'contact'         echo '/pages/contact'
-    when 'over-ons'        echo '/pages/over-ons'
-    when 'zakelijk'        echo '/pages/zakelijk'
-    when 'faq'             echo '/pages/veelgestelde-vragen'
-    when 'herroepingsrecht' echo '/pages/herroepingsrecht'
-    when 'pakketten'       echo '/pages/oplossingen'
-    when 'pakket'          echo '/pages/oplossingen?pakket=' | append: pakket
-    comment
-      Kenniscentrum articles (the 11). Slug === the article's blog handle.
-    endcomment
-    when 'kc/langer-thuis-wonen'                echo kc_blog | append: 'langer-thuis-wonen'
-    when 'kc/langer-thuis-wonen-met-dementie'   echo kc_blog | append: 'langer-thuis-wonen-met-dementie'
-    when 'kc/wat-is-alarm-com'                  echo kc_blog | append: 'wat-is-alarm-com'
-    when 'kc/hoe-werkt-een-meldkamer'           echo kc_blog | append: 'hoe-werkt-een-meldkamer'
-    when 'kc/leefstijlmonitoring-zonder-cameras' echo kc_blog | append: 'leefstijlmonitoring-zonder-cameras'
-    when 'kc/sensoren-of-cameras'               echo kc_blog | append: 'sensoren-of-cameras'
-    when 'kc/hoe-veilig-is-nederland'           echo kc_blog | append: 'hoe-veilig-is-nederland'
-    when 'kc/alarm-met-of-zonder-meldkamer'     echo kc_blog | append: 'alarm-met-of-zonder-meldkamer'
-    when 'kc/camera-zonder-abonnement'          echo kc_blog | append: 'camera-zonder-abonnement'
-    when 'kc/privacy-en-gegevens'               echo kc_blog | append: 'privacy-en-gegevens'
-    when 'kc/hoe-veilig-zijn-slimme-sensoren'   echo kc_blog | append: 'hoe-veilig-zijn-slimme-sensoren'
-    else echo '/pages/kenniscentrum'
+    when 'home'
+      echo routes.root_url
+    when 'keuzehulp'
+      echo routes.root_url | append: '#keuzehulp'
+    when 'oplossingen'
+      echo '/pages/oplossingen'
+    when 'kenniscentrum'
+      echo '/pages/kenniscentrum'
+    when 'klantenservice'
+      echo '/pages/klantenservice'
+    when 'contact'
+      echo '/pages/contact'
+    when 'over-ons'
+      echo '/pages/over-ons'
+    when 'zakelijk'
+      echo '/pages/zakelijk'
+    when 'faq'
+      echo '/pages/veelgestelde-vragen'
+    when 'herroepingsrecht'
+      echo '/pages/herroepingsrecht'
+    when 'pakketten'
+      echo '/pages/oplossingen'
+    when 'pakket'
+      echo '/pages/oplossingen?pakket=' | append: pakket
+    when 'kc/langer-thuis-wonen'
+      echo kc_blog | append: 'langer-thuis-wonen'
+    when 'kc/langer-thuis-wonen-met-dementie'
+      echo kc_blog | append: 'langer-thuis-wonen-met-dementie'
+    when 'kc/wat-is-alarm-com'
+      echo kc_blog | append: 'wat-is-alarm-com'
+    when 'kc/hoe-werkt-een-meldkamer'
+      echo kc_blog | append: 'hoe-werkt-een-meldkamer'
+    when 'kc/leefstijlmonitoring-zonder-cameras'
+      echo kc_blog | append: 'leefstijlmonitoring-zonder-cameras'
+    when 'kc/sensoren-of-cameras'
+      echo kc_blog | append: 'sensoren-of-cameras'
+    when 'kc/hoe-veilig-is-nederland'
+      echo kc_blog | append: 'hoe-veilig-is-nederland'
+    when 'kc/alarm-met-of-zonder-meldkamer'
+      echo kc_blog | append: 'alarm-met-of-zonder-meldkamer'
+    when 'kc/camera-zonder-abonnement'
+      echo kc_blog | append: 'camera-zonder-abonnement'
+    when 'kc/privacy-en-gegevens'
+      echo kc_blog | append: 'privacy-en-gegevens'
+    when 'kc/hoe-veilig-zijn-slimme-sensoren'
+      echo kc_blog | append: 'hoe-veilig-zijn-slimme-sensoren'
+    else
+      echo '/pages/kenniscentrum'
   endcase
 -%}
