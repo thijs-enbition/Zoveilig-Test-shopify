@@ -1,12 +1,12 @@
 {{ 'zv-kc.css' | asset_url | stylesheet_tag }}
 
 <div class="zv-kc">
-  <section
-    class="kc-hero"
-    {% if section.settings.background != blank %}
-      style="--kc-hero-img: url('{{ section.settings.background | image_url: width: 1800 }}');"
-    {% endif %}
-  >
+  {%- if section.settings.background != blank -%}
+    {%- assign kc_hero_url = section.settings.background | image_url: width: 1800 -%}
+  {%- else -%}
+    {%- assign kc_hero_url = 'kc-hero.jpg' | asset_url -%}
+  {%- endif -%}
+  <section class="kc-hero" style="--kc-hero-img: url('{{ kc_hero_url }}');">
     <div class="wrap">
       {%- if section.settings.eyebrow != blank -%}
         <span class="eyebrow">{{ section.settings.eyebrow | escape }}</span>

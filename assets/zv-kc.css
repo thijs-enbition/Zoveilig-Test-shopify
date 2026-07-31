@@ -559,3 +559,22 @@ a.tb-name:hover{border-color:var(--gold);transform:translateY(-1px);}
 .crumb a:hover{color:var(--indigo);}
 .crumb svg{width:14px;height:14px;color:var(--line-2);}
 .crumb .cur{color:var(--indigo);}
+
+/* Onderwerpen accordion — was inline <style> in the design's #onderwerpen section. */
+.zv-kc #onderwerpen .kc-dd-wrap { max-width: 760px; }
+.zv-kc #onderwerpen .kc-dd { border: 1px solid var(--line, #ece6d8); border-radius: 16px; background: var(--paper, #fffdf8); overflow: hidden; box-shadow: 0 18px 44px -34px rgba(26, 18, 48, 0.4); }
+.zv-kc #onderwerpen .kc-dd > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 18px 20px; font-weight: 800; color: var(--indigo, #322469); font-size: 16px; }
+.zv-kc #onderwerpen .kc-dd > summary::-webkit-details-marker { display: none; }
+.zv-kc #onderwerpen .kc-dd > summary .cnt { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--muted, #6f6786); background: var(--sand, #f3eede); border-radius: 999px; padding: 4px 11px; }
+.zv-kc #onderwerpen .kc-dd > summary .chev { width: 18px; height: 18px; flex: none; color: var(--indigo, #322469); transition: transform 0.2s; }
+.zv-kc #onderwerpen .kc-dd[open] > summary .chev { transform: rotate(180deg); }
+.zv-kc #onderwerpen .kc-dd-list { border-top: 1px solid var(--line, #ece6d8); max-height: 420px; overflow: auto; }
+.zv-kc #onderwerpen .kc-dd-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--line, #ece6d8); text-decoration: none; transition: background 0.14s; }
+.zv-kc #onderwerpen .kc-dd-item:last-child { border-bottom: none; }
+.zv-kc #onderwerpen .kc-dd-item:hover { background: var(--sand, #f6efe1); }
+.zv-kc #onderwerpen .kc-dd-tx { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.zv-kc #onderwerpen .kc-dd-tx b { font-size: 15px; font-weight: 800; color: var(--indigo, #322469); }
+.zv-kc #onderwerpen .kc-dd-tx span { font-size: 12.5px; font-weight: 600; color: var(--muted, #6f6786); }
+.zv-kc #onderwerpen .kc-dd-tag { flex: none; font-size: 11px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; color: var(--belt, #b67e0a); background: var(--sand, #f3eede); border-radius: 6px; padding: 4px 9px; }
+.zv-kc #onderwerpen .kc-dd-arr { flex: none; width: 18px; height: 18px; color: var(--belt, #b67e0a); }
+.zv-kc #onderwerpen .kc-dd-arr svg { width: 100%; height: 100%; }
