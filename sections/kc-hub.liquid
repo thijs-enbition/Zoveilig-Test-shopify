@@ -1,0 +1,279 @@
+{%- comment -%}
+  Kenniscentrum hub body — 1:1 port of "Zo Veilig Kenniscentrum.html"
+  (#mantelzorgers grid + keuzehulp bridge, trustband, #begin-hier, #onderwerpen
+  accordion, #meest-gelezen, #zonder-cameras, #veiligheid, #levensfase).
+  Every internal link goes through snippets/zv-route so routing is centralised.
+  Anchor IDs (#mantelzorgers #onderwerpen #meest-gelezen #veiligheid) are preserved
+  because other pages/footer link into them.
+{%- endcomment -%}
+{{ 'zv-kc.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign arrow = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  assign clock = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  assign ext = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 5h5v5M19 5l-8 8M11 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+-%}
+
+<div class="zv-kc">
+
+  <!-- Voor mantelzorgers & families -->
+  <section class="sec" id="mantelzorgers">
+    <div class="wrap">
+      <div class="sec-head"><div>
+        <span class="eyebrow" style="color:var(--belt);">Voor mantelzorgers &amp; families</span>
+        <h2>Het begint vaak met een gevoel, niet met een product.</h2>
+        <p class="lede">“Ik maak me zorgen om mijn ouder, partner of dierbare, maar weet nog niet welke ondersteuning past.” Dat gevoel is het begin. Hier leest u eerst rustig wat helpt, zonder druk. Verhalen, gidsen en praktische checklists voor kinderen en mantelzorgers.</p>
+      </div></div>
+
+      <div class="topic-grid">
+        <a class="topic-card t-green" href="{% render 'zv-route', key: 'kc/langer-thuis-wonen' %}">
+          <span class="topic-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3>Langer zelfstandig thuis wonen</h3>
+          <p>Wat helpt om een dierbare veilig en vertrouwd thuis te laten wonen, en wat het vraagt.</p>
+          <span class="meta">Lees het overzicht {{ arrow }}</span>
+        </a>
+        <a class="topic-card t-blue" href="{% render 'zv-route', key: 'kc/langer-thuis-wonen-met-dementie' %}">
+          <span class="topic-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 0-6 6c0 5-2 6-2 6h16s-2-1-2-6a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10.5 20a2 2 0 0 0 3 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <h3>Hoe herkent u wanneer extra ondersteuning nodig is?</h3>
+          <p>De signalen die stilletjes laten zien dat er iets moet veranderen.</p>
+          <span class="meta">Lees: signalen om op te letten {{ arrow }}</span>
+        </a>
+        <a class="topic-card t-gold" href="{% render 'zv-route', key: 'kc/leefstijlmonitoring-zonder-cameras' %}">
+          <span class="topic-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h13a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 4V7a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 9h7M8 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <h3>Hoe bespreekt u veiligheid zonder controle over te nemen?</h3>
+          <p>Voer het gesprek met respect voor zelfstandigheid en eigen regie.</p>
+          <span class="meta">Lees: meekijken zonder mee te kijken {{ arrow }}</span>
+        </a>
+        <a class="topic-card t-red" href="{% render 'zv-route', key: 'kc/sensoren-of-cameras' %}">
+          <span class="topic-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.3 11.8l1.9 1.9 3.6-3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3>Vallen, dwalen, vergeetachtigheid of alleen wonen</h3>
+          <p>Praktische stappen en checklists voor de situaties die u het meeste zorgen geven.</p>
+          <span class="meta">Lees: welke bescherming past {{ arrow }}</span>
+        </a>
+      </div>
+
+      <div class="mz-bridge">
+        <div class="mz-tx">
+          <span class="eyebrow">Van begrip naar de juiste stap</span>
+          <h3>Niet zeker welke ondersteuning past?</h3>
+          <p>Elke familie is anders. Beantwoord een paar eenvoudige vragen en ontdek welke ondersteuning logisch is voor uw situatie.</p>
+        </div>
+        <a class="mz-cta" href="{% render 'zv-route', key: 'keuzehulp' %}">Start de Keuzehulp<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust / research band -->
+  <section class="trustband">
+    <div class="wrap">
+      <span class="tb-label">Gebaseerd op inzichten van</span>
+      <div class="tb-names">
+        <span class="tb-name">Vilans</span>
+        <span class="tb-name">Zorg van Nu</span>
+        <span class="tb-name">CBS<small>Veiligheidsmonitor</small></span>
+        <span class="tb-name">Medisch Contact</span>
+        <span class="tb-name">Politiekeurmerk Veilig Wonen</span>
+        <span class="tb-name">NIH</span>
+        <span class="tb-name">MDPI</span>
+        <span class="tb-name">TVV Totaal</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Begin hier · key articles -->
+  <section class="keyart" id="begin-hier">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow" style="color:var(--belt);">Begin hier</span>
+          <h2>De belangrijkste artikelen om te beginnen</h2>
+          <p class="lede">Wilt u begrijpen hoe onze oplossingen werken? Begin dan met deze twee artikelen. Ze leggen uit hoe het slimme Alarm.com-platform werkt en welke rol de Securitas-meldkamer speelt. Zo weet u precies hoe uw veiligheid achter de schermen wordt geregeld.</p>
+        </div>
+        <a class="all" href="#onderwerpen">Alle onderwerpen {{ arrow }}</a>
+      </div>
+
+      <div class="ka-grid">
+        <a class="ka-lead" href="{% render 'zv-route', key: 'kc/wat-is-alarm-com' %}">
+          <span class="ka-partner alarm"><span class="pdot"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 5 4-10 2 5h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Powered by Alarm.com</span>
+          <img src="{{ 'kc-alarm.jpg' | asset_url }}" alt="Gezin met Alarm.com beveiliging thuis" loading="lazy" width="720" height="480">
+          <div class="ka-lead-in">
+            <span class="ka-tag"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.3 11.8l1.9 1.9 3.6-3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Het slimme platform</span>
+            <h3>Alarm.com: het brein achter uw beveiliging</h3>
+            <ul class="ka-points">
+              <li><b>Crash &amp; Smash:</b> een seintje gaat naar de cloud zodra de deur opengaat. Wordt het paneel vernield, dan alarmeert de meldkamer alsnog.</li>
+              <li><b>Eigen mobiele verbinding:</b> sabotagebestendig, ook als kabels worden doorgeknipt of de stroom uitvalt.</li>
+              <li><b>AI-videoanalyse:</b> ziet verschil tussen mens, dier en voertuig, dus alleen meldingen die er toe doen.</li>
+            </ul>
+            <span class="ka-foot"><span class="go">Lees de gids {{ arrow }}</span><span class="rt">{{ clock }}7 min</span></span>
+          </div>
+        </a>
+
+        <a class="ka-lead" href="{% render 'zv-route', key: 'kc/hoe-werkt-een-meldkamer' %}">
+          <span class="ka-partner secu"><span class="pdot"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></span>Securitas meldkamer</span>
+          <img src="{{ 'kc-meldkamer.jpg' | asset_url }}" alt="Securitas meldkamer die 24/7 meekijkt" loading="lazy" width="720" height="480">
+          <div class="ka-lead-in">
+            <span class="ka-tag"><svg viewBox="0 0 24 24" fill="none"><path d="M12 13a8 8 0 0 1 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 19a7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 13l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>De mensen die opvolgen</span>
+            <h3>Securitas: de meldkamer en zorg die meekijkt</h3>
+            <ul class="ka-points">
+              <li><b>24/7 meldkamer:</b> bij een melding volgt binnen seconden een mens, sneller dan de drie minuten die een inbreker nodig heeft.</li>
+              <li><b>Foresite voorspellende zorg:</b> passieve sensoren volgen looppatroon, slaap en ademhaling en signaleren problemen vroeg.</li>
+              <li><b>Privacy-silhouet bij een val:</b> opvolging zonder videobeeld, zo blijft het veilig en respectvol.</li>
+            </ul>
+            <span class="ka-foot"><span class="go">Lees de gids {{ arrow }}</span><span class="rt">{{ clock }}6 min</span></span>
+          </div>
+        </a>
+      </div>
+
+      <div class="ka-row">
+        <a class="ka-item" href="{% render 'zv-route', key: 'kc/wat-is-alarm-com' %}"><span class="ka-src">Alarm.com</span><b>Eén app voor alles</b><p>Camera's, sloten, verwarming en verlichting in één vertrouwd overzicht, in plaats van vijf losse apps.</p><span class="ka-meta">Lees verder {{ arrow }}</span></a>
+        <a class="ka-item" href="{% render 'zv-route', key: 'kc/wat-is-alarm-com' %}"><span class="ka-src">Alarm.com</span><b>Veilig toegang delen</b><p>Tijdelijke codes voor de schoonmaker, klusjesman of logé, met een eigen tijdvak en zonder sleutel.</p><span class="ka-meta">Lees verder {{ arrow }}</span></a>
+        <a class="ka-item" href="{% render 'zv-route', key: 'kc/wat-is-alarm-com' %}"><span class="ka-src">Alarm.com</span><b>Slim arm en disarm</b><p>Automatisch op scherp bij het slapengaan, en weer uit zodra uw telefoon thuis aankomt via geofencing.</p><span class="ka-meta">Lees verder {{ arrow }}</span></a>
+        <a class="ka-item" href="{% render 'zv-route', key: 'kc/hoe-werkt-een-meldkamer' %}"><span class="ka-src">Securitas</span><b>Proactieve welzijnsmeldingen</b><p>Het systeem leert het dagritme en waarschuwt familie bij afwijkingen, zoals een dag met opvallend weinig activiteit.</p><span class="ka-meta">Lees verder {{ arrow }}</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Onderwerpen · accordion -->
+  <section class="sec" id="onderwerpen">
+    <div class="wrap">
+      <div class="sec-head"><div>
+        <span class="eyebrow" style="color:var(--belt);">Onderwerpen</span>
+        <h2>Blader door alle artikelen</h2>
+        <p class="lede">Open het menu en spring direct naar een van onze elf gidsen.</p>
+      </div></div>
+      <div class="kc-dd-wrap">
+        <details class="kc-dd">
+          <summary>
+            <span>Kies een onderwerp</span>
+            <span class="cnt">11 artikelen</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="kc-dd-list">
+            {%- assign items = 'langer-thuis-wonen|Langer thuis wonen|Wat langer thuis wonen betekent en hoe u het veilig volhoudt|Pijler,langer-thuis-wonen-met-dementie|Langer thuis wonen met dementie|Veilig en vertrouwd thuis blijven met de juiste techniek|Gids,wat-is-alarm-com|Wat is Alarm.com?|Het slimme platform dat alles laat samenwerken|Platform,hoe-werkt-een-meldkamer|Hoe werkt een meldkamer?|De 24/7 Nederlandse meldkamer en opvolging|Meldkamer,leefstijlmonitoring-zonder-cameras|Leefstijlmonitoring zonder camera’s|Sensoren herkennen het dagritme, zonder beeld|Privacy,hoe-veilig-is-nederland|Hoe veilig is Nederland nog?|Feiten over woninginbraken en wat echt helpt|Onderzoek,alarm-met-of-zonder-meldkamer|Alarm met of zonder meldkamer?|Wie onderneemt actie als het alarm afgaat|Uitleg,sensoren-of-cameras|Sensoren of camera’s?|Welke laag bescherming past bij uw situatie|Techniek,camera-zonder-abonnement|Camera zonder abonnement: slimste keuze?|Wat u krijgt, wat u mist en wanneer het genoeg is|Kosten,privacy-en-gegevens|Privacy en gegevens|Wat er met uw gegevens gebeurt en hoe we ze beschermen|Privacy,hoe-veilig-zijn-slimme-sensoren|Hoe veilig zijn slimme sensoren?|De beveiliging en betrouwbaarheid van sensoren|Techniek' | split: ',' -%}
+            {%- for row in items -%}
+              {%- assign p = row | split: '|' -%}
+              {%- assign kckey = 'kc/' | append: p[0] -%}
+              <a class="kc-dd-item" href="{% render 'zv-route', key: kckey %}">
+                <span class="kc-dd-tx"><b>{{ p[1] }}</b><span>{{ p[2] }}</span></span>
+                <span class="kc-dd-tag">{{ p[3] }}</span>
+                <span class="kc-dd-arr"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </a>
+            {%- endfor -%}
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Meest gelezen -->
+  <section class="sec section-alt" id="meest-gelezen">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow" style="color:var(--belt);">Meest gelezen</span>
+          <h2>Artikelen waar families mee beginnen</h2>
+          <p class="lede">De gidsen die het vaakst gelezen worden, helder geschreven en onderbouwd met onderzoek.</p>
+        </div>
+        <a class="all" href="#onderwerpen">Alle artikelen {{ arrow }}</a>
+      </div>
+      <div class="art-grid cols-3">
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/langer-thuis-wonen' %}"><div class="art-photo"><img src="{{ 'kc-huis.jpg' | asset_url }}" alt="Veilig thuis wonen" loading="lazy" width="600" height="375"><span class="art-tag">Langer thuis</span></div><div class="art-body"><h3>Wat betekent langer thuis wonen precies?</h3><p>De definitie, de voordelen en wat er nodig is om het veilig vol te houden.</p><div class="art-meta"><span class="rd">{{ clock }}6 min</span><span class="sep"></span><span>Pijler</span></div></div></a>
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/langer-thuis-wonen-met-dementie' %}"><div class="art-photo"><img src="{{ 'kc-dementie.jpg' | asset_url }}" alt="Mantelzorg bij dementie" loading="lazy" width="600" height="375"><span class="art-tag t-gold">Dementie</span></div><div class="art-body"><h3>Langer thuis wonen met dementie</h3><p>Veilig en vertrouwd thuis blijven, met de juiste techniek en afspraken.</p><div class="art-meta"><span class="rd">{{ clock }}9 min</span><span class="sep"></span><span>Gids</span></div></div></a>
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/wat-is-alarm-com' %}"><div class="art-photo"><img src="{{ 'kc-alarm.jpg' | asset_url }}" alt="Alarm.com platform" loading="lazy" width="600" height="375"><span class="art-tag t-indigo">Het platform</span></div><div class="art-body"><h3>Wat is Alarm.com?</h3><p>Het slimme platform dat camera's, sloten en sensoren laat samenwerken.</p><div class="art-meta"><span class="rd">{{ clock }}7 min</span><span class="sep"></span><span>Gids</span></div></div></a>
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/hoe-werkt-een-meldkamer' %}"><div class="art-photo"><img src="{{ 'kc-meldkamer.jpg' | asset_url }}" alt="Nederlandse meldkamer" loading="lazy" width="600" height="375"><span class="art-tag t-red">Meldkamer</span></div><div class="art-body"><h3>Hoe werkt een meldkamer?</h3><p>De 24/7 Nederlandse meldkamer en de zorg die meekijkt met Foresite.</p><div class="art-meta"><span class="rd">{{ clock }}6 min</span><span class="sep"></span><span>Gids</span></div></div></a>
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/leefstijlmonitoring-zonder-cameras' %}"><div class="art-photo"><img src="{{ 'kc-couple.jpg' | asset_url }}" alt="Ouder echtpaar thuis" loading="lazy" width="600" height="375"><span class="art-tag t-indigo">Privacy</span></div><div class="art-body"><h3>Waarom leefstijlmonitoring geen camera's nodig heeft</h3><p>Sensoren herkennen veranderingen in het dagritme, zonder camera's.</p><div class="art-meta"><span class="rd">{{ clock }}8 min</span><span class="sep"></span><span>Uitleg</span></div></div></a>
+        <a class="art-card" href="{% render 'zv-route', key: 'kc/hoe-veilig-is-nederland' %}"><div class="art-photo"><img src="{{ 'kc-pand.jpg' | asset_url }}" alt="Woning en inbraakpreventie" loading="lazy" width="600" height="375"><span class="art-tag t-red">Beveiliging</span></div><div class="art-body"><h3>Hoe veilig is Nederland nog?</h3><p>Feiten over woninginbraken en wat een woning echt veiliger maakt.</p><div class="art-meta"><span class="rd">{{ clock }}10 min</span><span class="sep"></span><span>Onderzoek</span></div></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Meekijken zonder mee te kijken · partner-tech -->
+  <section class="sec" id="zonder-cameras">
+    <div class="wrap">
+      <div class="sec-head"><div>
+        <span class="eyebrow" style="color:var(--belt);">Privacy-first · zonder camera's</span>
+        <h2>Meekijken zonder mee te kijken</h2>
+        <p class="lede">De nieuwe generatie monitoring beschermt zonder camera's en zonder wearables. Geen beelden, wel zekerheid. Zo werkt het, met de technologie van onze partners.</p>
+      </div></div>
+      <div class="mon-grid">
+        <div class="mon-card m-blue">
+          <div class="mon-top"><span class="mon-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13a9 9 0 0 1 14 0M8 16a5 5 0 0 1 8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg></span><span class="mon-partner">Nami</span></div>
+          <h3>Wi-Fi als onzichtbare radar</h3>
+          <p>Bestaande wifi-routers en slimme stekkers worden samen een bewegingsnetwerk voor het hele huis. Subtiele verstoringen in het wifi-signaal verraden of iemand beweegt, rust of valt. Geen extra hub, geen camera, geen knopje om te dragen.</p>
+          <a class="mc-foot" href="https://nami.ai" target="_blank" rel="noopener noreferrer">Meer over Nami Sensing {{ ext }}</a>
+        </div>
+        <div class="mon-card">
+          <div class="mon-top"><span class="mon-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 5 4-10 2 5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="mon-partner">Alarm.com</span></div>
+          <h3>Gedragspatronen die afwijkingen zien</h3>
+          <p>Kleine sensoren op het bed, de koelkast en kastjes leren het normale dagritme. Wijkt het patroon af, dan gaat er een seintje naar familie: een deur die 's nachts opengaat, medicatie die blijft liggen, of een dag met opvallend weinig activiteit.</p>
+          <a class="mc-foot" href="https://alarm.com/wellness-independent-living/" target="_blank" rel="noopener noreferrer">Meer over Wellness Insights {{ ext }}</a>
+        </div>
+        <div class="mon-card m-red">
+          <div class="mon-top"><span class="mon-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 13a8 8 0 0 1 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 19a7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 13l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span class="mon-partner">Securitas</span></div>
+          <h3>Voorspellende zorg met Foresite</h3>
+          <p>Passieve sensoren volgen looppatroon, slaap en ademhaling. Gevoed door twintig jaar klinisch onderzoek signaleert het systeem sluimerende problemen vroeg. Bij een val volgt een privacy-silhouet in plaats van een videobeeld, zodat opvolging veilig en respectvol blijft.</p>
+          <a class="mc-foot" href="https://www.securitashealthcare.com/solutions/senior-living-fall-management" target="_blank" rel="noopener noreferrer">Meer over Foresite {{ ext }}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Veiligheid & inbraakpreventie -->
+  <section class="cluster" id="veiligheid">
+    <div class="wrap">
+      <div class="sec-head"><div>
+        <span class="eyebrow">Veiligheid &amp; inbraakpreventie</span>
+        <h2>De cijfers, en wat u eraan doet</h2>
+        <p class="lede">Inbraak is geen kwestie van pech maar van kans. Begrijp het risico, en verklein het met bewezen maatregelen.</p>
+      </div></div>
+      <div class="cluster-grid">
+        <div class="cluster-stats">
+          <div class="cstat"><b>4<span class="u">op 5</span></b><p>inbraakpogingen eindigt met buit als een woning niet goed beveiligd is.</p><div class="src">Bron: Beveiliging Nieuws</div></div>
+          <div class="cstat"><b>90<span class="u">%</span></b><p>van de inbrekers haakt af bij zichtbare beveiliging en goed hang- en sluitwerk.</p><div class="src">Bron: Politiekeurmerk Veilig Wonen</div></div>
+          <div class="cstat"><b>3<span class="u">min</span></b><p>is genoeg voor een inbreker. Een meldkamer reageert sneller dan dat.</p><div class="src">Bron: Zo Veilig praktijk</div></div>
+          <div class="cstat"><b>30<span class="u">sec</span></b><p>kost het om uw eigen risico in te schatten met de Home Security Audit.</p><div class="src">Interactieve tool</div></div>
+        </div>
+        <div class="cluster-links">
+          <a class="cl-link" href="{% render 'zv-route', key: 'kc/alarm-met-of-zonder-meldkamer' %}"><span class="cl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 0-6 6c0 5-2 6-2 6h16s-2-1-2-6a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10.5 20a2 2 0 0 0 3 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span class="cl-tx"><b>Alarm met of zonder meldkamer?</b><span>Wie onderneemt actie als het alarm afgaat</span></span><span class="cl-arr"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          <a class="cl-link" href="{% render 'zv-route', key: 'kc/hoe-veilig-is-nederland' %}"><span class="cl-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="cl-tx"><b>Hoe veilig is Nederland nog?</b><span>Feiten over woninginbraken en wat echt helpt</span></span><span class="cl-arr"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          <a class="cl-link" href="{% render 'zv-route', key: 'kc/sensoren-of-cameras' %}"><span class="cl-ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M17 11l4-2.5v7L17 13" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="cl-tx"><b>Camera's, sensoren en meldkamers</b><span>Welke laag bescherming past bij uw situatie</span></span><span class="cl-arr"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          <a class="cl-link" href="{% render 'zv-route', key: 'kc/camera-zonder-abonnement' %}"><span class="cl-ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M17 11l4-2.5v7L17 13" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="cl-tx"><b>Camera zonder abonnement: slimste keuze?</b><span>Wat u krijgt, wat u mist en wanneer het genoeg is</span></span><span class="cl-arr"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Praktijkverhalen -->
+  <section class="sec section-alt" id="levensfase">
+    <div class="wrap">
+      <div class="sec-head"><div>
+        <span class="eyebrow" style="color:var(--belt);">Praktijkverhalen</span>
+        <h2>Welke situatie herkent u?</h2>
+        <p class="lede">Herken uw situatie, lees het bijbehorende artikel en ontdek welke oplossing daarbij past.</p>
+      </div></div>
+      <div class="case-grid">
+        {%- comment -%} persona | title | story | article-key | pkg-badge | pkg-name | finder_key {%- endcomment -%}
+        {%- assign cases = 'Voor ouderen~Zelfstandig en gerust thuis~Mevrouw (78) woont alleen. Haar kinderen willen weten dat ze veilig is, zonder camera in de woonkamer.~kc/leefstijlmonitoring-zonder-cameras~Lees: monitoring zonder camera’s~Aware~Pakket Meekijken~aware|Voor mantelzorgers~Grip en rust in de zorg~U zorgt voor uw moeder en wilt ’s nachts kunnen slapen, zonder constant te checken of alles goed gaat.~kc/leefstijlmonitoring-zonder-cameras~Lees: leefstijlmonitoring~Aware+~Pakket Aware Gerust~aware_plus|Voor partners~Samen veilig ouder worden~Samen in uw eigen huis blijven wonen, met zicht op wie er aan de deur staat en een meldkamer die meekijkt.~kc/hoe-veilig-is-nederland~Lees: hoe veilig is Nederland?~Camera + meldkamer~Pakket Vista~secure_plus|Voor kinderen van ouderen~Op afstand toch dichtbij~U woont een uur rijden verderop en wilt dat er iemand professioneel opvolgt als er iets gebeurt.~kc/hoe-werkt-een-meldkamer~Lees: hoe werkt een meldkamer?~Care~Pakket Zorg Compleet~care|Voor mensen met dementie~Langer thuis met steun~Beginnende dementie en ’s nachts onrustig. Dwaaldetectie en een meldkamer geven de familie rust.~kc/langer-thuis-wonen-met-dementie~Lees: langer thuis met dementie~Care~Pakket Zorg Compleet~care|Voor alleenwonenden~Niemand merkt het? Wij wel~Als u alleen woont en valt, telt elke minuut. Het systeem signaleert en schakelt hulp in.~kc/alarm-met-of-zonder-meldkamer~Lees: alarm met of zonder meldkamer~Care~Pakket Zorg Compleet~care' | split: '|' -%}
+        {%- for c in cases -%}
+          {%- assign f = c | split: '~' -%}
+          <div class="case-card">
+            <div class="case-top">
+              <span class="case-ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span><span class="case-persona">{{ f[0] }}</span><h3>{{ f[1] }}</h3></span>
+            </div>
+            <p class="case-story">{{ f[2] }}</p>
+            <div class="case-foot">
+              <a class="case-link" href="{% render 'zv-route', key: f[3] %}"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>{{ f[4] }}</span></a>
+              <a class="case-pkg" href="{% render 'zv-route', key: 'pakket', pakket: f[7] %}"><span class="pk"><span class="pk-badge">{{ f[5] }}</span>{{ f[6] }}</span><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+</div>
+
+{% schema %}
+{ "name": "Kenniscentrum hub", "tag": "section", "settings": [], "presets": [{ "name": "Kenniscentrum hub" }] }
+{% endschema %}

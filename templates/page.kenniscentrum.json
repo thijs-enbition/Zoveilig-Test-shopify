@@ -6,19 +6,22 @@
         "chip_1": {
           "type": "chip",
           "settings": {
-            "label": "Langer thuis wonen"
+            "label": "Langer thuis wonen",
+            "link": "/blogs/kenniscentrum/langer-thuis-wonen"
           }
         },
         "chip_2": {
           "type": "chip",
           "settings": {
-            "label": "Inbraakpreventie"
+            "label": "Inbraakpreventie",
+            "link": "#veiligheid"
           }
         },
         "chip_3": {
           "type": "chip",
           "settings": {
-            "label": "Voor mantelzorgers"
+            "label": "Voor mantelzorgers",
+            "link": "#mantelzorgers"
           }
         }
       },
@@ -30,25 +33,22 @@
         "chips_label": "Populair:"
       }
     },
-    "kc_bridge": {
-      "type": "kc-bridge",
-      "settings": {
-        "eyebrow": "Van begrip naar de juiste stap",
-        "heading": "Niet zeker welke ondersteuning past?",
-        "text": "Elke familie is anders. Beantwoord een paar eenvoudige vragen en ontdek welke ondersteuning logisch is voor jullie situatie.",
-        "cta_label": "Start de Keuzehulp"
-      }
+    "kc_hub": {
+      "type": "kc-hub",
+      "settings": {}
     },
     "kc_cta": {
       "type": "kc-cta-band",
       "settings": {
         "eyebrow": "Van kennis naar de juiste oplossing",
-        "heading": "Weet je genoeg? Bekijk de pakketten die hierbij passen.",
-        "text": "Onze gidsen helpen je kiezen. Onze pakketten maken het waar, met een vertrouwd gezicht dat met je meedenkt.",
+        "heading": "Weet u genoeg? Bekijk de pakketten die hierbij passen.",
+        "text": "Onze gidsen helpen u kiezen. Onze pakketten maken het waar, met een vertrouwd gezicht dat met u meedenkt.",
         "primary_label": "Bekijk pakketten",
-        "secondary_label": "Gratis adviesgesprek"
+        "primary_link": "/pages/oplossingen",
+        "secondary_label": "Gratis adviesgesprek",
+        "secondary_link": "/pages/klantenservice#contact"
       }
     }
   },
-  "order": ["kc_hero", "kc_bridge", "kc_cta"]
+  "order": ["kc_hero", "kc_hub", "kc_cta"]
 }
