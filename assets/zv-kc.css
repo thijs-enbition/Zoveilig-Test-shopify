@@ -578,3 +578,9 @@ a.tb-name:hover{border-color:var(--gold);transform:translateY(-1px);}
 .zv-kc #onderwerpen .kc-dd-tag { flex: none; font-size: 11px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; color: var(--belt, #b67e0a); background: var(--sand, #f3eede); border-radius: 6px; padding: 4px 9px; }
 .zv-kc #onderwerpen .kc-dd-arr { flex: none; width: 18px; height: 18px; color: var(--belt, #b67e0a); }
 .zv-kc #onderwerpen .kc-dd-arr svg { width: 100%; height: 100%; }
+
+/* Keuzehulp hero "Populair" chips: one straight horizontal row on desktop/tablet.
+   (The .kc-hero .wrap > * max-width:min(600px,54%) cap otherwise wraps them.) */
+@media (min-width: 721px) {
+  .zv-kc .kc-hero .kc-chips { max-width: none; flex-wrap: nowrap; }
+}
