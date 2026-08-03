@@ -69,8 +69,17 @@
 .util .u-r .ph svg { width: 14px; height: 14px; }
 @media (max-width: 720px) { .util .u-l span.long { display: none; } .util .u-r .hideph { display: none; } }
 
+/* Sticky header.
+   Dawn wraps the zv-header section in a .shopify-section-group-header-group grid item
+   inside the display:grid <body>. A sticky element is bounded by its containing block:
+   putting sticky on .sf-nav alone bounds it to that ~117px wrapper, so the nav releases
+   after the util bar (~38px) and scrolls away. Putting sticky on the grid item itself
+   makes its containing block the whole body grid (~full page height), so the header pins
+   for the entire page — the same mechanism Dawn's own sticky header uses. */
+.shopify-section-group-header-group { position: sticky; top: 0; z-index: 50; }
+
 /* nav */
-.sf-nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, 0.92); backdrop-filter: saturate(160%) blur(10px); -webkit-backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--line); }
+.sf-nav { position: relative; background: rgba(255, 255, 255, 0.92); backdrop-filter: saturate(160%) blur(10px); -webkit-backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--line); }
 .sf-nav .wrap { height: 78px; display: flex; align-items: center; gap: 34px; }
 .sf-logo img { height: 36px; width: auto; }
 .sf-logo .sf-logo-text { font-size: 22px; font-weight: 900; color: var(--indigo); letter-spacing: -0.02em; }

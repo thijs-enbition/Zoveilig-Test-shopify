@@ -35,6 +35,14 @@
   --shadow-sm: 0 12px 26px -22px rgba(26, 18, 48, 0.4);
   --shadow-md: 0 24px 50px -38px rgba(26, 18, 48, 0.5);
   color: var(--ink);
+  /* Match the design's <body> baseline. Dawn's <body> applies line-height ~1.8 and
+     letter-spacing 0.06rem; the design uses line-height 1.55 and no letter-spacing, so
+     every paragraph/list/link that doesn't set its own would otherwise inherit looser
+     spacing than the design. The cream page background (design body) shows through the
+     transparent .sec blocks between the paper cards. */
+  line-height: 1.55;
+  letter-spacing: normal;
+  background: var(--cream);
 }
 
 .zv-kc .wrap {

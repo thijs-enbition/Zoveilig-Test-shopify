@@ -19,6 +19,11 @@
         {%- for link in linklists[section.settings.utility_menu].links -%}
           <a href="{{ link.url }}">{{ link.title }}</a>
         {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} Fallback to the design's utility links so the top bar matches the design
+          even before a "Utility-menu" link list is assigned in the Theme Editor. {%- endcomment -%}
+        <a href="{% render 'zv-route', key: 'kenniscentrum' %}">Kenniscentrum</a>
+        <a href="{% render 'zv-route', key: 'klantenservice' %}">Klantenservice</a>
       {%- endif -%}
       {%- if section.settings.phone != blank -%}
         <a class="ph hideph" href="tel:{{ section.settings.phone | remove: ' ' }}">
