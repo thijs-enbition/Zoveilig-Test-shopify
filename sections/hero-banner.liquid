@@ -118,9 +118,17 @@
           {%- endif -%}
 
           {%- if hero.primary_button_text != blank or hero.secondary_button_text != blank -%}
+            {%- comment -%} The hero CTA scrolls to the on-page Keuzehulp (finder) section instead of
+              opening a separate page: any button URL that targets "keuzehulp" resolves to the
+              #keuzehulp anchor on this homepage (works on any domain, no page reload). {%- endcomment -%}
+            {%- comment -%} capture coerces the metaobject url-field drop to a plain string so `contains` works. {%- endcomment -%}
+            {%- capture primary_url -%}{{ hero.primary_button_url }}{%- endcapture -%}
+            {%- if primary_url contains 'keuzehulp' -%}{%- assign primary_url = '#keuzehulp' -%}{%- elsif primary_url == blank -%}{%- assign primary_url = '#' -%}{%- endif -%}
+            {%- capture secondary_url -%}{{ hero.secondary_button_url }}{%- endcapture -%}
+            {%- if secondary_url contains 'keuzehulp' -%}{%- assign secondary_url = '#keuzehulp' -%}{%- elsif secondary_url == blank -%}{%- assign secondary_url = '#' -%}{%- endif -%}
             <div class="hero-cta">
               {%- if hero.primary_button_text != blank -%}
-                <a class="btn btn--gold" href="{{ hero.primary_button_url | default: '#' }}" data-zv-event="finder_start" data-zv-source="homepage_hero">
+                <a class="btn btn--gold" href="{{ primary_url }}" data-zv-event="finder_start" data-zv-source="homepage_hero">
                   {{- hero.primary_button_text }}
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -128,7 +136,7 @@
                 </a>
               {%- endif -%}
               {%- if hero.secondary_button_text != blank -%}
-                <a class="btn btn--light" href="{{ hero.secondary_button_url | default: '#' }}">
+                <a class="btn btn--light" href="{{ secondary_url }}">
                   {{- hero.secondary_button_text -}}
                 </a>
               {%- endif -%}
