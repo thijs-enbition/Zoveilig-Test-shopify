@@ -65,12 +65,19 @@
         </header>
 
       {%- when 'content' -%}
-        <div
-          class="article-template__content page-width page-width--narrow rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          {{ block.shopify_attributes }}
-        >
-          <div class="zv-article">{{ article.content }}</div>
-        </div>
+        {%- if article.template_suffix == 'kenniscentrum' -%}
+          {%- comment -%} Kenniscentrum articles carry the full designed body (page-hero + doc-layout).
+            Render it full-width with no page-width--narrow wrapper, so the two-column layout and
+            full-bleed hero match the design. {%- endcomment -%}
+          <div class="zv-article" {{ block.shopify_attributes }}>{{ article.content }}</div>
+        {%- else -%}
+          <div
+            class="article-template__content page-width page-width--narrow rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="zv-article">{{ article.content }}</div>
+          </div>
+        {%- endif -%}
 
       {%- when 'share' -%}
         <div
@@ -83,6 +90,8 @@
     {%- endcase -%}
   {%- endfor -%}
 
+  {%- comment -%} KC articles are self-contained (own hero + CTA band); skip Dawn's back-link and comments. {%- endcomment -%}
+  {%- unless article.template_suffix == 'kenniscentrum' -%}
   <div class="article-template__back element-margin-top center{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
     <a href="{{ blog.url }}" class="article-template__link link animate-arrow">
       <span class="icon-wrap">
@@ -287,6 +296,7 @@
       </div>
     </div>
   {%- endif -%}
+  {%- endunless -%}
 </article>
 
 <script type="application/ld+json">
