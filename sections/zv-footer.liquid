@@ -2,13 +2,10 @@
   Zo Veilig footer. 1:1 port of the design pack footer (Homepage.html: footer.foot).
 
   Link columns come from Shopify navigation menus (a primitive, not a metaobject).
-  Partner logos come from the partner metaobject (active, sorted by display_order), the same
-  CMS data the homepage trust bar uses. Brand text, tagline and phone are section settings.
+  Brand text, tagline and phone are section settings. The partner logos live in the
+  dedicated showcases (homepage trust bar / Oplossingen "De beste technologie" band),
+  so the footer deliberately does NOT repeat them.
 {%- endcomment -%}
-
-{%- liquid
-  assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
--%}
 
 <footer class="foot" role="contentinfo">
   <div class="wrap">
@@ -43,22 +40,6 @@
       {%- endfor -%}
     </div>
 
-    {%- if partners.size > 0 -%}
-      <div class="foot-partners">
-        <div class="fp-logos">
-          {%- for partner in partners -%}
-            {%- if partner.logo != blank -%}
-              {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
-              <span class="fp-chip{% if forloop.first %} sec{% endif %}">
-                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
-              </span>
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
-        {%- if section.settings.partners_note != blank -%}<span class="fp-note">{{ section.settings.partners_note }}</span>{%- endif -%}
-      </div>
-    {%- endif -%}
-
     <div class="foot-base">
       <div>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright }}</div>
       {%- if section.settings.legal_menu != blank -%}
@@ -89,8 +70,6 @@
     { "type": "header", "content": "Kolom 3" },
     { "type": "text", "id": "col_3_heading", "label": "Kop", "default": "Over Zo Veilig" },
     { "type": "link_list", "id": "col_3_menu", "label": "Menu" },
-    { "type": "header", "content": "Partners" },
-    { "type": "text", "id": "partners_note", "label": "Bijschrift", "default": "Beveiligd met bewezen partners" },
     { "type": "header", "content": "Onderregel" },
     { "type": "text", "id": "copyright", "label": "Copyright", "default": "Zo Veilig, Nederlandse meldkamer, 24/7 bewaakt" },
     { "type": "link_list", "id": "legal_menu", "label": "Juridische links" }
