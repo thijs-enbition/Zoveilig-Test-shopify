@@ -211,41 +211,77 @@
 
   {%- comment -%} Stappen + Partners are solution-agnostic; rendered once below the active panel. {%- endcomment -%}
   <section class="stappen" data-section-name="stappen">
-    <h3>Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt.</h3>
-    <p class="st-sub">Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt.</p>
+    <h2>{{ section.settings.service_heading | default: 'Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt.' | escape }}</h2>
+    <p class="st-sub">{{ section.settings.service_intro | default: 'Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt.' | escape }}</p>
     <div class="steprow">
-      <div class="stap">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg></div>
-        <div><span class="sk">Online</span><b>Direct online regelen</b><p>Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt.</p></div>
-      </div>
-      <div class="stap">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
-        <div><span class="sk">Advies</span><b>Persoonlijk advies</b><p>Twijfelt u? Samen kiezen we de oplossing die het beste bij uw situatie past.</p></div>
-      </div>
-      <div class="stap">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="M5 11l3 3"/></svg></div>
-        <div><span class="sk">Montage</span><b>Vakkundige installatie</b><p>Onze monteurs installeren alles professioneel en zorgen dat u direct aan de slag kunt.</p></div>
-      </div>
-      <div class="stap hl">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0"/><rect x="3.5" y="12" width="3.5" height="6" rx="1.6"/><rect x="17" y="12" width="3.5" height="6" rx="1.6"/><path d="M19 18v.6a2.4 2.4 0 0 1-2.4 2.4H13"/></svg></div>
-        <div><span class="sk">Altijd</span><b>Ook daarna bereikbaar</b><p>Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt.</p>
-          <a class="belbtn" href="tel:0880123456" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>088 012 3456</a>
+      {%- comment -%} 4 benefit items; eyebrow/title/text are theme-editor manageable, icons are fixed per slot. {%- endcomment -%}
+      {%- assign s_def = 'Online~Direct online regelen~Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt.|Advies~Persoonlijk advies~Twijfelt u? Samen kiezen we de oplossing die het beste bij uw situatie past.|Montage~Vakkundige installatie~Onze monteurs installeren alles professioneel en zorgen dat u direct aan de slag kunt.|Altijd~Ook daarna bereikbaar~Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt.' | split: '|' -%}
+      {%- for row in s_def -%}
+        {%- assign d = row | split: '~' -%}
+        {%- assign idx = forloop.index -%}
+        {%- assign k_eb = 'benefit_' | append: idx | append: '_eyebrow' -%}
+        {%- assign k_ti = 'benefit_' | append: idx | append: '_title' -%}
+        {%- assign k_tx = 'benefit_' | append: idx | append: '_text' -%}
+        {%- assign eb = section.settings[k_eb] | default: d[0] -%}
+        {%- assign ti = section.settings[k_ti] | default: d[1] -%}
+        {%- assign tx = section.settings[k_tx] | default: d[2] -%}
+        <div class="stap{% if idx == 4 %} hl{% endif %}">
+          <div class="sic" aria-hidden="true">{%- case idx -%}
+            {%- when 1 -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
+            {%- when 2 -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+            {%- when 3 -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="M5 11l3 3"/></svg>
+            {%- when 4 -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0"/><rect x="3.5" y="12" width="3.5" height="6" rx="1.6"/><rect x="17" y="12" width="3.5" height="6" rx="1.6"/><path d="M19 18v.6a2.4 2.4 0 0 1-2.4 2.4H13"/></svg>
+          {%- endcase -%}</div>
+          <div><span class="sk">{{ eb | escape }}</span><b>{{ ti | escape }}</b><p>{{ tx | escape }}</p>
+            {%- if idx == 4 and section.settings.phone_label != blank -%}
+              {%- assign tel = section.settings.phone | default: '0880123456' | remove: ' ' -%}
+              <a class="belbtn" href="tel:{{ tel }}" aria-label="Bel Zo Veilig, {{ section.settings.phone_label | default: '088 012 3456' | escape }}" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>{{ section.settings.phone_label | default: '088 012 3456' | escape }}</a>
+            {%- endif -%}
+          </div>
         </div>
-      </div>
+      {%- endfor -%}
     </div>
   </section>
 
   <section class="partners" data-section-name="partners">
     <div class="partners__t">
-      <div class="eb">De beste technologie</div>
-      <h4>De beste technologie. Eén vertrouwd aanspreekpunt.</h4>
-      <p>Wij kiezen niet voor één merk, maar voor de beste technologie die past bij uw situatie. Daarom werken we samen met toonaangevende partners zoals Alarm.com, Climax, NAMI en Securitas. Zo profiteert u van innovatieve en betrouwbare oplossingen, terwijl u voor advies, installatie en service altijd één vast aanspreekpunt heeft: Zo Veilig.</p>
+      <div class="eb">{{ section.settings.partners_eyebrow | default: 'De beste technologie' | escape }}</div>
+      <h2 class="partners__h">{{ section.settings.partners_heading | default: 'De beste technologie. Eén vertrouwd aanspreekpunt.' | escape }}</h2>
+      <p>{{ section.settings.partners_body | default: 'Wij kiezen niet voor één merk, maar voor de beste technologie die past bij uw situatie. Daarom werken we samen met toonaangevende partners zoals Alarm.com, Climax, NAMI en Securitas. Zo profiteert u van innovatieve en betrouwbare oplossingen, terwijl u voor advies, installatie en service altijd één vast aanspreekpunt heeft: Zo Veilig.' }}</p>
+      {%- if section.settings.show_walkthrough -%}
+        <a class="walkthrough-btn" href="{{ section.settings.walkthrough_url | default: '#' }}"{% if section.settings.walkthrough_url == blank %} aria-disabled="true"{% endif %}>
+          <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-8z"/></svg></span>
+          {{ section.settings.walkthrough_label | default: 'Start de rondleiding' | escape }}
+        </a>
+      {%- endif -%}
     </div>
     <div class="partners__logos">
-      <span class="logochip sec"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="34"></span>
-      <span class="logochip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="30"></span>
-      <span class="logochip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="30"></span>
-      <span class="logochip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="30"></span>
+      {%- comment -%} 4 partner logo cards; each is theme-editor manageable (image_picker) with an
+        approved-asset fallback so the row is never empty. Alarm.com uses a wider card. {%- endcomment -%}
+      {%- assign p_defaults = 'securitas-preferred-partner.png~Securitas Preferred Partner~sec|partner-nami.png~NAMI~|partner-climax.png~Climax~|partner-alarmcom.png~Alarm.com~wide' | split: '|' -%}
+      {%- for row in p_defaults -%}
+        {%- assign d = row | split: '~' -%}
+        {%- assign idx = forloop.index -%}
+        {%- assign k_logo = 'partner_' | append: idx | append: '_logo' -%}
+        {%- assign k_alt = 'partner_' | append: idx | append: '_alt' -%}
+        {%- assign k_url = 'partner_' | append: idx | append: '_url' -%}
+        {%- assign logo = section.settings[k_logo] -%}
+        {%- assign alt = section.settings[k_alt] | default: d[1] -%}
+        {%- assign purl = section.settings[k_url] -%}
+        {%- capture chip_cls -%}logochip{% if d[2] != blank %} {{ d[2] }}{% endif %}{%- endcapture -%}
+        {%- capture chip_inner -%}
+          {%- if logo != blank -%}
+            {{ logo | image_url: height: 68 | image_tag: alt: alt, loading: 'lazy', widths: '90, 180', class: 'logochip__img' }}
+          {%- else -%}
+            <img class="logochip__img" src="{{ d[0] | asset_url }}" alt="{{ alt | escape }}" loading="lazy" width="150" height="34">
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- if purl != blank -%}
+          <a class="{{ chip_cls }}" href="{{ purl }}" target="_blank" rel="noopener" aria-label="{{ alt | escape }}">{{ chip_inner }}</a>
+        {%- else -%}
+          <span class="{{ chip_cls }}">{{ chip_inner }}</span>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
   </section>
 
@@ -448,7 +484,7 @@
 
 /* ---- Direct online geregeld / Stappen (VERBATIM) ---- */
 .opl-page .stappen { padding: clamp(40px, 4vw, 60px) clamp(24px, 3.4vw, 56px); background: var(--cream); border-top: 1px solid var(--line); }
-.stappen h3 { text-align: center; color: var(--indigo); font-size: clamp(24px, 2.8vw, 32px); font-weight: 900; letter-spacing: -0.015em; line-height: 1.1; }
+.stappen h2 { text-align: center; color: var(--indigo); font-size: clamp(24px, 2.8vw, 32px); font-weight: 900; letter-spacing: -0.015em; line-height: 1.1; margin: 0 auto; max-width: 20ch; }
 .stappen .st-sub { text-align: center; font-size: 15px; font-weight: 600; color: var(--muted); margin-top: 11px; }
 .steprow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin: 38px auto 0; max-width: 1180px; }
 @media (max-width: 880px) { .steprow { grid-template-columns: 1fr 1fr; } }
@@ -468,13 +504,19 @@
 .opl-page .partners { background: radial-gradient(64% 120% at 95% 0%, rgba(197, 46, 47, 0.42) 0%, rgba(197, 46, 47, 0) 55%), radial-gradient(66% 122% at 3% 102%, rgba(0, 80, 159, 0.6) 0%, rgba(0, 80, 159, 0) 58%), linear-gradient(180deg, #2c3076 0%, #262a64 100%); color: #fff; padding: clamp(34px, 3.4vw, 48px) clamp(24px, 3.4vw, 56px); display: grid; grid-template-columns: 1fr auto; gap: 28px 48px; align-items: center; }
 .partners__t { max-width: 42ch; }
 .partners__t .eb { font-size: 11.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-lt); }
-.partners__t h4 { font-size: clamp(20px, 2vw, 26px); font-weight: 900; line-height: 1.12; margin-top: 11px; letter-spacing: -0.01em; color: #fff; }
+.partners__t .partners__h { font-size: clamp(20px, 2vw, 26px); font-weight: 900; line-height: 1.12; margin-top: 11px; letter-spacing: -0.01em; color: #fff; }
 .partners__t p { font-size: 14.5px; font-weight: 500; color: #cdc6e8; margin-top: 10px; line-height: 1.5; }
+.opl-page .partners .walkthrough-btn { display: inline-flex; align-items: center; gap: 11px; margin-top: 20px; background: var(--indigo); color: #fff; border-radius: 999px; padding: 8px 20px 8px 8px; font-weight: 800; font-size: 14px; line-height: 1; text-decoration: none; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6); transition: transform 0.15s; }
+.opl-page .partners .walkthrough-btn:hover { transform: translateY(-2px); }
+.opl-page .partners .walkthrough-btn:focus-visible { outline: 2px solid var(--gold-lt); outline-offset: 3px; }
+.opl-page .partners .walkthrough-btn .play { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; flex: none; }
+.opl-page .partners .walkthrough-btn .play svg { width: 14px; height: 14px; color: #26190a; margin-left: 2px; }
 .partners__logos { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
 .logochip { background: #fff; border-radius: 13px; padding: 14px 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.5); }
-.logochip img { height: 30px; width: auto; }
+.logochip img { height: 30px; width: auto; max-width: 100%; object-fit: contain; display: block; }
 .logochip.sec img { height: 34px; }
-@media (max-width: 880px) { .partners { grid-template-columns: 1fr; } .partners__logos { justify-content: flex-start; } }
+@media (max-width: 880px) { .opl-page .partners { grid-template-columns: 1fr; } .partners__logos { justify-content: flex-start; } }
+@media (max-width: 560px) { .opl-page .partners__logos { display: grid; grid-template-columns: 1fr 1fr; } .opl-page .partners__logos .logochip { width: 100%; } }
 
 /* Meer informatie modal / breakout (pb- and pbd- classes). NB: no bare asterisk-slash in this comment. */
 .pb-scrim { position: fixed; inset: 0; z-index: 9999; background: rgba(17, 14, 45, 0.52); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; justify-content: flex-end; animation: pbFade 0.2s ease; }
@@ -1193,7 +1235,45 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 {
   "name": "Oplossingen",
   "tag": "section",
-  "settings": [],
+  "settings": [
+    { "type": "header", "content": "Service-sectie (Online wanneer u wilt)" },
+    { "type": "text", "id": "service_heading", "label": "Kop", "default": "Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt." },
+    { "type": "textarea", "id": "service_intro", "label": "Introtekst", "default": "Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt." },
+    { "type": "text", "id": "benefit_1_eyebrow", "label": "1 · Eyebrow", "default": "Online" },
+    { "type": "text", "id": "benefit_1_title", "label": "1 · Titel", "default": "Direct online regelen" },
+    { "type": "textarea", "id": "benefit_1_text", "label": "1 · Tekst", "default": "Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt." },
+    { "type": "text", "id": "benefit_2_eyebrow", "label": "2 · Eyebrow", "default": "Advies" },
+    { "type": "text", "id": "benefit_2_title", "label": "2 · Titel", "default": "Persoonlijk advies" },
+    { "type": "textarea", "id": "benefit_2_text", "label": "2 · Tekst", "default": "Twijfelt u? Samen kiezen we de oplossing die het beste bij uw situatie past." },
+    { "type": "text", "id": "benefit_3_eyebrow", "label": "3 · Eyebrow", "default": "Montage" },
+    { "type": "text", "id": "benefit_3_title", "label": "3 · Titel", "default": "Vakkundige installatie" },
+    { "type": "textarea", "id": "benefit_3_text", "label": "3 · Tekst", "default": "Onze monteurs installeren alles professioneel en zorgen dat u direct aan de slag kunt." },
+    { "type": "text", "id": "benefit_4_eyebrow", "label": "4 · Eyebrow", "default": "Altijd" },
+    { "type": "text", "id": "benefit_4_title", "label": "4 · Titel", "default": "Ook daarna bereikbaar" },
+    { "type": "textarea", "id": "benefit_4_text", "label": "4 · Tekst", "default": "Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt." },
+    { "type": "text", "id": "phone", "label": "Telefoonnummer (tel:)", "default": "0880123456" },
+    { "type": "text", "id": "phone_label", "label": "Telefoon-label", "default": "088 012 3456" },
+    { "type": "header", "content": "Technologie & partners" },
+    { "type": "text", "id": "partners_eyebrow", "label": "Eyebrow", "default": "De beste technologie" },
+    { "type": "text", "id": "partners_heading", "label": "Kop", "default": "De beste technologie. Eén vertrouwd aanspreekpunt." },
+    { "type": "textarea", "id": "partners_body", "label": "Tekst", "default": "Wij kiezen niet voor één merk, maar voor de beste technologie die past bij uw situatie. Daarom werken we samen met toonaangevende partners zoals Alarm.com, Climax, NAMI en Securitas. Zo profiteert u van innovatieve en betrouwbare oplossingen, terwijl u voor advies, installatie en service altijd één vast aanspreekpunt heeft: Zo Veilig." },
+    { "type": "checkbox", "id": "show_walkthrough", "label": "Rondleiding-knop tonen", "default": false },
+    { "type": "text", "id": "walkthrough_label", "label": "Rondleiding-knop label", "default": "Start de rondleiding" },
+    { "type": "url", "id": "walkthrough_url", "label": "Rondleiding-knop link" },
+    { "type": "header", "content": "Partnerlogo's (leeg = standaard)" },
+    { "type": "image_picker", "id": "partner_1_logo", "label": "1 · Logo" },
+    { "type": "text", "id": "partner_1_alt", "label": "1 · Alt-tekst", "default": "Securitas Preferred Partner" },
+    { "type": "url", "id": "partner_1_url", "label": "1 · Link (optioneel)" },
+    { "type": "image_picker", "id": "partner_2_logo", "label": "2 · Logo" },
+    { "type": "text", "id": "partner_2_alt", "label": "2 · Alt-tekst", "default": "NAMI" },
+    { "type": "url", "id": "partner_2_url", "label": "2 · Link (optioneel)" },
+    { "type": "image_picker", "id": "partner_3_logo", "label": "3 · Logo" },
+    { "type": "text", "id": "partner_3_alt", "label": "3 · Alt-tekst", "default": "Climax" },
+    { "type": "url", "id": "partner_3_url", "label": "3 · Link (optioneel)" },
+    { "type": "image_picker", "id": "partner_4_logo", "label": "4 · Logo" },
+    { "type": "text", "id": "partner_4_alt", "label": "4 · Alt-tekst", "default": "Alarm.com" },
+    { "type": "url", "id": "partner_4_url", "label": "4 · Link (optioneel)" }
+  ],
   "blocks": [
     {
       "type": "solution",
