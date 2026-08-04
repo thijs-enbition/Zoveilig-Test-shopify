@@ -8,6 +8,9 @@
   Partner logos come from the partner metaobject (active, sorted by display_order).
 {%- endcomment -%}
 
+{%- comment -%} The Oplossingen page ends at its own "De beste technologie" band (as in the
+  design pack), so the global footer is intentionally not rendered on that template. {%- endcomment -%}
+{%- unless template.suffix == 'oplossingen' -%}
 {%- liquid
   assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
 -%}
@@ -72,9 +75,6 @@
       </div>
     </div>
 
-    {%- comment -%} Oplossingen has its own partner showcase in the "De beste technologie"
-      band, so the footer strip is suppressed there to avoid duplicating the logos. {%- endcomment -%}
-    {%- unless template.suffix == 'oplossingen' -%}
     {%- if partners.size > 0 -%}
       <div class="foot-partners">
         <div class="fp-logos">
@@ -90,7 +90,6 @@
         {%- if section.settings.partners_note != blank -%}<span class="fp-note">{{ section.settings.partners_note }}</span>{%- endif -%}
       </div>
     {%- endif -%}
-    {%- endunless -%}
 
     <div class="foot-base">
       <div>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright }}</div>
@@ -106,6 +105,7 @@
     </div>
   </div>
 </footer>
+{%- endunless -%}
 
 {% schema %}
 {
