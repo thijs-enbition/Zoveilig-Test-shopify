@@ -198,7 +198,7 @@
                   {%- if b.settings[klabel] != blank -%}
                     {%- assign wurl = b.settings[kurl] -%}
                     {%- if wurl == blank -%}{%- assign wurl = '#' | append: anchor -%}{%- endif -%}
-                    <a class="why__link" href="{{ wurl }}" data-zv-event="why_link" data-solution-type="{{ anchor }}" data-cta-name="why_{{ i }}" data-cta-position="{{ anchor }}_why">{{ b.settings[klabel] }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    <a class="why__link" href="{{ wurl }}"{% if wurl contains '://' %} target="_blank" rel="noopener noreferrer"{% endif %} data-zv-event="why_link" data-solution-type="{{ anchor }}" data-cta-name="why_{{ i }}" data-cta-position="{{ anchor }}_why">{{ b.settings[klabel] }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                   {%- endif -%}
                 </article>
               {%- endif -%}
