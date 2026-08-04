@@ -1,11 +1,16 @@
 {%- comment -%}
-  Zo Veilig footer. 1:1 port of the design pack footer (Homepage.html: footer.foot).
+  Zo Veilig footer. 1:1 port of the design pack footer (Homepage.html: footer.foot):
+  brand + three link columns + partner strip + baseline (copyright + legal).
 
-  Link columns come from Shopify navigation menus (a primitive, not a metaobject).
-  Brand text, tagline and phone are section settings. The partner logos live in the
-  dedicated showcases (homepage trust bar / Oplossingen "De beste technologie" band),
-  so the footer deliberately does NOT repeat them.
+  Link columns come from Shopify navigation menus when assigned; otherwise each column
+  falls back to the design's own links (routed through snippets/zv-route) so the footer
+  is always complete, even before menus are configured in the Theme Editor.
+  Partner logos come from the partner metaobject (active, sorted by display_order).
 {%- endcomment -%}
+
+{%- liquid
+  assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
+-%}
 
 <footer class="foot" role="contentinfo">
   <div class="wrap">
@@ -25,30 +30,79 @@
         {%- endif -%}
       </div>
 
-      {%- for i in (1..3) -%}
-        {%- assign heading_key = 'col_' | append: i | append: '_heading' -%}
-        {%- assign menu_key = 'col_' | append: i | append: '_menu' -%}
-        {%- assign menu_handle = section.settings[menu_key] -%}
-        {%- if menu_handle != blank -%}
-          <div class="foot-col">
-            {%- if section.settings[heading_key] != blank -%}<h4>{{ section.settings[heading_key] }}</h4>{%- endif -%}
-            {%- for link in linklists[menu_handle].links -%}
-              <a href="{{ link.url }}">{{ link.title }}</a>
-            {%- endfor -%}
-          </div>
+      {%- comment -%} Column 1 — Oplossingen {%- endcomment -%}
+      <div class="foot-col">
+        <h4>{{ section.settings.col_1_heading | default: 'Oplossingen' }}</h4>
+        {%- if section.settings.col_1_menu != blank -%}
+          {%- for link in linklists[section.settings.col_1_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
+        {%- else -%}
+          <a href="{% render 'zv-route', key: 'oplossingen' %}">Langer Thuis</a>
+          <a href="{% render 'zv-route', key: 'oplossingen' %}">Mijn Thuis</a>
+          <a href="{% render 'zv-route', key: 'oplossingen' %}">Veilig Onderweg</a>
+          <a href="{% render 'zv-route', key: 'pakketten' %}">Vergelijk pakketten</a>
+          <a href="{% render 'zv-route', key: 'zakelijk' %}">Zakelijk</a>
         {%- endif -%}
-      {%- endfor -%}
+      </div>
+
+      {%- comment -%} Column 2 — Kennis {%- endcomment -%}
+      <div class="foot-col">
+        <h4>{{ section.settings.col_2_heading | default: 'Kennis' }}</h4>
+        {%- if section.settings.col_2_menu != blank -%}
+          {%- for link in linklists[section.settings.col_2_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
+        {%- else -%}
+          <a href="{% render 'zv-route', key: 'kenniscentrum' %}">Kenniscentrum</a>
+          <a href="{% render 'zv-route', key: 'faq' %}">Veelgestelde vragen</a>
+          <a href="{% render 'zv-route', key: 'kc/hoe-werkt-een-meldkamer' %}">Hoe werkt de meldkamer</a>
+          <a href="{% render 'zv-route', key: 'kc/leefstijlmonitoring-zonder-cameras' %}">Leefstijlmonitoring</a>
+          <a href="{% render 'zv-route', key: 'kc/privacy-en-gegevens' %}">Privacy &amp; gegevens</a>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Column 3 — Over Zo Veilig {%- endcomment -%}
+      <div class="foot-col">
+        <h4>{{ section.settings.col_3_heading | default: 'Over Zo Veilig' }}</h4>
+        {%- if section.settings.col_3_menu != blank -%}
+          {%- for link in linklists[section.settings.col_3_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
+        {%- else -%}
+          <a href="{% render 'zv-route', key: 'over-ons' %}">Over Ons</a>
+          <a href="{% render 'zv-route', key: 'klantenservice' %}">Klantenservice</a>
+          <a href="{% render 'zv-route', key: 'contact' %}">Contact</a>
+          <a href="{% render 'zv-route', key: 'herroepingsrecht' %}">Aankoop herroepen</a>
+        {%- endif -%}
+      </div>
     </div>
+
+    {%- comment -%} Oplossingen has its own partner showcase in the "De beste technologie"
+      band, so the footer strip is suppressed there to avoid duplicating the logos. {%- endcomment -%}
+    {%- unless template.suffix == 'oplossingen' -%}
+    {%- if partners.size > 0 -%}
+      <div class="foot-partners">
+        <div class="fp-logos">
+          {%- for partner in partners -%}
+            {%- if partner.logo != blank -%}
+              {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
+              <span class="fp-chip{% if forloop.first %} sec{% endif %}">
+                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        {%- if section.settings.partners_note != blank -%}<span class="fp-note">{{ section.settings.partners_note }}</span>{%- endif -%}
+      </div>
+    {%- endif -%}
+    {%- endunless -%}
 
     <div class="foot-base">
       <div>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright }}</div>
-      {%- if section.settings.legal_menu != blank -%}
-        <div class="fb-links">
-          {%- for link in linklists[section.settings.legal_menu].links -%}
-            <a href="{{ link.url }}">{{ link.title }}</a>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
+      <div class="fb-links">
+        {%- if section.settings.legal_menu != blank -%}
+          {%- for link in linklists[section.settings.legal_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
+        {%- else -%}
+          {%- if shop.privacy_policy != blank -%}<a href="{{ shop.privacy_policy.url }}">Privacy</a>{%- endif -%}
+          {%- if shop.terms_of_service != blank -%}<a href="{{ shop.terms_of_service.url }}">Voorwaarden</a>{%- endif -%}
+          {%- if shop.refund_policy != blank -%}<a href="{{ shop.refund_policy.url }}">Retourneren</a>{%- endif -%}
+        {%- endif -%}
+      </div>
     </div>
   </div>
 </footer>
@@ -59,20 +113,22 @@
   "settings": [
     { "type": "header", "content": "Merk" },
     { "type": "image_picker", "id": "logo_light", "label": "Logo (wit)" },
-    { "type": "textarea", "id": "tagline", "label": "Tagline", "default": "Slimme zorg en beveiliging voor thuis. Al 20 jaar." },
+    { "type": "textarea", "id": "tagline", "label": "Tagline", "default": "Slimme zorg en beveiliging voor thuis. Al 20 jaar, met een Nederlandse meldkamer die nooit slaapt." },
     { "type": "text", "id": "phone", "label": "Telefoonnummer", "default": "088 012 3456" },
     { "type": "header", "content": "Kolom 1" },
     { "type": "text", "id": "col_1_heading", "label": "Kop", "default": "Oplossingen" },
-    { "type": "link_list", "id": "col_1_menu", "label": "Menu" },
+    { "type": "link_list", "id": "col_1_menu", "label": "Menu (leeg = standaard)" },
     { "type": "header", "content": "Kolom 2" },
     { "type": "text", "id": "col_2_heading", "label": "Kop", "default": "Kennis" },
-    { "type": "link_list", "id": "col_2_menu", "label": "Menu" },
+    { "type": "link_list", "id": "col_2_menu", "label": "Menu (leeg = standaard)" },
     { "type": "header", "content": "Kolom 3" },
     { "type": "text", "id": "col_3_heading", "label": "Kop", "default": "Over Zo Veilig" },
-    { "type": "link_list", "id": "col_3_menu", "label": "Menu" },
+    { "type": "link_list", "id": "col_3_menu", "label": "Menu (leeg = standaard)" },
+    { "type": "header", "content": "Partners" },
+    { "type": "text", "id": "partners_note", "label": "Bijschrift", "default": "Beveiligd met bewezen partners" },
     { "type": "header", "content": "Onderregel" },
     { "type": "text", "id": "copyright", "label": "Copyright", "default": "Zo Veilig, Nederlandse meldkamer, 24/7 bewaakt" },
-    { "type": "link_list", "id": "legal_menu", "label": "Juridische links" }
+    { "type": "link_list", "id": "legal_menu", "label": "Juridische links (leeg = winkelbeleid)" }
   ]
 }
 {% endschema %}
