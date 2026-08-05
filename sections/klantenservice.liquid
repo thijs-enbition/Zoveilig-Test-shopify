@@ -1,0 +1,314 @@
+{%- comment -%}
+  Zo Veilig Klantenservice — customer-service + FAQ page.
+  1:1 port of the design pack "Klanterservice.html" (hero + zoek, FAQ met filters/accordion,
+  direct contact, nieuwe-klant CTA). FAQ items are theme-editable blocks; filtering, search
+  and the accordion are progressive-enhancement JS over server-rendered, accessible markup.
+{%- endcomment -%}
+
+{%- liquid
+  assign cats = section.settings.categories | newline_to_br | strip_newlines | split: '<br />'
+  assign popular = section.settings.popular | newline_to_br | strip_newlines | split: '<br />'
+-%}
+
+<div class="zv-svc">
+  <!-- HERO + ZOEK -->
+  <section class="svc-hero">
+    <div class="wrap">
+      {%- if section.settings.eyebrow != blank -%}<span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | escape }}</span>{%- endif -%}
+      <h1>{{ section.settings.heading | default: 'Waar kunnen wij uw mee helpen?' | escape }}</h1>
+      {%- if section.settings.intro != blank -%}<p class="intro">{{ section.settings.intro | escape }}</p>{%- endif -%}
+
+      <div class="hero-search" role="search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <input id="svcSearch" type="text" placeholder="{{ section.settings.search_placeholder | default: 'Typ uw vraag of zoek op onderwerp' | escape }}" aria-label="Zoek in veelgestelde vragen" autocomplete="off">
+        <button class="btn btn--indigo" id="svcSearchBtn" type="button">Zoeken</button>
+      </div>
+
+      {%- if popular.size > 0 -%}
+        <div class="popular">
+          <span class="pl">Vaak gezocht:</span>
+          {%- for p in popular -%}<button type="button" class="svc-pop" data-q="{{ p | strip | escape }}">{{ p | strip | escape }}</button>{%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="svc-faq" id="veelgestelde-vragen">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow"><span class="d"></span>Veelgestelde vragen</span>
+        <h2>{{ section.settings.faq_heading | default: 'Vind snel een antwoord' | escape }}</h2>
+      </div>
+
+      <div class="cats" role="group" aria-label="Filter op categorie">
+        <button type="button" class="cat on" data-cat="__all" aria-pressed="true"><span class="cdot"></span>Alle</button>
+        {%- for c in cats -%}
+          <button type="button" class="cat" data-cat="{{ c | strip | downcase | handle }}" aria-pressed="false"><span class="cdot"></span>{{ c | strip | escape }}</button>
+        {%- endfor -%}
+      </div>
+
+      <div class="faq" id="svcList">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'faq' -%}
+            {%- assign cat_slug = block.settings.category | strip | downcase | handle -%}
+            {%- assign ansid = 'svc-a-' | append: block.id -%}
+            <div class="faq-item" data-cat="{{ cat_slug }}" data-text="{{ block.settings.question | append: ' ' | append: block.settings.category | append: ' ' | append: block.settings.answer | strip_html | downcase | escape }}" {{ block.shopify_attributes }}>
+              <button class="faq-q" type="button" aria-expanded="false" aria-controls="{{ ansid }}">
+                {%- if block.settings.category != blank -%}<span class="qcat">{{ block.settings.category | escape }}</span>{%- endif -%}
+                <span class="qtext">{{ block.settings.question | escape }}</span>
+                <svg class="qx" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+              </button>
+              <div class="faq-a" id="{{ ansid }}" role="region"><div class="faq-a-inner">{{ block.settings.answer }}</div></div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      <div class="faq-empty" id="svcEmpty" hidden>Geen vragen gevonden. Bel ons gerust op 088-122 11 11, we helpen uw direct.</div>
+    </div>
+  </section>
+
+  <!-- DIRECT CONTACT -->
+  <section class="svc-direct" id="contact">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow"><span class="d"></span>Direct contact</span>
+        <h2>Liever persoonlijk contact?</h2>
+      </div>
+      <div class="ct-grid">
+        {%- assign tel = section.settings.phone | default: '088-122 11 11' -%}
+        <a class="ct" href="tel:{{ tel | remove: ' ' | remove: '-' }}">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg></span>
+          <h3>Bellen</h3>
+          <p>{{ section.settings.phone_hours | default: 'Ma t/m vr, 08:30 tot 17:30 uur.' | escape }}</p>
+          <span class="cv">{{ tel | escape }}</span>
+        </a>
+        {%- assign mail = section.settings.email | default: 'klantenservice@zoveilig.nl' -%}
+        <a class="ct" href="mailto:{{ mail }}">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/></svg></span>
+          <h3>Mailen</h3>
+          <p>{{ section.settings.email_sla | default: 'Reactie binnen één werkdag.' | escape }}</p>
+          <span class="cv">{{ mail | escape }}</span>
+        </a>
+      </div>
+      <p class="hk-note">Online iets gekocht en toch bedenken? <a href="{% render 'zv-route', key: 'herroepingsrecht' %}">Bestelling herroepen binnen 14 dagen</a></p>
+    </div>
+  </section>
+
+  <!-- NIEUWE KLANT -->
+  <section class="svc-klant">
+    <div class="wrap">
+      <div class="card">
+        <div class="kt">
+          <span class="eyebrow"><span class="d"></span>Nieuwe klant</span>
+          <h2>{{ section.settings.cta_heading | default: 'Wilt uw klant worden?' | escape }}</h2>
+          <p>{{ section.settings.cta_text | default: 'Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl.' | escape }}</p>
+        </div>
+        <div class="kb">
+          <a class="btn btn--gold" href="{{ section.settings.cta1_url | default: '/pages/oplossingen' }}">{{ section.settings.cta1_label | default: 'Maak me wegwijs' | escape }}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn btn--ghost" href="{{ section.settings.cta2_url | default: '/pages/hoe-het-werkt' }}">{{ section.settings.cta2_label | default: 'Hoe het werkt' | escape }}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-svc {
+  --ink:#1a1230; --indigo:#322469; --indigo-2:#473a86; --indigo-soft:#efecf7;
+  --cream:#fdfaf2; --paper:#ffffff; --sand:#efe9d6; --gold:#e4a311; --gold-lt:#f5c84a;
+  --belt:#b67e0a; --ok:#2f8f5b; --line:#e9e2d2; --line-2:#ddd5c2; --muted:#6f6786;
+  background:var(--cream); color:var(--ink); line-height:1.5;
+}
+.zv-svc .wrap { max-width:1160px; margin:0 auto; padding:0 clamp(20px,3.4vw,48px); }
+.zv-svc .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--belt); }
+.zv-svc .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
+.zv-svc h1, .zv-svc h2, .zv-svc h3 { color:var(--indigo); }
+.zv-svc .btn { font-weight:800; font-size:15px; border:none; border-radius:12px; padding:14px 22px; line-height:1; display:inline-flex; align-items:center; justify-content:center; gap:9px; cursor:pointer; text-decoration:none; transition:transform .14s,box-shadow .14s; }
+.zv-svc .btn svg { width:18px; height:18px; }
+.zv-svc .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 2px 0 var(--belt); }
+.zv-svc .btn--gold:hover { transform:translateY(-1px); box-shadow:0 4px 0 var(--belt),0 12px 24px -12px rgba(180,126,10,.7); }
+.zv-svc .btn--indigo { background:var(--indigo); color:#fff; }
+.zv-svc .btn--indigo:hover { background:var(--indigo-2); }
+.zv-svc .btn--ghost { background:transparent; color:var(--indigo); border:2px solid var(--indigo); padding:12px 20px; }
+.zv-svc .btn--ghost:hover { background:var(--indigo-soft); }
+.zv-svc a:focus-visible, .zv-svc button:focus-visible { outline:2px solid var(--indigo); outline-offset:3px; border-radius:8px; }
+
+/* hero */
+.zv-svc .svc-hero { background:radial-gradient(120% 130% at 82% 0%, var(--indigo-soft) 0%, #f6eedd 46%, var(--cream) 100%); }
+.zv-svc .svc-hero .wrap { text-align:center; display:flex; flex-direction:column; align-items:center; padding:clamp(48px,6vw,86px) clamp(20px,3.4vw,48px); }
+.zv-svc .svc-hero h1 { font-size:clamp(32px,5vw,60px); font-weight:900; letter-spacing:-.025em; line-height:1; margin-top:14px; }
+.zv-svc .svc-hero .intro { font-size:clamp(16px,1.6vw,18.5px); font-weight:500; color:#473f5e; margin-top:22px; line-height:1.6; max-width:52ch; }
+.zv-svc .hero-search { display:flex; align-items:center; gap:10px; width:100%; max-width:560px; margin:30px auto 0; background:#fff; border:1.5px solid var(--line-2); border-radius:16px; padding:8px 8px 8px 18px; box-shadow:0 26px 54px -30px rgba(26,18,48,.5); }
+.zv-svc .hero-search > svg { width:21px; height:21px; color:var(--muted); flex:none; }
+.zv-svc .hero-search input { flex:1; min-width:0; border:none; background:none; font-family:inherit; font-size:16px; font-weight:500; color:var(--ink); padding:11px 4px; }
+.zv-svc .hero-search input:focus { outline:none; }
+.zv-svc .hero-search .btn { border-radius:12px; padding:13px 22px; white-space:nowrap; }
+.zv-svc .popular { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; align-items:center; margin-top:18px; }
+.zv-svc .popular .pl { font-size:13px; font-weight:700; color:var(--muted); }
+.zv-svc .popular .svc-pop { font-size:13px; font-weight:700; color:var(--indigo); background:var(--sand); border:none; border-radius:999px; padding:7px 13px; cursor:pointer; transition:.15s; }
+.zv-svc .popular .svc-pop:hover { background:var(--indigo); color:#fff; }
+
+/* faq */
+.zv-svc .svc-faq { background:var(--paper); border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:clamp(44px,5vw,72px) 0; }
+.zv-svc .svc-faq .head { text-align:center; max-width:680px; margin:0 auto; }
+.zv-svc .svc-faq h2 { font-size:clamp(28px,3.4vw,40px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin-top:11px; }
+.zv-svc .cats { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:26px; }
+.zv-svc .cat { display:inline-flex; align-items:center; gap:9px; font-size:13.5px; font-weight:800; color:var(--indigo); background:var(--cream); border:1.5px solid var(--line); border-radius:999px; padding:10px 16px; cursor:pointer; transition:.15s; }
+.zv-svc .cat:hover { border-color:var(--indigo-2); }
+.zv-svc .cat.on { background:var(--indigo); color:#fff; border-color:var(--indigo); }
+.zv-svc .cat .cdot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex:none; }
+.zv-svc .cat.on .cdot { background:var(--gold-lt); }
+.zv-svc .faq { max-width:720px; margin:30px auto 0; display:flex; flex-direction:column; gap:10px; }
+.zv-svc .faq-item { background:var(--cream); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.zv-svc .faq-item[hidden] { display:none; }
+.zv-svc .faq-q { width:100%; text-align:left; background:none; border:none; padding:17px 20px; display:flex; align-items:center; gap:14px; font-size:15.5px; font-weight:800; color:var(--ink); cursor:pointer; }
+.zv-svc .faq-q .qcat { font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--belt); background:var(--sand); border-radius:999px; padding:4px 9px; flex:none; }
+.zv-svc .faq-q .qtext { flex:1; }
+.zv-svc .faq-q .qx { margin-left:auto; width:22px; height:22px; flex:none; color:var(--indigo); transition:transform .2s; }
+.zv-svc .faq-item.open .faq-q .qx { transform:rotate(45deg); }
+.zv-svc .faq-a { max-height:0; overflow:hidden; transition:max-height .25s ease; }
+.zv-svc .faq-a-inner { padding:0 20px 18px; font-size:14.5px; font-weight:500; color:#5b5374; line-height:1.6; }
+.zv-svc .faq-a-inner a { color:var(--indigo); font-weight:700; }
+.zv-svc .faq-empty { text-align:center; font-size:14.5px; font-weight:600; color:var(--muted); padding:24px; }
+
+/* direct contact */
+.zv-svc .svc-direct { padding:clamp(44px,5vw,72px) 0; }
+.zv-svc .svc-direct .head { text-align:center; max-width:640px; margin:0 auto 34px; }
+.zv-svc .svc-direct .head h2 { font-size:clamp(28px,3.4vw,40px); font-weight:900; letter-spacing:-.02em; margin-top:11px; }
+.zv-svc .ct-grid { display:grid; grid-template-columns:repeat(2,minmax(0,320px)); gap:16px; justify-content:center; }
+@media (max-width:520px) { .zv-svc .ct-grid { grid-template-columns:1fr; } }
+.zv-svc .ct { display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:26px 22px; text-align:left; transition:transform .15s,box-shadow .15s,border-color .15s; box-shadow:0 26px 54px -46px rgba(26,18,48,.4); }
+.zv-svc .ct:hover { transform:translateY(-3px); border-color:var(--indigo-soft); box-shadow:0 32px 60px -44px rgba(26,18,48,.5); }
+.zv-svc .ct .ci { width:50px; height:50px; border-radius:13px; background:var(--indigo-soft); display:grid; place-items:center; margin-bottom:16px; }
+.zv-svc .ct .ci svg { width:24px; height:24px; color:var(--indigo); }
+.zv-svc .ct h3 { font-size:17px; font-weight:900; color:var(--indigo); }
+.zv-svc .ct p { font-size:13.5px; font-weight:600; color:var(--muted); margin-top:5px; line-height:1.45; }
+.zv-svc .ct .cv { font-size:15px; font-weight:800; color:var(--belt); margin-top:14px; }
+.zv-svc .hk-note { text-align:center; margin-top:24px; font-size:13.5px; font-weight:600; color:var(--muted); }
+.zv-svc .hk-note a { color:var(--indigo); font-weight:800; text-decoration:underline; }
+
+/* nieuwe klant */
+.zv-svc .svc-klant { padding:clamp(48px,6vw,80px) 0; }
+.zv-svc .svc-klant .card { background:linear-gradient(165deg,#fff,#fbf4e6); border:1px solid var(--line); border-radius:26px; padding:clamp(34px,4vw,52px); display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap; box-shadow:0 40px 90px -54px rgba(26,18,48,.5); }
+.zv-svc .svc-klant .kt h2 { font-size:clamp(26px,3vw,36px); font-weight:900; letter-spacing:-.02em; max-width:18ch; margin-top:11px; }
+.zv-svc .svc-klant .kt p { font-size:16px; font-weight:500; color:#473f5e; margin-top:12px; max-width:46ch; line-height:1.55; }
+.zv-svc .svc-klant .kb { display:flex; gap:12px; flex-wrap:wrap; }
+.zv-svc .svc-klant .kb .btn { font-size:16px; padding:16px 26px; }
+@media (max-width:600px) { .zv-svc .svc-klant .kb { width:100%; } .zv-svc .svc-klant .kb .btn { flex:1 1 100%; } }
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var root = document.currentScript && document.currentScript.closest ? null : null;
+  var scope = document.querySelector('.zv-svc');
+  if (!scope) return;
+  var search = scope.querySelector('#svcSearch');
+  var searchBtn = scope.querySelector('#svcSearchBtn');
+  var cats = scope.querySelectorAll('.cat');
+  var items = Array.prototype.slice.call(scope.querySelectorAll('.faq-item'));
+  var empty = scope.querySelector('#svcEmpty');
+  var activeCat = '__all';
+  var term = '';
+
+  function apply() {
+    var shown = 0;
+    items.forEach(function (it) {
+      var okCat = activeCat === '__all' || it.getAttribute('data-cat') === activeCat;
+      var okTerm = !term || (it.getAttribute('data-text') || '').indexOf(term) >= 0;
+      var visible = okCat && okTerm;
+      it.hidden = !visible;
+      if (visible) shown++;
+    });
+    if (empty) empty.hidden = shown !== 0;
+  }
+
+  cats.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      cats.forEach(function (b) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('on'); btn.setAttribute('aria-pressed', 'true');
+      activeCat = btn.getAttribute('data-cat');
+      apply();
+    });
+  });
+
+  function runSearch() { term = (search.value || '').trim().toLowerCase(); apply(); }
+  if (search) search.addEventListener('input', runSearch);
+  if (searchBtn) searchBtn.addEventListener('click', runSearch);
+
+  scope.querySelectorAll('.svc-pop').forEach(function (p) {
+    p.addEventListener('click', function () {
+      if (search) search.value = p.getAttribute('data-q') || p.textContent;
+      // popular pill resets the category filter, like the design
+      cats.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-cat') === '__all'); b.setAttribute('aria-pressed', b.getAttribute('data-cat') === '__all' ? 'true' : 'false'); });
+      activeCat = '__all';
+      runSearch();
+      var faq = scope.querySelector('#veelgestelde-vragen');
+      if (faq) faq.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Accordion — one open at a time, accessible
+  items.forEach(function (it) {
+    var q = it.querySelector('.faq-q');
+    var a = it.querySelector('.faq-a');
+    if (!q || !a) return;
+    q.addEventListener('click', function () {
+      var isOpen = it.classList.contains('open');
+      items.forEach(function (o) {
+        o.classList.remove('open');
+        var oq = o.querySelector('.faq-q'); var oa = o.querySelector('.faq-a');
+        if (oq) oq.setAttribute('aria-expanded', 'false');
+        if (oa) oa.style.maxHeight = '0';
+      });
+      if (!isOpen) {
+        it.classList.add('open');
+        q.setAttribute('aria-expanded', 'true');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Klantenservice",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Klantenservice" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Waar kunnen wij uw mee helpen?" },
+    { "type": "textarea", "id": "intro", "label": "Introtekst", "default": "Zoek een antwoord, bekijk de veelgestelde vragen of neem direct persoonlijk contact met ons op." },
+    { "type": "text", "id": "search_placeholder", "label": "Zoek-placeholder", "default": "Typ uw vraag of zoek op onderwerp" },
+    { "type": "textarea", "id": "popular", "label": "Vaak gezocht (1 per regel)", "default": "Alarm gaat af\nPincode wijzigen\nVals alarm\nOp vakantie" },
+    { "type": "header", "content": "FAQ" },
+    { "type": "text", "id": "faq_heading", "label": "Kop", "default": "Vind snel een antwoord" },
+    { "type": "textarea", "id": "categories", "label": "Categorieën (1 per regel, matchen met de FAQ-blokken)", "default": "Vaak gezocht\nMijn systeem\nSmarthome / Domotica\nContract en betaling\nAfspraak of annulering\nMeldkamer & alarmopvolging" },
+    { "type": "header", "content": "Direct contact" },
+    { "type": "text", "id": "phone", "label": "Telefoon", "default": "088-122 11 11" },
+    { "type": "text", "id": "phone_hours", "label": "Telefoon-openingstijden", "default": "Ma t/m vr, 08:30 tot 17:30 uur." },
+    { "type": "text", "id": "email", "label": "E-mail", "default": "klantenservice@zoveilig.nl" },
+    { "type": "text", "id": "email_sla", "label": "E-mail-reactietijd", "default": "Reactie binnen één werkdag." },
+    { "type": "header", "content": "Nieuwe klant" },
+    { "type": "text", "id": "cta_heading", "label": "Kop", "default": "Wilt uw klant worden?" },
+    { "type": "textarea", "id": "cta_text", "label": "Tekst", "default": "Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl." },
+    { "type": "text", "id": "cta1_label", "label": "Knop 1 tekst", "default": "Maak me wegwijs" },
+    { "type": "url", "id": "cta1_url", "label": "Knop 1 link" },
+    { "type": "text", "id": "cta2_label", "label": "Knop 2 tekst", "default": "Hoe het werkt" },
+    { "type": "url", "id": "cta2_url", "label": "Knop 2 link" }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ-vraag",
+      "settings": [
+        { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën." },
+        { "type": "text", "id": "question", "label": "Vraag" },
+        { "type": "richtext", "id": "answer", "label": "Antwoord", "default": "<p>Ons klantenserviceteam helpt u hier graag persoonlijk mee. Bel 088-122 11 11 of mail klantenservice@zoveilig.nl, dan lossen we het samen snel op. In uw app en handleiding vindt u ook stapsgewijze uitleg.</p>" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Klantenservice" }]
+}
+{% endschema %}

@@ -1,0 +1,119 @@
+{
+  "sections": {
+    "main": {
+      "type": "klantenservice",
+      "blocks": {
+        "faq1": {
+          "type": "faq",
+          "settings": {
+            "category": "Mijn systeem",
+            "question": "Kiezer te laat, of bericht simkaartnummer ontvangen"
+          }
+        },
+        "faq2": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer & alarmopvolging",
+            "question": "Gele en rode kaarten"
+          }
+        },
+        "faq3": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer & alarmopvolging",
+            "question": "Ik heb geen doormelding. Wat nu?"
+          }
+        },
+        "faq4": {
+          "type": "faq",
+          "settings": {
+            "category": "Mijn systeem",
+            "question": "Hoe wijzig ik mijn pincode?"
+          }
+        },
+        "faq5": {
+          "type": "faq",
+          "settings": {
+            "category": "Vaak gezocht",
+            "question": "Wat moet ik doen als het alarm afgaat?"
+          }
+        },
+        "faq6": {
+          "type": "faq",
+          "settings": {
+            "category": "Vaak gezocht",
+            "question": "Hoe meld ik een alarm af bij de alarmcentrale?"
+          }
+        },
+        "faq7": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer & alarmopvolging",
+            "question": "De alarmcentrale vraagt naar een pincode van de passen. Wat nu?"
+          }
+        },
+        "faq8": {
+          "type": "faq",
+          "settings": {
+            "category": "Afspraak of annulering",
+            "question": "Contactpersonen wijzigen"
+          }
+        },
+        "faq9": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer & alarmopvolging",
+            "question": "Alarmmelding opvolging"
+          }
+        },
+        "faq10": {
+          "type": "faq",
+          "settings": {
+            "category": "Mijn systeem",
+            "question": "Ik heb een bedieningsfout gemaakt, moet ik wachten tot de alarmcentrale belt?"
+          }
+        },
+        "faq11": {
+          "type": "faq",
+          "settings": {
+            "category": "Vaak gezocht",
+            "question": "Vals alarm"
+          }
+        },
+        "faq12": {
+          "type": "faq",
+          "settings": {
+            "category": "Smarthome / Domotica",
+            "question": "Koolmonoxide alarm"
+          }
+        },
+        "faq13": {
+          "type": "faq",
+          "settings": {
+            "category": "Vaak gezocht",
+            "question": "Ik ga op vakantie, waar moet ik aan denken?"
+          }
+        }
+      },
+      "block_order": [
+        "faq1",
+        "faq2",
+        "faq3",
+        "faq4",
+        "faq5",
+        "faq6",
+        "faq7",
+        "faq8",
+        "faq9",
+        "faq10",
+        "faq11",
+        "faq12",
+        "faq13"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
