@@ -1,0 +1,441 @@
+{%- comment -%}
+  Zo Veilig — Over ons. 1:1 port of the design pack "Zo Veilig Over Ons.html"
+  (hero, partner trust strip, intro, cijfers, content blocks, Securitas partner band,
+  video band, maatwerk/integer, waarom, stappen). Header + footer come from the theme.
+  Photos are theme assets with image_picker overrides; links route through zv-route.
+{%- endcomment -%}
+
+{%- liquid
+  assign hero_img = section.settings.hero_image
+  if hero_img != blank
+    assign hero_url = hero_img | image_url: width: 1600
+  else
+    assign hero_url = 'zv-overons-zaanse-huizen.jpg' | asset_url
+  endif
+-%}
+
+<div class="zv-overons">
+  <!-- HERO -->
+  <section class="oo-hero">
+    <div class="wrap">
+      <div class="hero-media" style="background-image:url('{{ hero_url }}');">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow">{{ section.settings.eyebrow | default: 'Over ons' | escape }}</span>
+            <h1>{{ section.settings.heading | default: 'Van woningbeveiliging naar complete veiligheid.' | escape }}</h1>
+            <div class="hero-cta">
+              <a class="btn btn--gold" href="{{ section.settings.cta1_url | default: '/pages/oplossingen' }}">{{ section.settings.cta1_label | default: 'Bekijk onze oplossingen' | escape }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <a class="btn btn--ghost-light" href="{{ section.settings.cta2_url | default: '/pages/klantenservice#contact' }}">{{ section.settings.cta2_label | default: 'Neem contact op' | escape }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNER TRUST STRIP -->
+  <section class="trust-top">
+    <div class="wrap">
+      <span class="tt-label">Preferred Partner van Securitas, sinds 2007</span>
+      <div class="tt-logos">
+        <span class="tt-chip lead"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="34"></span>
+        <span class="tt-chip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="30"></span>
+        <span class="tt-chip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="30"></span>
+        <span class="tt-chip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="30"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="intro">
+    <div class="wrap">
+      <div class="photowrap">
+        {%- if section.settings.intro_image != blank -%}
+          {{ section.settings.intro_image | image_url: width: 900 | image_tag: class: 'introphoto', alt: 'De leiding van Zo Veilig in overleg', loading: 'lazy' }}
+        {%- else -%}
+          <img class="introphoto" src="{{ 'zv-overons-team-leiding.jpg' | asset_url }}" alt="De leiding van Zo Veilig in overleg" loading="lazy" width="720" height="500">
+        {%- endif -%}
+        <div class="yrs"><b>20</b><span>jaar ervaring</span></div>
+      </div>
+      <div>
+        <span class="eyebrow">Wat we hebben gebouwd</span>
+        <h2>Bijna twintig jaar bouwen aan veiligheid</h2>
+        <p class="lead">Twintig jaar geleden begonnen we met het beveiligen van woningen. Vandaag helpen we mensen op drie manieren veilig te leven.</p>
+        <ul class="intro-pillars">
+          <li><span class="dot"></span><span><b>Mijn Thuis.</b> Slimme beveiliging die uw woning beschermt, met camera's, alarm en meldkamer.</span></li>
+          <li><span class="dot"></span><span><b>Langer Thuis.</b> Een extra oogje in het zeil, zodat mensen langer zelfstandig kunnen blijven wonen. Met respect voor privacy en geruststelling voor familie.</span></li>
+          <li><span class="dot"></span><span><b>Onderweg.</b> Persoonlijke veiligheid met directe hulp wanneer dat nodig is, thuis en onderweg.</span></li>
+        </ul>
+        <p class="lead">Welke oplossing u ook kiest, één ding blijft hetzelfde: persoonlijk advies, betrouwbare technologie en één vertrouwd aanspreekpunt.</p>
+        <p class="lead lead--accent">Dat is Zo Veilig. Al bijna twintig jaar.</p>
+        <div class="partner">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#E4A311" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.3v5.7c0 4.4-3 7.7-7 9.3-4-1.6-7-4.9-7-9.3V5.3L12 3z"/><path d="M8.6 12l2.5 2.5L15.7 9" stroke-linecap="round"/></svg></div>
+          <div class="t"><b>Preferred Partner van Securitas</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CIJFERS -->
+  <section class="stats">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Zo Veilig in cijfers</span>
+        <h2>Elke dag zorgen we voor de veiligheid van ruim 7.000 huishoudens</h2>
+        <p class="sub">Twintig jaar ervaring, duizenden klanten en een meldkamer die dag en nacht voor u klaarstaat. Dáár bouwen wij ons vertrouwen op.</p>
+      </div>
+      <div class="grid4">
+        <div class="stat"><div class="n">20 jaar</div><div class="l">Ervaring in veiligheid</div></div>
+        <div class="stat"><div class="n">7000+</div><div class="l">Huishoudens vertrouwen op Zo Veilig</div></div>
+        <div class="stat"><div class="n">&lt;1 min</div><div class="l">Gemiddelde meldkamerreactie</div></div>
+        <div class="stat hl"><div class="n">Sinds 2007</div><div class="l">Preferred Partner van Securitas</div></div>
+      </div>
+      <p class="note">Samen goed voor ruim <b>17.000 mensen</b> die elke dag veilig thuis zijn.</p>
+    </div>
+  </section>
+
+  <!-- CONTENT BLOCKS -->
+  <section class="blocks">
+    <div class="wrap">
+      <div class="block">
+        <span class="tag"><span class="d d-red"></span>Wat we nu doen</span>
+        <h3>Van woningen beschermen naar mensen helpen veilig te leven</h3>
+        <p>Twintig jaar geleden begonnen we met woningbeveiliging. Vandaag helpen we mensen met een veilig huis, langer zelfstandig thuis wonen en persoonlijke veiligheid onderweg.</p>
+        <p>Niet door zoveel mogelijk techniek te verkopen, maar door slimme technologie te combineren met persoonlijk advies, vakkundige installatie en één vertrouwd aanspreekpunt.</p>
+      </div>
+      <div class="block">
+        <span class="tag"><span class="d d-gold"></span>De volgende stap</span>
+        <h3>Veiligheid is meer dan een alarm</h3>
+        <p>Een veilig gevoel gaat verder dan bescherming tegen inbraak. Het betekent ook weten dat het goed gaat met uw ouders, hulp die direct bereikbaar is wanneer dat nodig is en technologie die ongemerkt met u meedenkt.</p>
+        <p>Dat is hoe wij veiligheid zien. Persoonlijk, betrouwbaar en altijd passend bij uw situatie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITAS PARTNER BAND -->
+  <section class="partners-band">
+    <div class="wrap">
+      <div class="pb-photo">
+        {%- if section.settings.partner_image != blank -%}
+          {{ section.settings.partner_image | image_url: width: 900 | image_tag: alt: 'Het team van Zo Veilig in een werksessie', loading: 'lazy' }}
+        {%- else -%}
+          <img src="{{ 'zv-overons-team-werksessie.jpg' | asset_url }}" alt="Het team van Zo Veilig in een werksessie" loading="lazy" width="720" height="500">
+        {%- endif -%}
+      </div>
+      <div>
+        <span class="eyebrow">Onze hoofdpartner</span>
+        <h2>In samenwerking met Securitas, sinds 2007</h2>
+        <p class="lead">Securitas is niet alleen onze Preferred Partner, maar ook aandeelhouder. In Nederland zijn wij de enige leverancier, installateur en dealer van het SecuritasHome-concept. Eén keurmerk, één meldkamer, één aanspreekpunt: Zo Veilig.</p>
+        <div class="sec-feature">
+          <span class="sec-logo"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="170" height="40"></span>
+          <ul class="sec-points">
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Preferred Partner én aandeelhouder sinds 2007</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Enige SecuritasHome-leverancier in Nederland</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Meldkamerreactie binnen 1 minuut, 24/7</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITAS VIDEO -->
+  <section class="videoband">
+    <div class="wrap">
+      <div class="vb-head">
+        <span class="eyebrow">Gedragen door Securitas</span>
+        <h2>Eén partnership, één belofte van veiligheid</h2>
+        <p class="lead">Securitas is niet alleen onze Preferred Partner, maar ook aandeelhouder. In Nederland zijn wij de enige leverancier, installateur en dealer van het SecuritasHome-concept. Door deze unieke bundeling van krachten bieden we professionele dienstverlening tegen zeer gunstige tarieven. We werken uitsluitend met gediplomeerde installateurs, meldkamermedewerkers en surveillanten, en adviseren integer, zonder het belang van de klant uit het oog te verliezen.</p>
+      </div>
+      <div class="vb-frame" data-yt="{{ section.settings.video_id | default: 'VSPJbIc8cmw' }}">
+        <img class="vb-poster" src="{% if section.settings.video_poster != blank %}{{ section.settings.video_poster | image_url: width: 1280 }}{% else %}{{ 'zv-overons-video-poster.jpg' | asset_url }}{% endif %}" alt="Securitas video: wat doen de meldkamer en surveillant?" loading="lazy" width="1280" height="720">
+        <button class="vb-play" type="button" aria-label="Speel de video af"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+      </div>
+      <p class="vb-note">Met ons gedreven team blijven wij andere bedrijven in onze markt een stapje voor, door klanten te verrassen met de mogelijkheden op het gebied van beveiliging en wooncomfort. Wij kenmerken ons door transparante, open service en werken uitsluitend met gediplomeerde installateurs, meldkamermedewerkers en surveillanten.</p>
+    </div>
+  </section>
+
+  <!-- MAATWERK & INTEGER -->
+  <section class="blocks">
+    <div class="wrap">
+      <div class="block">
+        <span class="tag"><span class="d d-blue"></span>Maatwerk</span>
+        <h3>Wij leveren maatwerk voor elke thuissituatie</h3>
+        <p>Door ons modulaire concept bieden wij voor ieder type huis en gezinssamenstelling een passende beveiligingsoplossing. Alarmsystemen met en zonder opvolging vanuit Securitas, diverse beveiligings- en domotica-producten, of losse camera's zonder alarmsysteem. We richten ons vooral op de particuliere markt met het SecuritasHome-concept, maar beveiligen ook veel mkb-kantoren, praktijken en winkels.</p>
+      </div>
+      <div class="block">
+        <span class="tag"><span class="d d-gold"></span>Integer</span>
+        <h3>Integere omgang met de klant</h3>
+        <p>Het gemeenschappelijke doel van Securitas en Zo Veilig is om zoveel mogelijk mensen kennis te laten maken met producten en diensten voor een veilig en comfortabel thuis, zonder het belang van de klant uit het oog te verliezen. We adviseren integer, installeren zorgvuldig en bieden daarna optimale dienstverlening. Onze meldkamer reageert binnen 1 minuut op uw alarmering en we zijn 24 uur per dag telefonisch bereikbaar bij storingen of defecten.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAAROM -->
+  <section class="waarom">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Waarom Zo Veilig</span>
+        <h2 class="waarom-h">Vakmanschap dat u voelt</h2>
+        <div class="feat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#2E2160" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.3v5.7c0 4.4-3 7.7-7 9.3-4-1.6-7-4.9-7-9.3V5.3L12 3z"/></svg></div>
+          <div class="t"><b>Bijna 20 jaar ervaring</b><p>Een stevige basis van kennis en praktijk.</p></div>
+        </div>
+        <div class="feat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#E5292A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 11l2 2 4-4"/><path d="M21 12v3a2 2 0 0 1-2 2h-1l-4 3v-3H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+          <div class="t"><b>Preferred Partner van Securitas</b><p>Al sinds 2007 een betrouwbare samenwerking.</p></div>
+        </div>
+        <div class="feat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#E4A311" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="t"><b>Meldkamer en surveillance mogelijk</b><p>24 uur per dag, 7 dagen per week bereikbaar.</p></div>
+        </div>
+        <div class="feat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#2E2160" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M12 15v6l-2-1.5L8 21v-4.5"/><path d="M12 15v6l2-1.5L16 21v-4.5"/></svg></div>
+          <div class="t"><b>Uitsluitend vakmensen</b><p>Gediplomeerde installateurs en ervaren beveiligingsspecialisten.</p></div>
+        </div>
+      </div>
+      <div class="satis">
+        {%- if section.settings.team_image != blank -%}
+          {{ section.settings.team_image | image_url: width: 900 | image_tag: class: 'teamphoto', alt: 'Medewerker van de Zo Veilig service en meldkamer', loading: 'lazy' }}
+        {%- else -%}
+          <img class="teamphoto" src="{{ 'zv-overons-support-meldkamer.jpg' | asset_url }}" alt="Medewerker van de Zo Veilig service en meldkamer" loading="lazy" width="720" height="500">
+        {%- endif -%}
+        <div class="pill"><b>24/7</b><span>bewaakt</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAPPEN -->
+  <section class="stappen">
+    <div class="wrap">
+      <h2>Direct online geregeld, met hulp binnen handbereik</h2>
+      <p class="sub">Klik en koop met de Keuzehulp. Liever overleggen? Ons callcenter staat altijd voor u klaar.</p>
+      <div class="steprow">
+        <div class="stap">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg></div>
+          <div><span class="k">Online</span><b>Vind en koop uw pakket</b><p>Vind direct uw pakket met de Keuzehulp en reken meteen online af, op uw eigen moment.</p></div>
+        </div>
+        <div class="stap">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <div><span class="k">Op maat</span><b>Een beveiligingsplan op maat</b><p>In goed overleg stellen we een plan op, indien gewenst met huisautomatisering en opvolging vanuit Securitas.</p></div>
+        </div>
+        <div class="stap">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="M5 11l3 3"/></svg></div>
+          <div><span class="k">Montage</span><b>Vakkundige montage</b><p>Onze gediplomeerde monteurs installeren alles vakkundig bij u thuis. Klaar voor gebruik.</p></div>
+        </div>
+        <div class="stap hl">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12a7 7 0 0 1 14 0"/><rect x="3.5" y="12" width="3.5" height="6" rx="1.6"/><rect x="17" y="12" width="3.5" height="6" rx="1.6"/><path d="M19 18v.6a2.4 2.4 0 0 1-2.4 2.4H13"/></svg></div>
+          <div><span class="k">Altijd</span><b>Persoonlijke hulp, wanneer u wilt</b><p>Liever een mens spreken? Op elke productpagina en hier bereikt u ons callcenter voor deskundig advies.</p>
+            <a class="belbtn" href="tel:{{ section.settings.phone | default: '0880123456' | remove: ' ' }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>Bel een adviseur</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-overons {
+  --ink:#1a1230; --indigo:#322469; --indigo-2:#473a86; --gold:#E4A311; --belt:#b67e0a;
+  --red:#E5292A; --blue:#00509F; --canvas:#f7efe0; --paper:#fffdf8; --sand:#efe6d2;
+  --line:#e6dcc6; --muted:#6f6786; --muted-2:#b8b0d6;
+  background:var(--canvas); color:var(--ink);
+}
+.zv-overons .wrap { max-width:1180px; margin:0 auto; padding:0 32px; }
+@media(max-width:720px){ .zv-overons .wrap{ padding:0 20px; } }
+.zv-overons .eyebrow { font-size:12px; font-weight:800; letter-spacing:.26em; text-transform:uppercase; color:var(--red); display:inline-block; }
+.zv-overons h2 { font-size:38px; font-weight:900; letter-spacing:-.015em; color:var(--indigo); line-height:1.04; margin-top:12px; }
+.zv-overons .lead { font-size:16.5px; font-weight:500; color:#473f5e; line-height:1.62; margin-top:18px; }
+.zv-overons .lead--accent { font-weight:800; color:var(--indigo); }
+.zv-overons .btn { font-weight:800; font-size:15px; border:none; border-radius:999px; padding:15px 26px; line-height:1; display:inline-flex; align-items:center; gap:10px; cursor:pointer; text-decoration:none; transition:transform .15s,box-shadow .15s,background .15s,color .15s; white-space:nowrap; }
+.zv-overons .btn svg{ width:18px; height:18px; }
+.zv-overons .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 10px 26px -12px rgba(180,126,10,.85); }
+.zv-overons .btn--gold:hover { transform:translateY(-2px); box-shadow:0 16px 34px -14px rgba(180,126,10,.95); }
+.zv-overons .btn--ghost-light { color:var(--indigo); border:1.5px solid var(--line); background:#fff; }
+.zv-overons .btn--ghost-light:hover { background:var(--paper); border-color:var(--indigo); }
+.zv-overons a:focus-visible, .zv-overons button:focus-visible { outline:2px solid var(--indigo); outline-offset:3px; }
+
+/* hero */
+.zv-overons .oo-hero .wrap { max-width:none; padding:clamp(14px,2vw,26px) clamp(16px,3vw,40px) 0; }
+.zv-overons .hero-media { position:relative; border-radius:16px; overflow:hidden; height:clamp(440px,42vw,560px); background-size:cover; background-position:center 42%; background-repeat:no-repeat; box-shadow:0 30px 70px -44px rgba(26,18,48,.45); }
+.zv-overons .hero-media::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(90deg,rgba(18,12,38,.74) 0%,rgba(18,12,38,.46) 34%,rgba(18,12,38,.12) 58%,transparent 74%); }
+.zv-overons .hero-card { position:absolute; z-index:3; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:clamp(28px,6vw,88px); padding-right:48%; }
+.zv-overons .hero-copy { max-width:560px; }
+.zv-overons .hero-copy .eyebrow { color:#f5c84a; display:inline-flex; align-items:center; gap:9px; letter-spacing:.28em; }
+.zv-overons .hero-copy .eyebrow::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--red); box-shadow:0 0 0 4px rgba(226,75,74,.3); }
+.zv-overons .hero-copy h1 { color:#fff; text-shadow:0 3px 30px rgba(12,8,28,.7); font-size:clamp(40px,5.2vw,72px); font-weight:900; letter-spacing:-.02em; line-height:.98; margin-top:14px; }
+.zv-overons .hero-cta { display:flex; gap:14px; flex-wrap:wrap; margin-top:28px; }
+@media(max-width:760px){ .zv-overons .hero-media{ height:auto; min-height:360px; aspect-ratio:4/3; } .zv-overons .hero-card{ padding:24px; padding-right:24px; } .zv-overons .hero-copy h1{ font-size:clamp(30px,9vw,44px); } }
+
+/* trust-top */
+.zv-overons .trust-top { background:var(--paper); border-bottom:1px solid var(--line); }
+.zv-overons .trust-top .wrap { padding:24px 32px; display:flex; align-items:center; justify-content:center; gap:clamp(18px,3vw,40px); flex-wrap:wrap; }
+.zv-overons .tt-label { font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); flex:none; }
+.zv-overons .tt-logos { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
+.zv-overons .tt-chip { display:flex; align-items:center; justify-content:center; padding:9px 15px; border-radius:11px; background:#fff; border:1px solid var(--line); box-shadow:0 10px 24px -20px rgba(26,18,48,.4); }
+.zv-overons .tt-chip img { height:23px; width:auto; display:block; object-fit:contain; }
+.zv-overons .tt-chip.lead img { height:29px; }
+.zv-overons .tt-chip.lead { border-color:#eccf86; background:#fffdf6; }
+@media(max-width:720px){ .zv-overons .trust-top .wrap{ flex-direction:column; gap:14px; } }
+
+/* intro */
+.zv-overons .intro .wrap { padding:84px 32px; display:grid; grid-template-columns:1fr 1.08fr; gap:48px; align-items:center; }
+@media(max-width:880px){ .zv-overons .intro .wrap{ grid-template-columns:1fr; gap:36px; padding:56px 20px; } }
+.zv-overons .photowrap { position:relative; }
+.zv-overons .introphoto { width:100%; display:block; border-radius:24px; object-fit:cover; aspect-ratio:720/500; box-shadow:0 36px 70px -40px rgba(26,18,48,.5); }
+.zv-overons .photowrap .yrs { position:absolute; left:-22px; bottom:34px; background:var(--gold); color:var(--ink); border-radius:16px; padding:16px 20px; box-shadow:0 18px 40px -22px rgba(26,18,48,.6); }
+.zv-overons .photowrap .yrs b { display:block; font-size:34px; font-weight:900; line-height:1; }
+.zv-overons .photowrap .yrs span { font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+@media(max-width:880px){ .zv-overons .photowrap .yrs{ left:14px; } }
+.zv-overons .intro-pillars { list-style:none; margin:20px 0 4px; padding:0; display:flex; flex-direction:column; gap:15px; }
+.zv-overons .intro-pillars li { display:flex; gap:13px; align-items:flex-start; font-size:17px; line-height:1.55; color:#4a4458; }
+.zv-overons .intro-pillars li .dot { flex:none; width:9px; height:9px; border-radius:50%; background:var(--gold); margin-top:10px; }
+.zv-overons .intro-pillars li b { color:var(--indigo); font-weight:800; }
+.zv-overons .partner { display:flex; align-items:center; gap:14px; margin-top:26px; padding-top:24px; border-top:1px solid var(--line); }
+.zv-overons .partner .ic { width:46px; height:46px; border-radius:12px; background:var(--indigo); display:flex; align-items:center; justify-content:center; flex:none; }
+.zv-overons .partner .ic svg { width:24px; height:24px; }
+.zv-overons .partner .t b { font-size:15px; font-weight:900; color:var(--ink); }
+
+/* stats */
+.zv-overons .stats { background:radial-gradient(64% 120% at 95% 0%,rgba(197,46,47,.42) 0%,rgba(197,46,47,0) 55%),radial-gradient(66% 122% at 3% 102%,rgba(0,80,159,.6) 0%,rgba(0,80,159,0) 58%),linear-gradient(180deg,#2c3076 0%,#262a64 100%); color:var(--paper); }
+.zv-overons .stats .wrap { padding:72px 32px; }
+.zv-overons .stats .head { text-align:center; max-width:1000px; margin:0 auto; }
+.zv-overons .stats .eyebrow { color:var(--gold); }
+.zv-overons .stats h2 { color:var(--paper); font-size:34px; margin-top:10px; }
+.zv-overons .stats .sub { color:var(--muted-2); font-size:15.5px; font-weight:600; margin-top:12px; line-height:1.5; }
+.zv-overons .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:42px; }
+@media(max-width:880px){ .zv-overons .grid4{ grid-template-columns:1fr 1fr; } }
+@media(max-width:520px){ .zv-overons .grid4{ grid-template-columns:1fr; } }
+.zv-overons .stat { background:rgba(255,255,255,.06); border:1.6px solid rgba(226,75,74,.55); border-radius:18px; padding:26px 22px; box-shadow:0 0 0 3px rgba(226,75,74,.1); }
+.zv-overons .stat.hl { background:#c52e2f; border-color:#c52e2f; color:#fff; box-shadow:0 18px 40px -20px rgba(197,46,47,.7); }
+.zv-overons .stat .n { font-size:46px; font-weight:900; letter-spacing:-.02em; line-height:1; color:var(--paper); }
+.zv-overons .stat .l { font-size:13.5px; font-weight:700; color:var(--muted-2); margin-top:10px; line-height:1.4; }
+.zv-overons .stat.hl .l { color:#ffe3df; }
+.zv-overons .stats .note { text-align:center; font-size:13.5px; font-weight:700; color:var(--muted-2); margin-top:28px; }
+.zv-overons .stats .note b { color:var(--gold); }
+
+/* blocks */
+.zv-overons .blocks .wrap { padding:84px 32px; display:grid; grid-template-columns:1fr 1fr; gap:30px; }
+@media(max-width:880px){ .zv-overons .blocks .wrap{ grid-template-columns:1fr; padding:56px 20px; } }
+.zv-overons .block { background:var(--paper); border:1px solid var(--line); border-radius:22px; padding:36px 34px; box-shadow:0 26px 60px -46px rgba(26,18,48,.5); }
+.zv-overons .block .tag { display:inline-flex; align-items:center; gap:8px; font-size:11.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--indigo); background:var(--sand); border-radius:999px; padding:7px 13px; }
+.zv-overons .block .tag .d { width:7px; height:7px; border-radius:50%; display:inline-block; }
+.zv-overons .block .tag .d-red { background:var(--red); }
+.zv-overons .block .tag .d-gold { background:var(--gold); }
+.zv-overons .block .tag .d-blue { background:var(--blue); }
+.zv-overons .block h3 { font-size:25px; font-weight:900; color:var(--indigo); margin-top:18px; line-height:1.1; }
+.zv-overons .block p { font-size:15.5px; font-weight:500; color:#473f5e; line-height:1.62; margin-top:14px; }
+
+/* partners-band */
+.zv-overons .partners-band { background:linear-gradient(180deg,#f3ead7,#efe6d2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.zv-overons .partners-band .wrap { padding:80px 32px; display:grid; grid-template-columns:1fr 1.28fr; gap:54px; align-items:center; }
+@media(max-width:880px){ .zv-overons .partners-band .wrap{ grid-template-columns:1fr; gap:34px; padding:56px 20px; } }
+.zv-overons .pb-photo img { width:100%; display:block; border-radius:24px; aspect-ratio:720/500; object-fit:cover; box-shadow:0 36px 70px -40px rgba(26,18,48,.5); }
+.zv-overons .partners-band .eyebrow { color:var(--red); }
+.zv-overons .sec-feature { margin-top:26px; display:flex; align-items:center; gap:22px; flex-wrap:wrap; background:var(--paper); border:1px solid #eccf86; border-radius:18px; padding:20px 22px; box-shadow:0 18px 40px -28px rgba(180,126,10,.5); }
+.zv-overons .sec-logo img { height:40px; width:auto; display:block; }
+.zv-overons .sec-points { list-style:none; display:flex; flex-direction:column; gap:9px; flex:1; min-width:240px; margin:0; padding:0; }
+.zv-overons .sec-points li { display:flex; align-items:flex-start; gap:10px; font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.35; }
+.zv-overons .sec-points li .ck { width:20px; height:20px; border-radius:50%; background:#eaf3ee; display:grid; place-items:center; flex:none; margin-top:1px; }
+.zv-overons .sec-points li .ck svg { width:12px; height:12px; color:#2f8f5b; }
+
+/* videoband */
+.zv-overons .videoband { background:radial-gradient(64% 120% at 95% 0%,rgba(197,46,47,.42) 0%,rgba(197,46,47,0) 55%),radial-gradient(66% 122% at 3% 102%,rgba(0,80,159,.6) 0%,rgba(0,80,159,0) 58%),linear-gradient(180deg,#2c3076 0%,#262a64 100%); color:var(--paper); }
+.zv-overons .videoband .wrap { padding:80px 32px; }
+@media(max-width:720px){ .zv-overons .videoband .wrap{ padding:56px 20px; } }
+.zv-overons .vb-head { text-align:center; max-width:780px; margin:0 auto 36px; }
+.zv-overons .videoband .eyebrow { color:var(--gold); }
+.zv-overons .videoband h2 { color:var(--paper); font-size:34px; margin-top:10px; }
+.zv-overons .videoband .lead { color:#e9e4f5; }
+.zv-overons .vb-frame { position:relative; max-width:920px; margin:0 auto; aspect-ratio:16/9; border-radius:20px; overflow:hidden; box-shadow:0 50px 100px -40px rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.14); background:#000; }
+.zv-overons .vb-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; display:block; }
+.zv-overons .vb-poster { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.zv-overons .vb-play { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:78px; height:78px; border-radius:50%; border:none; cursor:pointer; background:rgba(46,33,96,.92); display:grid; place-items:center; box-shadow:0 20px 50px -16px rgba(0,0,0,.6); transition:transform .15s,background .15s; }
+.zv-overons .vb-play:hover { transform:translate(-50%,-50%) scale(1.06); background:var(--gold); }
+.zv-overons .vb-play svg { width:30px; height:30px; color:#fff; margin-left:4px; }
+.zv-overons .vb-play:hover svg { color:var(--ink); }
+.zv-overons .vb-note { max-width:780px; margin:30px auto 0; text-align:center; font-size:14.5px; font-weight:600; color:var(--muted-2); line-height:1.6; }
+
+/* waarom */
+.zv-overons .waarom .wrap { padding:20px 32px 90px; display:grid; grid-template-columns:1fr 1.18fr; gap:54px; align-items:center; }
+@media(max-width:880px){ .zv-overons .waarom .wrap{ grid-template-columns:1fr; gap:36px; padding:10px 20px 64px; } }
+.zv-overons .waarom-h { margin-bottom:14px; }
+.zv-overons .feat { display:flex; gap:16px; padding:18px 0; border-bottom:1px solid var(--line); }
+.zv-overons .feat:last-child { border-bottom:none; }
+.zv-overons .feat .ic { width:48px; height:48px; border-radius:13px; background:var(--paper); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex:none; }
+.zv-overons .feat .ic svg { width:24px; height:24px; }
+.zv-overons .feat .t b { font-size:16.5px; font-weight:800; color:var(--ink); }
+.zv-overons .feat .t p { font-size:14px; font-weight:500; color:var(--muted); margin-top:3px; line-height:1.45; }
+.zv-overons .satis { position:relative; }
+.zv-overons .teamphoto { width:100%; display:block; border-radius:24px; object-fit:cover; aspect-ratio:720/500; box-shadow:0 36px 70px -40px rgba(26,18,48,.5); }
+.zv-overons .satis .pill { position:absolute; left:-20px; bottom:30px; background:var(--red); color:#fff; border-radius:50%; width:96px; height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 18px 40px -20px rgba(26,18,48,.7); }
+.zv-overons .satis .pill b { font-size:24px; font-weight:900; line-height:1; }
+.zv-overons .satis .pill span { font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; margin-top:3px; }
+
+/* stappen */
+.zv-overons .stappen { background:var(--paper); border-top:1px solid var(--line); }
+.zv-overons .stappen .wrap { padding:72px 32px; }
+@media(max-width:720px){ .zv-overons .stappen .wrap{ padding:52px 20px; } }
+.zv-overons .stappen h2 { text-align:center; color:var(--indigo); font-size:32px; }
+.zv-overons .stappen .sub { text-align:center; font-size:15px; font-weight:600; color:var(--muted); margin-top:12px; }
+.zv-overons .steprow { display:grid; grid-template-columns:repeat(4,1fr); gap:28px; margin-top:42px; }
+@media(max-width:880px){ .zv-overons .steprow{ grid-template-columns:1fr 1fr; gap:30px; } }
+@media(max-width:520px){ .zv-overons .steprow{ grid-template-columns:1fr; } }
+.zv-overons .stap { display:flex; gap:14px; }
+.zv-overons .stap .ic { width:50px; height:50px; flex:none; border-radius:13px; background:var(--canvas); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--indigo); }
+.zv-overons .stap .ic svg { width:25px; height:25px; }
+.zv-overons .stap.hl .ic { background:var(--indigo); border-color:var(--indigo); color:#f5c84a; }
+.zv-overons .stap .k { font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+.zv-overons .stap b { display:block; font-size:16px; font-weight:900; color:var(--ink); margin-top:2px; line-height:1.2; }
+.zv-overons .stap p { font-size:13.5px; font-weight:500; color:var(--muted); margin-top:7px; line-height:1.5; }
+.zv-overons .stap .belbtn { display:inline-flex; align-items:center; gap:7px; margin-top:11px; font-size:13px; font-weight:800; color:var(--indigo); background:var(--sand); border:none; border-radius:9px; padding:9px 13px; cursor:pointer; text-decoration:none; }
+.zv-overons .stap .belbtn svg { width:15px; height:15px; }
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var frame = document.querySelector('.zv-overons .vb-frame');
+  if (!frame) return;
+  var btn = frame.querySelector('.vb-play');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var id = frame.getAttribute('data-yt');
+    if (!id) return;
+    var ifr = document.createElement('iframe');
+    ifr.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+    ifr.title = 'Securitas video';
+    ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    ifr.setAttribute('allowfullscreen', '');
+    frame.innerHTML = '';
+    frame.appendChild(ifr);
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Over ons",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Over ons" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Van woningbeveiliging naar complete veiligheid." },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero-achtergrond" },
+    { "type": "text", "id": "cta1_label", "label": "Knop 1 tekst", "default": "Bekijk onze oplossingen" },
+    { "type": "url", "id": "cta1_url", "label": "Knop 1 link" },
+    { "type": "text", "id": "cta2_label", "label": "Knop 2 tekst", "default": "Neem contact op" },
+    { "type": "url", "id": "cta2_url", "label": "Knop 2 link" },
+    { "type": "header", "content": "Foto's" },
+    { "type": "image_picker", "id": "intro_image", "label": "Intro-foto" },
+    { "type": "image_picker", "id": "partner_image", "label": "Partner-band foto" },
+    { "type": "image_picker", "id": "team_image", "label": "Team-foto (Waarom)" },
+    { "type": "header", "content": "Video" },
+    { "type": "text", "id": "video_id", "label": "YouTube video-ID", "default": "VSPJbIc8cmw" },
+    { "type": "image_picker", "id": "video_poster", "label": "Video-poster" },
+    { "type": "header", "content": "Contact" },
+    { "type": "text", "id": "phone", "label": "Telefoon (adviseur)", "default": "088 012 3456" }
+  ],
+  "presets": [{ "name": "Over ons" }]
+}
+{% endschema %}
