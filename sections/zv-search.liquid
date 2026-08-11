@@ -1,0 +1,154 @@
+{%- comment -%}
+  Zo Veilig — Zoeken. 1:1 port of the design's curated site-search: a guided
+  index of the site's key destinations (oplossingen, kenniscentrum, service)
+  with client-side filtering, category chips and an empty state. Reads ?q= from
+  the URL so the header search and Shopify's /search route both land here.
+  Header/footer come from the theme layout.
+{%- endcomment -%}
+
+<div class="zv-search">
+  <section class="page-hero">
+    <div class="wrap">
+      <div class="crumbs"><a href="{% render 'zv-route', key: 'home' %}">Home</a> <span>›</span> <b>Zoeken</b></div>
+      <span class="eyebrow">Zoeken</span>
+      <h1>Waar kunnen we u mee helpen?</h1>
+      <form class="searchbar" onsubmit="zvDoSearch();return false;">
+        <input id="q" type="search" placeholder="Zoek op oplossing, artikel of vraag" aria-label="Zoekterm" autocomplete="off">
+        <button class="btn btn--gold" type="submit">Zoek <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </form>
+      <div class="sh-links">
+        <a class="back" href="{% render 'zv-route', key: 'home' %}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug naar home</a>
+        <a class="ctc" href="{% render 'zv-route', key: 'contact' %}">Liever persoonlijk? Neem contact op<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sr-wrap">
+    <div class="wrap">
+      <div class="sr-head" id="srHead"><span class="sr-count" id="srCount"></span><div class="sr-filters" id="srFilters"></div></div>
+      <div class="sr-list" id="srList"></div>
+      <div class="sr-empty" id="srEmpty">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <h2>Geen resultaten voor "<span id="emptyQ"></span>"</h2>
+        <p>We konden hier niets over vinden. Probeer een andere zoekterm, of laat u persoonlijk helpen.</p>
+        <div class="sr-sugg" id="srSugg"></div>
+        <div class="ce-cta"><a class="btn btn--gold" href="{% render 'zv-route', key: 'contact' %}">Neem contact op <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="btn btn--ghost" href="{% render 'zv-route', key: 'kenniscentrum' %}">Naar kenniscentrum</a></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  if(!document.getElementById('srList'))return;
+  var IC={sol:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',kc:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h7M8 13h7M8 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',svc:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 10a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.7M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'};
+  var DATA=[
+    {c:"sol",cat:"Oplossingen",t:"Langer Thuis",d:"Slimme sensoren die discreet meekijken zodat een dierbare langer zelfstandig thuis kan wonen.",h:"/pages/oplossingen?cat=living",k:"langer thuis sensoren zorg leefstijl ouderen mantelzorg zelfstandig"},
+    {c:"sol",cat:"Oplossingen",t:"Mijn Thuis",d:"Slim alarmsysteem dat inbraak, brand of onraad direct opmerkt en u meteen waarschuwt.",h:"/pages/oplossingen?cat=security",k:"mijn thuis alarm inbraak brand camera beveiliging woning"},
+    {c:"sol",cat:"Oplossingen",t:"Veilig Onderweg",d:"Persoonlijk alarm met GPS en valdetectie dat met een druk hulp inschakelt.",h:"/pages/oplossingen?cat=persoonlijk",k:"veilig onderweg personenalarm sos gps valdetectie paniekknop"},
+    {c:"sol",cat:"Oplossingen",t:"Vergelijk pakketten",d:"Alle pakketten en tiers naast elkaar, van Inzicht tot Beschermd.",h:"/pages/vergelijk-pakketten",k:"vergelijk pakketten prijzen tiers inzicht zeker beschermd abonnement"},
+    {c:"kc",cat:"Kenniscentrum",t:"Hoe werkt de meldkamer?",d:"Wat er gebeurt na een melding en hoe de Nederlandse meldkamer opvolging regelt.",h:"/blogs/kenniscentrum/hoe-werkt-een-meldkamer",k:"meldkamer securitas opvolging alarm 24/7 hulpdienst"},
+    {c:"kc",cat:"Kenniscentrum",t:"Leefstijlmonitoring uitgelegd",d:"Hoe sensoren dagelijkse routines herkennen zonder camera of microfoon.",h:"/blogs/kenniscentrum/leefstijlmonitoring-zonder-cameras",k:"leefstijlmonitoring sensoren routine privacy zonder camera"},
+    {c:"kc",cat:"Kenniscentrum",t:"Privacy en gegevens",d:"Wat we wel en niet meten en hoe we omgaan met uw gegevens.",h:"/blogs/kenniscentrum/privacy-en-gegevens",k:"privacy gegevens avg data camera veiligheid"},
+    {c:"kc",cat:"Kenniscentrum",t:"Sensoren of camera?",d:"De afweging tussen discrete sensoren en camerabeveiliging.",h:"/blogs/kenniscentrum/sensoren-of-cameras",k:"sensoren camera keuze verschil privacy"},
+    {c:"kc",cat:"Kenniscentrum",t:"Mantelzorg-gids",d:"Gratis gids: langer veilig thuis wonen, praktische tips voor mantelzorgers.",h:"/pages/mantelzorg-gids",k:"mantelzorg gids download ouders dierbare tips langer thuis"},
+    {c:"svc",cat:"Service",t:"Veelgestelde vragen",d:"Antwoord op de vragen die we het vaakst horen over pakketten, installatie en meldkamer.",h:"/pages/veelgestelde-vragen",k:"faq veelgestelde vragen hulp installatie abonnement opzeggen"},
+    {c:"svc",cat:"Service",t:"Contact en afspraak",d:"Plan een gratis adviesgesprek of stel uw vraag aan een adviseur.",h:"/pages/contact",k:"contact afspraak bellen adviesgesprek showroom email"},
+    {c:"svc",cat:"Service",t:"Herroepingsrecht",d:"14 dagen bedenktijd: hoe u een aankoop herroept en wat de voorwaarden zijn.",h:"/pages/herroepingsrecht",k:"herroepingsrecht retour bedenktijd annuleren opzeggen 14 dagen"},
+    {c:"svc",cat:"Service",t:"Klantenservice",d:"Bereikbaarheid, storingen doorgeven en hulp bij uw bestaande systeem.",h:"/pages/klantenservice",k:"klantenservice storing hulp support onderhoud contact"},
+    {c:"svc",cat:"Service",t:"Verzending en levering",d:"Levertijden, installatieafspraak en wat u kunt verwachten na uw bestelling.",h:"/pages/verzending-en-levering",k:"verzending levering bezorging installatie afspraak levertijd"}
+  ];
+  var filter="all";
+  function getQ(){var p=new URLSearchParams(location.search);return (p.get("q")||"").trim();}
+  function esc(s){return s.replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m];});}
+  function hi(text,q){if(!q)return esc(text);var i=text.toLowerCase().indexOf(q.toLowerCase());if(i<0)return esc(text);return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length));}
+  function match(it,q){if(!q)return true;q=q.toLowerCase();return (it.t+" "+it.d+" "+it.k).toLowerCase().indexOf(q)>-1;}
+  function render(){
+    var q=getQ();document.getElementById("q").value=q;
+    var res=DATA.filter(function(it){return match(it,q)&&(filter==="all"||it.c===filter);});
+    var list=document.getElementById("srList"),empty=document.getElementById("srEmpty"),head=document.getElementById("srHead");
+    var cats=[["all","Alles"],["sol","Oplossingen"],["kc","Kenniscentrum"],["svc","Service"]];
+    document.getElementById("srFilters").innerHTML=cats.map(function(c){return '<button class="sr-chip'+(filter===c[0]?' on':'')+'" data-f="'+c[0]+'">'+c[1]+'</button>';}).join("");
+    Array.prototype.forEach.call(document.querySelectorAll("#srFilters .sr-chip"),function(b){b.addEventListener("click",function(){filter=b.getAttribute("data-f");render();});});
+    var totalForQ=DATA.filter(function(it){return match(it,q);}).length;
+    if(totalForQ===0){
+      head.style.display="none";list.style.display="none";empty.style.display="block";
+      document.getElementById("emptyQ").textContent=q||"";
+      var sug=document.getElementById("srSugg");
+      sug.innerHTML=["meldkamer","sensoren","personenalarm","herroepingsrecht"].map(function(s){return '<button data-s="'+s+'">'+s+'</button>';}).join("");
+      Array.prototype.forEach.call(sug.querySelectorAll("button"),function(b){b.addEventListener("click",function(){go(b.getAttribute("data-s"));});});
+      return;
+    }
+    head.style.display="";list.style.display="";empty.style.display="none";
+    document.getElementById("srCount").innerHTML="<b>"+res.length+"</b> "+(res.length===1?"resultaat":"resultaten")+(q?' voor "'+esc(q)+'"':"");
+    list.innerHTML=res.map(function(it){return '<a class="sr-item" href="'+it.h+'"><span class="sr-ic">'+IC[it.c]+'</span><div><span class="sr-cat">'+it.cat+'</span><h3>'+hi(it.t,q)+'</h3><p>'+esc(it.d)+'</p></div><svg class="go" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';}).join("");
+  }
+  function go(term){history.replaceState(null,"","?q="+encodeURIComponent(term));render();}
+  window.zvDoSearch=function(){var v=document.getElementById("q").value.trim();history.replaceState(null,"","?q="+encodeURIComponent(v));filter="all";render();};
+  render();
+})();
+</script>
+
+{% stylesheet %}
+.zv-search {
+  --ink:#1a1230; --indigo:#322469; --paper:#fffdf8; --cream:#fdfaf2;
+  --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a; --gold-soft:#fbf0d4;
+  --line:#e7e0cf; --line-2:#ddd4c0; --indigo-soft:#ece8fb; --muted:#6f6786;
+  color:var(--ink); line-height:1.5;
+}
+.zv-search .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-search .page-hero { background:radial-gradient(64% 120% at 92% 0%,rgba(197,46,47,.3) 0%,rgba(197,46,47,0) 55%),linear-gradient(180deg,#2c3076 0%,#241c54 100%); color:#fff; padding:clamp(38px,4.6vw,64px) 0 clamp(34px,4vw,54px); }
+.zv-search .page-hero .crumbs { font-size:12.5px; font-weight:700; color:#cdc6e8; display:flex; gap:8px; align-items:center; }
+.zv-search .page-hero .crumbs a { color:#cdc6e8; text-decoration:none; }
+.zv-search .page-hero .crumbs b { color:#fff; }
+.zv-search .page-hero .eyebrow { display:inline-block; margin-top:14px; font-size:12px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-search .page-hero h1 { font-size:clamp(28px,3.6vw,46px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin-top:10px; }
+.zv-search .searchbar { display:flex; gap:10px; max-width:640px; margin-top:24px; }
+.zv-search .searchbar input { flex:1; background:#fff; border:1.5px solid transparent; border-radius:999px; padding:16px 22px; font:inherit; font-size:16px; font-weight:600; color:var(--ink); box-shadow:0 20px 40px -26px rgba(0,0,0,.6); }
+.zv-search .searchbar input:focus { outline:none; border-color:var(--gold-lt); }
+.zv-search .searchbar .btn { display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; border-radius:999px; font:inherit; font-weight:800; padding:15px 24px; background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; }
+.zv-search .searchbar .btn svg { width:18px; height:18px; }
+.zv-search .sh-links { display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; }
+.zv-search .sh-links a { font-weight:800; font-size:14px; display:inline-flex; align-items:center; gap:7px; text-decoration:none; }
+.zv-search .sh-links a svg { width:16px; height:16px; }
+.zv-search .sh-links .back { color:var(--gold-lt); }
+.zv-search .sh-links .ctc { color:#fff; }
+.zv-search .sr-wrap { padding:clamp(30px,3.5vw,52px) 0 90px; background:var(--cream); }
+.zv-search .sr-head { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+.zv-search .sr-count { font-size:15px; font-weight:700; color:var(--muted); }
+.zv-search .sr-count b { color:var(--indigo); font-weight:900; }
+.zv-search .sr-filters { display:flex; gap:9px; margin-left:auto; flex-wrap:wrap; }
+.zv-search .sr-chip { font-size:13px; font-weight:800; color:var(--indigo); background:var(--paper); border:1.5px solid var(--line-2); border-radius:999px; padding:9px 16px; cursor:pointer; transition:all .15s; }
+.zv-search .sr-chip:hover { border-color:var(--indigo); }
+.zv-search .sr-chip.on { background:var(--indigo); color:#fff; border-color:var(--indigo); }
+.zv-search .sr-list { display:flex; flex-direction:column; gap:12px; }
+.zv-search .sr-item { display:flex; gap:18px; align-items:flex-start; background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px 22px; box-shadow:0 14px 36px -34px rgba(26,18,48,.5); text-decoration:none; transition:transform .15s,box-shadow .15s,border-color .15s; }
+.zv-search .sr-item:hover { transform:translateY(-2px); box-shadow:0 26px 50px -34px rgba(26,18,48,.5); border-color:var(--line-2); }
+.zv-search .sr-ic { flex:none; width:48px; height:48px; border-radius:13px; background:var(--indigo-soft); color:var(--indigo); display:grid; place-items:center; }
+.zv-search .sr-ic svg { width:24px; height:24px; }
+.zv-search .sr-cat { font-size:11px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--belt); }
+.zv-search .sr-item h3 { font-size:18px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; margin-top:3px; }
+.zv-search .sr-item h3 mark { background:var(--gold-soft); color:var(--belt); border-radius:3px; padding:0 2px; }
+.zv-search .sr-item p { font-size:14.5px; font-weight:500; color:#5b5374; margin-top:6px; line-height:1.5; }
+.zv-search .sr-item .go { flex:none; align-self:center; width:22px; height:22px; color:var(--muted); }
+.zv-search .sr-empty { text-align:center; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:clamp(40px,6vw,72px) 24px; box-shadow:0 20px 48px -44px rgba(26,18,48,.5); }
+.zv-search .sr-empty .ic { width:80px; height:80px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo); display:grid; place-items:center; margin:0 auto 20px; }
+.zv-search .sr-empty .ic svg { width:40px; height:40px; }
+.zv-search .sr-empty h2 { font-size:24px; font-weight:900; color:var(--indigo); letter-spacing:-.02em; }
+.zv-search .sr-empty p { font-size:16px; font-weight:500; color:#5b5374; margin:12px auto 0; max-width:44ch; line-height:1.55; }
+.zv-search .sr-sugg { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-top:22px; }
+.zv-search .sr-sugg button { font-size:13.5px; font-weight:800; color:var(--indigo); background:var(--cream); border:1.5px solid var(--line-2); border-radius:999px; padding:9px 16px; cursor:pointer; }
+.zv-search .sr-sugg button:hover { border-color:var(--indigo); }
+.zv-search .sr-empty .ce-cta { margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.zv-search .btn--gold { display:inline-flex; align-items:center; gap:9px; border-radius:12px; font-weight:800; text-decoration:none; padding:13px 22px; background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; }
+.zv-search .btn--ghost { display:inline-flex; align-items:center; gap:9px; border-radius:12px; font-weight:800; text-decoration:none; padding:13px 22px; background:transparent; color:var(--indigo); border:1.5px solid var(--line-2); }
+.zv-search .btn--gold svg, .zv-search .btn--ghost svg { width:18px; height:18px; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Zoeken",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}
