@@ -1,0 +1,76 @@
+{%- comment -%}
+  Zo Veilig — Gids bedankt (lead-magnet confirmation). 1:1 port of the design.
+  Download button links to the real gids PDF once uploaded (section setting);
+  until then it stays disabled. Header/footer come from the theme layout.
+{%- endcomment -%}
+
+<div class="zv-thanks">
+  <div class="tk">
+    <div class="wrap">
+      <div class="tk-card">
+        <div class="tk-ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1>{{ section.settings.title | default: 'Bedankt. De gids is onderweg.' | escape }}</h1>
+        <p class="lead">{{ section.settings.lead | default: 'We hebben de Mantelzorg-gids naar uw mailbox gestuurd. Komt hij niet aan? Kijk dan even in de map ongewenste e-mail, of download hem direct hieronder.' | escape }}</p>
+        {%- if section.settings.pdf_url != blank -%}
+          <a class="btn btn--gold tk-dl" href="{{ section.settings.pdf_url }}" download><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Download de gids (PDF)</a>
+        {%- else -%}
+          <span class="btn btn--gold tk-dl is-soon" role="button" aria-disabled="true" title="De download wordt binnenkort gekoppeld."><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Download volgt per e-mail</span>
+        {%- endif -%}
+        <div class="tk-next">
+          <h3>Zo komt u verder</h3>
+          <div class="tk-links">
+            <a href="{% render 'zv-route', key: 'keuzehulp' %}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Doe de Keuzehulp</a>
+            <a href="{% render 'zv-route', key: 'oplossingen' %}?cat=living"><span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Bekijk Langer Thuis</a>
+            <a href="{% render 'zv-route', key: 'kenniscentrum' %}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h11l3 3v13H5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h7M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Lees het kenniscentrum</a>
+            <a href="{% render 'zv-route', key: 'contact' %}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Plan een adviesgesprek</a>
+          </div>
+        </div>
+        <div class="tk-help">Liever even overleggen? Bel gerust <a href="tel:0881221111">088-122 11 11</a>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+.zv-thanks {
+  --ink:#1a1230; --indigo:#322469; --indigo-soft:#ece8fb; --paper:#fffdf8; --cream:#fdfaf2;
+  --gold:#e4a311; --gold-lt:#f5c84a; --line:#e7e0cf; --line-2:#ddd4c0; --muted:#6f6786; --ok:#2f8f5b;
+  color:var(--ink); line-height:1.5;
+  background:linear-gradient(180deg,#fbf5e9,#f4ecda);
+}
+.zv-thanks .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-thanks .tk { display:flex; align-items:center; padding:clamp(40px,6vw,90px) 0; }
+.zv-thanks .tk-card { max-width:640px; margin:0 auto; text-align:center; background:var(--paper); border:1px solid var(--line); border-radius:24px; padding:clamp(32px,4vw,56px); box-shadow:0 34px 74px -46px rgba(26,18,48,.55); }
+.zv-thanks .tk-ic { width:88px; height:88px; border-radius:50%; background:rgba(47,143,91,.14); color:var(--ok); display:grid; place-items:center; margin:0 auto 22px; }
+.zv-thanks .tk-ic svg { width:46px; height:46px; }
+.zv-thanks .tk-card h1 { font-size:clamp(27px,3.2vw,40px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; line-height:1.04; }
+.zv-thanks .tk-card p.lead { font-size:16.5px; font-weight:500; color:#5b5374; margin:14px auto 0; max-width:46ch; line-height:1.6; }
+.zv-thanks .btn { display:inline-flex; align-items:center; gap:9px; border:none; cursor:pointer; border-radius:12px; font:inherit; font-weight:800; text-decoration:none; padding:14px 24px; }
+.zv-thanks .btn svg { width:18px; height:18px; }
+.zv-thanks .btn--gold { background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; box-shadow:0 14px 30px -18px rgba(228,163,17,.9); }
+.zv-thanks .tk-dl { margin-top:26px; }
+.zv-thanks .tk-dl.is-soon { cursor:default; opacity:.7; box-shadow:none; }
+.zv-thanks .tk-next { text-align:left; background:var(--cream); border:1px solid var(--line); border-radius:16px; padding:22px 24px; margin-top:28px; }
+.zv-thanks .tk-next h3 { font-size:13px; font-weight:800; letter-spacing:.02em; color:var(--indigo); margin-bottom:14px; }
+.zv-thanks .tk-links { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:520px){ .zv-thanks .tk-links { grid-template-columns:1fr; } }
+.zv-thanks .tk-links a { display:flex; align-items:center; gap:11px; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px; font-size:14.5px; font-weight:800; color:var(--indigo); text-decoration:none; transition:transform .15s,border-color .15s; }
+.zv-thanks .tk-links a:hover { transform:translateY(-2px); border-color:var(--line-2); }
+.zv-thanks .tk-links a .ic { flex:none; width:34px; height:34px; border-radius:9px; background:var(--indigo-soft); display:grid; place-items:center; }
+.zv-thanks .tk-links a .ic svg { width:19px; height:19px; }
+.zv-thanks .tk-help { margin-top:24px; font-size:14.5px; font-weight:600; color:var(--muted); }
+.zv-thanks .tk-help a { font-weight:800; color:var(--indigo); }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Gids bedankt",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Titel", "default": "Bedankt. De gids is onderweg." },
+    { "type": "textarea", "id": "lead", "label": "Lead" },
+    { "type": "url", "id": "pdf_url", "label": "Gids PDF (download)", "info": "Upload de PDF bij Content > Bestanden en plak de link. Leeg = knop toont 'volgt per e-mail'." }
+  ],
+  "presets": [{ "name": "Gids bedankt" }]
+}
+{% endschema %}

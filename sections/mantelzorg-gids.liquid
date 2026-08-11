@@ -1,0 +1,114 @@
+{%- comment -%}
+  Zo Veilig — Mantelzorg-gids (lead magnet). 1:1 port of the design pack.
+  Netlify 'gids-download' form is converted to a Shopify {% form 'contact' %};
+  on submit it posts and redirects to the bedankt page. Header/footer come
+  from the theme layout.
+{%- endcomment -%}
+
+<div class="zv-gids">
+  <section class="gd">
+    <div class="wrap">
+      <div class="gd-grid">
+        <div>
+          <span class="eyebrow">{{ section.settings.eyebrow | default: 'Gratis gids voor mantelzorgers' | escape }}</span>
+          <h1>{{ section.settings.title | default: 'Langer veilig thuis, zonder u constant zorgen te maken' | escape }}</h1>
+          <p class="lead">{{ section.settings.lead | default: 'Een praktische gids voor iedereen die voor een ouder of dierbare zorgt. Herkenbare situaties, concrete tips en een helder overzicht van wat wél en niet helpt.' | escape }}</p>
+          <ul class="gd-list">
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>De 5 signalen dat zelfstandig wonen lastiger wordt</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Het gesprek voeren zonder dat het als controle voelt</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Welke hulpmiddelen echt rust geven (en welke niet)</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Checklist: is uw situatie goed geregeld?</li>
+          </ul>
+        </div>
+
+        {%- assign gids_bedankt = '/pages/gids-bedankt' -%}
+        {%- form 'contact', id: 'zv-gids-form', class: 'gd-form', data-redirect: gids_bedankt -%}
+          {%- if form.posted_successfully? -%}
+            <div class="gd-cover"><span class="k">Gratis gids</span><h3>Langer veilig thuis</h3><span class="b">Voor mantelzorgers · Zo Veilig</span></div>
+            <h2>Bedankt, de gids is onderweg.</h2>
+            <p class="sub">We hebben de gids naar uw mailbox gestuurd. <a href="{{ gids_bedankt }}">Direct downloaden</a>.</p>
+          {%- else -%}
+            <div class="gd-cover"><span class="k">Gratis gids</span><h3>Langer veilig thuis</h3><span class="b">Voor mantelzorgers · Zo Veilig</span></div>
+            <h2>Ontvang de gids gratis</h2>
+            <p class="sub">Vul uw gegevens in, u krijgt de gids direct in uw mailbox.</p>
+            <input type="hidden" name="contact[Gids]" value="Mantelzorg-gids">
+            <input type="hidden" name="contact[Bron]" value="Mantelzorg-gids leadmagnet">
+            <div class="gd-fld"><label for="g-naam">Voornaam</label><input id="g-naam" name="contact[Naam]" placeholder="Uw voornaam" required></div>
+            <div class="gd-fld"><label for="g-mail">E-mailadres</label><input id="g-mail" name="contact[email]" type="email" placeholder="uw@email.nl" required></div>
+            <button class="btn btn--gold" type="submit">Stuur mij de gids <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div class="gd-trust"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Geen spam. Uitschrijven kan altijd.</div>
+            <p class="gd-priv">Door de gids aan te vragen gaat u akkoord met onze <a href="{% render 'zv-route', key: 'privacyverklaring' %}">privacyverklaring</a>.</p>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function(){
+    var f=document.getElementById('zv-gids-form');
+    if(!f||!window.fetch)return;
+    var to=f.getAttribute('data-redirect')||'/pages/gids-bedankt';
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      fetch(f.action,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
+        .then(function(){location.href=to;}).catch(function(){location.href=to;});
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.zv-gids {
+  --ink:#1a1230; --indigo:#322469; --paper:#fffdf8; --cream:#fdfaf2;
+  --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a; --line:#e7e0cf; --line-2:#ddd4c0;
+  --muted:#6f6786; --ok:#2f8f5b;
+  color:var(--ink); line-height:1.5;
+}
+.zv-gids .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-gids .gd { background:var(--cream); padding:clamp(40px,5vw,80px) 0 clamp(56px,6vw,96px); position:relative; overflow:hidden; }
+.zv-gids .gd::before { content:""; position:absolute; width:560px; height:560px; border-radius:50%; left:-200px; top:-160px; background:radial-gradient(circle,rgba(228,163,17,.16),transparent 62%); }
+.zv-gids .gd-grid { position:relative; z-index:1; display:grid; grid-template-columns:1fr .9fr; gap:clamp(34px,5vw,72px); align-items:center; }
+@media(max-width:900px){ .zv-gids .gd-grid { grid-template-columns:1fr; } }
+.zv-gids .eyebrow { display:inline-block; font-size:12px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--belt); }
+.zv-gids h1 { font-size:clamp(32px,4.2vw,54px); font-weight:900; color:var(--indigo); letter-spacing:-.025em; line-height:1.02; margin-top:14px; text-wrap:balance; }
+.zv-gids .lead { font-size:clamp(16px,1.6vw,20px); font-weight:500; color:#5b5374; margin-top:18px; max-width:48ch; line-height:1.6; }
+.zv-gids .gd-list { list-style:none; margin-top:24px; display:flex; flex-direction:column; gap:13px; }
+.zv-gids .gd-list li { display:flex; gap:13px; align-items:flex-start; font-size:16px; font-weight:600; color:#463f5c; line-height:1.45; }
+.zv-gids .gd-list .ck { flex:none; width:26px; height:26px; border-radius:50%; background:var(--gold); display:grid; place-items:center; margin-top:1px; }
+.zv-gids .gd-list .ck svg { width:15px; height:15px; color:var(--indigo); }
+.zv-gids .gd-form { background:var(--paper); border:1px solid var(--line); border-radius:22px; padding:clamp(26px,3vw,40px); box-shadow:0 34px 74px -46px rgba(26,18,48,.55); }
+.zv-gids .gd-cover { position:relative; background:linear-gradient(150deg,#322469,#473a86); border-radius:14px; aspect-ratio:1/1.18; margin:-70px auto 22px; max-width:200px; box-shadow:0 30px 60px -28px rgba(40,28,84,.7); display:flex; flex-direction:column; justify-content:space-between; padding:20px 18px; color:#fff; transform:rotate(-3deg); }
+.zv-gids .gd-cover .k { font-size:10px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-gids .gd-cover h3 { font-size:22px; font-weight:900; line-height:1.05; letter-spacing:-.01em; }
+.zv-gids .gd-cover .b { font-size:11px; font-weight:700; color:#d8d2ef; }
+@media(max-width:900px){ .zv-gids .gd-cover { margin-top:0; } }
+.zv-gids .gd-form h2 { font-size:22px; font-weight:900; color:var(--indigo); letter-spacing:-.015em; text-align:center; }
+.zv-gids .gd-form p.sub { font-size:14.5px; font-weight:500; color:var(--muted); text-align:center; margin-top:8px; line-height:1.5; }
+.zv-gids .gd-form p.sub a { color:var(--indigo); font-weight:800; }
+.zv-gids .gd-fld { margin-top:16px; }
+.zv-gids .gd-fld label { display:block; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:7px; }
+.zv-gids .gd-fld input { width:100%; background:var(--cream); border:1.5px solid var(--line-2); border-radius:12px; padding:14px 15px; font:inherit; font-size:15px; font-weight:600; color:var(--ink); }
+.zv-gids .gd-fld input:focus { outline:none; border-color:var(--indigo); background:#fff; }
+.zv-gids .btn { display:inline-flex; align-items:center; gap:9px; border:none; cursor:pointer; border-radius:12px; font:inherit; font-weight:800; text-decoration:none; }
+.zv-gids .btn svg { width:18px; height:18px; }
+.zv-gids .btn--gold { background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; padding:14px 24px; box-shadow:0 14px 30px -18px rgba(228,163,17,.9); }
+.zv-gids .gd-form .btn { width:100%; justify-content:center; margin-top:20px; }
+.zv-gids .gd-priv { font-size:12px; font-weight:600; color:var(--muted); text-align:center; margin-top:14px; line-height:1.45; }
+.zv-gids .gd-priv a { color:var(--indigo); font-weight:800; }
+.zv-gids .gd-trust { display:flex; gap:8px; justify-content:center; align-items:center; margin-top:16px; font-size:12.5px; font-weight:700; color:var(--ok); }
+.zv-gids .gd-trust svg { width:15px; height:15px; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mantelzorg-gids",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Gratis gids voor mantelzorgers" },
+    { "type": "text", "id": "title", "label": "Titel", "default": "Langer veilig thuis, zonder u constant zorgen te maken" },
+    { "type": "textarea", "id": "lead", "label": "Lead" }
+  ],
+  "presets": [{ "name": "Mantelzorg-gids" }]
+}
+{% endschema %}

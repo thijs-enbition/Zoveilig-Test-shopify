@@ -1,0 +1,132 @@
+{%- layout none -%}<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{ page.title | default: 'Binnenkort online' }} · Zo Veilig</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+{{ content_for_header }}
+<style>
+  :root{ --indigo-deep:#281c54; --gold:#e4a311; --gold-lt:#f5c84a; --ok:#2f8f5b; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Titillium Web',system-ui,sans-serif;background:var(--indigo-deep);color:#fff;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,3.6vw,52px);width:100%;}
+  a{color:inherit;}
+  .btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;border-radius:999px;font:inherit;font-weight:800;text-decoration:none;padding:14px 24px;background:linear-gradient(180deg,var(--gold-lt),var(--gold));color:#3a2a06;box-shadow:0 14px 30px -18px rgba(228,163,17,.9);}
+  .btn svg{width:18px;height:18px;}
+  .cs-stage{position:relative;flex:1;display:flex;align-items:center;overflow:hidden;padding:clamp(40px,6vw,90px) 0;}
+  .cs-stage::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,#2d2156 0 22px,#281c54 22px 44px);opacity:.5;}
+  .cs-stage::after{content:"";position:absolute;width:620px;height:620px;border-radius:50%;right:-180px;top:-200px;background:radial-gradient(circle,rgba(228,163,17,.24),transparent 64%);}
+  .cs-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(32px,5vw,72px);align-items:center;}
+  @media(max-width:900px){.cs-grid{grid-template-columns:1fr;}}
+  .cs-logo{height:40px;width:auto;margin-bottom:30px;}
+  .cs-copy .eyebrow{color:var(--gold-lt);font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;}
+  .cs-copy h1{font-size:clamp(38px,5.4vw,72px);font-weight:900;letter-spacing:-.028em;line-height:1;margin-top:16px;text-wrap:balance;}
+  .cs-copy p.sub{font-size:clamp(17px,1.7vw,21px);font-weight:500;color:#e4dffb;margin-top:20px;max-width:48ch;line-height:1.55;}
+  .cs-count{display:flex;gap:14px;margin-top:34px;}
+  .cs-cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:16px 20px;text-align:center;min-width:88px;backdrop-filter:blur(4px);}
+  .cs-cell b{display:block;font-size:38px;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1;}
+  .cs-cell span{display:block;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#b9b0e0;margin-top:8px;}
+  .cs-form{margin-top:34px;max-width:460px;}
+  .cs-form label{font-size:13px;font-weight:800;letter-spacing:.02em;color:#cdc6e8;}
+  .cs-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .cs-row input{flex:1;min-width:200px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.28);border-radius:999px;padding:14px 20px;font:inherit;font-size:15px;font-weight:600;color:#fff;}
+  .cs-row input::placeholder{color:#b9b0e0;}
+  .cs-row input:focus{outline:none;border-color:var(--gold-lt);background:rgba(255,255,255,.16);}
+  .cs-note{font-size:12.5px;font-weight:600;color:#a89fd0;margin-top:12px;}
+  .cs-ok{margin-top:14px;background:rgba(47,143,91,.18);border:1px solid rgba(47,143,91,.5);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;color:#c9f0d8;}
+  .cs-err{margin-top:14px;background:rgba(226,75,74,.18);border:1px solid rgba(226,75,74,.5);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;color:#ffd7d6;}
+  .cs-trust{display:flex;gap:12px 26px;flex-wrap:wrap;margin-top:34px;}
+  .cs-trust span{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:rgba(255,255,255,.92);}
+  .cs-trust i{width:22px;height:22px;border-radius:50%;background:var(--ok);display:grid;place-items:center;flex:none;}
+  .cs-trust i svg{width:13px;height:13px;color:#fff;}
+  .cs-visual{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/5;background:#cdbfae;border:1px solid rgba(255,255,255,.16);box-shadow:0 40px 90px -40px rgba(0,0,0,.7);}
+  .cs-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .cs-visual .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:repeating-linear-gradient(135deg,#3a2d70 0 26px,#332863 26px 52px);color:rgba(255,255,255,.6);}
+  .cs-visual .ph svg{width:52px;height:52px;}
+  .cs-visual .ph span{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;line-height:1.7;}
+  .cs-mini-foot{position:relative;z-index:1;padding:20px 0 30px;border-top:1px solid rgba(255,255,255,.12);}
+  .cs-mini-foot .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;font-weight:600;color:#9b92c8;}
+  .cs-mini-foot a{color:#cdc6e8;text-decoration:none;}
+  .cs-mini-foot a:hover{color:#fff;}
+  .cs-mini-foot .lk{display:flex;gap:22px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+  <section class="cs-stage">
+    <div class="wrap">
+      <div class="cs-grid">
+        <div class="cs-copy">
+          {%- if settings.logo_white != blank -%}
+            <img class="cs-logo" src="{{ settings.logo_white | image_url: width: 240 }}" alt="Zo Veilig">
+          {%- elsif settings.logo != blank -%}
+            <img class="cs-logo" src="{{ settings.logo | image_url: width: 240 }}" alt="Zo Veilig">
+          {%- endif -%}
+          <span class="eyebrow">Binnenkort online</span>
+          <h1>Langer veilig thuis. Bijna live.</h1>
+          <p class="sub">We leggen de laatste hand aan de nieuwe Zo Veilig webshop. Laat uw e-mailadres achter en u hoort als eerste wanneer u online een pakket kunt samenstellen.</p>
+          <div class="cs-count" aria-label="Aftellen naar lancering">
+            <div class="cs-cell"><b id="cd-d">14</b><span>Dagen</span></div>
+            <div class="cs-cell"><b id="cd-h">06</b><span>Uur</span></div>
+            <div class="cs-cell"><b id="cd-m">32</b><span>Min</span></div>
+            <div class="cs-cell"><b id="cd-s">08</b><span>Sec</span></div>
+          </div>
+          {%- form 'customer', id: 'cs-notify', class: 'cs-form' -%}
+            <input type="hidden" name="contact[tags]" value="binnenkort-launch">
+            <input type="hidden" name="contact[note]" value="Aangemeld via Binnenkort online-pagina">
+            <label for="cs-mail">Houd mij op de hoogte</label>
+            <div class="cs-row">
+              <input id="cs-mail" type="email" name="contact[email]" placeholder="uw@email.nl" required>
+              <button class="btn" type="submit">Zet mij op de lijst
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <p class="cs-note">We gebruiken uw adres alleen voor de lancering. Uitschrijven kan altijd.</p>
+            {%- if form.posted_successfully? -%}
+              <div class="cs-ok">Gelukt. U staat op de lijst, we houden u op de hoogte.</div>
+            {%- elsif form.errors -%}
+              <div class="cs-err">Controleer uw e-mailadres en probeer het opnieuw.</div>
+            {%- endif -%}
+          {%- endform -%}
+          <div class="cs-trust">
+            <span><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Al 20 jaar ervaring</span>
+            <span><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Nederlandse meldkamer, 24/7</span>
+          </div>
+        </div>
+        <div class="cs-visual">
+          {%- if settings.binnenkort_image != blank -%}
+            <img src="{{ settings.binnenkort_image | image_url: width: 900 }}" alt="Zo Veilig" loading="lazy">
+          {%- else -%}
+            <div class="ph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9l8-5 8 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Lifestyle / product<br>fotoslot</span></div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="cs-mini-foot">
+    <div class="wrap">
+      <div>© {{ 'now' | date: '%Y' }} Zo Veilig · Nederlandse meldkamer, 24/7 bewaakt</div>
+      <div class="lk"><a href="tel:0881221111">088-122 11 11</a><a href="{% render 'zv-route', key: 'privacyverklaring' %}">Privacy</a><a href="{% render 'zv-route', key: 'contact' %}">Contact</a></div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var target=new Date(); target.setDate(target.getDate()+14); target.setHours(target.getHours()+6);
+      function pad(n){return String(n).padStart(2,'0');}
+      function tick(){
+        var d=target-new Date(); if(d<0)d=0;
+        var s=Math.floor(d/1000);
+        document.getElementById('cd-d').textContent=Math.floor(s/86400);
+        document.getElementById('cd-h').textContent=pad(Math.floor(s%86400/3600));
+        document.getElementById('cd-m').textContent=pad(Math.floor(s%3600/60));
+        document.getElementById('cd-s').textContent=pad(s%60);
+      }
+      tick(); setInterval(tick,1000);
+      {%- if form.posted_successfully? -%}var ok=document.querySelector('.cs-ok'); if(ok)ok.scrollIntoView({block:'center'});{%- endif -%}
+    })();
+  </script>
+</body>
+</html>
