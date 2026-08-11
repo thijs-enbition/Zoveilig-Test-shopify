@@ -1,0 +1,180 @@
+{%- comment -%}
+  Zo Veilig — Hoe het werkt. 1:1 port of the design pack "Zo Veilig Hoe het Werkt.html":
+  hero, 4-step timeline, meldkamer flow (wat er gebeurt na een melding), 3 feature
+  cards, CTA. Header + footer come from the theme.
+{%- endcomment -%}
+
+<div class="zv-hoe">
+  <!-- HERO -->
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | default: 'Hoe het werkt' | escape }}</span>
+      <h1>{{ section.settings.heading | default: 'Van keuze tot een gerust gevoel, in vier stappen' | escape }}</h1>
+      <p class="lead">{{ section.settings.lead | default: 'U hoeft geen techneut te zijn. Wij regelen de installatie, leggen alles uit en houden 24/7 een oogje in het zeil vanuit onze Nederlandse meldkamer.' | escape }}</p>
+    </div>
+  </section>
+
+  <!-- 4 STEPS -->
+  <section class="hw">
+    <div class="wrap">
+      <div class="hw-steps">
+        <div class="hw-step">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg></div>
+          <h3>Kies uw oplossing</h3>
+          <p>Doe de Keuzehulp of bekijk de pakketten. Niet zeker? Onze adviseurs denken vrijblijvend met u mee.</p>
+        </div>
+        <div class="hw-step">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/><path d="M5 11l3 3"/></svg></div>
+          <h3>Wij installeren</h3>
+          <p>Een monteur installeert en test alles bij u thuis, koppelt de app en legt de werking rustig uit.</p>
+        </div>
+        <div class="hw-step">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 6.5-7 9-4-2.5-7-5-7-9V6l7-3z"/></svg></div>
+          <h3>Meldkamer bewaakt</h3>
+          <p>Vanaf dat moment houdt onze Nederlandse meldkamer 24 uur per dag alles in de gaten.</p>
+        </div>
+        <div class="hw-step">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg></div>
+          <h3>U leeft gerust verder</h3>
+          <p>U ziet alles in de app en krijgt alleen een melding wanneer daar aanleiding voor is.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MELDKAMER FLOW -->
+  <section class="hw-mk">
+    <div class="wrap">
+      <span class="eyebrow"><span class="d"></span>De meldkamer</span>
+      <h2>Wat er gebeurt na een melding</h2>
+      <p class="lead">Een melding is nooit zomaar een alarm. Achter elke melding zit een mens die beoordeelt en handelt, snel en zorgvuldig.</p>
+      <div class="hw-timeline">
+        <div class="hw-tl"><span class="t">Seconde 0</span><h4>Signaal binnen</h4><p>Een sensor of alarm stuurt direct een signaal naar de meldkamer.</p></div>
+        <div class="hw-tl"><span class="t">Direct</span><h4>Beoordeling</h4><p>Een meldkamercentralist beoordeelt de situatie en de context.</p></div>
+        <div class="hw-tl"><span class="t">Indien nodig</span><h4>Contact</h4><p>We nemen contact op met u of uw opgegeven contactpersonen.</p></div>
+        <div class="hw-tl"><span class="t">Bij nood</span><h4>Hulp ter plaatse</h4><p>Waar nodig schakelen we hulpdiensten of een surveillant in.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="hw-feat">
+    <div class="wrap">
+      <div class="grid">
+        <div class="hw-fcard">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12a7 7 0 0 1 14 0"/><rect x="3.5" y="12" width="3.5" height="6" rx="1.6"/><rect x="17" y="12" width="3.5" height="6" rx="1.6"/><path d="M19 18v.6a2.4 2.4 0 0 1-2.4 2.4H13"/></svg></div>
+          <h3>Nederlandse meldkamer</h3>
+          <p>Gecertificeerd en 24/7 bewaakt door Securitas. Altijd een Nederlandse stem aan de lijn.</p>
+        </div>
+        <div class="hw-fcard">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Privacy voorop</h3>
+          <p>Bij Langer Thuis meten we patronen, geen beeld of geluid. U houdt de regie.</p>
+        </div>
+        <div class="hw-fcard">
+          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.3A3.7 3.7 0 0 1 12 7.5 3.7 3.7 0 0 1 19 10.7c0 5-7 9.3-7 9.3z"/></svg></div>
+          <h3>Persoonlijke service</h3>
+          <p>Installatie, jaarlijks onderhoud en een klantenservice die u kent en herkent.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="hw-cta">
+    <div class="wrap">
+      <div class="box">
+        <h2>Klaar om het rustig te regelen?</h2>
+        <p>Doe de Keuzehulp en ontdek in een paar minuten welke oplossing bij uw situatie past.</p>
+        <div class="row">
+          <a class="btn btn--gold" href="{% render 'zv-route', key: 'keuzehulp' %}">Doe de Keuzehulp<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn btn--ghost" href="{% render 'zv-route', key: 'vergelijk-pakketten' %}">Vergelijk pakketten</a>
+          <a class="btn btn--ghost" href="{% render 'zv-route', key: 'klantenservice' %}">Terug naar service</a>
+          <a class="btn btn--ghost" href="{% render 'zv-route', key: 'klantenservice' %}#contact">Neem contact op</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-hoe {
+  --ink:#1a1230; --indigo:#322469; --indigo-deep:#281c54; --indigo-soft:#efecf7; --paper:#fffdf8;
+  --cream:#fdfaf2; --band:#f4f0e6; --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a;
+  --line:#e7e0cf; --muted:#6f6786;
+  color:var(--ink); line-height:1.5;
+}
+.zv-hoe .wrap { max-width:1120px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-hoe .btn { font-weight:800; font-size:14px; border:none; border-radius:12px; padding:13px 20px; line-height:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; text-decoration:none; transition:transform .15s,box-shadow .15s; }
+.zv-hoe .btn svg { width:16px; height:16px; }
+.zv-hoe .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 10px 26px -14px rgba(180,126,10,.85); }
+.zv-hoe .btn--gold:hover { transform:translateY(-2px); }
+.zv-hoe .btn--ghost { background:transparent; color:var(--indigo); border:1.6px solid var(--line); }
+.zv-hoe .btn--ghost:hover { border-color:var(--indigo); }
+.zv-hoe a:focus-visible { outline:2px solid var(--gold-lt); outline-offset:2px; }
+
+/* hero */
+.zv-hoe .page-hero { background:radial-gradient(64% 120% at 92% 0%,rgba(197,46,47,.34) 0%,rgba(197,46,47,0) 55%),radial-gradient(66% 122% at 4% 102%,rgba(0,80,159,.5) 0%,rgba(0,80,159,0) 58%),linear-gradient(180deg,#2c3076 0%,#241c54 100%); color:#fff; padding:clamp(48px,6vw,84px) 0 clamp(40px,5vw,60px); }
+.zv-hoe .page-hero .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-hoe .page-hero .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
+.zv-hoe .page-hero h1 { font-size:clamp(30px,4vw,52px); font-weight:900; letter-spacing:-.02em; line-height:1.03; margin-top:14px; max-width:22ch; text-wrap:balance; }
+.zv-hoe .page-hero .lead { font-size:clamp(16px,1.5vw,19px); font-weight:500; color:#e4dffb; margin-top:16px; max-width:60ch; line-height:1.55; }
+
+/* steps */
+.zv-hoe .hw { background:var(--cream); padding:clamp(30px,4vw,56px) 0 clamp(20px,3vw,40px); }
+.zv-hoe .hw-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; counter-reset:s; }
+@media(max-width:820px){ .zv-hoe .hw-steps{ grid-template-columns:1fr 1fr; } }
+@media(max-width:520px){ .zv-hoe .hw-steps{ grid-template-columns:1fr; } }
+.zv-hoe .hw-step { position:relative; background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:26px 22px; box-shadow:0 16px 40px -38px rgba(26,18,48,.5); counter-increment:s; }
+.zv-hoe .hw-step::before { content:"0" counter(s); position:absolute; top:20px; right:20px; font-size:26px; font-weight:900; color:var(--gold); opacity:.5; font-variant-numeric:tabular-nums; }
+.zv-hoe .hw-step .ic { width:52px; height:52px; border-radius:14px; background:var(--indigo-soft); color:var(--indigo); display:grid; place-items:center; margin-bottom:16px; }
+.zv-hoe .hw-step .ic svg { width:28px; height:28px; }
+.zv-hoe .hw-step h3 { font-size:19px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; }
+.zv-hoe .hw-step p { font-size:14.5px; font-weight:500; color:#5b5374; margin-top:9px; line-height:1.55; }
+
+/* meldkamer flow */
+.zv-hoe .hw-mk { background:var(--indigo-deep); color:#fff; padding:clamp(46px,5vw,84px) 0; position:relative; overflow:hidden; }
+.zv-hoe .hw-mk::before { content:""; position:absolute; width:600px; height:600px; border-radius:50%; right:-180px; top:-200px; background:radial-gradient(circle,rgba(228,163,17,.2),transparent 62%); }
+.zv-hoe .hw-mk .wrap { position:relative; }
+.zv-hoe .hw-mk .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-hoe .hw-mk .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
+.zv-hoe .hw-mk h2 { font-size:clamp(28px,3.4vw,44px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin-top:14px; max-width:20ch; text-wrap:balance; }
+.zv-hoe .hw-mk .lead { font-size:17px; color:#d8d2ef; margin-top:16px; max-width:56ch; line-height:1.6; }
+.zv-hoe .hw-timeline { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:38px; }
+@media(max-width:820px){ .zv-hoe .hw-timeline{ grid-template-columns:1fr 1fr; } }
+@media(max-width:520px){ .zv-hoe .hw-timeline{ grid-template-columns:1fr; } }
+.zv-hoe .hw-tl { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:14px; padding:22px 20px; }
+.zv-hoe .hw-tl .t { font-size:12px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-hoe .hw-tl h4 { font-size:17px; font-weight:900; margin-top:8px; }
+.zv-hoe .hw-tl p { font-size:13.5px; color:#cdc6e8; margin-top:7px; line-height:1.5; }
+
+/* features */
+.zv-hoe .hw-feat { background:var(--paper); padding:clamp(46px,5vw,84px) 0; }
+.zv-hoe .hw-feat .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+@media(max-width:760px){ .zv-hoe .hw-feat .grid{ grid-template-columns:1fr; max-width:520px; margin:0 auto; } }
+.zv-hoe .hw-fcard { border:1px solid var(--line); border-radius:16px; padding:26px 24px; background:linear-gradient(180deg,#fffdf8,#f9f3e6); }
+.zv-hoe .hw-fcard .ic { width:46px; height:46px; border-radius:12px; background:#fff; border:1px solid var(--line); color:var(--indigo); display:grid; place-items:center; margin-bottom:14px; }
+.zv-hoe .hw-fcard .ic svg { width:24px; height:24px; }
+.zv-hoe .hw-fcard h3 { font-size:18px; font-weight:900; color:var(--indigo); }
+.zv-hoe .hw-fcard p { font-size:14.5px; font-weight:500; color:#5b5374; margin-top:8px; line-height:1.55; }
+
+/* cta */
+.zv-hoe .hw-cta { background:var(--band); padding:clamp(46px,5vw,80px) 0; }
+.zv-hoe .hw-cta .box { text-align:center; max-width:720px; margin:0 auto; }
+.zv-hoe .hw-cta h2 { font-size:clamp(24px,2.8vw,36px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; }
+.zv-hoe .hw-cta p { font-size:16px; color:var(--muted); margin:12px auto 0; max-width:52ch; line-height:1.55; }
+.zv-hoe .hw-cta .row { display:flex; gap:13px; justify-content:center; flex-wrap:wrap; margin-top:26px; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hoe het werkt",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Hoe het werkt" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Van keuze tot een gerust gevoel, in vier stappen" },
+    { "type": "textarea", "id": "lead", "label": "Introtekst" }
+  ],
+  "presets": [{ "name": "Hoe het werkt" }]
+}
+{% endschema %}
