@@ -1,0 +1,306 @@
+{%- comment -%}
+  Zo Veilig — Zakelijk. 1:1 port of the design pack "Zo Veilig Zakelijk.html":
+  hero + lead form (rendered as a Shopify contact form), value props, Alarm.com tech,
+  "Voor wie" cards, Securitas anchor. Header + footer come from the theme.
+{%- endcomment -%}
+
+{%- liquid
+  assign hero_url = 'zv-zakelijk-skyline.jpg' | asset_url
+  if section.settings.hero_image != blank
+    assign hero_url = section.settings.hero_image | image_url: width: 1800
+  endif
+-%}
+
+<div class="zv-zakelijk">
+  <!-- HERO + LEAD FORM -->
+  <header class="zhero" style="--zhero-img:url('{{ hero_url }}');">
+    <div class="wrap">
+      <div class="zhero-grid">
+        <div class="zhc">
+          <span class="eyebrow">{{ section.settings.eyebrow | default: 'Zakelijke beveiliging' | escape }}</span>
+          <h1>{{ section.settings.heading | default: 'Bescherm uw bedrijf met de meldkamer die u al kent.' | escape }}</h1>
+          <p class="sub">{{ section.settings.sub | default: 'Toegangscontrole en monitoring voor winkels, kantoren en zorglocaties, op dezelfde Nederlandse Securitas-meldkamer die duizenden huizen beveiligt.' | escape }}</p>
+          <span class="roadmap"><i></i>{{ section.settings.badge | default: 'Nu in ontwikkeling · op aanvraag beschikbaar' | escape }}</span>
+        </div>
+
+        <div class="lead" id="aanvraag">
+          {%- form 'contact', id: 'zakelijk-lead' -%}
+            {%- if form.posted_successfully? -%}
+              <div class="lead-done" style="display:block;">
+                <span class="ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <h3>Bedankt, we nemen contact op.</h3>
+                <p>Een specialist zakelijke beveiliging belt of mailt u binnen 1 werkdag.</p>
+              </div>
+            {%- else -%}
+              <h2>Plan een vrijblijvend gesprek</h2>
+              <p class="lh">Vertel ons kort over uw locatie. We nemen binnen 1 werkdag contact op.</p>
+              {%- if form.errors -%}
+                <p class="form-err" role="alert">Controleer de gemarkeerde velden en probeer het opnieuw.</p>
+              {%- endif -%}
+              <input type="hidden" name="contact[utm_source]" class="js-utm" data-utm="utm_source">
+              <input type="hidden" name="contact[utm_medium]" class="js-utm" data-utm="utm_medium">
+              <input type="hidden" name="contact[utm_campaign]" class="js-utm" data-utm="utm_campaign">
+              <input type="hidden" name="contact[landing_page]" class="js-landing">
+              <div class="frow">
+                <div class="field"><label for="z-naam">Naam</label><input id="z-naam" name="contact[Naam]" type="text" required placeholder="Voor- en achternaam"></div>
+                <div class="field"><label for="z-bedrijf">Bedrijf</label><input id="z-bedrijf" name="contact[Bedrijf]" type="text" required placeholder="Bedrijfsnaam"></div>
+              </div>
+              <div class="frow">
+                <div class="field"><label for="z-email">E-mail</label><input id="z-email" name="contact[email]" type="email" required placeholder="naam@bedrijf.nl"></div>
+                <div class="field"><label for="z-tel">Telefoon</label><input id="z-tel" name="contact[Telefoon]" type="tel" placeholder="06 12 34 56 78"></div>
+              </div>
+              <div class="field"><label for="z-type">Type locatie</label>
+                <select id="z-type" name="contact[Type locatie]">
+                  <option>Winkel of retail</option>
+                  <option>Kantoor</option>
+                  <option>Zorglocatie of kliniek</option>
+                  <option>Meerdere vestigingen</option>
+                  <option>Anders</option>
+                </select>
+              </div>
+              <div class="field"><label for="z-bericht">Waar wilt u mee beginnen?</label><textarea id="z-bericht" name="contact[Bericht]" placeholder="Bijv. toegangscontrole, camerabewaking, of monitoring na sluitingstijd."></textarea></div>
+              <label class="consent"><input type="checkbox" id="z-consent" required><span>Ik ga akkoord met het <a href="{% render 'zv-route', key: 'klantenservice' %}">privacybeleid</a> en dat Zo Veilig mijn gegevens gebruikt om contact met me op te nemen over deze aanvraag.</span></label>
+              <button class="btn btn--gold submit" type="submit" id="z-submit" disabled>Plan mijn gesprek
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <p class="priv">Geen verplichtingen. Uw gegevens blijven bij Zo Veilig.</p>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- VALUE PROPS -->
+  <section class="props">
+    <div class="wrap">
+      <div class="props-head">
+        <span class="eyebrow">Waarom Zo Veilig zakelijk</span>
+        <h2>Eén infrastructuur, van thuis tot bedrijf</h2>
+        <p>We bouwen geen nieuwe capaciteit. We richten de meldkamer en techniek die we al jaren bedienen op uw bedrijf.</p>
+      </div>
+      <div class="props-grid">
+        <div class="prop asset"><img src="{{ 'zv-zakelijk-toegang.png' | asset_url }}" alt="Zakelijk · Toegangscontrole, bepaal wie waar binnenkomt" loading="lazy" width="720" height="560"></div>
+        <div class="prop asset"><img src="{{ 'zv-zakelijk-camera.png' | asset_url }}" alt="Zakelijk · Camera en monitoring, bewaking ook na sluitingstijd" loading="lazy" width="720" height="560"></div>
+        <div class="prop asset"><img src="{{ 'zv-zakelijk-opvolging.png' | asset_url }}" alt="Zakelijk · 24/7 opvolging, de meldkamer kijkt altijd mee" loading="lazy" width="720" height="560"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALARM.COM TECH -->
+  <section class="tech">
+    <div class="wrap">
+      <div class="tech-head">
+        <span class="eyebrow">Aangedreven door Alarm.com</span>
+        <h2>Al uw locaties in één overzicht</h2>
+        <p>Zo Veilig is officiële Alarm.com reseller. Beheer beveiliging, video en toegang van elke vestiging vanuit één app en dashboard, met realtime status per locatie.</p>
+      </div>
+      <div class="tech-asset">
+        <img src="{% if section.settings.tech_image != blank %}{{ section.settings.tech_image | image_url: width: 1500 }}{% else %}{{ 'zv-zakelijk-loc.jpg' | asset_url }}{% endif %}" alt="Meerdere locaties in één overzicht, aangedreven door Alarm.com" loading="lazy" width="1500" height="980">
+      </div>
+      <div class="tech-benes">
+        <div class="bene"><h4>Alles in één</h4><p>Vereenvoudig uw beveiliging met één app en webdashboard om alles in één keer te zien.</p></div>
+        <div class="bene"><h4>Uitbreidbaar</h4><p>Naarmate uw bedrijf groeit en uw beveiligingsbehoefte verandert, groeit het platform met u mee.</p></div>
+        <div class="bene"><h4>Zorgeloos</h4><p>Professionele installatie, geen software om te beheren. Uw systeem werkt zichzelf automatisch bij.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOOR WIE -->
+  <section class="audience">
+    <div class="wrap">
+      <div class="aud-head">
+        <span class="eyebrow">Voor wie</span>
+        <h2>Twee richtingen, één meldkamer</h2>
+        <p>Business en Zorg bouwt voort op wat we al doen. Twee duidelijke profielen, afgestemd op uw situatie.</p>
+      </div>
+      <div class="aud-grid">
+        <div class="aud-card">
+          <div class="tag">Kleine bedrijven · winkels</div>
+          <h3>Bescherm uw zaak</h3>
+          <ul>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Camerabewaking: NVR-streamrecorder, bedrade dome en floodlight</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Toegangsbeveiliging: Climax centrale en codepaneel</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Monitoring: meldkamer-opvolging op de zaak</li>
+          </ul>
+          <div class="builds">Bouwt op bestaande Security-hardware</div>
+        </div>
+        <div class="aud-card">
+          <div class="tag">Zorgorganisaties · B2B2C</div>
+          <h3>Zorg op schaal</h3>
+          <ul>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Care en Care+ stack uitgerold op cliënten</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Indigo GPS-paniek op schaal</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>24/7 zorgmeldkamer en professionele opvolging</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Discrete monitoring zonder camera's</li>
+          </ul>
+          <div class="builds">Bouwt op Connected Living-stack</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITAS ANCHOR -->
+  <section class="anchor">
+    <div class="wrap">
+      <div class="anchor-grid">
+        <div>
+          <span class="eyebrow">Securitas Preferred Partner</span>
+          <h2>De meldkamer die niet slaapt, werkt nu ook voor u.</h2>
+          <p>Dezelfde 24/7 monitoring die thuis een inbraak of een valpartij opvangt, beschermt uw winkel, kantoor of zorglocatie. Bewezen, Nederlands en altijd bereikbaar.</p>
+        </div>
+        <div class="anchor-stats">
+          <div class="astat"><b>24/7</b><span>Nederlandse meldkamer, dag en nacht bemand</span></div>
+          <div class="astat"><b>20 jaar</b><span>ervaring in beveiliging en zorg op afstand</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-zakelijk {
+  --ink:#1a1230; --indigo:#322469; --indigo-2:#473a86; --indigo-deep:#281c54; --indigo-soft:#efecf7;
+  --paper:#ffffff; --cream:#fdfaf2; --band:#f4f0e6; --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a;
+  --ok:#2f8f5b; --line:#e7e0cf; --line-2:#dcd2bd; --muted:#6f6786;
+  background:var(--paper); color:var(--ink); line-height:1.5;
+}
+.zv-zakelijk .wrap { max-width:1280px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-zakelijk .eyebrow { font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; display:inline-block; }
+.zv-zakelijk .btn { font-weight:800; font-size:15px; border:none; border-radius:999px; padding:15px 26px; line-height:1; display:inline-flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; text-decoration:none; transition:transform .15s,box-shadow .15s; white-space:nowrap; }
+.zv-zakelijk .btn svg { width:18px; height:18px; }
+.zv-zakelijk .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 10px 26px -12px rgba(180,126,10,.85); }
+.zv-zakelijk .btn--gold:hover { transform:translateY(-2px); box-shadow:0 16px 34px -14px rgba(180,126,10,.95); }
+.zv-zakelijk a:focus-visible, .zv-zakelijk button:focus-visible, .zv-zakelijk input:focus-visible { outline:2px solid var(--gold-lt); outline-offset:2px; }
+
+/* hero */
+.zv-zakelijk .zhero { position:relative; overflow:hidden; color:#fff; padding:clamp(56px,7vw,108px) 0 clamp(48px,6vw,96px);
+  background:linear-gradient(100deg, rgba(40,28,84,.94) 0%, rgba(40,28,84,.86) 34%, rgba(40,28,84,.64) 60%, rgba(40,28,84,.5) 100%), linear-gradient(180deg, rgba(40,28,84,.5) 0%, rgba(40,28,84,.2) 38%, rgba(40,28,84,.66) 100%), var(--zhero-img) center 62%/cover no-repeat, var(--indigo-deep); }
+.zv-zakelijk .zhero::before { content:""; position:absolute; width:680px; height:680px; border-radius:50%; right:-180px; top:-220px; background:radial-gradient(circle,rgba(228,163,17,.26),transparent 64%); pointer-events:none; }
+.zv-zakelijk .zhero::after { content:""; position:absolute; width:560px; height:560px; border-radius:50%; left:-200px; bottom:-260px; background:radial-gradient(circle,rgba(0,80,159,.42),transparent 62%); pointer-events:none; }
+.zv-zakelijk .zhero-grid { position:relative; z-index:1; display:grid; grid-template-columns:1fr 460px; gap:clamp(36px,5vw,80px); align-items:center; }
+@media(max-width:980px){ .zv-zakelijk .zhero-grid{ grid-template-columns:1fr; gap:36px; } }
+.zv-zakelijk .zhc .eyebrow { color:var(--gold-lt); }
+.zv-zakelijk .zhc h1 { font-size:clamp(38px,5vw,68px); font-weight:900; letter-spacing:-.025em; line-height:1; margin-top:16px; text-wrap:balance; }
+.zv-zakelijk .zhc p.sub { font-size:clamp(17px,1.7vw,22px); font-weight:500; color:#e4dffb; margin-top:18px; max-width:50ch; line-height:1.5; }
+.zv-zakelijk .zhc .roadmap { display:inline-flex; align-items:center; gap:9px; margin-top:22px; font-size:13px; font-weight:800; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:8px 15px; color:#f0ebff; }
+.zv-zakelijk .zhc .roadmap i { width:7px; height:7px; border-radius:50%; background:var(--gold); }
+
+/* lead form card */
+.zv-zakelijk .lead { background:var(--cream); color:var(--ink); border:1px solid var(--line); border-radius:18px; padding:clamp(24px,2.6vw,34px); box-shadow:0 50px 100px -42px rgba(0,0,0,.7); }
+.zv-zakelijk .lead h2 { font-size:23px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; }
+.zv-zakelijk .lead .lh { font-size:14px; font-weight:600; color:var(--muted); margin-top:6px; line-height:1.45; }
+.zv-zakelijk .lead form { margin-top:20px; display:flex; flex-direction:column; gap:14px; }
+.zv-zakelijk .lead .form-err { font-size:13px; font-weight:700; color:#c52e2f; }
+.zv-zakelijk .field label { display:block; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.zv-zakelijk .field input, .zv-zakelijk .field select, .zv-zakelijk .field textarea { width:100%; font-family:inherit; font-size:15px; font-weight:600; color:var(--ink); background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; transition:border-color .15s,box-shadow .15s; }
+.zv-zakelijk .field input:focus, .zv-zakelijk .field select:focus, .zv-zakelijk .field textarea:focus { outline:none; border-color:var(--indigo); box-shadow:0 0 0 3px rgba(50,36,105,.12); }
+.zv-zakelijk .field textarea { resize:vertical; min-height:84px; }
+.zv-zakelijk .frow { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:480px){ .zv-zakelijk .frow{ grid-template-columns:1fr; } }
+.zv-zakelijk .lead .submit { margin-top:4px; width:100%; }
+.zv-zakelijk .lead .priv { font-size:12px; font-weight:600; color:var(--muted); text-align:center; margin-top:4px; line-height:1.4; }
+.zv-zakelijk .lead .consent { display:flex; gap:11px; align-items:flex-start; font-size:12.5px; font-weight:600; color:#3a3550; line-height:1.45; text-align:left; margin-top:2px; }
+.zv-zakelijk .lead .consent input { margin-top:2px; width:17px; height:17px; flex:none; accent-color:var(--indigo); cursor:pointer; }
+.zv-zakelijk .lead .consent a { color:var(--indigo); font-weight:800; text-decoration:underline; }
+.zv-zakelijk .lead .submit[disabled] { opacity:.5; cursor:not-allowed; transform:none; box-shadow:0 10px 26px -12px rgba(180,126,10,.5); }
+.zv-zakelijk .lead-done { text-align:center; padding:18px 6px 8px; }
+.zv-zakelijk .lead-done .ok { width:58px; height:58px; border-radius:50%; background:var(--ok); display:grid; place-items:center; margin:0 auto 14px; }
+.zv-zakelijk .lead-done .ok svg { width:30px; height:30px; color:#fff; }
+.zv-zakelijk .lead-done h3 { font-size:21px; font-weight:900; color:var(--indigo); }
+.zv-zakelijk .lead-done p { font-size:14.5px; font-weight:600; color:var(--muted); margin-top:8px; line-height:1.5; }
+
+/* value props */
+.zv-zakelijk .props { background:var(--band); padding:clamp(52px,6vw,92px) 0; }
+.zv-zakelijk .props-head { max-width:680px; margin:0 auto clamp(36px,4vw,52px); text-align:center; }
+.zv-zakelijk .props-head .eyebrow { color:var(--belt); }
+.zv-zakelijk .props-head h2 { font-size:clamp(26px,3.2vw,42px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; line-height:1.05; margin-top:13px; text-wrap:balance; }
+.zv-zakelijk .props-head p { font-size:17px; font-weight:500; color:var(--muted); margin-top:14px; line-height:1.55; }
+.zv-zakelijk .props-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+@media(max-width:880px){ .zv-zakelijk .props-grid{ grid-template-columns:1fr; max-width:480px; margin:0 auto; } }
+.zv-zakelijk .prop.asset { background:none; border:none; padding:0; box-shadow:none; border-radius:16px; overflow:hidden; }
+.zv-zakelijk .prop.asset img { display:block; width:100%; height:auto; border-radius:16px; box-shadow:0 24px 50px -34px rgba(26,18,48,.45),0 3px 10px -7px rgba(26,18,48,.2); }
+
+/* tech */
+.zv-zakelijk .tech { background:var(--paper); padding:clamp(52px,6vw,92px) 0; }
+.zv-zakelijk .tech-head { max-width:720px; margin:0 auto clamp(28px,3vw,44px); text-align:center; }
+.zv-zakelijk .tech-head .eyebrow { color:var(--belt); }
+.zv-zakelijk .tech-head h2 { font-size:clamp(26px,3.2vw,42px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; line-height:1.05; margin-top:13px; text-wrap:balance; }
+.zv-zakelijk .tech-head p { font-size:17px; font-weight:500; color:var(--muted); margin-top:14px; line-height:1.55; }
+.zv-zakelijk .tech-asset { background:#fbf6ec; border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 30px 70px -44px rgba(26,18,48,.45); }
+.zv-zakelijk .tech-asset img { display:block; width:100%; height:auto; aspect-ratio:1500/980; object-fit:cover; }
+.zv-zakelijk .tech-benes { display:grid; grid-template-columns:repeat(3,1fr); gap:24px 34px; margin-top:clamp(30px,3.4vw,46px); }
+@media(max-width:760px){ .zv-zakelijk .tech-benes{ grid-template-columns:1fr; max-width:460px; margin-left:auto; margin-right:auto; } }
+.zv-zakelijk .bene h4 { font-size:18px; font-weight:900; color:var(--indigo); position:relative; padding-top:16px; }
+.zv-zakelijk .bene h4::before { content:""; position:absolute; top:0; left:0; width:34px; height:4px; border-radius:2px; background:var(--gold); }
+.zv-zakelijk .bene p { font-size:15px; font-weight:500; color:#5b5374; margin-top:10px; line-height:1.55; }
+
+/* audience */
+.zv-zakelijk .audience { background:var(--band); padding:clamp(52px,6vw,88px) 0; }
+.zv-zakelijk .aud-head { max-width:680px; margin:0 auto clamp(30px,3vw,44px); text-align:center; }
+.zv-zakelijk .aud-head .eyebrow { color:var(--belt); }
+.zv-zakelijk .aud-head h2 { font-size:clamp(26px,3.2vw,40px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; line-height:1.05; margin-top:12px; text-wrap:balance; }
+.zv-zakelijk .aud-head p { font-size:17px; font-weight:500; color:var(--muted); margin-top:13px; line-height:1.55; }
+.zv-zakelijk .aud-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+@media(max-width:760px){ .zv-zakelijk .aud-grid{ grid-template-columns:1fr; max-width:520px; margin:0 auto; } }
+.zv-zakelijk .aud-card { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:32px 30px; box-shadow:0 1px 2px rgba(26,18,48,.04); }
+.zv-zakelijk .aud-card .tag { font-size:11.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--belt); }
+.zv-zakelijk .aud-card h3 { font-size:22px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; margin-top:8px; }
+.zv-zakelijk .aud-card ul { list-style:none; margin-top:18px; display:flex; flex-direction:column; gap:12px; padding:0; }
+.zv-zakelijk .aud-card li { display:flex; align-items:flex-start; gap:11px; font-size:15px; font-weight:500; color:#3a3550; line-height:1.45; }
+.zv-zakelijk .aud-card li .ck { width:20px; height:20px; border-radius:50%; background:#eaf3ee; display:grid; place-items:center; flex:none; margin-top:1px; }
+.zv-zakelijk .aud-card li .ck svg { width:12px; height:12px; color:var(--ok); }
+.zv-zakelijk .aud-card .builds { margin-top:18px; padding-top:14px; border-top:1px solid var(--line); font-size:13px; font-weight:800; color:var(--muted); }
+
+/* anchor */
+.zv-zakelijk .anchor { background:var(--indigo-deep); color:#fff; padding:clamp(52px,6vw,92px) 0; position:relative; overflow:hidden; }
+.zv-zakelijk .anchor::before { content:""; position:absolute; width:560px; height:560px; border-radius:50%; left:-200px; top:-160px; background:radial-gradient(circle,rgba(0,80,159,.4),transparent 62%); }
+.zv-zakelijk .anchor-grid { position:relative; z-index:1; display:grid; grid-template-columns:1.1fr 1fr; gap:clamp(32px,5vw,72px); align-items:center; }
+@media(max-width:860px){ .zv-zakelijk .anchor-grid{ grid-template-columns:1fr; gap:30px; } }
+.zv-zakelijk .anchor .eyebrow { color:var(--gold-lt); }
+.zv-zakelijk .anchor h2 { font-size:clamp(26px,3vw,42px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin-top:13px; text-wrap:balance; }
+.zv-zakelijk .anchor p { font-size:17px; font-weight:500; color:#d8d2ef; margin-top:16px; line-height:1.6; }
+.zv-zakelijk .anchor-stats { display:flex; flex-wrap:wrap; gap:14px; }
+.zv-zakelijk .astat { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:14px; padding:22px 24px; flex:1; min-width:160px; }
+.zv-zakelijk .astat b { display:block; font-size:34px; font-weight:900; color:var(--gold-lt); letter-spacing:-.01em; line-height:1; }
+.zv-zakelijk .astat span { display:block; font-size:13.5px; font-weight:700; color:#cfc7ee; margin-top:8px; line-height:1.4; }
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var scope = document.querySelector('.zv-zakelijk');
+  if (!scope) return;
+  var consent = scope.querySelector('#z-consent');
+  var submit = scope.querySelector('#z-submit');
+  if (consent && submit) {
+    var sync = function () { submit.disabled = !consent.checked; };
+    consent.addEventListener('change', sync); sync();
+  }
+  // Lightweight lead attribution: copy UTM params + landing page into hidden fields.
+  try {
+    var params = new URLSearchParams(location.search);
+    scope.querySelectorAll('.js-utm').forEach(function (i) {
+      var v = params.get(i.getAttribute('data-utm')); if (v) i.value = v;
+    });
+    var lp = scope.querySelector('.js-landing'); if (lp) lp.value = location.pathname;
+  } catch (e) {}
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Zakelijk",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Zakelijke beveiliging" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Bescherm uw bedrijf met de meldkamer die u al kent." },
+    { "type": "textarea", "id": "sub", "label": "Subtekst" },
+    { "type": "text", "id": "badge", "label": "Badge", "default": "Nu in ontwikkeling · op aanvraag beschikbaar" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero-achtergrond (skyline)" },
+    { "type": "header", "content": "Alarm.com-visual" },
+    { "type": "image_picker", "id": "tech_image", "label": "Dashboard/locaties-afbeelding" }
+  ],
+  "presets": [{ "name": "Zakelijk" }]
+}
+{% endschema %}
