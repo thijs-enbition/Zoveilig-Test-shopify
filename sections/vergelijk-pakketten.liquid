@@ -1,0 +1,183 @@
+{%- comment -%}
+  Zo Veilig — Vergelijk pakketten. 1:1 port of the design pack
+  "Zo Veilig Vergelijk Pakketten.html": hero, Langer Thuis comparison table
+  (Inzicht/Zeker/Beschermd, FINAL prices), Mijn Thuis + Veilig Onderweg cards
+  (prijs volgt), Keuzehulp help-CTA. Header + footer come from the theme.
+  Prices are the finalized Langer Thuis tiers per the project constitution.
+{%- endcomment -%}
+
+{%- liquid
+  assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+  assign no = '<span class="no" aria-hidden="true">–</span>'
+  assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  assign opl = '/pages/oplossingen'
+-%}
+
+<div class="zv-vergelijk">
+  <!-- HERO -->
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | default: 'Vergelijk pakketten' | escape }}</span>
+      <h1>{{ section.settings.heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h1>
+      <p class="sub">{{ section.settings.sub | default: 'Drie niveaus, van een geruststellend seintje tot volledige meldkameropvolging. U kunt altijd later uitbreiden.' | escape }}</p>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="cmp">
+    <div class="wrap">
+      <div class="cmp-lead">Langer Thuis</div>
+      <h2>Vergelijk de drie niveaus</h2>
+      <p class="sub">Alle pakketten werken zonder camera. U kiest hoeveel opvolging en zekerheid u wilt.</p>
+
+      <div class="tbl-wrap">
+        <table class="cmp-tbl">
+          <thead>
+            <tr>
+              <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
+              <th class="plan" scope="col"><span class="pn">Inzicht</span><span class="price">€19,95<span> p/m</span></span></th>
+              <th class="plan rec" scope="col"><span class="badge">Meest gekozen</span><span class="pn">Zeker</span><span class="price">€24,95<span> p/m</span></span></th>
+              <th class="plan" scope="col"><span class="pn">Beschermd</span><span class="price">€39,95<span> p/m</span></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- comment -%} feat | small | inzicht | zeker | beschermd  (§ splits rows, | splits fields) {%- endcomment -%}
+            {%- assign rows = 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|n|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | split: '§' -%}
+            {%- for row in rows -%}
+              {%- assign f = row | split: '|' -%}
+              <tr>
+                <td class="feat">{{ f[0] }}<small>{{ f[1] }}</small></td>
+                {%- for i in (2..4) -%}
+                  {%- assign v = f[i] -%}
+                  {%- if v == 'y' -%}<td class="val txt">{{ check }}</td>
+                  {%- elsif v == 'n' -%}<td class="val txt">{{ no }}</td>
+                  {%- else -%}<td class="val txt">{{ v }}</td>{%- endif -%}
+                {%- endfor -%}
+              </tr>
+            {%- endfor -%}
+            <tr class="cta">
+              <td></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}">Kies Inzicht</a></td>
+              <td class="rec-cell"><a class="btn btn--gold" href="{{ opl }}">Kies Zeker {{ arrow }}</a></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}">Kies Beschermd</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- OTHER LINES -->
+      <div class="cmp-more">
+        <div class="cmp-card">
+          <span class="k">Mijn Thuis</span>
+          <h3>Woningbeveiliging tegen inbraak en brand</h3>
+          <p>Een slim alarmsysteem dat inbraak, brand of onraad direct opmerkt en u meteen waarschuwt. Uit te breiden met camera en meldkameropvolging.</p>
+          <div class="cmp-tiers"><span class="cmp-tier">Alert</span><span class="cmp-tier">Protect</span><span class="cmp-tier">Vista</span></div>
+          <span class="soon">Prijzen volgen binnenkort</span>
+          <a class="lk" href="{{ opl }}">Bekijk Mijn Thuis {{ arrow }}</a>
+        </div>
+        <div class="cmp-card">
+          <span class="k">Veilig Onderweg</span>
+          <h3>Persoonlijke alarmering, waar u ook bent</h3>
+          <p>Een persoonlijk alarm met GPS en valdetectie dat met één druk op de knop hulp inschakelt. Voor iedereen die met een gerust gevoel op pad wil.</p>
+          <div class="cmp-tiers"><span class="cmp-tier">Alarm</span><span class="cmp-tier">Locatie</span><span class="cmp-tier">Beschermd</span></div>
+          <span class="soon">Prijzen volgen binnenkort</span>
+          <a class="lk" href="{{ opl }}">Bekijk Veilig Onderweg {{ arrow }}</a>
+        </div>
+      </div>
+
+      <div class="cmp-help">
+        <h3>Nog niet zeker welk pakket past?</h3>
+        <p>Beantwoord een paar korte vragen in de Keuzehulp en ontdek de oplossing die bij uw situatie past.</p>
+        <div class="row">
+          <a class="btn btn--gold" href="{% render 'zv-route', key: 'keuzehulp' %}">Doe de Keuzehulp {{ arrow }}</a>
+          <a class="btn btn--ghost-light" href="{% render 'zv-route', key: 'klantenservice' %}#contact">Vraag advies</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-vergelijk {
+  --ink:#1a1230; --indigo:#322469; --indigo-deep:#281c54; --indigo-soft:#efecf7; --paper:#fffdf8;
+  --cream:#fdfaf2; --band:#f4f0e6; --gold:#e4a311; --gold-lt:#f5c84a; --gold-soft:#fbf0d4; --belt:#b67e0a;
+  --ok:#2f8f5b; --line:#e7e0cf; --line-2:#dcd2bd; --muted:#6f6786; --muted-2:#8c84a6;
+  color:var(--ink); line-height:1.5;
+}
+.zv-vergelijk .wrap { max-width:1080px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-vergelijk .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.zv-vergelijk .btn { font-weight:800; font-size:14px; border:none; border-radius:12px; padding:12px 18px; line-height:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; text-decoration:none; transition:transform .15s,box-shadow .15s; white-space:nowrap; }
+.zv-vergelijk .btn svg { width:16px; height:16px; }
+.zv-vergelijk .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 10px 26px -14px rgba(180,126,10,.85); }
+.zv-vergelijk .btn--gold:hover { transform:translateY(-2px); }
+.zv-vergelijk .btn--ghost { background:transparent; color:var(--indigo); border:1.6px solid var(--line-2); }
+.zv-vergelijk .btn--ghost:hover { border-color:var(--indigo); }
+.zv-vergelijk .btn--ghost-light { color:#fff; border:1.5px solid rgba(255,255,255,.4); background:transparent; }
+.zv-vergelijk a:focus-visible { outline:2px solid var(--gold-lt); outline-offset:2px; }
+
+/* hero */
+.zv-vergelijk .page-hero { background:radial-gradient(64% 120% at 92% 0%,rgba(197,46,47,.34) 0%,rgba(197,46,47,0) 55%),radial-gradient(66% 122% at 4% 102%,rgba(0,80,159,.5) 0%,rgba(0,80,159,0) 58%),linear-gradient(180deg,#2c3076 0%,#241c54 100%); color:#fff; padding:clamp(48px,6vw,84px) 0 clamp(40px,5vw,60px); }
+.zv-vergelijk .page-hero .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-vergelijk .page-hero .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
+.zv-vergelijk .page-hero h1 { font-size:clamp(30px,4vw,52px); font-weight:900; letter-spacing:-.02em; line-height:1.03; margin-top:14px; max-width:20ch; text-wrap:balance; }
+.zv-vergelijk .page-hero .sub { font-size:clamp(16px,1.5vw,19px); font-weight:500; color:#e4dffb; margin-top:16px; max-width:56ch; line-height:1.5; }
+
+/* comparison */
+.zv-vergelijk .cmp { background:var(--cream); padding:clamp(30px,4vw,56px) 0 clamp(50px,6vw,90px); }
+.zv-vergelijk .cmp-lead { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--belt); margin-bottom:8px; }
+.zv-vergelijk .cmp h2 { font-size:clamp(24px,2.8vw,34px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; }
+.zv-vergelijk .cmp .sub { font-size:16px; font-weight:500; color:var(--muted); margin-top:10px; max-width:60ch; line-height:1.55; }
+.zv-vergelijk .tbl-wrap { overflow-x:auto; margin-top:26px; border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 24px 54px -46px rgba(26,18,48,.5); }
+.zv-vergelijk .cmp-tbl { border-collapse:collapse; width:100%; min-width:680px; }
+.zv-vergelijk .cmp-tbl th, .zv-vergelijk .cmp-tbl td { padding:16px 20px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
+.zv-vergelijk .cmp-tbl thead th { background:var(--band); }
+.zv-vergelijk .cmp-tbl thead .plan { text-align:center; }
+.zv-vergelijk .cmp-tbl thead .plan .pn { display:block; font-size:19px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; }
+.zv-vergelijk .cmp-tbl thead .plan.rec { background:linear-gradient(180deg,#faf3e2,#f6ecd3); }
+.zv-vergelijk .cmp-tbl thead .plan .badge { display:inline-block; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--ink); background:var(--gold); border-radius:999px; padding:3px 10px; margin-bottom:6px; }
+.zv-vergelijk .cmp-tbl thead .plan .price { display:block; font-size:22px; font-weight:900; color:var(--ink); margin-top:4px; }
+.zv-vergelijk .cmp-tbl thead .plan .price span { font-size:12px; font-weight:700; color:var(--muted); }
+.zv-vergelijk .cmp-tbl .feat { font-size:14.5px; font-weight:700; color:var(--ink); }
+.zv-vergelijk .cmp-tbl .feat small { display:block; font-size:12.5px; font-weight:500; color:var(--muted); margin-top:2px; }
+.zv-vergelijk .cmp-tbl td.val { text-align:center; }
+.zv-vergelijk .cmp-tbl .yes { width:26px; height:26px; border-radius:50%; background:rgba(47,143,91,.14); color:var(--ok); display:inline-grid; place-items:center; }
+.zv-vergelijk .cmp-tbl .yes svg { width:15px; height:15px; }
+.zv-vergelijk .cmp-tbl .no { color:var(--muted-2); font-size:18px; }
+.zv-vergelijk .cmp-tbl td.val.txt { font-size:13.5px; font-weight:700; color:var(--indigo); }
+.zv-vergelijk .cmp-tbl tr.cta td { padding:20px; text-align:center; background:var(--cream); }
+.zv-vergelijk .cmp-tbl .rec-cell { background:#fdf8ee; }
+
+/* other lines */
+.zv-vergelijk .cmp-more { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:38px; }
+@media(max-width:760px){ .zv-vergelijk .cmp-more{ grid-template-columns:1fr; } }
+.zv-vergelijk .cmp-card { background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:28px 26px; box-shadow:0 20px 48px -44px rgba(26,18,48,.5); }
+.zv-vergelijk .cmp-card .k { font-size:11.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--belt); }
+.zv-vergelijk .cmp-card h3 { font-size:23px; font-weight:900; color:var(--indigo); letter-spacing:-.015em; margin-top:6px; }
+.zv-vergelijk .cmp-card p { font-size:15px; font-weight:500; color:#5b5374; margin-top:10px; line-height:1.55; }
+.zv-vergelijk .cmp-tiers { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+.zv-vergelijk .cmp-tier { font-size:12.5px; font-weight:800; color:var(--indigo); background:var(--indigo-soft); border-radius:999px; padding:6px 13px; }
+.zv-vergelijk .cmp-card .soon { display:inline-flex; align-items:center; gap:8px; margin-top:18px; font-size:13px; font-weight:800; color:var(--belt); background:var(--gold-soft); border-radius:999px; padding:8px 14px; }
+.zv-vergelijk .cmp-card .lk { display:flex; align-items:center; gap:8px; margin-top:18px; font-size:14.5px; font-weight:800; color:var(--indigo); text-decoration:none; }
+.zv-vergelijk .cmp-card .lk svg { width:16px; height:16px; transition:transform .15s; }
+.zv-vergelijk .cmp-card .lk:hover svg { transform:translateX(3px); }
+
+/* help */
+.zv-vergelijk .cmp-help { margin-top:40px; background:var(--indigo-deep); color:#fff; border-radius:20px; padding:clamp(28px,3.5vw,46px); text-align:center; position:relative; overflow:hidden; }
+.zv-vergelijk .cmp-help::before { content:""; position:absolute; width:460px; height:460px; border-radius:50%; left:-140px; bottom:-180px; background:radial-gradient(circle,rgba(0,80,159,.4),transparent 60%); }
+.zv-vergelijk .cmp-help h3 { font-size:clamp(22px,2.4vw,30px); font-weight:900; letter-spacing:-.015em; position:relative; }
+.zv-vergelijk .cmp-help p { font-size:16px; color:#d8d2ef; margin:12px auto 0; max-width:52ch; line-height:1.55; position:relative; }
+.zv-vergelijk .cmp-help .row { display:flex; gap:13px; justify-content:center; flex-wrap:wrap; margin-top:24px; position:relative; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Vergelijk pakketten",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Vergelijk pakketten" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Welk pakket past bij uw situatie?" },
+    { "type": "textarea", "id": "sub", "label": "Subtekst" }
+  ],
+  "presets": [{ "name": "Vergelijk pakketten" }]
+}
+{% endschema %}
