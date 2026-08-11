@@ -1,0 +1,96 @@
+{%- comment -%}
+  Zo Veilig — shared legal / juridische pagina. 1:1 layout port of the design pack
+  legal pages (Algemene voorwaarden, Privacyverklaring, Cookiebeleid, Herroepingsrecht,
+  Verzending en levering, Klachten en geschillen). Hero comes from the page title; the
+  actual legal text lives in the page body ({{ page.content }}), styled as .lg prose.
+  A concept notice is shown because these texts are still to be legally reviewed and
+  completed with the company details (KvK, btw, adres).
+{%- endcomment -%}
+
+<div class="zv-legal">
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | default: 'Juridisch' | escape }}</span>
+      <h1>{{ page.title | default: section.settings.fallback_title | escape }}</h1>
+      {%- if section.settings.effective_date != blank -%}<p class="he-date">Laatst bijgewerkt: {{ section.settings.effective_date | escape }}</p>{%- endif -%}
+    </div>
+  </section>
+
+  {%- if section.settings.show_concept_notice -%}
+    <div class="lg-note">
+      <div class="wrap">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>{{ section.settings.concept_text | default: 'Conceptversie. Deze tekst wordt vóór livegang juridisch getoetst en aangevuld met de bedrijfsgegevens (KvK, btw, adres).' | escape }}</span>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <section class="lg">
+    <div class="wrap">
+      <div class="lg-body rte">
+        {%- if page.content != blank -%}
+          {{ page.content }}
+        {%- else -%}
+          {%- case page.handle -%}
+            {%- when 'algemene-voorwaarden' -%}{%- render 'legal-algemene-voorwaarden' -%}
+            {%- when 'privacyverklaring' -%}{%- render 'legal-privacyverklaring' -%}
+            {%- when 'cookiebeleid' -%}{%- render 'legal-cookiebeleid' -%}
+            {%- when 'herroepingsrecht' -%}{%- render 'legal-herroepingsrecht' -%}
+            {%- when 'verzending-en-levering' -%}{%- render 'legal-verzending-en-levering' -%}
+            {%- when 'klachten-en-geschillen' -%}{%- render 'legal-klachten-en-geschillen' -%}
+          {%- endcase -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.zv-legal {
+  --ink:#1a1230; --indigo:#322469; --indigo-deep:#281c54; --paper:#fffdf8; --cream:#fdfaf2;
+  --gold:#e4a311; --gold-lt:#f5c84a; --gold-soft:#fbf0d4; --belt:#b67e0a; --line:#e7e0cf;
+  --muted:#6f6786; --muted-2:#8c84a6;
+  color:var(--ink); line-height:1.5;
+}
+.zv-legal .wrap { max-width:1000px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-legal .page-hero { background:radial-gradient(64% 120% at 92% 0%,rgba(197,46,47,.3) 0%,rgba(197,46,47,0) 55%),linear-gradient(180deg,#2c3076 0%,#241c54 100%); color:#fff; padding:clamp(40px,5vw,72px) 0 clamp(30px,3.5vw,48px); }
+.zv-legal .page-hero .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-lt); }
+.zv-legal .page-hero .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
+.zv-legal .page-hero h1 { font-size:clamp(28px,3.6vw,46px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin-top:14px; }
+.zv-legal .page-hero .he-date { font-size:13.5px; font-weight:600; color:#cdc6e8; margin-top:12px; }
+.zv-legal .lg-note { background:var(--gold-soft); border-top:1px solid #eddfba; border-bottom:1px solid #eddfba; }
+.zv-legal .lg-note .wrap { display:flex; align-items:center; gap:12px; padding:13px 0; font-size:13.5px; font-weight:700; color:var(--belt); }
+.zv-legal .lg-note svg { flex:none; width:20px; height:20px; }
+.zv-legal .lg { background:var(--cream); padding:clamp(30px,4vw,56px) 0 clamp(56px,6vw,90px); }
+.zv-legal .lg-body { max-width:760px; }
+/* prose: styles the page-body legal content (lg-sec blocks or plain rte) */
+.zv-legal .lg-body h2 { font-size:22px; font-weight:900; color:var(--indigo); letter-spacing:-.015em; line-height:1.2; margin-top:34px; padding-top:30px; border-top:1px solid var(--line); }
+.zv-legal .lg-body > h2:first-child, .zv-legal .lg-body > .lg-sec:first-child h2 { margin-top:0; padding-top:0; border-top:none; }
+.zv-legal .lg-body h3 { font-size:17px; font-weight:900; color:var(--indigo); margin-top:20px; }
+.zv-legal .lg-body p { font-size:15.5px; font-weight:500; color:#463f5c; margin-top:14px; line-height:1.65; }
+.zv-legal .lg-body ul, .zv-legal .lg-body ol { margin-top:14px; padding-left:20px; display:flex; flex-direction:column; gap:9px; }
+.zv-legal .lg-body li { font-size:15px; font-weight:500; color:#463f5c; line-height:1.55; }
+.zv-legal .lg-body b, .zv-legal .lg-body strong { color:var(--ink); font-weight:800; }
+.zv-legal .lg-body a { color:var(--indigo); font-weight:800; text-decoration:underline; }
+.zv-legal .lg-sec { scroll-margin-top:96px; }
+.zv-legal .lg-callout { background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--indigo); border-radius:10px; padding:16px 18px; margin-top:16px; font-size:14.5px; font-weight:600; color:#463f5c; line-height:1.6; }
+.zv-legal .lg-contact { background:var(--indigo-deep); color:#fff; border-radius:16px; padding:24px 26px; margin-top:24px; }
+.zv-legal .lg-contact h3 { font-size:17px; font-weight:900; color:#fff; margin-top:0; }
+.zv-legal .lg-contact p { color:#d8d2ef; }
+.zv-legal .lg-contact a { color:var(--gold-lt); }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Juridische pagina",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Juridisch" },
+    { "type": "text", "id": "fallback_title", "label": "Titel (fallback)", "default": "Juridisch" },
+    { "type": "text", "id": "effective_date", "label": "Laatst bijgewerkt", "default": "augustus 2026" },
+    { "type": "checkbox", "id": "show_concept_notice", "label": "Concept-melding tonen", "default": true },
+    { "type": "textarea", "id": "concept_text", "label": "Concept-melding tekst" }
+  ],
+  "presets": [{ "name": "Juridische pagina" }]
+}
+{% endschema %}
