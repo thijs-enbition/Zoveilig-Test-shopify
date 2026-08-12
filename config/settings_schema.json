@@ -1451,5 +1451,13 @@
         "default": "scheme-1"
       }
     ]
+  },
+  {
+    "name": "Zo Veilig · Integraties",
+    "settings": [
+      { "type": "header", "content": "Odoo / CRM lead-endpoint" },
+      { "type": "paragraph", "content": "URL waar alle terugbel- en contactformulieren hun lead als JSON naartoe POSTen (Odoo CRM webhook of proxy). Leeg = leads worden alleen lokaal bewaard, niet verzonden." },
+      { "type": "text", "id": "callback_endpoint", "label": "Lead-endpoint URL", "info": "Bijv. https://hooks.example.com/zo-veilig/lead . Publiek endpoint zonder client-side secret." }
+    ]
   }
 ]

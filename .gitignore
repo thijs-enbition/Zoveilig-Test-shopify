@@ -49,3 +49,6 @@ venv/
 # renders on Shopify without a build step. Rebuild after editing
 # pricing/pricing.config.json.
 # ============================================
+
+# Local design-pack drop (not part of the theme)
+_incoming-brand3*

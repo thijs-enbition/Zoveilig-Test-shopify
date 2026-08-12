@@ -70,6 +70,9 @@
 
     {{ content_for_header }}
 
+    {%- comment -%} Zo Veilig — single lead endpoint for every callback/contact form (Odoo CRM webhook or proxy). Blank = leads stay local. {%- endcomment -%}
+    <script>window.ZV_LEAD_ENDPOINT = {{ settings.callback_endpoint | json }};</script>
+
     {%- liquid
       assign body_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
       assign body_font_italic = settings.type_body_font | font_modify: 'style', 'italic'
