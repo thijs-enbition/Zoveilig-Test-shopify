@@ -1,0 +1,294 @@
+{%- comment -%}
+  Zo Veilig — Camerahardware (camera page). 1:1 port of "Zo Veilig Camera Hardware.html".
+  Conversion is by phone/callback only, never self-checkout: the visitor composes a
+  camera set (per line: kopen/huren), then "Bel om te bestellen" (tel:) or leaves a
+  callback. The callback POSTs a lead to window.ZV_LEAD_ENDPOINT (Odoo CRM). Header/
+  footer come from the theme layout; the design's own nav is dropped.
+{%- endcomment -%}
+
+<div class="zv-camera">
+  <div class="topbar">
+    <div class="wrap">
+      <div class="crumb">
+        <a href="{% render 'zv-route', key: 'oplossingen' %}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Mijn huis</a>
+        <span class="sep">/</span><b>Camerahardware toevoegen</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="lede">
+      <div class="eyebrow">{{ section.settings.eyebrow | default: 'Mijn huis · camerahardware' | escape }}</div>
+      <h1>{{ section.settings.title | default: "Voeg camera's toe aan uw huis" | escape }}</h1>
+      <p>{{ section.settings.lead | default: "Bekijk de mogelijkheden en voeg precies de camera's of videodeurbel toe die u nog mist." | escape }}</p>
+    </div>
+
+    <section class="shop">
+      <div>
+        <div class="cat-head">
+          <span class="step-n">2</span>
+          <h2>Kiest u camerahardware</h2>
+          <span class="cat-hint"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Kies per product kopen of huren</span>
+        </div>
+        <div class="rows" id="rows"></div>
+        <div class="adv-note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <p>Niet zeker welke camera's bij uw woning passen? Onze adviseurs kijken vrijblijvend met u mee en stellen samen de juiste set samen.</p>
+            <div class="adv-actions">
+              <a href="tel:0881221111">Bel 088-122 11 11</a>
+              <a href="{% render 'zv-route', key: 'contact' %}">Plan een adviesgesprek</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="summary">
+        <h3>Uw camera-setup</h3>
+        <div class="sum-cams">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8.5h4l1.5-2.5h7L17 8.5h4v11H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="14" r="3.4" stroke="currentColor" stroke-width="2"/></svg></span>
+          <div><b id="camCount">0</b><span>camera's en deurbellen</span></div>
+        </div>
+        <div class="sum-list" id="sumList"></div>
+        <div class="sum-empty" id="sumEmpty">Nog niets toegevoegd. Kies per product kopen of huren.</div>
+        <div class="sum-tot" id="sumTot"></div>
+        <button class="sumbtn" id="sumBtn" disabled>Bel om te bestellen<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sum-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bestellen gaat altijd via een kort telefoongesprek, 088-122 11 11</div>
+        <form class="cam-contact" id="camContact">
+          <div class="cam-contact-h">Of laat ons u terugbellen</div>
+          <input type="text" id="ccName" placeholder="Naam" required>
+          <input type="tel" id="ccPhone" placeholder="Telefoonnummer" required>
+          <input type="email" id="ccEmail" placeholder="E-mailadres (optioneel)">
+          <div class="cam-contact-err" id="ccErr"></div>
+          <button type="submit">Verstuur terugbelverzoek</button>
+          <div class="cam-contact-done" id="ccDone"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt, wij bellen u terug.</div>
+        </form>
+      </aside>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var scope = document.querySelector('.zv-camera'); if(!scope || !document.getElementById('rows')) return;
+  var HW=[
+    {n:'Binnencamera met SD kaart', type:'Binnen', koop:175.00, huur:15.31, k:'cam_binnen', sku:'CAM-BINNEN'},
+    {n:'Buitencamera wifi 724', type:'Buiten', koop:325.00, huur:28.44, k:'cam_724', sku:'CAM-724'},
+    {n:'Buitencamera wifi 730', type:'Buiten', koop:325.00, huur:28.44, k:'cam_730', sku:'CAM-730'},
+    {n:'Binnen/Buitencamera bedraad 727', type:'Binnen+Buiten', koop:349.00, huur:30.54, k:'cam_727', sku:'CAM-727'},
+    {n:'Dome camera met SD kaart', type:'Dome', koop:399.00, huur:34.91, k:'cam_dome', sku:'CAM-DOME'},
+    {n:'WiFi floodlight camera (ADC-V7294)', type:'Buiten', koop:475.00, huur:41.56, k:'cam_flood', sku:'CAM-FLOOD'},
+    {n:'Streamrecorder (NVR)', type:'Recorder', koop:500.00, huur:43.75, k:'nvr', sku:'NVR-STREAM'},
+    {n:'Video deurbel bedraad VDB 750', type:'Deurbel', koop:299.00, huur:26.16, k:'vdb_750', sku:'VDB-750'},
+    {n:'Video deurbel bedraad VDB 755 + chime', type:'Deurbel', koop:325.00, huur:28.44, k:'vdb_755', sku:'VDB-755'},
+    {n:'Video deurbel draadloos VDB780B + chime', type:'Deurbel', koop:425.00, huur:37.19, k:'vdb_780', sku:'VDB-780'}
+  ];
+  var state={ lines:{} };
+  function euro(n){ return '€ '+Number(n).toFixed(2).replace('.',','); }
+
+  var SRC=['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'];
+  function captureSource(){
+    var store={}; try{ store=JSON.parse(sessionStorage.getItem('zv_src')||'{}'); }catch(e){}
+    var qs=new URLSearchParams(location.search);
+    SRC.forEach(function(k){ var v=qs.get(k); if(v) store[k]=v; });
+    if(qs.get('pakket')) store.pakket_intent=qs.get('pakket');
+    try{ sessionStorage.setItem('zv_src',JSON.stringify(store)); }catch(e){}
+    var out={}; SRC.forEach(function(k){ out[k]=store[k]||''; });
+    out.pakket_intent=store.pakket_intent||'';
+    out.landing_page=location.pathname+location.search; out.referrer=document.referrer;
+    return out;
+  }
+  captureSource();
+
+  function modeChip(h,mode){
+    var l=state.lines[h.k], on=l&&l.mode===mode;
+    var price=euro(mode==='koop'?h.koop:h.huur);
+    var lab=mode==='koop'?'Kopen':'Huren', unit=mode==='koop'?'eenmalig':'per maand';
+    return '<button type="button" class="modechip '+mode+(on?' on':'')+'" data-mode="'+mode+'"><span class="ml">'+lab+'</span><span class="mp">'+price+'</span><span class="mu">'+unit+'</span></button>';
+  }
+  function renderRows(){
+    var rows=document.getElementById('rows'); rows.innerHTML='';
+    HW.forEach(function(h){
+      var l=state.lines[h.k], q=l?l.qty:0, hasMode=!!(l&&l.mode);
+      var chosen=hasMode?'<span class="hw-chosen">Gekozen: '+(l.mode==='koop'?'Kopen · eenmalig':'Huren · maandelijks')+' &middot; '+h.sku+'</span>':'';
+      var el=document.createElement('div'); el.className='hw'+(q>0?' has':''); el.setAttribute('data-k',h.k);
+      el.innerHTML=
+        '<div class="hw-main"><div class="hw-name">'+h.n+'</div>'+chosen+'</div>'+
+        '<div class="hw-modes">'+modeChip(h,'koop')+modeChip(h,'huur')+'</div>'+
+        '<div class="stepper"><button type="button" data-d="-1"'+(q===0?' disabled':'')+'>−</button><span class="q">'+q+'</span><button type="button" data-d="1"'+(hasMode?'':' disabled')+'>+</button></div>';
+      rows.appendChild(el);
+    });
+  }
+  document.getElementById('rows').addEventListener('click',function(e){
+    var chip=e.target.closest('.modechip');
+    if(chip){
+      var k=chip.closest('.hw').getAttribute('data-k'), m=chip.getAttribute('data-mode');
+      var l=state.lines[k]||{mode:null,qty:0}; l.mode=m; if(l.qty<1) l.qty=1; state.lines[k]=l;
+      renderRows(); renderSummary(); return;
+    }
+    var btn=e.target.closest('button[data-d]'); if(!btn) return;
+    var k=btn.closest('.hw').getAttribute('data-k'), l=state.lines[k], d=parseInt(btn.getAttribute('data-d'),10);
+    if(d>0 && (!l||!l.mode)) return;
+    l=l||{mode:null,qty:0}; l.qty+=d;
+    if(l.qty<=0) delete state.lines[k]; else state.lines[k]=l;
+    renderRows(); renderSummary();
+  });
+
+  function renderSummary(){
+    var list=document.getElementById('sumList'), keys=Object.keys(state.lines);
+    list.innerHTML='';
+    var cams=0, koop=0, huur=0;
+    keys.forEach(function(k){
+      var h=HW.find(function(x){return x.k===k;}); var l=state.lines[k], q=l.qty;
+      if(h.type!=='Recorder') cams+=q;
+      var isKoop=l.mode==='koop', unit=isKoop?h.koop:h.huur, line=unit*q;
+      if(isKoop) koop+=line; else huur+=line;
+      list.insertAdjacentHTML('beforeend','<div class="sl"><span><span class="q">'+q+'×</span> '+h.n+' <em style="color:'+(isKoop?'var(--belt)':'var(--indigo-2)')+';font-style:normal;font-weight:800">('+(isKoop?'Kopen':'Huren')+')</em></span><span class="v">'+euro(line)+(isKoop?'':'/m')+'</span></div>');
+    });
+    document.getElementById('camCount').textContent=cams;
+    document.getElementById('sumEmpty').style.display=keys.length?'none':'block';
+    document.getElementById('sumBtn').disabled=!keys.length;
+    var tot=document.getElementById('sumTot');
+    if(!keys.length){ tot.innerHTML=''; return; }
+    tot.innerHTML=
+      '<div class="tr big"><span>Totaal eenmalig</span><span class="accent" style="color:var(--belt)">'+euro(koop)+'</span></div>'+
+      '<div class="tr muted"><span>Vandaag via iDEAL / creditcard</span></div>'+
+      '<div class="tr big" style="margin-top:8px"><span>Totaal per maand</span><span class="accent">'+euro(huur)+'</span></div>'+
+      '<div class="tr muted"><span>Maandelijks via SEPA-incasso</span></div>';
+  }
+
+  document.getElementById('sumBtn').addEventListener('click',function(){
+    var keys=Object.keys(state.lines); if(!keys.length) return;
+    var lines=keys.map(function(k){
+      var h=HW.find(function(x){return x.k===k;}); var l=state.lines[k], isKoop=l.mode==='koop';
+      return { sku:h.sku, key:k, name:h.n, type:h.type, mode:isKoop?'Kopen':'Huren',
+        bucket:isKoop?'Eenmalig':'Maandelijks', unit:isKoop?h.koop:h.huur, qty:l.qty };
+    });
+    var payload={ lines:lines, source:captureSource() };
+    try{ localStorage.setItem('zv_addons_intake', JSON.stringify(payload)); }catch(e){}
+    window.location.href='tel:0881221111';
+  });
+
+  document.getElementById('camContact').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name=document.getElementById('ccName').value.trim();
+    var phone=document.getElementById('ccPhone').value.trim();
+    var email=document.getElementById('ccEmail').value.trim();
+    var err=document.getElementById('ccErr');
+    if(!name || !phone){ err.textContent='Vul uw naam en telefoonnummer in.'; err.style.display='block'; return; }
+    err.style.display='none';
+    var payload={ lead_type:'camera-hardware', name:name, phone:phone, email:email||null,
+      cta_location:'camera_hardware_page', source:captureSource() };
+    if (window.ZV_LEAD_ENDPOINT) {
+      fetch(window.ZV_LEAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }).catch(function(){});
+    }
+    try{ var leads=JSON.parse(localStorage.getItem('zv_leads')||'[]'); leads.push(payload); localStorage.setItem('zv_leads', JSON.stringify(leads)); }catch(ex){}
+    document.getElementById('camContact').style.display='none';
+    document.getElementById('ccDone').style.display='flex';
+  });
+
+  renderRows(); renderSummary();
+})();
+</script>
+
+{% stylesheet %}
+.zv-camera {
+  --ink:#1a1230; --indigo:#322469; --indigo-2:#473a86; --indigo-soft:#efecf7;
+  --cream:#fdfaf2; --paper:#fffdf8; --sand:#efe9d6; --sand-2:#e6dfca;
+  --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a;
+  --rood:#c52e2f; --red:#e24b4a; --ok:#2f8f5b;
+  --line:#e8e0cd; --line-2:#ded6c0; --muted:#6f6786; --muted-2:#8c84a6;
+  color:var(--ink); line-height:1.5; background:linear-gradient(180deg,#fbf5e9,#f4ecda);
+}
+.zv-camera .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(20px,3.4vw,48px); }
+.zv-camera .topbar { background:var(--paper); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.zv-camera .topbar .wrap { display:flex; align-items:center; gap:9px; padding-top:13px; padding-bottom:13px; }
+.zv-camera .crumb { font-size:13px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.zv-camera .crumb a { color:var(--indigo); font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+.zv-camera .crumb a svg { width:15px; height:15px; }
+.zv-camera .crumb .sep { color:var(--line-2); }
+.zv-camera .crumb b { color:var(--indigo); font-weight:800; }
+.zv-camera .lede { padding:clamp(30px,4vw,50px) 0 6px; }
+.zv-camera .eyebrow { font-size:12px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--red); }
+.zv-camera .lede h1 { font-size:clamp(30px,4.2vw,46px); font-weight:900; letter-spacing:-.02em; line-height:1.03; color:var(--indigo); margin-top:10px; }
+.zv-camera .lede p { font-size:16.5px; font-weight:600; color:var(--muted); margin-top:12px; max-width:640px; line-height:1.5; }
+.zv-camera .shop { display:grid; grid-template-columns:1fr 340px; gap:26px; padding:clamp(28px,3.4vw,44px) 0 80px; align-items:start; }
+@media(max-width:920px){ .zv-camera .shop { grid-template-columns:1fr; } }
+.zv-camera .cat-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+.zv-camera .step-n { width:30px; height:30px; border-radius:50%; background:var(--indigo); color:#fff; font-size:14px; font-weight:900; display:grid; place-items:center; flex:none; }
+.zv-camera .cat-head h2 { font-size:clamp(19px,2.2vw,25px); font-weight:900; color:var(--indigo); letter-spacing:-.015em; }
+.zv-camera .cat-hint { margin-left:auto; font-size:12.5px; font-weight:700; color:var(--muted); display:inline-flex; align-items:center; gap:7px; }
+.zv-camera .cat-hint svg { width:15px; height:15px; color:var(--belt); }
+@media(max-width:680px){ .zv-camera .cat-hint { margin-left:0; } }
+.zv-camera .hw-modes { display:flex; gap:8px; }
+.zv-camera .modechip { display:flex; flex-direction:column; align-items:flex-start; gap:1px; border:1.5px solid var(--line-2); background:#fff; border-radius:11px; padding:7px 13px; min-width:106px; text-align:left; transition:border-color .14s,background .14s,box-shadow .14s; }
+.zv-camera .modechip:hover { border-color:#c9bda0; }
+.zv-camera .modechip .ml { font-size:10.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); }
+.zv-camera .modechip .mp { font-size:15px; font-weight:900; color:var(--ink); line-height:1.1; }
+.zv-camera .modechip .mu { font-size:10.5px; font-weight:700; color:var(--muted); }
+.zv-camera .modechip.on { border-color:var(--indigo); background:var(--indigo-soft); box-shadow:0 8px 20px -14px rgba(50,36,105,.7); }
+.zv-camera .modechip.on .ml { color:var(--indigo); }
+.zv-camera .modechip.on .mp { color:var(--indigo); }
+.zv-camera .modechip.koop.on { border-color:var(--belt); background:#fbf1e0; }
+.zv-camera .modechip.koop.on .ml, .zv-camera .modechip.koop.on .mp { color:var(--belt); }
+.zv-camera .rows { display:flex; flex-direction:column; gap:10px; }
+.zv-camera .hw { display:grid; grid-template-columns:1fr auto auto; gap:16px; align-items:center; background:var(--paper); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; transition:border-color .14s,box-shadow .14s; }
+.zv-camera .hw.has { border-color:var(--indigo); box-shadow:0 10px 26px -18px rgba(50,36,105,.6); }
+.zv-camera .hw .hw-main { min-width:0; }
+.zv-camera .hw .hw-name { font-size:15px; font-weight:800; color:var(--ink); line-height:1.2; }
+.zv-camera .hw .hw-chosen { display:block; margin-top:7px; font-size:11px; font-weight:800; color:var(--ok); }
+.zv-camera .stepper { display:inline-flex; align-items:center; border:1.5px solid var(--line-2); border-radius:11px; overflow:hidden; background:#fff; }
+.zv-camera .stepper button { width:38px; height:40px; border:none; background:#fff; color:var(--indigo); font-size:20px; font-weight:800; line-height:1; display:grid; place-items:center; }
+.zv-camera .stepper button:disabled { color:var(--line-2); cursor:default; }
+.zv-camera .stepper button:hover:not(:disabled) { background:var(--indigo-soft); }
+.zv-camera .stepper .q { min-width:34px; text-align:center; font-size:15px; font-weight:900; color:var(--ink); }
+@media(max-width:680px){ .zv-camera .hw { grid-template-columns:1fr; } .zv-camera .hw-modes { flex-wrap:wrap; } .zv-camera .stepper { justify-self:start; } }
+.zv-camera .adv-note { margin-top:18px; display:flex; align-items:flex-start; gap:12px; background:var(--indigo-soft); border:1px solid #ddd5f0; border-radius:14px; padding:14px 16px; max-width:760px; }
+.zv-camera .adv-note svg { width:20px; height:20px; color:var(--indigo); flex:none; margin-top:1px; }
+.zv-camera .adv-note p { font-size:13.5px; font-weight:600; color:#3a3550; line-height:1.5; margin:0; }
+.zv-camera .adv-actions { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.zv-camera .adv-actions a { font-size:12.5px; font-weight:800; color:var(--indigo); border:1.5px solid var(--indigo); border-radius:999px; padding:7px 14px; text-decoration:none; }
+.zv-camera .summary { position:sticky; top:16px; background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:0 26px 56px -42px rgba(26,18,48,.5); }
+.zv-camera .summary h3 { font-size:17px; font-weight:900; color:var(--indigo); }
+.zv-camera .sum-cams { display:flex; align-items:center; gap:10px; margin-top:14px; background:var(--cream); border:1px solid var(--line-2); border-radius:13px; padding:12px 14px; }
+.zv-camera .sum-cams .ci { width:34px; height:34px; border-radius:10px; background:#fff; display:grid; place-items:center; flex:none; box-shadow:inset 0 0 0 1px var(--line-2); }
+.zv-camera .sum-cams .ci svg { width:19px; height:19px; color:var(--indigo); }
+.zv-camera .sum-cams b { font-size:21px; font-weight:900; color:var(--ink); line-height:1; }
+.zv-camera .sum-cams span { font-size:12px; font-weight:700; color:var(--muted); display:block; margin-top:2px; }
+.zv-camera .sum-list { margin-top:14px; display:flex; flex-direction:column; gap:8px; max-height:200px; overflow:auto; }
+.zv-camera .sum-list .sl { display:flex; justify-content:space-between; gap:10px; font-size:13px; font-weight:600; color:#3a3550; }
+.zv-camera .sum-list .sl .q { color:var(--muted); font-weight:800; }
+.zv-camera .sum-list .sl .v { font-weight:800; white-space:nowrap; }
+.zv-camera .sum-empty { font-size:13px; font-weight:600; color:var(--muted-2); margin-top:14px; line-height:1.5; }
+.zv-camera .sum-tot { border-top:1.5px solid var(--line); margin-top:14px; padding-top:14px; display:flex; flex-direction:column; gap:7px; }
+.zv-camera .sum-tot .tr { display:flex; justify-content:space-between; font-size:13.5px; font-weight:700; color:#3a3550; }
+.zv-camera .sum-tot .tr.big { font-size:17px; font-weight:900; color:var(--ink); }
+.zv-camera .sum-tot .tr.big .accent { color:var(--indigo); }
+.zv-camera .sum-tot .muted { font-size:12px; font-weight:600; color:var(--muted-2); }
+.zv-camera .sumbtn { margin-top:16px; width:100%; font-weight:800; font-size:15.5px; border:none; border-radius:13px; padding:15px; display:inline-flex; align-items:center; justify-content:center; gap:9px; background:var(--gold); color:var(--ink); box-shadow:0 2px 0 var(--belt); transition:transform .14s,box-shadow .14s; cursor:pointer; }
+.zv-camera .sumbtn:hover { transform:translateY(-1px); box-shadow:0 4px 0 var(--belt),0 12px 24px -12px rgba(180,126,10,.7); }
+.zv-camera .sumbtn:disabled { background:var(--sand); color:var(--muted-2); box-shadow:none; cursor:default; transform:none; }
+.zv-camera .sumbtn svg { width:18px; height:18px; }
+.zv-camera .sum-note { display:flex; align-items:center; gap:8px; justify-content:center; font-size:12px; font-weight:700; color:var(--muted); margin-top:11px; text-align:center; }
+.zv-camera .sum-note svg { width:14px; height:14px; color:var(--ok); flex:none; }
+.zv-camera .cam-contact { margin-top:20px; padding-top:18px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:9px; }
+.zv-camera .cam-contact-h { font-size:13px; font-weight:800; color:var(--indigo); margin-bottom:2px; }
+.zv-camera .cam-contact input { font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink); border:1.5px solid var(--line); border-radius:8px; padding:11px 12px; background:#fff; }
+.zv-camera .cam-contact button { font-family:inherit; font-size:14px; font-weight:800; color:#fff; background:var(--indigo); border:none; border-radius:8px; padding:12px 16px; cursor:pointer; }
+.zv-camera .cam-contact-err { font-size:12px; font-weight:700; color:var(--red); display:none; }
+.zv-camera .cam-contact-done { display:none; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#2f8f5b; }
+.zv-camera .cam-contact-done svg { width:16px; height:16px; flex:none; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Camerahardware",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Mijn huis · camerahardware" },
+    { "type": "text", "id": "title", "label": "Titel", "default": "Voeg camera's toe aan uw huis" },
+    { "type": "textarea", "id": "lead", "label": "Lead" }
+  ],
+  "presets": [{ "name": "Camerahardware" }]
+}
+{% endschema %}
