@@ -177,7 +177,7 @@
     var err=document.getElementById('ccErr');
     if(!name || !phone){ err.textContent='Vul uw naam en telefoonnummer in.'; err.style.display='block'; return; }
     err.style.display='none';
-    var payload={ lead_type:'camera-hardware', name:name, phone:phone, email:email||null,
+    var payload={ lead_type:'vista', source_page:'camera-hardware', name:name, phone:phone, email:email||null,
       cta_location:'camera_hardware_page', source:captureSource() };
     if (window.ZV_LEAD_ENDPOINT) {
       fetch(window.ZV_LEAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }).catch(function(){});
