@@ -117,6 +117,8 @@
                 Confirmed amounts must live only in pricing.config.json / snippets/zv-pricing.liquid (CI check #9 enforces this).
               {%- endcomment -%}
               {%- assign price_known = false -%}{%- if p.price and p.price > 0 -%}{%- assign price_known = true -%}{%- endif -%}
+              {%- comment -%} Vista (MT-VIS / secure_plus) is callout-only (maatwerk): geen vaste prijs, geen koop-accordions, alleen de VISTA Lead callback. {%- endcomment -%}
+              {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                        data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
@@ -127,7 +129,7 @@
                 {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
                 <div class="pcard__foot">
                   <div class="pcard__price">
-                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
                   </div>
                   {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
                   {%- if v.sku != blank -%}<div class="pcard__sku">SKU · {{ v.sku }}</div>{%- endif -%}
