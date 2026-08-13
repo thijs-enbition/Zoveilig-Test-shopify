@@ -51,11 +51,13 @@
   <section class="hero" data-section-id="{{ section.id }}">
     <div class="hero-media">
       <div class="hero-video-slot{% unless hero.dark_overlay %} no-overlay{% endunless %}">
-        {%- if hero.background_video != blank -%}
-          {%- comment -%} Canonical Shopify renderer: builds <video> with correct <source> tags from the metaobject video's sources. {%- endcomment -%}
-          {{ hero.background_video | video_tag: image_size: '1920x', autoplay: true, loop: true, muted: true, controls: false, preload: 'auto' }}
-        {%- elsif hero.background_image != blank -%}
-          {{ hero.background_image | image_url: width: 1600 | image_tag: class: 'hero-video', alt: '', aria-hidden: 'true', loading: 'eager' }}
+        {%- comment -%} Metaobject fields are MetafieldDrops -> use .value to reach the actual video/image media. {%- endcomment -%}
+        {%- assign hero_video = hero.background_video.value -%}
+        {%- assign hero_image = hero.background_image.value -%}
+        {%- if hero_video != blank -%}
+          {{ hero_video | video_tag: image_size: '1920x', autoplay: true, loop: true, muted: true, controls: false, preload: 'auto' }}
+        {%- elsif hero_image != blank -%}
+          {{ hero_image | image_url: width: 1600 | image_tag: class: 'hero-video', alt: '', aria-hidden: 'true', loading: 'eager' }}
         {%- endif -%}
       </div>
 
