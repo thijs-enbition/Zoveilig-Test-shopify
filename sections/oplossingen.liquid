@@ -83,16 +83,32 @@
         </div>
       </section>
 
-      <section class="pak" data-section-name="{{ anchor }}">
+      {%- assign is_coming_soon = false -%}{%- if b.settings.eyebrow contains 'Onderweg' -%}{%- assign is_coming_soon = true -%}{%- endif -%}
+      <section class="pak{% if is_coming_soon %} cs{% endif %}" data-section-name="{{ anchor }}">
         <div class="pak__head">
           <div class="pak__head-row">
-            {%- if b.settings.pak_heading != blank -%}<h3>{{ b.settings.pak_heading }}</h3>{%- endif -%}
-            <a class="compare" href="{{ b.settings.compare_url | default: '/#keuzehulp' }}" data-zv-event="compare_packages" data-solution-type="{{ anchor }}" data-cta-name="niet_zeker" data-cta-position="{{ anchor }}_paks" data-zv-finder>{{ b.settings.compare_label | default: 'Niet zeker welk niveau bij u past?' }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            {%- if is_coming_soon -%}<h3>Binnenkort beschikbaar</h3>{%- elsif b.settings.pak_heading != blank -%}<h3>{{ b.settings.pak_heading }}</h3>{%- endif -%}
+            {%- unless is_coming_soon -%}<a class="compare" href="{{ b.settings.compare_url | default: '/#keuzehulp' }}" data-zv-event="compare_packages" data-solution-type="{{ anchor }}" data-cta-name="niet_zeker" data-cta-position="{{ anchor }}_paks" data-zv-finder>{{ b.settings.compare_label | default: 'Niet zeker welk niveau bij u past?' }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>{%- endunless -%}
           </div>
           {%- if b.settings.pak_sub != blank -%}<p class="ph-sub">{{ b.settings.pak_sub }}</p>{%- endif -%}
         </div>
 
-        {%- if coll and coll.products.size > 0 -%}
+        {%- if is_coming_soon -%}
+          <div class="cs-wrap">
+            <div class="cs-copy"><p>Veilig Onderweg wordt een persoonlijk alarm voor onderweg en thuis: één druk op de knop of automatische valdetectie verbindt u met de meldkamer. We werken de precieze specificaties en prijzen nog uit.</p></div>
+            <div class="cs-formbox">
+              <b>Blijf op de hoogte</b>
+              <form class="cs-form" data-cs-form>
+                <label>E-mailadres<input type="email" name="email" placeholder="uw@email.nl" required></label>
+                <label>Telefoonnummer<input type="tel" name="phone" placeholder="06 12345678" required></label>
+                <label class="cs-check"><input type="checkbox" name="consent"><span>Ik ga akkoord met het <a href="{% render 'zv-route', key: 'privacyverklaring' %}" target="_blank" rel="noopener">privacybeleid</a>.</span></label>
+                <div class="cs-err" data-cs-err hidden></div>
+                <button type="submit" class="btn btn--gold">Laat uw gegevens achter</button>
+              </form>
+              <div class="cs-done" data-cs-done hidden><span class="cs-done-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Bedankt.</b> We nemen contact met u op zodra er meer bekend is.</div>
+            </div>
+          </div>
+        {%- elsif coll and coll.products.size > 0 -%}
           <div class="pgrid" data-n="{{ coll.products.size }}">
             {%- for p in coll.products -%}
               {%- assign fk = p.metafields.custom.finder_key.value -%}
@@ -694,6 +710,23 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__err { color: var(--red-deep); font-size: 12.5px; font-weight: 700; margin-top: 6px; }
 
 @media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct, .why__link svg { transition: none; } .pb-scrim, .pb-panel, .addcart__scrim, .addcart__panel { animation: none; } }
+/* Veilig Onderweg: 'Binnenkort beschikbaar' coming-soon block (1:1 Brand 3 pages.jsx) */
+.cs-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,3vw,44px);align-items:start;margin-top:8px;}
+@media(max-width:860px){.cs-wrap{grid-template-columns:1fr;}}
+.cs-copy p{font-size:16px;font-weight:500;color:#463f5c;line-height:1.6;max-width:52ch;}
+.cs-formbox{background:#fffdf8;border:1px solid #e7e0cf;border-radius:18px;padding:clamp(22px,2.4vw,30px);box-shadow:0 24px 54px -44px rgba(26,18,48,.5);}
+.cs-formbox>b{display:block;font-size:15px;font-weight:900;color:#322469;margin-bottom:12px;}
+.cs-form{display:flex;flex-direction:column;gap:12px;}
+.cs-form label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:800;color:#1a1230;}
+.cs-form input[type=email],.cs-form input[type=tel]{background:#fdfaf2;border:1.5px solid #ddd4c0;border-radius:10px;padding:12px 14px;font:inherit;font-size:15px;font-weight:600;color:#1a1230;}
+.cs-form input:focus{outline:none;border-color:#322469;background:#fff;}
+.cs-check{flex-direction:row;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:#5b5374;}
+.cs-check input{width:16px;height:16px;flex:none;margin-top:1px;accent-color:#322469;}
+.cs-check a{color:#322469;font-weight:800;}
+.cs-err{font-size:12px;font-weight:700;color:#e24b4a;}
+.cs-form .btn--gold{justify-content:center;margin-top:4px;}
+.cs-done{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:700;color:#2f8f5b;}
+.cs-done-ic svg{width:20px;height:20px;flex:none;}
 /* Vista: callout-only VISTA Lead callback form (1:1 with Brand 3 pages.jsx) */
 .pcard__vista{display:flex;flex-direction:column;gap:10px;}
 .pcard__vista-more{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:800;color:#322469;text-decoration:none;padding:6px 4px;}
@@ -1262,6 +1295,33 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (DATA.pkg[fk]) openModal(panels[anchor], fk);     // open its Meer informatie modal
   }
   openPackageFromUrl();
+})();
+/* ---- Veilig Onderweg 'Binnenkort beschikbaar' lead form (posts to window.ZV_LEAD_ENDPOINT) ---- */
+(function () {
+  function submitLead(payload) {
+    var rec = Object.assign({ ts: Date.now() }, payload);
+    if (window.ZV_LEAD_ENDPOINT) { try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rec) }).catch(function () {}); } catch (e) {} }
+    try { var L = JSON.parse(localStorage.getItem('zv_leads') || '[]'); L.push(rec); localStorage.setItem('zv_leads', JSON.stringify(L)); } catch (e) {}
+  }
+  function init() {
+    document.querySelectorAll('[data-cs-form]').forEach(function (form) {
+      if (form.dataset.bound) return; form.dataset.bound = '1';
+      var err = form.querySelector('[data-cs-err]'), box = form.closest('.cs-formbox'), done = box && box.querySelector('[data-cs-done]');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = ((form.querySelector('[name=email]') || {}).value || '').trim();
+        var phone = ((form.querySelector('[name=phone]') || {}).value || '').trim();
+        var consent = !!(form.querySelector('[name=consent]') || {}).checked;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Vul een geldig e-mailadres in.'; err.hidden = false; return; }
+        if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
+        if (!consent) { err.textContent = 'Ga akkoord met het privacybeleid om verder te gaan.'; err.hidden = false; return; }
+        err.hidden = true;
+        submitLead({ lead_type: 'coming-soon-onderweg', email: email, phone: phone, consent: consent, cta_location: 'coming_soon_onderweg' });
+        form.style.display = 'none'; if (done) done.hidden = false;
+      });
+    });
+  }
+  if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init);
 })();
 /* ---- Vista: callout-only VISTA Lead callback (posts to window.ZV_LEAD_ENDPOINT / Odoo CRM) ---- */
 (function () {
