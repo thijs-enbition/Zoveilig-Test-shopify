@@ -61,9 +61,9 @@
       <div class="cs-grid">
         <div class="cs-copy">
           {%- if settings.logo_white != blank -%}
-            <img class="cs-logo" src="{{ settings.logo_white | image_url: width: 240 }}" alt="Zo Veilig">
+            <img class="cs-logo" src="{{ settings.logo_white | image_url: width: 240 }}" alt="Zo Veilig" width="120" height="40">
           {%- elsif settings.logo != blank -%}
-            <img class="cs-logo" src="{{ settings.logo | image_url: width: 240 }}" alt="Zo Veilig">
+            <img class="cs-logo" src="{{ settings.logo | image_url: width: 240 }}" alt="Zo Veilig" width="120" height="40">
           {%- endif -%}
           <span class="eyebrow">Binnenkort online</span>
           <h1>Langer veilig thuis. Bijna live.</h1>
@@ -98,7 +98,7 @@
         </div>
         <div class="cs-visual">
           {%- if settings.binnenkort_image != blank -%}
-            <img src="{{ settings.binnenkort_image | image_url: width: 900 }}" alt="Zo Veilig" loading="lazy">
+            <img src="{{ settings.binnenkort_image | image_url: width: 900 }}" alt="Zo Veilig" width="900" height="1125" loading="lazy">
           {%- else -%}
             <div class="ph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9l8-5 8 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Lifestyle / product<br>fotoslot</span></div>
           {%- endif -%}
