@@ -159,6 +159,7 @@
                       {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
                       <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
                         <button type="button" class="btn btn--gold" data-vista-open data-zv-event="vista_lead_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="bel_mij_terug_vista" data-cta-position="{{ anchor }}_paks">Bel mij terug over Vista<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                         <form class="pcard__vista-form" data-vista-form hidden>
                           <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
                           <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
@@ -695,6 +696,10 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 @media (prefers-reduced-motion: reduce) { .catnav__t, .vhero__cta a, .pcard, .pcard__direct, .why__link svg { transition: none; } .pb-scrim, .pb-panel, .addcart__scrim, .addcart__panel { animation: none; } }
 /* Vista: callout-only VISTA Lead callback form (1:1 with Brand 3 pages.jsx) */
 .pcard__vista{display:flex;flex-direction:column;gap:10px;}
+.pcard__vista-more{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:800;color:#322469;text-decoration:none;padding:6px 4px;}
+.pcard__vista-more svg{width:15px;height:15px;transition:transform .15s;}
+.pcard__vista-more:hover{color:#b67e0a;}
+.pcard__vista-more:hover svg{transform:translateX(3px);}
 .pcard__vista-form{display:flex;flex-direction:column;gap:9px;}
 .pcard__vista-form input{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a1230;border:1.5px solid #e8e0cd;border-radius:6px;padding:11px 12px;background:#fff;}
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
