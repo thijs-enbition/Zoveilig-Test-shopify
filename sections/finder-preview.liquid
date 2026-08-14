@@ -200,11 +200,11 @@
     { "type": "textarea", "id": "text", "label": "Tekst", "default": "Lio stelt u een paar korte vragen en zoekt de ondersteuning die past bij uw situatie." },
     { "type": "header", "content": "Keuzehulp-kaart" },
     { "type": "text", "id": "card_eyebrow", "label": "Kaart-label", "default": "Zo Veilig Keuzehulp" },
-    { "type": "text", "id": "card_sub", "label": "Kaart-subtekst", "default": "In 4 korte vragen naar het juiste pad" },
-    { "type": "range", "id": "total_steps", "label": "Aantal stappen", "min": 2, "max": 6, "step": 1, "default": 4 },
-    { "type": "text", "id": "step_label", "label": "Stap-label", "default": "Vraag 1 · Stap 1 van 4" },
-    { "type": "text", "id": "question", "label": "Vraag", "default": "Voor wie zoekt u ondersteuning?" },
-    { "type": "text", "id": "question_sub", "label": "Vraag-subtekst", "default": "Zo stemmen we het advies af op de juiste persoon." },
+    { "type": "text", "id": "card_sub", "label": "Kaart-subtekst", "default": "In 3 korte vragen naar het juiste pad" },
+    { "type": "range", "id": "total_steps", "label": "Aantal stappen", "min": 2, "max": 6, "step": 1, "default": 3 },
+    { "type": "text", "id": "step_label", "label": "Stap-label", "default": "Vraag 1 · Stap 1 van 3" },
+    { "type": "text", "id": "question", "label": "Vraag", "default": "Waar wilt u vooral meer zekerheid over?" },
+    { "type": "text", "id": "question_sub", "label": "Vraag-subtekst" },
     { "type": "text", "id": "footer_text", "label": "Voettekst", "default": "Kies een antwoord om verder te gaan" },
     { "type": "url", "id": "finder_url", "label": "Fallback-link (als een pakket geen product heeft)" },
     { "type": "collection", "id": "collection", "label": "Pakketten-collectie", "info": "Standaard: keuzehulp-pakketten. Producten met een custom.finder_key metafield." }
@@ -224,11 +224,9 @@
     {
       "name": "Keuzehulp preview",
       "blocks": [
-        { "type": "option", "settings": { "label": "Voor mezelf" } },
-        { "type": "option", "settings": { "label": "Voor mijn ouder(s)" } },
-        { "type": "option", "settings": { "label": "Voor mijn partner" } },
-        { "type": "option", "settings": { "label": "Voor een ander familielid" } },
-        { "type": "option", "settings": { "label": "Voor iemand voor wie ik zorg" } }
+        { "type": "option", "settings": { "label": "Dat alles thuis volgens het normale ritme verloopt" } },
+        { "type": "option", "settings": { "label": "Bescherming tegen inbraak, brand of gevaar in mijn woning" } },
+        { "type": "option", "settings": { "label": "Snel hulp kunnen inschakelen, thuis én onderweg" } }
       ]
     }
   ]

@@ -6,50 +6,55 @@
   {%- else -%}
     {%- assign kc_hero_url = 'kc-hero.jpg' | asset_url -%}
   {%- endif -%}
-  <section class="kc-hero" style="--kc-hero-img: url('{{ kc_hero_url }}');">
+  <section class="kc-hero">
     <div class="wrap">
-      {%- if section.settings.eyebrow != blank -%}
-        <span class="eyebrow">{{ section.settings.eyebrow | escape }}</span>
-      {%- endif -%}
-
-      {%- if section.settings.heading != blank -%}
-        <h1>{{ section.settings.heading | escape }}</h1>
-      {%- endif -%}
-
-      {%- if section.settings.sub != blank -%}
-        <p class="sub">{{ section.settings.sub | escape }}</p>
-      {%- endif -%}
-
-      {%- assign chips = section.blocks | where: 'type', 'chip' -%}
-      {%- if chips.size > 0 -%}
-        <div class="kc-chips">
-          {%- if section.settings.chips_label != blank -%}
-            <span class="lbl">{{ section.settings.chips_label | escape }}</span>
+      <div class="kc-hero-stage">
+        <div class="kc-hero-media" style="--kc-hero-img: url('{{ kc_hero_url }}');"></div>
+        <div class="kc-hero-card">
+          {%- if section.settings.eyebrow != blank -%}
+            <span class="eyebrow">{{ section.settings.eyebrow | escape }}</span>
           {%- endif -%}
-          {%- for block in chips -%}
-            <a
-              href="{{ block.settings.link | default: '#' }}"
-              data-zv-event="kc_topic_click"
-              data-zv-label="{{ block.settings.label | escape }}"
-              {{ block.shopify_attributes }}
-            >
-              {{- block.settings.label | escape -}}
-            </a>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
 
-      {%- assign stats = section.blocks | where: 'type', 'stat' -%}
-      {%- if stats.size > 0 -%}
-        <div class="kc-hero-stats">
-          {%- for block in stats -%}
-            <div class="s" {{ block.shopify_attributes }}>
-              <b>{{ block.settings.value | escape }}</b>
-              <span>{{ block.settings.label | escape }}</span>
+          {%- if section.settings.heading != blank -%}
+            <h1>{{ section.settings.heading | escape }}</h1>
+          {%- endif -%}
+
+          {%- if section.settings.sub != blank -%}
+            <p class="sub">{{ section.settings.sub | escape }}</p>
+          {%- endif -%}
+
+          {%- assign chips = section.blocks | where: 'type', 'chip' -%}
+          {%- if chips.size > 0 -%}
+            <div class="kc-chips">
+              {%- if section.settings.chips_label != blank -%}
+                <span class="lbl">{{ section.settings.chips_label | escape }}</span>
+              {%- endif -%}
+              {%- for block in chips -%}
+                <a
+                  href="{{ block.settings.link | default: '#' }}"
+                  data-zv-event="kc_topic_click"
+                  data-zv-label="{{ block.settings.label | escape }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {{- block.settings.label | escape -}}
+                </a>
+              {%- endfor -%}
             </div>
-          {%- endfor -%}
+          {%- endif -%}
+
+          {%- assign stats = section.blocks | where: 'type', 'stat' -%}
+          {%- if stats.size > 0 -%}
+            <div class="kc-hero-stats">
+              {%- for block in stats -%}
+                <div class="s" {{ block.shopify_attributes }}>
+                  <b>{{ block.settings.value | escape }}</b>
+                  <span>{{ block.settings.label | escape }}</span>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
         </div>
-      {%- endif -%}
+      </div>
     </div>
   </section>
 </div>

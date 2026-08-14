@@ -30,13 +30,11 @@
     "finder_cta": {
       "type": "finder-preview",
       "blocks": {
-        "o1": { "type": "option", "settings": { "label": "Voor mezelf" } },
-        "o2": { "type": "option", "settings": { "label": "Voor mijn ouder(s)" } },
-        "o3": { "type": "option", "settings": { "label": "Voor mijn partner" } },
-        "o4": { "type": "option", "settings": { "label": "Voor een ander familielid" } },
-        "o5": { "type": "option", "settings": { "label": "Voor iemand voor wie ik zorg" } }
+        "o1": { "type": "option", "settings": { "label": "Dat alles thuis volgens het normale ritme verloopt" } },
+        "o2": { "type": "option", "settings": { "label": "Bescherming tegen inbraak, brand of gevaar in mijn woning" } },
+        "o3": { "type": "option", "settings": { "label": "Snel hulp kunnen inschakelen, thuis én onderweg" } }
       },
-      "block_order": ["o1", "o2", "o3", "o4", "o5"],
+      "block_order": ["o1", "o2", "o3"],
       "settings": {}
     },
     "story": {

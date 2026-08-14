@@ -111,109 +111,130 @@
 /* ============================================================
    HERO
    ============================================================ */
+/* Brand 3 KC hero: cream floating card overhanging a rounded photo (matches design). */
 .zv-kc .kc-hero {
   position: relative;
-  overflow: hidden;
-  color: #fff;
-  background: #281c54;
-  display: flex;
-  align-items: center;
-  min-height: clamp(360px, 42vw, 560px);
-}
-.zv-kc .kc-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: var(--kc-hero-img, none) center 28% / cover no-repeat;
-}
-.zv-kc .kc-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(
-      95deg,
-      rgba(26, 18, 48, 0.94) 0%,
-      rgba(26, 18, 48, 0.8) 28%,
-      rgba(26, 18, 48, 0.45) 50%,
-      rgba(26, 18, 48, 0.14) 70%,
-      rgba(26, 18, 48, 0.04) 100%
-    ),
-    linear-gradient(180deg, rgba(26, 18, 48, 0.14) 0%, rgba(26, 18, 48, 0) 32%, rgba(26, 18, 48, 0.4) 100%);
+  overflow: visible;
+  color: var(--ink);
+  background: var(--cream);
+  display: block;
+  height: clamp(440px, 44vw, 600px);
+  padding: clamp(10px, 1.4vw, 18px) 0 clamp(24px, 3vw, 40px);
 }
 .zv-kc .kc-hero .wrap {
   position: relative;
-  z-index: 1;
-  padding-top: clamp(48px, 6vw, 82px);
-  padding-bottom: clamp(48px, 6vw, 78px);
+  height: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3.4vw, 48px);
+}
+.zv-kc .kc-hero-stage {
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+.zv-kc .kc-hero-media {
+  display: block; /* override Dawn base.css `div:empty { display:none }` — this media div is intentionally empty */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #281c54 var(--kc-hero-img, none) center 28% / cover no-repeat;
+  box-shadow: 0 40px 90px -54px rgba(26, 18, 48, 0.6);
+}
+.zv-kc .kc-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(18, 12, 38, 0.5) 0%, transparent 26%, transparent 74%, rgba(18, 12, 38, 0.5) 100%);
+}
+.zv-kc .kc-hero-card {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 0 clamp(-64px, -4.5vw, -28px);
+  max-width: 440px;
+  background: rgba(253, 250, 242, 0.94);
+  border-radius: 6px;
+  padding: clamp(26px, 2.7vw, 38px);
+  box-shadow: 0 40px 80px -40px rgba(26, 18, 48, 0.6);
 }
 .zv-kc .kc-hero .eyebrow {
-  color: var(--gold-lt);
+  color: var(--belt);
 }
 .zv-kc .kc-hero h1 {
-  font-size: clamp(36px, 5.2vw, 62px);
+  font-size: clamp(24px, 2.4vw, 34px);
   font-weight: 900;
-  letter-spacing: -0.025em;
-  line-height: 1;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   margin-top: 14px;
-  max-width: 17ch;
+  max-width: none;
   text-wrap: balance;
-  color: #fff;
+  color: var(--indigo);
 }
 .zv-kc .kc-hero .sub {
-  font-size: clamp(16px, 1.7vw, 20px);
+  font-size: clamp(14.5px, 1.15vw, 16px);
   font-weight: 500;
-  color: #d7d0f0;
-  margin-top: 18px;
-  max-width: 60ch;
-  line-height: 1.5;
+  color: #5b5374;
+  margin-top: 14px;
+  max-width: 44ch;
+  line-height: 1.58;
 }
 .zv-kc .kc-chips {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 22px;
+  margin-top: 18px;
   align-items: center;
 }
 .zv-kc .kc-chips .lbl {
   font-size: 13px;
   font-weight: 700;
-  color: #bcb2e0;
+  color: var(--muted, #6b6484);
 }
 .zv-kc .kc-chips a {
   font-size: 13.5px;
   font-weight: 700;
-  color: #efeaff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--indigo);
+  background: var(--indigo-soft, #efecf7);
+  border: 1px solid var(--line-2, #e7e0cf);
   border-radius: 999px;
   padding: 7px 14px;
   text-decoration: none;
   transition: background 0.14s;
 }
 .zv-kc .kc-chips a:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: #e4dffb;
 }
 .zv-kc .kc-hero-stats {
   display: flex;
   gap: clamp(20px, 4vw, 52px);
   flex-wrap: wrap;
-  margin-top: 34px;
-  padding-top: 26px;
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line-2, #e7e0cf);
 }
 .zv-kc .kc-hero-stats .s b {
   display: block;
   font-size: clamp(24px, 2.6vw, 32px);
   font-weight: 900;
-  color: #fff;
+  color: var(--indigo);
   letter-spacing: -0.01em;
 }
 .zv-kc .kc-hero-stats .s span {
   font-size: 13px;
   font-weight: 600;
-  color: #bcb2e0;
+  color: #6b6484;
+}
+@media (max-width: 760px) {
+  .zv-kc .kc-hero { height: auto; min-height: 420px; }
+  .zv-kc .kc-hero-media { border-radius: 0; }
+  .zv-kc .kc-hero-card { margin: 0 16px; max-width: none; }
+  .zv-kc .kc-hero h1 { font-size: clamp(28px, 8vw, 40px); }
 }
 
 /* ============================================================
@@ -335,32 +356,15 @@
 /* ============================================================
    HERO (knowledge hub)
    ============================================================ */
-@media(max-width:720px){.kc-hero .wrap > *{max-width:none;}}
-.kc-hero{position:relative;overflow:hidden;color:#fff;background:#281c54;display:flex;align-items:center;min-height:clamp(360px,42vw,560px);}
-.kc-hero::before{content:"";position:absolute;inset:0;z-index:0;
-  background:url('../assets/hero/kenniscentrum-thuis.png') center 28% / cover no-repeat;}
-.kc-hero::after{content:"";position:absolute;inset:0;z-index:0;
-  background:linear-gradient(95deg,rgba(26,18,48,.94) 0%,rgba(26,18,48,.8) 28%,rgba(26,18,48,.45) 50%,rgba(26,18,48,.14) 70%,rgba(26,18,48,.04) 100%),linear-gradient(180deg,rgba(26,18,48,.14) 0%,rgba(26,18,48,0) 32%,rgba(26,18,48,.4) 100%);}
-.kc-hero .wrap{position:relative;z-index:1;max-width:none;margin:0;padding-top:clamp(48px,6vw,82px);padding-bottom:clamp(48px,6vw,78px);padding-left:clamp(20px,3vw,40px);}
-.kc-hero .wrap > *{max-width:min(600px,54%);}
-.kc-hero .eyebrow{color:var(--gold-lt);}
-.kc-hero h1{font-size:clamp(36px,5.2vw,62px);font-weight:900;letter-spacing:-.025em;line-height:1.0;margin-top:14px;max-width:17ch;text-wrap:balance;}
-.kc-hero .sub{font-size:clamp(16px,1.7vw,20px);font-weight:500;color:#d7d0f0;margin-top:18px;max-width:44ch;line-height:1.5;}
-.kc-hero .hero-cta{display:flex;gap:13px;flex-wrap:wrap;margin-top:26px;}
+/* Legacy unscoped dark-hero rules removed — the scoped Brand 3 KC hero
+   (cream card over a rounded photo) above is the single source of truth.
+   Only the search-box styling is retained here. */
 .kc-search{display:flex;align-items:center;gap:10px;background:var(--paper);border-radius:16px;padding:8px 8px 8px 18px;
   max-width:560px;margin-top:30px;box-shadow:0 30px 60px -34px rgba(0,0,0,.6);}
 .kc-search svg{width:22px;height:22px;color:var(--muted);flex:none;}
 .kc-search input{flex:1;border:none;outline:none;background:none;font-family:inherit;font-size:16px;font-weight:600;color:var(--ink);}
 .kc-search input::placeholder{color:var(--muted-2);font-weight:600;}
 .kc-search button{flex:none;}
-.kc-chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center;}
-.kc-chips .lbl{font-size:13px;font-weight:700;color:#bcb2e0;}
-.kc-chips a{font-size:13.5px;font-weight:700;color:#efeaff;background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;transition:background .14s;}
-.kc-chips a:hover{background:rgba(255,255,255,.22);}
-.kc-hero-stats{display:flex;gap:clamp(20px,4vw,52px);flex-wrap:wrap;margin-top:34px;padding-top:26px;border-top:1px solid rgba(255,255,255,.16);}
-.kc-hero-stats .s b{display:block;font-size:clamp(24px,2.6vw,32px);font-weight:900;color:#fff;letter-spacing:-.01em;}
-.kc-hero-stats .s span{font-size:13px;font-weight:600;color:#bcb2e0;}
 
 /* ============================================================
    TRUST / RESEARCH BAND
@@ -587,11 +591,8 @@ a.tb-name:hover{border-color:var(--gold);transform:translateY(-1px);}
 .zv-kc #onderwerpen .kc-dd-arr { flex: none; width: 18px; height: 18px; color: var(--belt, #b67e0a); }
 .zv-kc #onderwerpen .kc-dd-arr svg { width: 100%; height: 100%; }
 
-/* Keuzehulp hero "Populair" chips: one straight horizontal row on desktop/tablet.
-   (The .kc-hero .wrap > * max-width:min(600px,54%) cap otherwise wraps them.) */
-@media (min-width: 721px) {
-  .zv-kc .kc-hero .kc-chips { max-width: none; flex-wrap: nowrap; }
-}
+/* Keuzehulp hero "Populair" chips wrap inside the narrow cream card (matches design). */
+.zv-kc .kc-hero .kc-chips { max-width: none; flex-wrap: wrap; }
 
 /* Match the design's global `a{text-decoration:none}` reset (Dawn underlines links by
    default). Scoped to .zv-kc; colour left to each element so button/link colours stay. */
