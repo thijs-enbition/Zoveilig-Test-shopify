@@ -1,13 +1,20 @@
 {%- comment -%}
   Zo Veilig — Winkelwagen. Visual 1:1 port of the design pack cart, wired to
   the live Shopify {{ cart }}: real line items, quantities (/cart/change),
-  subtotal and checkout. NOTE: the design mockup showed a bespoke Langer Thuis
-  Odoo/SEPA split (maandbedrag + eenmalige kosten + "vandaag te betalen"). That
-  math is not native Shopify cart data, so the summary here uses Shopify's real
-  line items and subtotal; the reassurance/payment rows are kept as designed.
+  and checkout. Payment split: products carrying the subscription tag
+  (section setting `sub_tag`, default "abonnement") are shown as MONTHLY via
+  SEPA-incasso (Odoo) and are EXCLUDED from "Vandaag te betalen"; untagged lines
+  are one-time and billed today via Shopify.
+
+  ⚠️ MONEY-FLOW REQUIREMENT: Shopify charges the FULL cart total at checkout.
+  For the actual charge to equal the displayed "Vandaag te betalen", the
+  subscription products must be priced €0,00 in Shopify (the monthly amount is
+  billed in Odoo via SEPA), OR use a Shopify selling plan. Otherwise Shopify
+  also collects the monthly amount today. Confirm the product setup with ops.
   Header/footer come from the theme layout.
 {%- endcomment -%}
 
+{%- assign sub_tag = section.settings.sub_tag | default: 'abonnement' -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
@@ -23,6 +30,8 @@
         <form action="{{ routes.cart_url }}" method="post" id="cart-form" class="clayout">
           <div class="citems">
             {%- for item in cart.items -%}
+              {%- assign is_sub = false -%}
+              {%- if item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
@@ -51,8 +60,14 @@
                   </div>
                 </div>
                 <div class="ci-right">
-                  <div class="ci-price">{{ item.final_line_price | money }}</div>
-                  {%- if item.original_line_price > item.final_line_price -%}<span class="ci-note">Korting toegepast</span>{%- endif -%}
+                  {%- if is_sub -%}
+                    <div class="ci-price" style="color:var(--indigo)">{{ item.final_line_price | money }} <span>p/m</span></div>
+                    <span class="ci-badge">Abonnement</span>
+                    <span class="ci-note">Via SEPA-incasso (Odoo).<br>Niet vandaag betaald.</span>
+                  {%- else -%}
+                    <div class="ci-price">{{ item.final_line_price | money }}</div>
+                    {%- if item.original_line_price > item.final_line_price -%}<span class="ci-note">Korting toegepast</span>{%- endif -%}
+                  {%- endif -%}
                 </div>
               </div>
             {%- endfor -%}
@@ -60,14 +75,31 @@
 
           <aside class="csummary">
             <h2>Overzicht</h2>
-            <div class="srow"><span>Subtotaal ({{ cart.item_count }} {% if cart.item_count == 1 %}artikel{% else %}artikelen{% endif %})</span><b>{{ cart.total_price | money }}</b></div>
+            {%- assign today_cents = 0 -%}
+            {%- assign month_cents = 0 -%}
+            {%- for item in cart.items -%}
+              {%- assign li_sub = false -%}
+              {%- if item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
+              {%- if li_sub -%}
+                {%- assign month_cents = month_cents | plus: item.final_line_price -%}
+                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso (Odoo)</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
+              {%- else -%}
+                {%- assign today_cents = today_cents | plus: item.final_line_price -%}
+                <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
+              {%- endif -%}
+            {%- endfor -%}
             {%- if cart.cart_level_discount_applications.size > 0 -%}
               {%- for d in cart.cart_level_discount_applications -%}
+                {%- assign today_cents = today_cents | minus: d.total_allocated_amount -%}
                 <div class="srow"><span>Korting · {{ d.title | escape }}</span><b>−{{ d.total_allocated_amount | money }}</b></div>
               {%- endfor -%}
             {%- endif -%}
-            <div class="srow total"><span>Vandaag te betalen</span><b>{{ cart.total_price | money }}</b></div>
-            <div class="s-sub">Verzend- en eventuele installatiekosten worden bij het afrekenen berekend. Prijzen incl. btw.</div>
+            <div class="srow total"><span>Vandaag te betalen</span><b>{{ today_cents | money }}</b></div>
+            {%- if month_cents > 0 -%}
+              <div class="s-sub">Shopify int vandaag {{ today_cents | money }}. Daarna {{ month_cents | money }} per maand via SEPA-incasso (Odoo). Prijzen incl. btw.</div>
+            {%- else -%}
+              <div class="s-sub">Verzend- en eventuele installatiekosten worden bij het afrekenen berekend. Prijzen incl. btw.</div>
+            {%- endif -%}
             <button type="submit" name="checkout" class="btn btn--gold cta-checkout">Naar afrekenen <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <div class="c-guarantee">
               <div><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></i>Nederlandse meldkamer, 24/7 bewaakt</div>
@@ -130,6 +162,7 @@
 .zv-cart .ci-price { font-size:19px; font-weight:900; color:var(--ink); white-space:nowrap; }
 .zv-cart .ci-price span { font-size:12.5px; font-weight:700; color:var(--muted); }
 .zv-cart .ci-note { font-size:12px; font-weight:700; color:var(--muted); text-align:right; line-height:1.4; max-width:160px; }
+.zv-cart .ci-badge { display:inline-block; font-size:10.5px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; color:var(--indigo); background:var(--indigo-soft); border-radius:6px; padding:3px 8px; }
 .zv-cart .csummary { position:sticky; top:96px; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:24px; box-shadow:0 22px 52px -44px rgba(26,18,48,.5); }
 .zv-cart .csummary h2 { font-size:18px; font-weight:900; color:var(--indigo); }
 .zv-cart .srow { display:flex; justify-content:space-between; gap:12px; font-size:14.5px; font-weight:600; color:#5b5374; padding:11px 0; border-bottom:1px solid var(--line); }
@@ -161,6 +194,8 @@
 {
   "name": "Winkelwagen",
   "tag": "section",
-  "settings": []
+  "settings": [
+    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Producten met deze tag tonen als maandbedrag via SEPA-incasso (Odoo) en tellen niet mee in 'Vandaag te betalen'." }
+  ]
 }
 {% endschema %}
