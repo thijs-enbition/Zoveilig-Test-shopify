@@ -6,92 +6,385 @@
         "faq1": {
           "type": "faq",
           "settings": {
-            "category": "Mijn systeem",
-            "question": "Kiezer te laat, of bericht simkaartnummer ontvangen"
+            "category": "Uw alarmsysteem bedienen",
+            "question": "Hoe schakel ik mijn alarmsysteem in en uit met het bedieningspaneel?",
+            "answer": "<ul><li><strong>Volledig inschakelen:</strong> druk op het gesloten slotje.</li><li><strong>Gedeeltelijk inschakelen</strong> (bijvoorbeeld 's nachts, terwijl u thuis bent): druk op het huisje.</li><li><strong>Uitschakelen:</strong> toets uw viercijferige gebruikerscode in en druk daarna op het geopende slotje.</li></ul><p>Weet u uw gebruikerscode niet meer? U vindt deze terug in de app. Ga naar Gebruikers en klik op uw naam. Onder uw naam staat uw persoonlijke gebruikerscode.</p>"
           }
         },
         "faq2": {
           "type": "faq",
           "settings": {
-            "category": "Meldkamer & alarmopvolging",
-            "question": "Gele en rode kaarten"
+            "category": "Uw alarmsysteem bedienen",
+            "question": "Hoe activeer ik de paniekknop op de afstandsbediening?",
+            "answer": "<p>Houd het kruisje op de afstandsbediening enkele seconden ingedrukt. De meldkamer van Securitas belt u vervolgens direct.</p><p>Kunt u niet opnemen? Dan belt de meldkamer uw contactpersonen één voor één.</p><p>Drukt u meerdere keren achter elkaar op de paniekknop, dan stuurt de meldkamer de politie naar uw adres. De meldkamer probeert altijd eerst contact met u op te nemen, omdat uw veiligheid voorop staat.</p>"
           }
         },
         "faq3": {
           "type": "faq",
           "settings": {
-            "category": "Meldkamer & alarmopvolging",
-            "question": "Ik heb geen doormelding. Wat nu?"
+            "category": "Uw alarmsysteem bedienen",
+            "question": "Ik heb een bedieningsfout gemaakt. Moet ik wachten tot de alarmcentrale mij belt?",
+            "answer": "<p>Nee, dat is niet nodig. Druk op de knop met de ronde pijlen op uw bedieningspaneel. Daarmee wist u uw voorgaande handelingen, waarna u de juiste code opnieuw kunt invoeren.</p>"
           }
         },
         "faq4": {
           "type": "faq",
           "settings": {
-            "category": "Mijn systeem",
-            "question": "Hoe wijzig ik mijn pincode?"
+            "category": "Uw alarmsysteem bedienen",
+            "question": "Ik ga verbouwen, schilderen of batterijen vervangen. Wat doe ik met mijn systeem?",
+            "answer": "<p>Gaat u verbouwen of schilderen, of vervangt u zelf de batterijen? Meld dit dan vooraf bij de meldkamer. U belt de meldkamer via 040 289 41 41. Houd uw ID-code en pincode bij de hand, zodat u zich kunt identificeren.</p><p>Wilt u het alarmsysteem tijdens de werkzaamheden toch inschakelen? Dan kunnen wij de componenten die u tijdelijk verwijdert voor u overbruggen. Neem hiervoor contact met ons op via 088 122 11 11.</p>"
           }
         },
         "faq5": {
           "type": "faq",
           "settings": {
-            "category": "Vaak gezocht",
-            "question": "Wat moet ik doen als het alarm afgaat?"
+            "category": "Uw alarmsysteem bedienen",
+            "question": "Ik ga op vakantie. Waar moet ik aan denken?",
+            "answer": "<p>Maakt u gebruik van de meldkamerdienst? Geef dan door wie er tijdens uw afwezigheid gebeld mag worden, zodat uw contactpersonen worden benaderd in plaats van uzelf.</p><p>U mailt deze wijziging naar meldkamer@securitas.nl, onder vermelding van uw naam, adres en ID-code.</p><p>Zorg dat uw contactpersonen weten dat zij als contactpersoon staan geregistreerd en dat zij hun eigen ID-code en pincode bij de hand hebben.</p>"
           }
         },
         "faq6": {
           "type": "faq",
           "settings": {
-            "category": "Vaak gezocht",
-            "question": "Hoe meld ik een alarm af bij de alarmcentrale?"
+            "category": "De app, gebruikers en codes",
+            "question": "Hoe geef ik iemand anders toegang tot mijn alarmsysteem?",
+            "answer": "<p>U kunt iemand een eigen gebruikerscode geven voor het bedieningspaneel, eigen inloggegevens voor de app, of beide.</p><p><strong>Een toegangscode voor het bedieningspaneel</strong></p><p>Hiermee geeft u iemand (eventueel tijdelijk) de mogelijkheid om uw systeem in- en uit te schakelen.</p><ul><li>Ga naar de website alarm.com en log in.</li><li>Kies in het menu aan de linkerzijde voor Gebruikers.</li><li>Kies vervolgens Gebruiker toevoegen.</li><li>Vul de voornaam en achternaam in. Een e-mailadres is hier niet nodig.</li><li>Klik op het slotje en kies Panel.</li><li>Het slotje kleurt nu blauw. Vul de gewenste viercijferige code in die op het bedieningspaneel gebruikt gaat worden.</li><li>Scroll naar beneden en kies Opslaan.</li><li>Binnen vijf minuten is de nieuwe gebruikerscode te gebruiken op het bedieningspaneel.</li></ul><p><strong>Een eigen login voor de app</strong></p><p>Met een eigen login kan de gebruiker met een e-mailadres en wachtwoord inloggen op de app van uw alarmsysteem.</p><ul><li>Ga naar de website alarm.com en log in.</li><li>Kies in het menu aan de linkerzijde voor Gebruikers.</li><li>Kies bovenaan in de zwarte balk voor Aanmeldingen beheren.</li><li>Klik op de blauwe knop Een aanmelding toevoegen.</li><li>Vul het e-mailadres van de nieuwe gebruiker in en klik op Opslaan.</li><li>Stel in welke handelingen de gebruiker in de app wel en niet mag uitvoeren. Lees deze bevoegdheden aandachtig door.</li><li>Klik onderaan op Opslaan.</li><li>De nieuwe gebruiker ontvangt een welkomstmail met instructies voor het aanmaken van een eigen wachtwoord.</li><li>De gebruiker kan daarna de Alarm.com-app downloaden en inloggen met zijn of haar eigen gegevens.</li></ul>"
           }
         },
         "faq7": {
           "type": "faq",
           "settings": {
-            "category": "Meldkamer & alarmopvolging",
-            "question": "De alarmcentrale vraagt naar een pincode van de passen. Wat nu?"
+            "category": "De app, gebruikers en codes",
+            "question": "De gebruiker die ik heb toegevoegd kan het systeem niet bedienen. Hoe komt dat?",
+            "answer": "<p>Controleert u in het Alarm.com-portaal onder Gebruikers of het slotje bij deze gebruiker blauw is. Staat het slotje niet op blauw, dan heeft de gebruiker geen rechten op het bedieningspaneel.</p><p>Komt u er niet uit? Neem dan contact met ons op via 088 122 11 11.</p>"
           }
         },
         "faq8": {
           "type": "faq",
           "settings": {
-            "category": "Afspraak of annulering",
-            "question": "Contactpersonen wijzigen"
+            "category": "De app, gebruikers en codes",
+            "question": "Hoe stel ik een dwangcode in?",
+            "answer": "<p>Met een dwangcode schakelt u uw systeem ogenschijnlijk normaal uit, terwijl de meldkamer van Securitas een stil alarm ontvangt en het juiste protocol in werking zet. U stelt de dwangcode als volgt in:</p><ul><li>Log in op de website van alarm.com met uw gebruikersnaam en wachtwoord.</li><li>Ga naar Gebruikers.</li><li>Klik rechtsboven op Acties.</li><li>Kies Paniekalarm toevoegen.</li><li>Geef een naam op (bijvoorbeeld 'dwangcode') en stel de gewenste schakelcode in.</li></ul><p>Deel de dwangcode alleen met personen die weten waarvoor deze bedoeld is, en gebruik deze code nooit voor dagelijks gebruik.</p>"
           }
         },
         "faq9": {
           "type": "faq",
           "settings": {
-            "category": "Meldkamer & alarmopvolging",
-            "question": "Alarmmelding opvolging"
+            "category": "De app, gebruikers en codes",
+            "question": "Hoe zet ik meldingen in de app aan of uit?",
+            "answer": "<p>Na een onderhoudsbeurt of een update van het alarmsysteem kan het voorkomen dat u opeens meldingen ontvangt, bijvoorbeeld 'deur geopend', via e-mail of als pushbericht. Wij begrijpen dat dit vervelend kan zijn. Deze meldingen zijn onderdeel van de instellingen binnen uw eigen account en kunnen daarom alleen door uzelf worden aangepast.</p><p>U past de meldingen eenvoudig aan via de app:</p><ul><li>Open de app en druk onderaan op de knop Meer (de drie streepjes).</li><li>Kies vervolgens voor Meldingen.</li><li>Onder Sensoractiviteit ziet u de tekst: 'Stuur een melding als een van deze sensoren opengaat of wordt geactiveerd.'</li><li>Wilt u geen meldingen meer ontvangen? Schakel dan het icoon aan de rechterkant uit. U ontvangt dan geen melding meer bij het openen van een deur of raam.</li><li>Wilt u alleen voor bepaalde sensoren meldingen behouden? Tik op de instelling om de lijst met sensoren te openen en vink de gewenste sensoren aan of uit.</li><li>Scroll naar beneden om aan te passen welke toestellen of e-mailadressen de meldingen ontvangen.</li><li>Druk op Opslaan om uw wijzigingen te bevestigen.</li></ul><p>Komt u er niet uit, of wilt u dat wij met u meekijken? Neem dan gerust contact op met onze klantenservice. Wij helpen u graag verder.</p>"
           }
         },
         "faq10": {
           "type": "faq",
           "settings": {
-            "category": "Mijn systeem",
-            "question": "Ik heb een bedieningsfout gemaakt, moet ik wachten tot de alarmcentrale belt?"
+            "category": "De app, gebruikers en codes",
+            "question": "Hoe koppel ik meerdere alarmsystemen aan één account?",
+            "answer": "<p>Het kan voorkomen dat u meerdere systemen afneemt of toegang heeft tot een systeem op een ander adres. Voor elk systeem heeft u een eigen gebruikersnaam en wachtwoord. U kiest één aansluiting als hoofdaansluiting en voegt daaraan de overige aansluitingen toe. Wanneer u inlogt op de hoofdaansluiting, ziet u alle gekoppelde systemen in één overzicht.</p><ul><li>Open de app van uw alarmsysteem en log in met uw gebruikersnaam en wachtwoord.</li><li>Druk onderaan uw scherm op de drie streepjes: Meer.</li><li>Kies onder Instellingen voor Koppel een systeem.</li><li>Voer de gebruikersnaam en het wachtwoord in van het tweede alarmsysteem en druk rechtsboven op Volgende.</li><li>U wordt gevraagd de verificatiecode van het tweede alarmsysteem in te voeren.</li><li>Volg de instructies op uw scherm om de koppeling te voltooien.</li></ul><p>Let op: heeft u tweestapsverificatie via e-mail ingeschakeld, druk dan niet op de knop 'Terug'. De per e-mail verzonden verificatiecode wordt dan namelijk direct ongeldig. Open de e-mail bij voorkeur op een ander apparaat, bijvoorbeeld een tablet of computer, en typ de code over op uw telefoon.</p><p>Wilt u een derde systeem koppelen? Herhaal dan bovenstaande stappen. In de balk bovenaan uw scherm schakelt u eenvoudig tussen de verschillende alarmsystemen. Zo controleert u de status of voert u handelingen uit voor één specifiek adres.</p><p>U kunt de overige systemen daarnaast gewoon afzonderlijk benaderen. U gebruikt dan de gebruikersnaam en het wachtwoord die bij die aansluiting horen.</p>"
           }
         },
         "faq11": {
           "type": "faq",
           "settings": {
-            "category": "Vaak gezocht",
-            "question": "Vals alarm"
+            "category": "De app, gebruikers en codes",
+            "question": "Ik ben mijn wachtwoord kwijt. Wat moet ik doen?",
+            "answer": "<p>Belt u ons via 088 122 11 11. U krijgt dan onze klantenservice aan de telefoon. Onze medewerker controleert uw gegevens en stuurt u vervolgens nieuwe inloggegevens toe per e-mail.</p>"
           }
         },
         "faq12": {
           "type": "faq",
           "settings": {
-            "category": "Smarthome / Domotica",
-            "question": "Koolmonoxide alarm"
+            "category": "Storingen en meldingen",
+            "question": "Ik heb een storing aan mijn systeem. Wat moet ik nu doen?",
+            "answer": "<p>Onze technische dienst is 24 uur per dag bereikbaar voor urgente storingen.</p><ul><li>Telefonisch: 088 122 11 11</li><li>Per e-mail: storingen@zoveilig.nl</li></ul><p>Tijdens kantooruren staat een van onze klantenservicemedewerkers u te woord. Stuurt u een e-mail, dan nemen wij zo snel mogelijk contact met u op.</p><p>Belt u na 16:00 uur en is er geen sprake van een urgente storing? Dan neemt onze technische dienst de eerstvolgende werkdag contact met u op. Bij een urgente storing na 16:00 uur neemt onze avondmonteur contact met u op.</p>"
           }
         },
         "faq13": {
           "type": "faq",
           "settings": {
-            "category": "Vaak gezocht",
-            "question": "Ik ga op vakantie, waar moet ik aan denken?"
+            "category": "Storingen en meldingen",
+            "question": "Wat betekenen de statussen activated, closed, open, idle en malfunction?",
+            "answer": "<p>In het portaal ziet u onderaan het scherm een overzicht van uw geplaatste sensoren, zoals bewegingsmelders en magneetcontacten. Achter elke sensor staat de actuele status.</p><ul><li><strong>Activated:</strong> uw bewegingssensor heeft beweging geregistreerd. Let op: deze melding ziet u ook wanneer uw alarmsysteem is uitgeschakeld.</li><li><strong>Open:</strong> het magneetcontact op uw deur of raam detecteert dat deze geopend is.</li><li><strong>Closed:</strong> het magneetcontact detecteert dat de deur of het raam gesloten is.</li><li><strong>Idle:</strong> uw bewegingsmelder detecteert geen beweging en is in rust.</li><li><strong>Malfunction:</strong> uw sensor functioneert niet naar behoren. Deze melding ziet u ook terug in uw storingsoverzicht.</li></ul>"
+          }
+        },
+        "faq14": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Mijn componenten staan op idle, terwijl het systeem is ingeschakeld. Hoe kan dat?",
+            "answer": "<p>Dat is normaal. Uw systeem staat op het moment van inschakelen in een rustmodus. Zodra er beweging wordt gedetecteerd, springt de status op activated. Blijft het daarna rustig, dan keert de status vanzelf terug naar idle.</p>"
+          }
+        },
+        "faq15": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Wat betekent de melding 'dual path communication failure'?",
+            "answer": "<p>Deze melding betekent dat uw alarmsysteem niet meer via twee wegen kan communiceren. Meestal komt dit doordat de netwerkkabel tussen de alarmcentrale en uw modem is losgeraakt, of doordat de UPnP-poorten in uw router of modem niet openstaan.</p><p>Controleert u eerst of de netwerkkabel aan beide zijden goed vastzit. Is dat het geval, neem dan contact op met uw internetprovider om de poortinstellingen te laten controleren. Zodra de verbinding is hersteld, verdwijnt de melding vanzelf.</p>"
+          }
+        },
+        "faq16": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Mijn systeem geeft een tamper- of sabotagemelding. Wat betekent dit?",
+            "answer": "<p>Een tamper- of sabotagemelding ontstaat wanneer een magneetcontact, bewegingssensor, bedieningspaneel of glasbreukmelder niet volledig bevestigd is.</p><p>Aan de achterzijde van een magneetcontact, bewegingssensor en bedieningspaneel steekt een wit dopje uit de behuizing. Bij een glasbreukmelder werkt dit met een veertje aan de binnenzijde. Zolang dit dopje of veertje volledig is ingedrukt, weet de sensor dat hij correct bevestigd is. Ontstaat er speling, bijvoorbeeld doordat de behuizing openstaat of doordat er per ongeluk tegenaan is gestoten, dan wordt een sabotagealarm geactiveerd.</p><p>Neem gerust contact met ons op via 088 122 11 11, dan lossen wij deze storing samen met u op.</p>"
+          }
+        },
+        "faq17": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Wat moet ik doen bij een stroomstoring?",
+            "answer": "<p>Bij een stroomstoring hoeft u zelf geen actie te ondernemen voor uw alarmsysteem.</p><p>Tijdens een stroomonderbreking schakelt het systeem automatisch over op de reserveaccu. Deze noodvoorziening zorgt ervoor dat uw alarmsysteem blijft functioneren, doorgaans tot ongeveer 24 uur na het uitvallen van de netspanning.</p><p>Het kan voorkomen dat het alarmsysteem een piepsignaal geeft om aan te geven dat er een stroomstoring is. Vindt u dit hinderlijk? Neem dan gerust contact met ons op; wij kunnen de storingspiepjes tijdelijk voor u uitschakelen.</p><p>Zodra de stroomvoorziening is hersteld, schakelt het systeem automatisch terug naar de normale werking en laadt de accu weer op. Dit duurt ongeveer 24 uur. Is de melding na een dag nog steeds zichtbaar, neemt u dan contact met ons op.</p>"
+          }
+        },
+        "faq18": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Mijn telefoon geeft een malfunctionmelding in de app. Hoe los ik dit op?",
+            "answer": "<p>U heeft een malfunctionmelding ontvangen in uw alarmapp. Deze melding verschijnt wanneer:</p><ul><li>de telefoon een tijd uit heeft gestaan;</li><li>de telefoon binnen 24 uur niet buitenshuis is geweest;</li><li>de app niet is gebruikt.</li></ul><p>U verwijdert de melding als volgt:</p><ul><li>Ga naar de website van alarm.com en log in.</li><li>Kies in het menu aan de linkerzijde voor Instellingen.</li><li>Kies vervolgens Places.</li><li>Selecteer de telefoon die de malfunctionmelding geeft.</li><li>Vink de storingsmelding uit.</li><li>Klik onderaan de pagina op Opslaan.</li><li>Binnen 30 minuten is de melding verdwenen.</li></ul>"
+          }
+        },
+        "faq19": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Hoe vervang ik zelf de batterijen van mijn systeem?",
+            "answer": "<p>U kunt de batterijen van uw systeem eenvoudig zelf vervangen. In onze handleiding leest u stap voor stap hoe u de batterijen vervangt van uw bedieningspaneel, magneetcontact, foto-PIR en rookmelder.</p><p><a href=\"/pages/klantenservice#contact\">Handleiding batterijen vervangen (pdf)</a></p>"
+          }
+        },
+        "faq20": {
+          "type": "faq",
+          "settings": {
+            "category": "Storingen en meldingen",
+            "question": "Ik heb een nieuw component ontvangen. Hoe koppel ik dit aan mijn alarmsysteem?",
+            "answer": "<p>Neem contact met ons op via 088 122 11 11, van maandag tot en met donderdag tussen 8:30 en 17:00 uur of op vrijdag tussen 8:30 en 13:00 uur. Wij activeren het component vervolgens samen met u.</p><p>Let op: u dient thuis te zijn om de sensor te kunnen activeren.</p>"
+          }
+        },
+        "faq21": {
+          "type": "faq",
+          "settings": {
+            "category": "Camera's en videodeurbel",
+            "question": "Hoe download ik beelden vanaf de SD-kaart?",
+            "answer": "<p>Via de website kunt u opgenomen fragmenten van de SD-kaart downloaden. Het fragment wordt gedownload in mp4-formaat.</p><p><strong>Wat heeft u nodig?</strong></p><ul><li>Toegang tot de website alarm.com</li><li>Uw gebruikersnaam en wachtwoord</li></ul><p><strong>Stappenplan</strong></p><ul><li>Ga naar alarm.com en log in via Customer login.</li><li>Klik in het menu op Video.</li><li>Klik bovenaan in de balk op Aan boord 24/7 tijdlijn.</li><li>Kies de camera waarvan u de beelden wilt downloaden.</li><li>Klik op het downloadicoon in het videovenster en kies vervolgens Exporteer video.</li><li>In het pop-upvenster kiest u de dag, de starttijd en de looptijd. De looptijd mag maximaal 15 minuten zijn.</li><li>Klik op Downloaden en bevestig met OK.</li><li>Het gevraagde fragment wordt lokaal opgeslagen op de computer die u gebruikt.</li></ul>"
+          }
+        },
+        "faq22": {
+          "type": "faq",
+          "settings": {
+            "category": "Camera's en videodeurbel",
+            "question": "Handleiding: mijn ADC-V724-camera opnieuw installeren",
+            "answer": "<p>Heeft u een nieuwe wifi-verbinding, of werkt uw beveiligingscamera niet meer zoals u gewend bent? Met deze handleiding installeert u uw Alarm.com ADC-V724 wifi-camera opnieuw via de app.</p><p><strong>Wat heeft u nodig?</strong></p><ul><li>Uw smartphone met de Alarm.com-app</li><li>Een stabiele wifi-verbinding van 2,4 GHz</li><li>Een camera die op stroom is aangesloten</li><li>Het wachtwoord van uw wifi-netwerk</li></ul><p><strong>Stap 1: zet de camera terug naar de fabrieksinstellingen</strong></p><ul><li>Houd de resetknop aan de achterzijde van de camera ongeveer 15 seconden ingedrukt met een paperclip of een dunne pen.</li><li>Laat los zodra het ledlampje rood wordt.</li><li>De camera start opnieuw op. Zodra het lampje wit knippert, is de camera klaar voor installatie.</li></ul><p><strong>Stap 2: koppel de camera via de app</strong></p><ul><li>Open de Alarm.com-app op uw telefoon.</li><li>Ga naar Menu en kies Video.</li><li>Tik op het tandwiel (Instellingen).</li><li>Kies Camera toevoegen.</li><li>Selecteer het model ADC-V724.</li><li>Maak via uw telefooninstellingen verbinding met het wifi-signaal van de camera. Dit netwerk begint met 'ADC-V724-'.</li><li>Ga terug naar de app, kies uw eigen wifi-netwerk en voer het wachtwoord in.</li><li>De camera maakt verbinding. Zodra het ledlampje groen brandt, is de koppeling gelukt.</li></ul><p><strong>Stap 3: test de camera</strong></p><ul><li>Open de Alarm.com-app en ga naar het tabblad Video.</li><li>Controleer of het livebeeld werkt.</li><li>Bekijk eventueel de opnames en stel zones en meldingen in via Instellingen.</li></ul>"
+          }
+        },
+        "faq23": {
+          "type": "faq",
+          "settings": {
+            "category": "Camera's en videodeurbel",
+            "question": "Handleiding: mijn ADC-VDB750 videodeurbel opnieuw installeren",
+            "answer": "<p>Heeft u een nieuwe wifi-verbinding, of werkt uw slimme deurbel niet meer zoals u gewend bent? Met deze handleiding stelt u uw Alarm.com ADC-VDB750 opnieuw in via de app.</p><p><strong>Wat heeft u nodig?</strong></p><ul><li>Uw smartphone met de Alarm.com-app</li><li>Een stabiele wifi-verbinding van 2,4 GHz</li><li>Een deurbel die is aangesloten op stroom (16 tot 24 volt)</li><li>Het wachtwoord van uw wifi-netwerk</li><li>Informatie over het type gong dat u heeft: mechanisch of digitaal (zie stap 3)</li></ul><p><strong>Stap 1: reset de deurbelcamera</strong></p><ul><li>Houd de kleine knop aan de zijkant van de deurbel ongeveer 5 seconden ingedrukt.</li><li>Laat los zodra het ledlampje rood knippert.</li><li>Wacht tot het ledlampje wit knippert. De deurbel is dan klaar om gekoppeld te worden.</li></ul><p><strong>Stap 2: koppel de deurbel via de app</strong></p><ul><li>Open de Alarm.com-app op uw telefoon.</li><li>Ga naar Menu en kies Video.</li><li>Tik op het tandwiel (Instellingen).</li><li>Kies Camera toevoegen of Deurbel toevoegen.</li><li>Selecteer het model ADC-VDB750.</li><li>Verbind uw telefoon met het wifi-netwerk van de deurbel. Dit netwerk begint met 'ADC-VDB750-'.</li><li>Ga terug naar de app, kies uw eigen wifi-netwerk en vul het wachtwoord in.</li><li>Wacht tot het ledlampje groen brandt. De koppeling is dan gelukt.</li></ul><p><strong>Stap 3: stel de gong in</strong></p><ul><li>Ga in de app naar Video en vervolgens naar Instellingen.</li><li>Selecteer de deurbelcamera en kies het juiste type gong.</li><li>Mechanisch: de klassieke 'ding-dong'-bel</li><li>Digitaal: een elektronische gong met melodie</li></ul><p>Twijfelt u welke optie u nodig heeft? Kies dan eerst voor mechanisch. Geeft de gong daarna geen geluid, dan past u de instelling eenvoudig aan.</p><p><strong>Stap 4: test de deurbel</strong></p><p>Druk op de knop van de deurbel. U hoort de gong en ontvangt een melding op uw telefoon. Ziet u ook het livebeeld in de app, dan is alles goed ingesteld.</p>"
+          }
+        },
+        "faq24": {
+          "type": "faq",
+          "settings": {
+            "category": "Camera's en videodeurbel",
+            "question": "Hoe laad ik de accu van mijn ADC-VDB780B videodeurbel op?",
+            "answer": "<p>De batterij van de draadloze videodeurbel ADC-VDB780B laadt u op met een USB-wandlader van 5 volt en 1,5 ampère, in combinatie met de meegeleverde oplaadkabel.</p><ul><li>Maak de onderzijde van de houder los.</li><li>Verwijder de deurbel uit de houder.</li><li>Sluit de meegeleverde micro-USB-kabel aan op de batterij.</li><li>Sluit het andere uiteinde van de kabel aan op een USB-wandlader en steek de lader in het stopcontact.</li></ul><p>Het oplaadlampje aan de bovenzijde van de batterij brandt continu oranje tijdens het opladen en wordt groen zodra het opladen is voltooid.</p><p>Het opladen van een volledig lege batterij duurt ongeveer 7 uur.</p>"
+          }
+        },
+        "faq25": {
+          "type": "faq",
+          "settings": {
+            "category": "Camera's en videodeurbel",
+            "question": "Wanneer heeft Securitas toegang tot mijn (video)beelden?",
+            "answer": "<p>Al het dataverkeer tussen u, Alarm.com en de meldkamer van Securitas verloopt via een VPN: een beveiligde verbinding.</p><p>Maakt u gebruik van camera's of foto-PIR's, dan kan Securitas een alarm verifiëren aan de hand van beeldmateriaal, mits u daarvoor toestemming heeft gegeven. De meldkamer kan uitsluitend beelden en foto's bekijken die rond het gegenereerde alarm zijn gemaakt.</p><p>Een voorbeeld: om 12:15 uur ontstaat er een inbraakalarm in de woonkamer, waarbij de foto-PIR wordt geactiveerd. Securitas krijgt dan tijdelijk toestemming om de gemaakte foto's te bekijken.</p><p>Deze tijdelijke machtiging geldt tot een kwartier na de alarmgebeurtenis. Daarna worden de beelden geblokkeerd en zijn ze uitsluitend nog voor u zichtbaar. Securitas kan uw beelden dus niet op elk gewenst moment inzien.</p>"
+          }
+        },
+        "faq26": {
+          "type": "faq",
+          "settings": {
+            "category": "Slimme apparaten in huis",
+            "question": "Wat is een slimme stekker?",
+            "answer": "<p>Met een slimme stekker maakt u elk gewenst elektrisch apparaat in huis slim. U plaatst de slimme stekker in een bestaand stopcontact en sluit daar een apparaat op aan, bijvoorbeeld een lamp of een koffiezetapparaat. Vervolgens schakelt u dit apparaat op afstand aan en uit met uw smartphone of tablet. Ook kunt u het energieverbruik meten en realtime terugzien in de app.</p><p><strong>Hoe werkt het?</strong></p><p>Een slimme stekker verbindt u draadloos met een basisstation, de schakel tussen het internet en uw slimme stekker, of rechtstreeks met uw smartphone of tablet. Dit hangt af van het ingebouwde communicatieprotocol, zoals Bluetooth, Z-Wave, Zigbee of wifi.</p><p><strong>Een voorbeeld</strong></p><p>Uw kind slaapt graag met een lampje aan. U steekt een slimme stekker in het stopcontact, sluit het nachtlampje daarop aan en koppelt de stekker aan uw beveiligingssysteem. Zodra uw kind in slaap valt, gaat het licht vanzelf uit. Wordt uw kind wakker, dan gaat het lampje automatisch weer aan. Van elke gebeurtenis ontvangt u een melding op uw smartphone, zodat u altijd op de hoogte blijft.</p>"
+          }
+        },
+        "faq27": {
+          "type": "faq",
+          "settings": {
+            "category": "Slimme apparaten in huis",
+            "question": "Wat is een slimme lamp?",
+            "answer": "<p>Slimme lampen geven een nieuwe betekenis aan licht. U bedient de verlichting met uw smartphone of tablet en stelt zo de gewenste lichtkleur en lichtsterkte in. Zo bedient u de verlichting in elke ruimte in huis, terwijl u gewoon op de bank blijft zitten. In de bijbehorende app kiest u uit verschillende lichtscènes die passen bij het moment.</p><p><strong>Lichtscènes instellen</strong></p><p>Bij onze slimme lamp heeft u de keuze uit honderden wittinten. Heeft u geen zin om zelf met de dimmer te spelen? Dan kiest u met één druk op de knop een van de vooraf ingestelde lichtscènes. Elke scène geeft een totaal andere sfeer, bijvoorbeeld om te concentreren of juist om te ontspannen.</p>"
+          }
+        },
+        "faq28": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "Hoe verloopt de opvolging van een alarmmelding?",
+            "answer": "<p>Calamiteiten zoals een inbraak- of brandmelding worden direct doorgezet naar uw app en naar de alarmcentrale van Securitas. Daardoor kan er onmiddellijk actie worden ondernomen.</p><p>Blijft een reactie van uw kant uit? Dan komt Securitas in actie en wordt de situatie op afstand beoordeeld, bijvoorbeeld door de beelden van de (PIR-)camera te bekijken. De centralist belt vervolgens u en uw contactpersonen. Is niemand bereikbaar, dan wordt in bepaalde gevallen een surveillancewagen ter plaatse gestuurd. De surveillant schakelt waar nodig de hulpdiensten in.</p><p>Uw systeem is 24 uur per dag, 7 dagen per week met ons platform verbonden. Daarnaast verstuurt uw systeem dagelijks een testmelding naar Securitas. Zo weten wij zeker dat de verbinding tussen uw systeem en de alarmcentrale in orde is.</p><p>Blijft de dagelijkse testmelding uit, of is er sprake van stroomuitval, een batterijstoring of een andere servicemelding? Dan ontvangt u hiervan bericht via de app of per e-mail.</p>"
+          }
+        },
+        "faq29": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "Wat moet ik doen als het alarm afgaat en hoe meld ik een alarm af?",
+            "answer": "<ul><li>Bel bij een alarm de alarmcentrale van Securitas via 040 289 41 41.</li><li>U wordt gevraagd naar uw zescijferige ID-code.</li><li>Vervolgens wordt gevraagd naar de pincode die bij uw ID-code hoort.</li><li>Is de combinatie van ID-code en pincode juist, dan volgt u de stappen in het keuzemenu. U kunt in het menu ook kiezen voor een gesprek met een centralist.</li><li>Meld het alarm af bij de centralist.</li></ul>"
+          }
+        },
+        "faq30": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "De alarmcentrale vraagt om de pincode van mijn pas. Wat wordt daarmee bedoeld?",
+            "answer": "<p>Bij elke identificatiepas hoort een pincode. Deze identificatiepassen ontvangt u tijdens de installatie. De bijbehorende pincode kunt u zelf wijzigen in een pincode naar keuze.</p><p>U heeft de ID-code en de bijbehorende pincode nodig om een alarm af te melden en om wijzigingen door te geven. Weet u uw ID-code niet meer, of wilt u uw pincode wijzigen? Neem dan telefonisch of per e-mail contact met ons op.</p>"
+          }
+        },
+        "faq31": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "Hoe wijzig ik mijn pincode bij de meldkamer?",
+            "answer": "<p>Aan elke ID-code is standaard de pincode 0000 gekoppeld. Wij adviseren u dringend deze standaardpincode te wijzigen, zodat niemand uit uw naam contact kan opnemen met Securitas.</p><ul><li>Bel de alarmcentrale van Securitas via 040 289 41 41.</li><li>U komt in het keuzemenu terecht en hoort: 'Goedemorgen (-middag/-avond), u bent verbonden met de meldkamer van Securitas.'</li><li>Toets uw ID-code in en sluit af met een hekje (#). Dit is de code die op uw pas staat.</li><li>Kies in het menu voor pincodemutatie en volg de instructies.</li></ul><p>Vergeet het hekje (#) niet. Hiermee wordt de toegang tot het keuzemenu geactiveerd. Vergeet u dit, dan geeft het menu aan dat de code onjuist is en wordt u doorverbonden met een centralist.</p>"
+          }
+        },
+        "faq32": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "Hoeveel contactpersonen moet ik opgeven?",
+            "answer": "<p>Naast uw eigen telefoonnummer geeft u minimaal vier contactpersonen op, met naam en telefoonnummer. Securitas belt deze personen in geval van een alarm.</p><p>Zorg ervoor dat uw contactpersonen op de hoogte zijn van hun eigen ID-code en pincode. Bij contact met de alarmcentrale wordt hier in bepaalde gevallen naar gevraagd.</p><p>Zodra een contactpersoon wordt gebeld door de alarmcentrale, geeft de centralist door wat de aard van het alarm is. Afhankelijk daarvan kan de alarmcentrale de pashouder vragen om naar het alarmadres te gaan. Dat kan bijvoorbeeld nodig zijn om de hulpdiensten toegang te verlenen.</p>"
+          }
+        },
+        "faq33": {
+          "type": "faq",
+          "settings": {
+            "category": "Meldkamer en alarmopvolging",
+            "question": "Ik wil mijn systeem koppelen aan de meldkamer van Securitas",
+            "answer": "<p>Wanneer uw alarm afgaat, staat u er het liefst niet alleen voor. Door uw bestaande alarmsysteem aan te sluiten op de meldkamer van Securitas verzekert u zich van een snelle reactie bij een alarm. De meldkameroperators staan 24 uur per dag klaar om u te helpen. Zij begeleiden u bij de alarmopvolging en sturen indien nodig interventie aan.</p><p><strong>Efficiënte alarmopvolging</strong></p><p>De operators van de meldkamer controleren de binnenkomende alarmmeldingen en nemen direct telefonisch contact op met u of met uw opgegeven contactpersonen. Indien nodig, en wanneer u een abonnement op surveillance heeft, waarschuwen zij de mobiele surveillance of de hulpdiensten.</p><p><strong>Waarom alarmopvolging via Securitas?</strong></p><ul><li>Het team van Securitas staat 24 uur per dag klaar om in te grijpen.</li><li>U heeft te maken met professionele, meertalige meldkameroperators.</li><li>In noodsituaties worden de hulpdiensten direct gealarmeerd.</li><li>U kunt mobiele surveillance inzetten. Dit is een aanvullende dienst tegen betaling.</li><li>Securitas beschikt over het meest fijnmazige netwerk van mobiele surveillanten in Nederland en daarmee over korte responstijden.</li><li>De meldkamer is te koppelen aan vrijwel elk alarmsysteem, zodat uw investering in uw bestaande systeem behouden blijft.</li><li>U kunt gebruikmaken van een breed aanbod aan alarmopvolgingsdiensten in heel Europa.</li></ul><p>Wilt u weten wat de mogelijkheden voor uw situatie zijn? Neem dan contact met ons op via 088 122 11 11.</p>"
+          }
+        },
+        "faq34": {
+          "type": "faq",
+          "settings": {
+            "category": "Onderhoud en service",
+            "question": "Wat houdt een onderhouds- of servicecontract precies in?",
+            "answer": "<p>Met een servicecontract maakt u het hele jaar door, 24 uur per dag, onbeperkt gebruik van onze technische dienst. Onze storingsmonteurs kunnen op afstand meekijken, problemen voor u oplossen en helpen om het alarmsysteem naar uw wensen in te richten. Bovendien krijgt u voorrang bij onze technische dienst.</p><p>Daarnaast voeren wij eenmaal per jaar een servicebeurt uit aan uw alarmsysteem, bij u thuis of op de zaak. Wij houden zelf in de gaten wanneer uw jaarlijkse onderhoudsmoment plaatsvindt, zodat u daar geen omkijken naar heeft. Waar nodig voeren wij op afstand beveiligingsupdates uit, zodat uw systeem altijd optimaal beveiligd is.</p><p><strong>Wat gebeurt er tijdens de servicebeurt?</strong></p><p>Tijdens de servicebeurt vervangen wij niet alleen de batterijen. Wij controleren, meten door, reinigen en stellen bij:</p><ul><li>de centrale controle- en stuureenheid (CCS);</li><li>alle gemonteerde detectoren;</li><li>de communicatieverbinding met de alarmgevers, zowel akoestisch als optisch;</li><li>de in- en uitschakelapparatuur;</li><li>de energievoorziening van de CCS en de noodvoeding, zoals omschreven in het beveiligingsplan.</li></ul><p>Ook kijkt de monteur samen met u of alle instellingen nog naar wens zijn. Wilt u gebruikers toevoegen of codes wijzigen, dan regelt de monteur dat direct. Daarnaast kunt u uw systeem tijdens dit bezoek uitbreiden zonder extra installatie- en voorrijkosten; u betaalt dan alleen de kosten van het component zelf. Denk bijvoorbeeld aan een digitale deurbel met camera.</p>"
+          }
+        },
+        "faq35": {
+          "type": "faq",
+          "settings": {
+            "category": "Onderhoud en service",
+            "question": "De monteur is nog niet langs geweest, maar ik heb wel al een factuur ontvangen",
+            "answer": "<p>Het kan voorkomen dat u de factuur al ontvangt voordat onze monteur bij u is langs geweest. Dat klopt: u heeft een servicecontract voor een heel jaar. Het bedrag dat u jaarlijks betaalt, geldt voor een volledig jaar aan extra service, waar het jaarlijkse bezoek van de monteur onderdeel van is.</p><p>De monteur komt dus zeker nog bij u langs. Eén maand voorafgaand aan de afspraak mailen wij u de exacte datum. Wilt u eerder weten wanneer uw afspraak plaatsvindt? Bel of mail ons dan gerust.</p>"
+          }
+        },
+        "faq36": {
+          "type": "faq",
+          "settings": {
+            "category": "Onderhoud en service",
+            "question": "Zijn er naast de abonnements- en huurkosten nog andere kosten?",
+            "answer": "<p>Naast de abonnements- en huurkosten zijn er geen vaste kosten waar u rekening mee hoeft te houden, met uitzondering van het vervangen van lege batterijen. Deze gebruiksartikelen vallen niet onder het onderhoud en schaft u zelf aan.</p><p>Zo Veilig brengt wel kosten in rekening voor het verhuizen van uw alarmsysteem, het bestellen en installeren van extra componenten, en voor een bezoek van de monteur wanneer het systeem door eigen toedoen niet meer werkt. Deze kosten nemen wij altijd vooraf met u door.</p>"
+          }
+        },
+        "faq37": {
+          "type": "faq",
+          "settings": {
+            "category": "Facturen en betalen",
+            "question": "Hoe kan ik betalen?",
+            "answer": "<p>Heeft u ons gemachtigd voor automatische incasso, dan hoeft u niets te doen. Wij schrijven het factuurbedrag automatisch af.</p><p>Heeft u geen machtiging afgegeven, dan verzoeken wij u vriendelijk de betaling binnen de gestelde termijn te voldoen. Dat kan op twee manieren:</p><ul><li>via iDEAL, door onderaan de e-mail op de blauwe knop Nu betalen te klikken;</li><li>door het bedrag zelf over te maken, onder vermelding van uw klantnummer en factuurnummer.</li></ul><p>Heeft u naar aanleiding van uw factuur nog vragen? Neem dan gerust contact met ons op.</p>"
+          }
+        },
+        "faq38": {
+          "type": "faq",
+          "settings": {
+            "category": "Facturen en betalen",
+            "question": "Op welk rekeningnummer kan ik mijn betaling verrichten?",
+            "answer": "<p>U kunt uw betaling overmaken naar NL04 ABNA 0980 9531 46 ten name van Zo Veilig, onder vermelding van uw klantnummer en factuurnummer.</p>"
+          }
+        },
+        "faq39": {
+          "type": "faq",
+          "settings": {
+            "category": "Facturen en betalen",
+            "question": "Hoe wijzig ik mijn betaalwijze?",
+            "answer": "<p>De meeste klanten kiezen voor automatische incasso. Dat is gratis, betrouwbaar en gemakkelijk. Bij deze manier van betalen schrijven wij het factuurbedrag maandelijks automatisch van uw rekening af. U betaalt daardoor altijd op tijd en kunt het bedrag tot 56 dagen na de factuurdatum laten terugstorten. De betaling verwerken wij binnen één werkdag.</p><p>Wilt u overstappen op automatische incasso, of uw rekeningnummer wijzigen? Download dan het wijzigingsformulier, vul dit volledig in, onderteken het en stuur het naar ons terug.</p><p><a href=\"/pages/klantenservice#contact\">Formulier bankrekening wijzigen (pdf)</a></p><p>U kunt het formulier per e-mail sturen naar klantenservice@zoveilig.nl of per post naar Zo Veilig, Xenonstraat 60, 1362 GG Almere.</p>"
+          }
+        },
+        "faq40": {
+          "type": "faq",
+          "settings": {
+            "category": "Facturen en betalen",
+            "question": "Waar vind ik de algemene voorwaarden?",
+            "answer": "<p>Onze algemene voorwaarden vindt u op onze website.</p><p><a href=\"/pages/klantenservice#contact\">Algemene voorwaarden Zo Veilig</a></p>"
+          }
+        },
+        "faq41": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Ik ga verhuizen. Wat zijn mijn mogelijkheden?",
+            "answer": "<p>Gaat u binnenkort verhuizen? Dan heeft u vier mogelijkheden. Neem contact met ons op via 088 122 11 11 of klantenservice@zoveilig.nl, dan bespreken wij samen welke optie het beste bij uw situatie past.</p><p><strong>Optie 1: uw alarmsysteem verhuist mee</strong></p><p>U demonteert het systeem zelf. Onze monteur installeert en test het systeem op uw nieuwe adres en levert het gebruiksklaar op.</p><p>Liever niet zelf demonteren? Dan verzorgt onze monteur zowel de demontage als de installatie op uw nieuwe adres. Ook dan wordt het systeem getest en gebruiksklaar opgeleverd.</p><p>Heeft u uitsluitend videocomponenten, dan gelden hiervoor afwijkende tarieven. Wij informeren u vooraf over de kosten.</p><p><strong>Optie 2: het contract wordt overgenomen</strong></p><p>Het beveiligingssysteem en het contract met de bijbehorende betalingsverplichtingen kunnen worden overgenomen, bijvoorbeeld door de nieuwe bewoners. Hoe u dit regelt, leest u bij 'Hoe laat ik mijn contract overnemen?'.</p><p><strong>Optie 3: opzeggen per einddatum van het contract</strong></p><p>Wij verwerken uw opzegging per de einddatum van uw contract. Onze dienstverlening en uw betalingsverplichting lopen dan tot die datum door. Na afloop verzoeken wij u de gehuurde producten aan ons te retourneren. Uiteraard doen wij er tot die tijd alles aan om ervoor te zorgen dat u naar tevredenheid gebruik kunt blijven maken van onze dienstverlening.</p><p><strong>Optie 4: het contract afkopen</strong></p><p>Tot slot kunt u de resterende verplichtingen afkopen. Wilt u een afkoopvoorstel ontvangen? Laat het ons weten, dan stellen wij dit voor u op.</p><p><strong>Een beveiligingssysteem in uw nieuwe woning?</strong></p><p>Wilt u ook in uw nieuwe woning een beveiligingssysteem? Laat het ons weten, dan doen wij u graag een passend voorstel. Onze monteur kan de nieuwe woning bezoeken om samen met u de beveiliging door te nemen en een passende offerte uit te brengen.</p>"
+          }
+        },
+        "faq42": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Ik wil korting op mijn huidige abonnement",
+            "answer": "<p>Is uw contractperiode verlopen? Dan komt u mogelijk in aanmerking voor een korting op uw huidige abonnement. Benieuwd welke korting voor u geldt? Neem contact op met een van onze klantenservicemedewerkers via 088 122 11 11.</p>"
+          }
+        },
+        "faq43": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Kan ik mijn contract tijdelijk stopzetten?",
+            "answer": "<p>Het tijdelijk stopzetten van uw contract is mogelijk. Hiervoor gelden de volgende voorwaarden:</p><ul><li>Wij zetten uw contract voor minimaal 3 en maximaal 12 maanden stil. Hiervoor brengen wij administratiekosten in rekening.</li><li>Tijdens deze periode betaalt u geen maandelijkse kosten en kunt u het alarmsysteem niet gebruiken.</li><li>Geef de gewenste pauze minimaal één maand voor de ingangsdatum aan ons door.</li><li>Heeft u een betalingsachterstand? Voldoe deze dan eerst. Anders kunnen wij uw verzoek niet in behandeling nemen.</li><li>De ingangsdatum is altijd de eerste dag van de maand en de einddatum altijd de laatste dag van de maand.</li><li>Wij verlengen uw contract met de duur van de pauze.</li></ul>"
+          }
+        },
+        "faq44": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Hoe laat ik mijn contract overnemen?",
+            "answer": "<p>Het is mogelijk om uw contract over te laten nemen. Download hiervoor het overnameformulier en vul dit samen met de nieuwe eigenaar volledig in.</p><p><a href=\"/pages/klantenservice#contact\">Overnameformulier Zo Veilig (pdf)</a></p><p>Het is belangrijk dat de nieuwe eigenaar op de hoogte is van de resterende looptijd van de overeenkomst en van de maandelijkse kosten die aan het abonnement verbonden zijn.</p><p>Stuur het ondertekende formulier, samen met een kopie van een geldig legitimatiebewijs, per e-mail naar klantenservice@zoveilig.nl of per post naar Zo Veilig, Xenonstraat 60, 1362 GG Almere.</p>"
+          }
+        },
+        "faq45": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Opzeggen of overnemen bij overlijden",
+            "answer": "<p>Is een familielid of bekende van u overleden? Wij kunnen ons voorstellen dat het afhandelen van de zaken van een overledene niet altijd eenvoudig is. Daarom maken wij dit graag zo makkelijk mogelijk voor u.</p><p>Wij beëindigen het abonnement, of zetten dit op een andere naam. Om de beëindiging formeel te kunnen verwerken, vragen wij u de overlijdensakte aan te leveren.</p><p>U kunt de akte per e-mail sturen naar klantenservice@zoveilig.nl of per post naar Zo Veilig, Xenonstraat 60, 1362 GG Almere.</p>"
+          }
+        },
+        "faq46": {
+          "type": "faq",
+          "settings": {
+            "category": "Verhuizen, wijzigen en opzeggen",
+            "question": "Ik wil mijn contract opzeggen",
+            "answer": "<p>Wilt u opzeggen? Dat vinden wij jammer, want wij zijn blij met u als klant. Uiteraard regelen wij uw opzegging.</p><p>Belt u ons via 088 122 11 11. Onze medewerkers helpen u graag met uw opzegging of met persoonlijk advies. U kunt uw opzegging ook per e-mail sturen naar klantenservice@zoveilig.nl, of per post naar:</p><p>Zo Veilig B.V.<br>Xenonstraat 60<br>1362 GG Almere</p>"
+          }
+        },
+        "faq47": {
+          "type": "faq",
+          "settings": {
+            "category": "Afspraken en annuleren",
+            "question": "Mijn afspraakvoorstel komt niet gelegen. Hoe wijzig ik de afspraak?",
+            "answer": "<p>Reageert u bij voorkeur rechtstreeks op de e-mailuitnodiging en geeft u daarin uw beschikbaarheid door. U kunt ook telefonisch contact met ons opnemen via 088 122 11 11.</p><p>Onze klantenservice noteert uw voorkeuren. Binnen 48 uur ontvangt u per e-mail een reactie of een nieuwe uitnodiging.</p>"
+          }
+        },
+        "faq48": {
+          "type": "faq",
+          "settings": {
+            "category": "Afspraken en annuleren",
+            "question": "Kan ik mijn bestelling binnen 14 dagen annuleren?",
+            "answer": "<p>Bent u onverhoopt niet tevreden over een van onze producten? Dat vinden wij vervelend om te horen. Wij gaan graag met u in gesprek om samen naar een oplossing te zoeken, zodat u het product alsnog naar tevredenheid kunt gebruiken.</p><p><strong>Wilt u toch afzien van de aanschaf?</strong></p><p>Bij de aankoop van ons product heeft u het recht om de overeenkomst binnen 14 dagen zonder opgave van redenen te ontbinden. Deze bedenktermijn gaat in op de dag van installatie van het beveiligingssysteem, of op de dag na ontvangst van het product.</p><p>U kunt het herroepingsformulier downloaden, digitaal invullen en naar ons versturen.</p><p><a href=\"/pages/klantenservice#contact\">Herroepingsformulier (pdf)</a></p><p>Stuur het formulier per e-mail naar klantenservice@zoveilig.nl of per post naar onderstaand adres. Herroept u een huurovereenkomst, stuur dan ook de gehuurde apparatuur mee. De apparatuur dient binnen vier weken na opzegging bij ons retour te zijn.</p><p>Zo Veilig B.V.<br>T.a.v. afdeling Installatie<br>Xenonstraat 60<br>1362 GG Almere</p>"
           }
         }
       },
@@ -108,9 +401,62 @@
         "faq10",
         "faq11",
         "faq12",
-        "faq13"
+        "faq13",
+        "faq14",
+        "faq15",
+        "faq16",
+        "faq17",
+        "faq18",
+        "faq19",
+        "faq20",
+        "faq21",
+        "faq22",
+        "faq23",
+        "faq24",
+        "faq25",
+        "faq26",
+        "faq27",
+        "faq28",
+        "faq29",
+        "faq30",
+        "faq31",
+        "faq32",
+        "faq33",
+        "faq34",
+        "faq35",
+        "faq36",
+        "faq37",
+        "faq38",
+        "faq39",
+        "faq40",
+        "faq41",
+        "faq42",
+        "faq43",
+        "faq44",
+        "faq45",
+        "faq46",
+        "faq47",
+        "faq48"
       ],
-      "settings": {}
+      "settings": {
+        "eyebrow": "Klantenservice",
+        "heading": "Waarmee kunnen wij u helpen?",
+        "intro": "Zoek een antwoord, blader door de veelgestelde vragen of neem direct persoonlijk contact met ons op.",
+        "search_placeholder": "Typ uw vraag of zoek op onderwerp",
+        "popular": "Alarm gaat af\nPincode wijzigen\nOp vakantie\nBatterijen vervangen",
+        "faq_heading": "Vind snel een antwoord",
+        "categories": "Uw alarmsysteem bedienen\nDe app, gebruikers en codes\nStoringen en meldingen\nCamera's en videodeurbel\nSlimme apparaten in huis\nMeldkamer en alarmopvolging\nOnderhoud en service\nFacturen en betalen\nVerhuizen, wijzigen en opzeggen\nAfspraken en annuleren",
+        "phone": "088 122 11 11",
+        "phone_hours": "Ma t/m do 8:30 tot 17:00 uur, vr 8:30 tot 13:00 uur.",
+        "email": "klantenservice@zoveilig.nl",
+        "email_sla": "Reactie binnen één werkdag.",
+        "cta_heading": "Wilt u klant worden?",
+        "cta_text": "Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl.",
+        "cta1_label": "Maak me wegwijs",
+        "cta1_url": "/pages/oplossingen",
+        "cta2_label": "Hoe het werkt",
+        "cta2_url": "/pages/hoe-het-werkt"
+      }
     }
   },
   "order": [
