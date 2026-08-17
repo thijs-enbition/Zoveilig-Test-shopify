@@ -1301,7 +1301,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 (function () {
   function submitLead(payload) {
     var rec = Object.assign({ ts: Date.now() }, payload);
-    if (window.ZV_LEAD_ENDPOINT) { try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rec) }).catch(function () {}); } catch (e) {} }
+    if (window.ZV_LEAD_ENDPOINT) { try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(rec), keepalive: true, mode: 'no-cors' }).catch(function () {}); } catch (e) {} }
     try { var L = JSON.parse(localStorage.getItem('zv_leads') || '[]'); L.push(rec); localStorage.setItem('zv_leads', JSON.stringify(L)); } catch (e) {}
   }
   function init() {
@@ -1329,7 +1329,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   function submitLead(payload) {
     var rec = Object.assign({ ts: Date.now() }, payload);
     if (window.ZV_LEAD_ENDPOINT) {
-      try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rec) }).catch(function () {}); } catch (e) {}
+      try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(rec), keepalive: true, mode: 'no-cors' }).catch(function () {}); } catch (e) {}
     }
     try { var L = JSON.parse(localStorage.getItem('zv_leads') || '[]'); L.push(rec); localStorage.setItem('zv_leads', JSON.stringify(L)); } catch (e) {}
   }

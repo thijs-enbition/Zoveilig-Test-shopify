@@ -180,7 +180,7 @@
     var payload={ lead_type:'vista', source_page:'camera-hardware', name:name, phone:phone, email:email||null,
       cta_location:'camera_hardware_page', source:captureSource() };
     if (window.ZV_LEAD_ENDPOINT) {
-      fetch(window.ZV_LEAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }).catch(function(){});
+      fetch(window.ZV_LEAD_ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body: JSON.stringify(payload), keepalive:true, mode:'no-cors' }).catch(function(){});
     }
     try{ var leads=JSON.parse(localStorage.getItem('zv_leads')||'[]'); leads.push(payload); localStorage.setItem('zv_leads', JSON.stringify(leads)); }catch(ex){}
     document.getElementById('camContact').style.display='none';

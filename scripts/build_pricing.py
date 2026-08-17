@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 """
-Zo Veilig pricing builder.
+Zo Veilig pricing builder (v3 intro-promo model).
 
-Reads pricing.config.json (inputs only) and derives every money value exactly once:
+Reads pricing.config.json (INPUTS only) and derives every money value once:
 
-    initialCommitmentAmount = monthlyRecurringPrice * commitment.multiplier
-    initialPaymentDueToday  = activationPrice + initialCommitmentAmount
-    indicativeContractValue = activationPrice + initialCommitmentAmount + remaining recurring
+    promoMonthly           = monthly * (1 - promo.rate)              [half-up]
+    promoDiscountTotal      = promo.months * monthly * promo.rate    [half-up]
+    initialPaymentDueToday  = activation            (activation ONLY)
+    indicativeContractValue = activation + monthly*term - promoDiscountTotal
+
+The 1.5x 'eerste vooruitbetaling' commitment is RETIRED (was v2). Today's payment is
+the activation only; the intro promo (50% off the first 3 monthly SEPA instalments)
+replaces the prepayment. Odoo applies the promo to the recurring invoices; the theme
+only displays it.
 
 Emits:
     pricing.generated.json          machine-readable, for checks / JS / dataLayer
-    ../theme/snippets/zv-pricing.liquid   single source the theme renders from
+    ../snippets/zv-pricing.liquid   single source the theme renders from
 
-Money is integer cents throughout. Rounding is ROUND_HALF_UP, never banker's rounding:
-1.5 * 2495 = 3742.5 must become 3743 (EUR 37,43), not 3742.
-
-Run:  python3 build_pricing.py
+Money is integer cents throughout. Rounding is ROUND_HALF_UP, never banker's.
+Run:  python3 scripts/build_pricing.py
 """
 
 from decimal import Decimal, ROUND_HALF_UP
@@ -47,10 +51,13 @@ def build():
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
 
     activation_cents = cfg["activation"]["amountCents"]
-    multiplier = Decimal(str(cfg["commitment"]["multiplier"]))
     default_term = cfg["contract"]["defaultTermMonths"]
     enabled_terms = [o["months"] for o in cfg["contract"]["options"] if o["enabled"]]
-    credit = cfg["commitment"]["creditTreatment"]
+
+    promo = cfg["promo"]
+    promo_enabled = bool(promo.get("enabled", True))
+    promo_months = int(promo["months"])
+    promo_rate = Decimal(str(promo["ratePercent"])) / Decimal(100)
 
     out = {
         "generatedFrom": "pricing.config.json",
@@ -59,7 +66,15 @@ def build():
         "rounding": cfg["rounding"],
         "activation": {"amountCents": activation_cents, "display": eur(activation_cents),
                        "label": cfg["labels"]["activation"]},
-        "commitment": {"multiplier": float(multiplier), "label": cfg["labels"]["commitment"]},
+        "promo": {
+            "enabled": promo_enabled,
+            "months": promo_months,
+            "ratePercent": promo["ratePercent"],
+            "label": promo["label"],
+            "cardBadge": promo["cardBadge"],
+            "timelineLabel": promo["timelineLabel"],
+            "disclosure": promo["disclosure"],
+        },
         "contract": {"defaultTermMonths": default_term, "enabledTerms": enabled_terms},
         "labels": cfg["labels"],
         "packages": [],
@@ -84,28 +99,25 @@ def build():
                 "sub": pkg.get("sub"),
             }
 
-            if not is_priced(price):
+            # Not purchasable: explicit flag (e.g. Vista = advies) or no amount yet.
+            if pkg.get("purchasable") is False or not is_priced(price):
                 row.update({
                     "purchasable": False,
                     "pricingStatus": "PRICE_PENDING",
                     "monthlyDisplay": price.get("display", cfg["labels"]["pricePending"]),
+                    "cta": pkg.get("cta"),
+                    "ctaLabel": pkg.get("ctaLabel"),
                 })
                 out["packages"].append(row)
                 continue
 
             monthly = price["amountCents"]
-            commitment = cents_half_up(Decimal(monthly) * multiplier)
-            due_today = activation_cents + commitment
             term = pkg.get("termMonths", default_term)
 
-            # Indicative contract value, computed BOTH ways because the Odoo
-            # treatment is unresolved. Neither is authoritative yet.
-            # credited: the prepayment covers the first 1.5 months, so only the
-            #           remaining months are invoiced. No period counted twice.
-            # separate: the prepayment is additional, all term months are invoiced.
-            remaining_credited = (Decimal(term) - multiplier) * Decimal(monthly)
-            icv_credited = activation_cents + commitment + cents_half_up(remaining_credited)
-            icv_separate = activation_cents + commitment + (monthly * term)
+            promo_monthly = cents_half_up(Decimal(monthly) * (Decimal(1) - promo_rate)) if promo_enabled else monthly
+            promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
+            due_today = activation_cents  # activation ONLY; commitment retired
+            icv = activation_cents + (monthly * term) - promo_discount_total
 
             row.update({
                 "purchasable": True,
@@ -113,27 +125,20 @@ def build():
                 "termMonths": term,
                 "monthlyRecurringPriceCents": monthly,
                 "monthlyDisplay": eur(monthly),
-                "initialCommitmentAmountCents": commitment,
-                "initialCommitmentDisplay": eur(commitment),
+                "promoMonths": promo_months if promo_enabled else 0,
+                "promoMonthlyCents": promo_monthly,
+                "promoMonthlyDisplay": eur(promo_monthly),
+                "promoDiscountTotalCents": promo_discount_total,
+                "promoDiscountTotalDisplay": eur(promo_discount_total),
                 "activationPriceCents": activation_cents,
                 "activationDisplay": eur(activation_cents),
                 "initialPaymentDueTodayCents": due_today,
                 "initialPaymentDueTodayDisplay": eur(due_today),
                 "indicativeContractValue": {
-                    "status": "UNRESOLVED_PENDING_ODOO",
-                    "selectedMethod": credit.get("selected"),
-                    "methods": {
-                        "credited": {
-                            "cents": icv_credited,
-                            "display": eur(icv_credited),
-                            "recurringMonthsBilled": float(Decimal(term) - multiplier),
-                        },
-                        "separate": {
-                            "cents": icv_separate,
-                            "display": eur(icv_separate),
-                            "recurringMonthsBilled": term,
-                        },
-                    },
+                    "status": "CURRENT_WORKING",
+                    "cents": icv,
+                    "display": eur(icv),
+                    "recurringMonthsBilled": term,
                     "label": cfg["labels"]["indicativeContractValue"],
                 },
             })
@@ -167,14 +172,12 @@ def build():
 
     GENERATED.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    # Theme materialisation. Liquid cannot parse JSON at render time, so the
-    # generated data is emitted as a JSON island for JS (configurator, cart,
-    # dataLayer) plus per-package Liquid assigns for server-rendered display.
+    # Theme materialisation: JSON island for JS + per-package Liquid assigns.
     lines = [
         "{%- comment -%}",
         "  GENERATED FILE. Do not edit by hand.",
-        "  Source: website/pricing/pricing.config.json",
-        "  Rebuild: python3 website/pricing/build_pricing.py",
+        "  Source: pricing/pricing.config.json",
+        "  Rebuild: python3 scripts/build_pricing.py",
         "  Single source of truth for every customer-visible price and duration.",
         "{%- endcomment -%}",
         "",
@@ -182,32 +185,39 @@ def build():
         json.dumps(out, ensure_ascii=False, separators=(",", ":")),
         "</script>",
         "",
+        f"{{%- assign zv_promo_months = {out['promo']['months']} -%}}",
+        f"{{%- assign zv_promo_badge = '{out['promo']['cardBadge']}' -%}}",
+        f"{{%- assign zv_promo_timeline = '{out['promo']['timelineLabel']}' -%}}",
+        f"{{%- assign zv_promo_disclosure = '{out['promo']['disclosure']}' -%}}",
     ]
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")
         if not p.get("purchasable"):
             lines.append(f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}")
+            if p.get("ctaLabel"):
+                lines.append(f"{{%- assign zv_{pid}_cta = '{p['ctaLabel']}' -%}}")
             continue
         lines += [
             f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_monthly = '{p['promoMonthlyDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",
-            f"{{%- assign zv_{pid}_commitment = '{p['initialCommitmentDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_term = {p['termMonths']} -%}}",
+            f"{{%- assign zv_{pid}_icv = '{p['indicativeContractValue']['display']}' -%}}",
         ]
     SNIPPET.parent.mkdir(parents=True, exist_ok=True)
     SNIPPET.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     priced = [p for p in out["packages"] if p.get("purchasable")]
-    print(f"wrote {GENERATED.name} and theme/snippets/{SNIPPET.name}")
+    print(f"wrote {GENERATED.name} and snippets/{SNIPPET.name}")
     print(f"  packages: {len(out['packages'])} ({len(priced)} purchasable)")
-    print(f"  activation: {eur(activation_cents)} | multiplier: {multiplier} | default term: {default_term}m")
+    print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
     for p in priced:
         print(f"  - {p['lineName']}/{p['name']}: monthly {p['monthlyDisplay']}"
-              f" | commitment {p['initialCommitmentDisplay']}"
+              f" | promo {p['promoMonthlyDisplay']} (-{p['promoDiscountTotalDisplay']})"
               f" | due today {p['initialPaymentDueTodayDisplay']}"
-              f" | ICV credited {p['indicativeContractValue']['methods']['credited']['display']}"
-              f" / separate {p['indicativeContractValue']['methods']['separate']['display']}")
+              f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']}")
 
 
 if __name__ == "__main__":

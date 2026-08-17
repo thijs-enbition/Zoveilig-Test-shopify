@@ -1,6 +1,6 @@
 {
   "generatedFrom": "pricing.config.json",
-  "configVersion": "2.0.0",
+  "configVersion": "3.0.0",
   "currency": "EUR",
   "rounding": {
     "method": "ROUND_HALF_UP",
@@ -13,13 +13,19 @@
     "display": "€ 49,00",
     "label": "Eenmalige activatie en installatie"
   },
-  "commitment": {
-    "multiplier": 1.5,
-    "label": "Eerste vooruitbetaling"
+  "promo": {
+    "enabled": true,
+    "months": 3,
+    "ratePercent": 50,
+    "label": "Korting eerste 3 maanden (50%)",
+    "cardBadge": "50% korting",
+    "timelineLabel": "Eerste 3 maanden",
+    "disclosure": "Indicatief. De eerste 3 maanden ontvangt uw 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)."
   },
   "contract": {
     "defaultTermMonths": 36,
     "enabledTerms": [
+      12,
       36
     ]
   },
@@ -60,27 +66,20 @@
       "termMonths": 36,
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
-      "initialCommitmentAmountCents": 2993,
-      "initialCommitmentDisplay": "€ 29,93",
+      "promoMonths": 3,
+      "promoMonthlyCents": 998,
+      "promoMonthlyDisplay": "€ 9,98",
+      "promoDiscountTotalCents": 2993,
+      "promoDiscountTotalDisplay": "€ 29,93",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 7893,
-      "initialPaymentDueTodayDisplay": "€ 78,93",
+      "initialPaymentDueTodayCents": 4900,
+      "initialPaymentDueTodayDisplay": "€ 49,00",
       "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 76721,
-            "display": "€ 767,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 79713,
-            "display": "€ 797,13",
-            "recurringMonthsBilled": 36
-          }
-        },
+        "status": "CURRENT_WORKING",
+        "cents": 73727,
+        "display": "€ 737,27",
+        "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -99,27 +98,20 @@
       "termMonths": 36,
       "monthlyRecurringPriceCents": 2495,
       "monthlyDisplay": "€ 24,95",
-      "initialCommitmentAmountCents": 3743,
-      "initialCommitmentDisplay": "€ 37,43",
+      "promoMonths": 3,
+      "promoMonthlyCents": 1248,
+      "promoMonthlyDisplay": "€ 12,48",
+      "promoDiscountTotalCents": 3743,
+      "promoDiscountTotalDisplay": "€ 37,43",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 8643,
-      "initialPaymentDueTodayDisplay": "€ 86,43",
+      "initialPaymentDueTodayCents": 4900,
+      "initialPaymentDueTodayDisplay": "€ 49,00",
       "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 94721,
-            "display": "€ 947,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 98463,
-            "display": "€ 984,63",
-            "recurringMonthsBilled": 36
-          }
-        },
+        "status": "CURRENT_WORKING",
+        "cents": 90977,
+        "display": "€ 909,77",
+        "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -138,27 +130,20 @@
       "termMonths": 36,
       "monthlyRecurringPriceCents": 3995,
       "monthlyDisplay": "€ 39,95",
-      "initialCommitmentAmountCents": 5993,
-      "initialCommitmentDisplay": "€ 59,93",
+      "promoMonths": 3,
+      "promoMonthlyCents": 1998,
+      "promoMonthlyDisplay": "€ 19,98",
+      "promoDiscountTotalCents": 5993,
+      "promoDiscountTotalDisplay": "€ 59,93",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 10893,
-      "initialPaymentDueTodayDisplay": "€ 108,93",
+      "initialPaymentDueTodayCents": 4900,
+      "initialPaymentDueTodayDisplay": "€ 49,00",
       "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 148721,
-            "display": "€ 1.487,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 154713,
-            "display": "€ 1.547,13",
-            "recurringMonthsBilled": 36
-          }
-        },
+        "status": "CURRENT_WORKING",
+        "cents": 142727,
+        "display": "€ 1.427,27",
+        "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -174,30 +159,23 @@
       "sub": "NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera",
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
-      "termMonths": 36,
+      "termMonths": 12,
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
-      "initialCommitmentAmountCents": 2993,
-      "initialCommitmentDisplay": "€ 29,93",
+      "promoMonths": 3,
+      "promoMonthlyCents": 998,
+      "promoMonthlyDisplay": "€ 9,98",
+      "promoDiscountTotalCents": 2993,
+      "promoDiscountTotalDisplay": "€ 29,93",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 7893,
-      "initialPaymentDueTodayDisplay": "€ 78,93",
+      "initialPaymentDueTodayCents": 4900,
+      "initialPaymentDueTodayDisplay": "€ 49,00",
       "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 76721,
-            "display": "€ 767,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 79713,
-            "display": "€ 797,13",
-            "recurringMonthsBilled": 36
-          }
-        },
+        "status": "CURRENT_WORKING",
+        "cents": 25847,
+        "display": "€ 258,47",
+        "recurringMonthsBilled": 12,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -208,7 +186,7 @@
       "lineName": "Mijn Thuis",
       "cat": "security",
       "platform": "Climax",
-      "badge": null,
+      "badge": "Meest gekozen",
       "hook": "Alarm met 24/7 meldkamer die meekijkt.",
       "sub": "Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel",
       "purchasable": true,
@@ -216,27 +194,20 @@
       "termMonths": 36,
       "monthlyRecurringPriceCents": 3495,
       "monthlyDisplay": "€ 34,95",
-      "initialCommitmentAmountCents": 5243,
-      "initialCommitmentDisplay": "€ 52,43",
+      "promoMonths": 3,
+      "promoMonthlyCents": 1748,
+      "promoMonthlyDisplay": "€ 17,48",
+      "promoDiscountTotalCents": 5243,
+      "promoDiscountTotalDisplay": "€ 52,43",
       "activationPriceCents": 4900,
       "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 10143,
-      "initialPaymentDueTodayDisplay": "€ 101,43",
+      "initialPaymentDueTodayCents": 4900,
+      "initialPaymentDueTodayDisplay": "€ 49,00",
       "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 130721,
-            "display": "€ 1.307,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 135963,
-            "display": "€ 1.359,63",
-            "recurringMonthsBilled": 36
-          }
-        },
+        "status": "CURRENT_WORKING",
+        "cents": 125477,
+        "display": "€ 1.254,77",
+        "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -250,34 +221,11 @@
       "badge": null,
       "hook": "Complete beveiliging met meldkamer én camera.",
       "sub": "Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera",
-      "purchasable": true,
-      "pricingStatus": "CURRENT_WORKING",
-      "termMonths": 36,
-      "monthlyRecurringPriceCents": 3995,
-      "monthlyDisplay": "€ 39,95",
-      "initialCommitmentAmountCents": 5993,
-      "initialCommitmentDisplay": "€ 59,93",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 10893,
-      "initialPaymentDueTodayDisplay": "€ 108,93",
-      "indicativeContractValue": {
-        "status": "UNRESOLVED_PENDING_ODOO",
-        "selectedMethod": null,
-        "methods": {
-          "credited": {
-            "cents": 148721,
-            "display": "€ 1.487,21",
-            "recurringMonthsBilled": 34.5
-          },
-          "separate": {
-            "cents": 154713,
-            "display": "€ 1.547,13",
-            "recurringMonthsBilled": 36
-          }
-        },
-        "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
-      }
+      "purchasable": false,
+      "pricingStatus": "PRICE_PENDING",
+      "monthlyDisplay": "Op maat",
+      "cta": "advies",
+      "ctaLabel": "Vraag persoonlijk advies"
     },
     {
       "id": "vo-sos",
@@ -291,7 +239,9 @@
       "sub": "Prijs en specs volgen",
       "purchasable": false,
       "pricingStatus": "PRICE_PENDING",
-      "monthlyDisplay": "Prijs volgt"
+      "monthlyDisplay": "Prijs volgt",
+      "cta": null,
+      "ctaLabel": null
     },
     {
       "id": "vo-zorg",
@@ -305,7 +255,9 @@
       "sub": "Prijs en specs volgen",
       "purchasable": false,
       "pricingStatus": "PRICE_PENDING",
-      "monthlyDisplay": "Prijs volgt"
+      "monthlyDisplay": "Prijs volgt",
+      "cta": null,
+      "ctaLabel": null
     }
   ],
   "addons": [
@@ -434,7 +386,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is activationPrice + initialCommitmentAmount. Never send activationPrice alone.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is the activation only. The 1.5x prepayment is retired; the intro promo is applied to the SEPA monthly, not collected today.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -445,17 +397,16 @@
     "momentB": {
       "event": "contract_signed_offline",
       "valueSource": "indicativeContractValue",
-      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until commitment.creditTreatment is resolved.",
+      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms the intro promo is applied to the first 3 SEPA instalments.",
       "status": "BLOCKED_PENDING_ODOO"
     }
   },
   "unresolved": [
     {
-      "id": "ODOO_COMMITMENT_TREATMENT",
-      "severity": "blocker",
-      "summary": "Odoo administrator must confirm whether the 1.5x prepayment is credited against the first 1.5 months of invoices or is a separate non-refundable payment, when recurring invoicing starts, and how the half month is represented. Until confirmed, indicativeContractValue is computed both ways and neither is authoritative.",
+      "id": "ODOO_PROMO_DISCOUNT",
+      "severity": "high",
+      "summary": "Odoo Subscriptions must apply the intro promo (50% off the first 3 monthly SEPA instalments) on the recurring invoices. The theme only displays it. If Odoo does not apply it, the displayed discount and the actual billing diverge.",
       "blocks": [
-        "indicativeContractValue",
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],

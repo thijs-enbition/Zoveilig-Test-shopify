@@ -95,11 +95,14 @@
 
       window.fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead)
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(lead),
+        keepalive: true,
+        mode: 'no-cors'
       })
-        .then(function (res) {
-          if (!res.ok) throw new Error('status ' + res.status);
+        .then(function () {
+          // Cross-origin webhook returns an opaque response (no CORS headers),
+          // so we can't read status. The POST still reaches Odoo; treat as sent.
           form.reset();
           setStatus(form, 'Bedankt. We bellen u terug op het gekozen moment.', 'success');
           if (ZV.callbackRequestSuccess) ZV.callbackRequestSuccess(ctx(form));

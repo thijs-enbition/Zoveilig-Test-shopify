@@ -3,6 +3,7 @@
   "presets": {
     "Default": {
       "logo_width": 90,
+      "callback_endpoint": "https://zoveilig-2026-06-15-36420254.dev.odoo.com/web/hook/beac0ffd-97d8-476e-aaaf-28f8d38caf0a",
       "color_schemes": {
         "scheme-1": {
           "settings": {

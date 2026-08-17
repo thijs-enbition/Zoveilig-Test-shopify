@@ -1,12 +1,12 @@
 {
   "$schema": "./pricing.schema.json",
   "meta": {
-    "version": "2.0.0",
+    "version": "3.0.0",
     "status": "WORKING_SOURCE_OF_TRUTH",
-    "decidedOn": "2026-07-16",
-    "decidedBy": "Operator commercial decisions, 2026-07-16",
-    "principle": "This file holds INPUTS only. Every derived value (initial commitment, amount due today, indicative contract value) is computed once by build_pricing.py and emitted to pricing.generated.json plus snippets/zv-pricing.liquid. No page, cart, configurator, confirmation or analytics event may compute or hardcode a price or duration independently.",
-    "supersedes": "pricing.config.json v1.0.0 (extraction of the design pack, 2026-07-16)"
+    "decidedOn": "2026-08-17",
+    "decidedBy": "Operator commercial decision, 2026-08-17 (intro promo model)",
+    "principle": "This file holds INPUTS only. Every derived value (promo monthly, promo discount, amount due today, indicative contract value) is computed once by build_pricing.py and emitted to pricing.generated.json plus snippets/zv-pricing.liquid. No page, cart, configurator, confirmation or analytics event may compute or hardcode a price or duration independently.",
+    "supersedes": "pricing.config.json v2.0.0 (1.5x 'eerste vooruitbetaling' commitment model). The commitment prepayment is retired; today's payment is the activation only, and an intro promo of 50% off the first 3 monthly SEPA instalments replaces it. This resolves the v2 ODOO_COMMITMENT_TREATMENT blocker."
   },
   "currency": "EUR",
   "rounding": {
@@ -31,6 +31,9 @@
   },
   "commitment": {
     "id": "initial-commitment",
+    "retired": true,
+    "retiredBy": "promo v3.0.0 (2026-08-17)",
+    "retiredNote": "The 1.5x prepayment is no longer collected today. Kept for history only; build_pricing.py no longer reads it. Today's payment is the activation only; the intro promo (see 'promo') replaces the prepayment.",
     "multiplier": 1.5,
     "basis": "monthlyRecurringPrice",
     "label": "Eerste vooruitbetaling",
@@ -64,14 +67,28 @@
       ]
     }
   },
+  "promo": {
+    "id": "intro-3-months-50",
+    "enabled": true,
+    "months": 3,
+    "ratePercent": 50,
+    "basis": "monthlyRecurringPrice",
+    "collectedVia": "sepa-monthly",
+    "label": "Korting eerste 3 maanden (50%)",
+    "cardBadge": "50% korting",
+    "timelineLabel": "Eerste 3 maanden",
+    "disclosure": "Indicatief. De eerste 3 maanden ontvangt uw 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%).",
+    "note": "50% off the monthly amount for the first 3 SEPA instalments. Odoo must apply this discount to the first 3 recurring invoices; the theme only displays it. Replaces the retired 1.5x prepayment."
+  },
   "contract": {
     "defaultTermMonths": 36,
     "storedPer": "package",
     "options": [
       {
         "months": 12,
-        "enabled": false,
-        "requiresApproval": true
+        "enabled": true,
+        "requiresApproval": false,
+        "note": "Enabled 2026-08-17 for Mijn Thuis Alert."
       },
       {
         "months": 24,
@@ -158,11 +175,12 @@
             "display": "€19,95",
             "per": "/mnd"
           },
-          "termMonths": 36
+          "termMonths": 12
         },
         {
           "id": "protect",
           "name": "Protect",
+          "badge": "Meest gekozen",
           "platform": "Climax",
           "platformMappingConfidence": "inferred_from_price_level",
           "hook": "Alarm met 24/7 meldkamer die meekijkt.",
@@ -181,12 +199,13 @@
           "platformMappingConfidence": "inferred_from_price_level",
           "hook": "Complete beveiliging met meldkamer én camera.",
           "sub": "Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera",
+          "purchasable": false,
+          "cta": "advies",
+          "ctaLabel": "Vraag persoonlijk advies",
           "monthlyRecurringPrice": {
-            "amountCents": 3995,
-            "display": "€39,95",
-            "per": "/mnd"
-          },
-          "termMonths": 36
+            "status": "CUSTOM_ADVIES",
+            "display": "Op maat"
+          }
         }
       ]
     },
@@ -397,7 +416,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is activationPrice + initialCommitmentAmount. Never send activationPrice alone.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is the activation only. The 1.5x prepayment is retired; the intro promo is applied to the SEPA monthly, not collected today.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -408,7 +427,7 @@
     "momentB": {
       "event": "contract_signed_offline",
       "valueSource": "indicativeContractValue",
-      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until commitment.creditTreatment is resolved.",
+      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms the intro promo is applied to the first 3 SEPA instalments.",
       "status": "BLOCKED_PENDING_ODOO"
     }
   },
@@ -473,11 +492,10 @@
   ],
   "unresolved": [
     {
-      "id": "ODOO_COMMITMENT_TREATMENT",
-      "severity": "blocker",
-      "summary": "Odoo administrator must confirm whether the 1.5x prepayment is credited against the first 1.5 months of invoices or is a separate non-refundable payment, when recurring invoicing starts, and how the half month is represented. Until confirmed, indicativeContractValue is computed both ways and neither is authoritative.",
+      "id": "ODOO_PROMO_DISCOUNT",
+      "severity": "high",
+      "summary": "Odoo Subscriptions must apply the intro promo (50% off the first 3 monthly SEPA instalments) on the recurring invoices. The theme only displays it. If Odoo does not apply it, the displayed discount and the actual billing diverge.",
       "blocks": [
-        "indicativeContractValue",
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],
