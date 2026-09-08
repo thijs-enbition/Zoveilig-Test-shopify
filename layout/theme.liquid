@@ -68,6 +68,17 @@
       <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
+    {%- comment -%}
+      Shopify renders /policies/* through its own fixed markup and ignores
+      templates/policy.liquid entirely (confirmed empirically). This
+      reskins that fixed markup client-side to match the site's legal-page
+      design. See assets/zv-policy-enhance.js for details.
+    {%- endcomment -%}
+    {%- if template.name == 'policy' -%}
+      <link rel="stylesheet" href="{{ 'zv-policy.css' | asset_url }}">
+      <script src="{{ 'zv-policy-enhance.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
     {{ content_for_header }}
 
     {%- comment -%} Zo Veilig — single lead endpoint for every callback/contact form (Odoo CRM webhook or proxy). Blank = leads stay local. {%- endcomment -%}

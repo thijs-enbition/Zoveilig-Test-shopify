@@ -1,0 +1,50 @@
+/*
+  zv-policy.css — reskins Shopify's fixed shop-policy markup
+  (.shopify-policy__container / __title / __body), which Shopify renders
+  itself and does NOT allow a theme template to replace. Loaded only on
+  template.name == 'policy'. Paired with zv-policy-enhance.js, which adds
+  the classes/structure this file styles. Visual language matches
+  sections/legal-page.liquid (same tokens) so /policies/* looks consistent
+  with the rest of the site's legal pages.
+*/
+.zv-policy-page { color:#1a1230; }
+.zv-policy-page .crumb { max-width:1000px; margin:0 auto; padding:14px clamp(20px,3.6vw,52px) 0; font-size:13px; font-weight:700; color:#8c84a6; display:flex; gap:8px; align-items:center; }
+.zv-policy-page .crumb a { color:#8c84a6; text-decoration:none; }
+.zv-policy-page .crumb a:hover { text-decoration:underline; }
+.zv-policy-page .crumb .cur { color:#463f5c; }
+
+.zv-policy-page .policy-hero {
+  position:relative; overflow:hidden; color:#fff;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 2px, transparent 2px 34px),
+    linear-gradient(180deg,#2c3076 0%,#241c54 100%);
+  padding:clamp(28px,4vw,48px) 0 clamp(24px,3vw,36px);
+  margin-top:8px;
+}
+.zv-policy-page .policy-hero .wrap { max-width:1000px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-policy-page .policy-hero .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:#f5c84a; }
+.zv-policy-page .policy-hero .eyebrow .d { width:8px; height:8px; border-radius:50%; background:#e4a311; }
+.zv-policy-page .policy-hero h1 { color:#fff; font-size:clamp(30px,4vw,52px); font-weight:900; letter-spacing:-.02em; line-height:1.05; margin:14px 0 0; max-width:16ch; text-wrap:balance; }
+
+.zv-policy-page .policy-columns { background:#fdfaf2; padding:clamp(24px,3.4vw,44px) 0 clamp(56px,6vw,90px); }
+.zv-policy-page .policy-grid { max-width:1000px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); display:grid; grid-template-columns:240px 1fr; gap:clamp(28px,4vw,56px); align-items:start; }
+@media (max-width:860px) { .zv-policy-page .policy-grid { grid-template-columns:1fr; } .zv-policy-page .policy-toc { position:static; order:2; } }
+
+.zv-policy-page .policy-toc { position:sticky; top:24px; background:#fffdf8; border:1px solid #e7e0cf; border-radius:14px; padding:20px; }
+.zv-policy-page .toc-label { font-size:11.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#e4a311; margin:0 0 12px; }
+.zv-policy-page .policy-toc ol { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; counter-reset:toc; }
+.zv-policy-page .policy-toc li { counter-increment:toc; }
+.zv-policy-page .policy-toc a { display:flex; gap:8px; font-size:14px; font-weight:700; color:#322469; text-decoration:none; line-height:1.35; }
+.zv-policy-page .policy-toc a::before { content:counter(toc) "."; color:#e4a311; flex:none; }
+.zv-policy-page .policy-toc a:hover { text-decoration:underline; }
+.zv-policy-page .toc-updated { margin:16px 0 0; padding-top:14px; border-top:1px solid #e7e0cf; font-size:12.5px; font-weight:600; color:#6f6786; }
+
+.zv-policy-page .policy-body .lg-sec { scroll-margin-top:96px; }
+.zv-policy-page .policy-body h2 { font-size:22px; font-weight:900; color:#322469; letter-spacing:-.015em; line-height:1.2; margin-top:34px; padding-top:30px; border-top:1px solid #e7e0cf; }
+.zv-policy-page .policy-body > .lg-sec:first-of-type h2 { margin-top:0; padding-top:0; border-top:none; }
+.zv-policy-page .policy-body h2 .n { color:#e4a311; margin-right:8px; }
+.zv-policy-page .policy-body p { font-size:15.5px; font-weight:500; color:#463f5c; margin-top:14px; line-height:1.65; }
+.zv-policy-page .policy-body .lg-callout-warn { background:#fdf0f0; border:1px solid #f0d3d3; border-left:4px solid #c52e2f; border-radius:10px; padding:14px 16px; margin-top:14px; font-size:14px; font-weight:700; color:#8a2222; }
+.zv-policy-page .policy-body .policy-intro { margin-bottom:8px; }
+.zv-policy-page .policy-body table { border-collapse:collapse; margin-top:14px; }
+.zv-policy-page .policy-body td { padding:8px 14px 8px 0; font-size:14.5px; color:#463f5c; vertical-align:top; }
