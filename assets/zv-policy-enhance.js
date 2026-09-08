@@ -64,7 +64,9 @@
       }
 
       if (current) {
-        if (node.nodeType === 1 && node.tagName === 'P' && /^JURIDISCHE REVIEW VEREIST/i.test(node.textContent.trim())) {
+        // Review warnings appear both as plain <p> and as <div><table> blocks.
+        if (node.nodeType === 1 && (node.tagName === 'P' || node.tagName === 'DIV') &&
+            /^JURIDISCHE REVIEW VEREIST/i.test(node.textContent.trim())) {
           node.classList.add('lg-callout-warn');
         }
         current.appendChild(node);
