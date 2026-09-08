@@ -7,11 +7,28 @@
   completed with the company details (KvK, btw, adres).
 {%- endcomment -%}
 
+{%- comment -%}
+  This section is shared by two contexts:
+  1. Regular Pages using the "page.legal" template (page.title / page.content).
+  2. Shopify's built-in shop policies (Settings > Legal) using the "policy"
+     template, where content comes from the `policy` object instead of `page`.
+{%- endcomment -%}
+{%- liquid
+  assign lg_title = page.title
+  assign lg_content = page.content
+  assign lg_handle = page.handle
+  if template.name == 'policy'
+    assign lg_title = policy.title
+    assign lg_content = policy.body
+    assign lg_handle = ''
+  endif
+-%}
+
 <div class="zv-legal">
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | default: 'Juridisch' | escape }}</span>
-      <h1>{{ page.title | default: section.settings.fallback_title | escape }}</h1>
+      <h1>{{ lg_title | default: section.settings.fallback_title | escape }}</h1>
       {%- if section.settings.effective_date != blank -%}<p class="he-date">Laatst bijgewerkt: {{ section.settings.effective_date | escape }}</p>{%- endif -%}
     </div>
   </section>
@@ -28,10 +45,10 @@
   <section class="lg">
     <div class="wrap">
       <div class="lg-body rte">
-        {%- if page.content != blank -%}
-          {{ page.content }}
+        {%- if lg_content != blank -%}
+          {{ lg_content }}
         {%- else -%}
-          {%- case page.handle -%}
+          {%- case lg_handle -%}
             {%- when 'algemene-voorwaarden' -%}{%- render 'legal-algemene-voorwaarden' -%}
             {%- when 'privacyverklaring' -%}{%- render 'legal-privacyverklaring' -%}
             {%- when 'cookiebeleid' -%}{%- render 'legal-cookiebeleid' -%}
