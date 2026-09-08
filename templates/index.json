@@ -3,24 +3,82 @@
     "hero": {
       "type": "hero-banner",
       "blocks": {
-        "b1": { "type": "bullet", "settings": { "text": "Bescherm uw woning én uw dierbaren" } },
-        "b2": { "type": "bullet", "settings": { "text": "Altijd een oplossing die bij uw situatie past" } },
-        "b3": { "type": "bullet", "settings": { "text": "Uit te breiden met meldkamer en opvolging" } }
+        "b1": {
+          "type": "bullet",
+          "settings": {
+            "text": "Thijs test"
+          }
+        },
+        "b2": {
+          "type": "bullet",
+          "settings": {
+            "text": "Altijd een oplossing die bij uw situatie past"
+          }
+        },
+        "b3": {
+          "type": "bullet",
+          "settings": {
+            "text": "Uit te breiden met meldkamer en opvolging"
+          }
+        }
       },
-      "block_order": ["b1", "b2", "b3"]
+      "block_order": [
+        "b1",
+        "b2",
+        "b3"
+      ]
     },
     "trust": {
       "type": "trust-partners",
-      "settings": { "label": "Beveiligd met bewezen partners" }
+      "settings": {
+        "label": "Beveiligd met bewezen partners"
+      }
     },
     "features": {
       "type": "feature-cards",
       "blocks": {
-        "w1": { "type": "whocol", "settings": { "title": "Langer Thuis", "row1_label": "Inzicht", "row1_text": "voor wie af en toe een geruststellend seintje wil", "row2_label": "Zeker", "row2_text": "voor wie eerder wil weten wanneer er iets verandert", "row3_label": "Beschermd", "row3_text": "voor wie geen risico wil nemen als snelle hulp nodig is" } },
-        "w2": { "type": "whocol", "settings": { "title": "Mijn Thuis", "row1_label": "Alert", "row1_text": "voor wie zelf de regie wil houden", "row2_label": "Protect", "row2_text": "voor wie professionele beveiliging wil", "row3_label": "Vista", "row3_text": "voor wie niets aan het toeval wil overlaten" } },
-        "w3": { "type": "whocol", "settings": { "title": "Veilig Onderweg", "row1_label": "Alarm", "row1_text": "voor wie met een druk op de knop direct hulp wil kunnen inschakelen", "row2_label": "Locatie", "row2_text": "voor wie gevonden wil worden waar dan ook, dankzij GPS", "row3_label": "Beschermd", "row3_text": "voor wie ook geholpen wil worden bij een val, ook als hij zelf niets kan doen" } }
+        "w1": {
+          "type": "whocol",
+          "settings": {
+            "title": "Langer Thuis",
+            "row1_label": "Inzicht",
+            "row1_text": "voor wie af en toe een geruststellend seintje wil",
+            "row2_label": "Zeker",
+            "row2_text": "voor wie eerder wil weten wanneer er iets verandert",
+            "row3_label": "Beschermd",
+            "row3_text": "voor wie geen risico wil nemen als snelle hulp nodig is"
+          }
+        },
+        "w2": {
+          "type": "whocol",
+          "settings": {
+            "title": "Mijn Thuis",
+            "row1_label": "Alert",
+            "row1_text": "voor wie zelf de regie wil houden",
+            "row2_label": "Protect",
+            "row2_text": "voor wie professionele beveiliging wil",
+            "row3_label": "Vista",
+            "row3_text": "voor wie niets aan het toeval wil overlaten"
+          }
+        },
+        "w3": {
+          "type": "whocol",
+          "settings": {
+            "title": "Veilig Onderweg",
+            "row1_label": "Alarm",
+            "row1_text": "voor wie met een druk op de knop direct hulp wil kunnen inschakelen",
+            "row2_label": "Locatie",
+            "row2_text": "voor wie gevonden wil worden waar dan ook, dankzij GPS",
+            "row3_label": "Beschermd",
+            "row3_text": "voor wie ook geholpen wil worden bij een val, ook als hij zelf niets kan doen"
+          }
+        }
       },
-      "block_order": ["w1", "w2", "w3"],
+      "block_order": [
+        "w1",
+        "w2",
+        "w3"
+      ],
       "settings": {
         "eyebrow": "Eén platform. Voor thuis. Voor onderweg. Voor elkaar.",
         "heading": "Thijs Test",
@@ -30,11 +88,30 @@
     "finder_cta": {
       "type": "finder-preview",
       "blocks": {
-        "o1": { "type": "option", "settings": { "label": "Dat alles thuis volgens het normale ritme verloopt" } },
-        "o2": { "type": "option", "settings": { "label": "Bescherming tegen inbraak, brand of gevaar in mijn woning" } },
-        "o3": { "type": "option", "settings": { "label": "Snel hulp kunnen inschakelen, thuis én onderweg" } }
+        "o1": {
+          "type": "option",
+          "settings": {
+            "label": "Dat alles thuis volgens het normale ritme verloopt"
+          }
+        },
+        "o2": {
+          "type": "option",
+          "settings": {
+            "label": "Bescherming tegen inbraak, brand of gevaar in mijn woning"
+          }
+        },
+        "o3": {
+          "type": "option",
+          "settings": {
+            "label": "Snel hulp kunnen inschakelen, thuis én onderweg"
+          }
+        }
       },
-      "block_order": ["o1", "o2", "o3"],
+      "block_order": [
+        "o1",
+        "o2",
+        "o3"
+      ],
       "settings": {}
     },
     "story": {
