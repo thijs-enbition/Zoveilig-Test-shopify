@@ -23,6 +23,7 @@
   assign today_cents = 0
   assign month_cents = 0
   assign pkg_item = nil
+  assign distinct_fks = ''
   for item in cart.items
     assign is_sub = false
     if item.product.tags contains sub_tag
@@ -30,8 +31,15 @@
     endif
     if is_sub
       assign month_cents = month_cents | plus: item.final_line_price
-      if pkg_item == nil and item.product.metafields.custom.finder_key.value != blank
-        assign pkg_item = item
+      assign item_fk = item.product.metafields.custom.finder_key.value
+      if item_fk != blank
+        if pkg_item == nil
+          assign pkg_item = item
+        endif
+        assign fk_token = item_fk | append: '|'
+        unless distinct_fks contains fk_token
+          assign distinct_fks = distinct_fks | append: fk_token
+        endunless
       endif
     else
       assign today_cents = today_cents | plus: item.final_line_price
@@ -41,8 +49,16 @@
     assign today_cents = today_cents | minus: d.total_allocated_amount
   endfor
 
+  comment
+    Commercial-terms rows (promo, activation, contract duration, ICV) only apply when
+    the cart holds exactly one recognized package. A cart with two different packages
+    (e.g. Langer Thuis Inzicht + Mijn Thuis Alert) has two different contract terms and
+    ICVs at once; showing either one alone would be confidently wrong, not just
+    incomplete, so both fall back to the live-totals-only view instead.
+  endcomment
+  assign distinct_fk_count = distinct_fks | split: '|' | size
   assign pkg_available = false
-  if pkg_item != nil
+  if pkg_item != nil and distinct_fk_count == 1
     assign fk = pkg_item.product.metafields.custom.finder_key.value
     case fk
       when 'aware'

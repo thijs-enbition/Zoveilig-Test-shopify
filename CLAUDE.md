@@ -21,6 +21,11 @@ for what Shopify actually charges, and the confirmed per-package commercial term
 `{%- include 'zv-pricing' -%}`, matched to the cart's subscription-tagged line item through
 its `custom.finder_key` product metafield. See the comment at the top of
 `sections/zv-checkout-overview.liquid` for the finder_key → package id mapping.
+**If the cart holds more than one distinct recognized package** (e.g. Langer Thuis Inzicht +
+Mijn Thuis Alert together), the commercial-terms rows are hidden entirely rather than
+picking one package's numbers — a 36-month Inzicht contract and a 12-month Alert contract
+can't both be represented by a single set of rows, and showing either alone would be wrong,
+not just incomplete.
 
 ## Pricing pipeline
 
@@ -29,3 +34,25 @@ contract terms and indicative contract value. `python3 scripts/build_pricing.py`
 `pricing/pricing.generated.json` and `snippets/zv-pricing.liquid` (committed, generated —
 don't hand-edit). `python3 scripts/check_pricing.py` verifies the maths and that no theme
 file carries an independent literal price or duration; CI runs both on every push/PR.
+
+## Working rules for Claude Code on this repo
+
+- **`shopify theme check` does not catch every deploy-breaking error.** Shopify's GitHub
+  sync runs its own, stricter server-side Liquid validator. It has at least one known gap
+  `theme check` misses entirely: a literal `{` or `}` character inside a quoted string
+  *inside* a `{{ }}` output tag (e.g. `{{ x | replace: '{token}', y }}`) breaks its
+  `}}`-closing scan and gets the whole file — and anything referencing it, like a JSON
+  template's `"type"` — rejected. Never put `{`/`}` inside a string literal within `{{ }}`;
+  if you need a placeholder token, use something like `[token]`, or better, avoid
+  string-replace templating and compose the output from multiple schema settings + plain
+  `{{ }}` output instead.
+- **Before pushing anything Liquid to `origin main`, validate against Shopify's real
+  validator, not just `shopify theme check`** — e.g. `shopify theme push --unpublished
+  --theme "<throwaway-name>" --only <changed files>` against a disposable unpublished
+  theme, then delete it. `origin main` is connected to Shopify's GitHub sync for the live
+  test theme, so a rejected file there is a live regression, not just a failed CI check.
+- **If the Shopify CLI prompts for an interactive login (a `User verification code` /
+  `activate-with-code` device-code flow), stop and wait.** Print the link and the code,
+  tell the user you're waiting, and do not kill the process, work around it, or push
+  without having validated. The user completes the login in their own browser; once done
+  once, the CLI stays authenticated on their machine.
