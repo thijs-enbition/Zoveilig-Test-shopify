@@ -1,0 +1,24 @@
+{%- comment -%}
+  Package card for sections/actie-korting.liquid.
+  Params: name, hook, popular ("Meest gekozen" or blank), monthly, promo_monthly
+  (blank when the package has no fixed price yet), promo_badge, fk (finder_key,
+  for the /pages/oplossingen?pakket=<fk> deep link).
+{%- endcomment -%}
+<article class="acard{% if popular != blank %} pop{% endif %}">
+  {%- if popular != blank -%}<span class="acard__flag">{{ popular }}</span>{%- endif -%}
+  <h3>{{ name }}</h3>
+  <p class="acard__hook">{{ hook }}</p>
+
+  {%- if promo_monthly != blank -%}
+    <div class="acard__price">
+      <span class="now">{{ promo_monthly }}</span><span class="per">/mnd</span>
+      <span class="was">{{ monthly }}</span>
+    </div>
+    <span class="acard__badge">{{ promo_badge }}</span>
+  {%- else -%}
+    <div class="acard__price"><span class="now">{{ monthly }}</span></div>
+  {%- endif -%}
+
+  <a class="btn btn--ghost" href="{% render 'zv-route', key: 'pakket', pakket: fk %}">Bekijk pakket<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+</article>
+{%- comment -%} Card CSS lives in sections/actie-korting.liquid's stylesheet block: {% stylesheet %} is section-only in Shopify Liquid, not valid in snippets. {%- endcomment -%}

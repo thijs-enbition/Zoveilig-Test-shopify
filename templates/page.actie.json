@@ -1,0 +1,6 @@
+{
+  "sections": {
+    "actie": { "type": "actie-korting", "settings": {} }
+  },
+  "order": ["actie"]
+}
