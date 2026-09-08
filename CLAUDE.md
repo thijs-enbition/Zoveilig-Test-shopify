@@ -35,6 +35,18 @@ contract terms and indicative contract value. `python3 scripts/build_pricing.py`
 don't hand-edit). `python3 scripts/check_pricing.py` verifies the maths and that no theme
 file carries an independent literal price or duration; CI runs both on every push/PR.
 
+## Shopify store
+
+The test store is **`zoveiligdev.myshopify.com`** (admin: `admin.shopify.com/store/zoveiligdev`).
+The live/synced theme on it is named "Zoveilig-Test-shopify/main" (a theme *name*, matching the
+GitHub repo name — **not** the store's domain; `zoveilig-test-shopify.myshopify.com` does not
+exist and returns a 404). Always pass `--store zoveiligdev.myshopify.com` on every `shopify
+theme` CLI command, or `--environment zoveiligdev` to read it from `shopify.theme.toml` at the
+repo root. Never guess the store handle from the repo or theme name again — a wrong guess gets
+silently cached as this project's default store in `~/Library/Preferences/shopify-cli-theme-conf-
+nodejs/config.json` and causes every subsequent command to fail against the wrong store, even
+with a valid login (that's exactly what happened once already).
+
 ## Working rules for Claude Code on this repo
 
 - **`shopify theme check` does not catch every deploy-breaking error.** Shopify's GitHub

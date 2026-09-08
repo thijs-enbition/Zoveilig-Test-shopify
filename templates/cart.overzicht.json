@@ -1,1 +1,6 @@
-{ "sections": { "main": { "type": "zv-checkout-overview", "settings": {} } }, "order": ["main"] }
+{
+  "sections": {
+    "main": { "type": "zv-checkout-overview", "settings": {} }
+  },
+  "order": ["main"]
+}
