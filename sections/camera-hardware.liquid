@@ -18,7 +18,7 @@
 
   <div class="wrap">
     <div class="lede">
-      <div class="eyebrow">{{ section.settings.eyebrow | default: 'Mijn huis · camerahardware' | escape }}</div>
+      <div class="eyebrow">{{ section.settings.eyebrow | default: 'Mijn Thuis · camerahardware' | escape }}</div>
       <h1>{{ section.settings.title | default: "Voeg camera's toe aan uw huis" | escape }}</h1>
       <p>{{ section.settings.lead | default: "Bekijk de mogelijkheden en voeg precies de camera's of videodeurbel toe die u nog mist." | escape }}</p>
     </div>
@@ -27,16 +27,16 @@
       <div>
         <div class="cat-head">
           <span class="step-n">2</span>
-          <h2>Kiest u camerahardware</h2>
+          <h2>Kies uw camerahardware</h2>
           <span class="cat-hint"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Kies per product kopen of huren</span>
         </div>
         <div class="rows" id="rows"></div>
         <div class="adv-note">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div>
-            <p>Niet zeker welke camera's bij uw woning passen? Onze adviseurs kijken vrijblijvend met u mee en stellen samen de juiste set samen.</p>
+            <p>Niet zeker welke camera's bij uw woning passen? Onze adviseurs kijken vrijblijvend met u mee en stellen samen met u de juiste set samen.</p>
             <div class="adv-actions">
-              <a href="tel:0881221111">Bel 088-122 11 11</a>
+              <a href="tel:0881221111">Bel 088 122 11 11</a>
               <a href="{% render 'zv-route', key: 'contact' %}">Plan een adviesgesprek</a>
             </div>
           </div>
@@ -53,7 +53,7 @@
         <div class="sum-empty" id="sumEmpty">Nog niets toegevoegd. Kies per product kopen of huren.</div>
         <div class="sum-tot" id="sumTot"></div>
         <button class="sumbtn" id="sumBtn" disabled>Bel om te bestellen<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="sum-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bestellen gaat altijd via een kort telefoongesprek, 088-122 11 11</div>
+        <div class="sum-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bestellen gaat altijd via een kort telefoongesprek, 088 122 11 11</div>
         <form class="cam-contact" id="camContact">
           <div class="cam-contact-h">Of laat ons u terugbellen</div>
           <input type="text" id="ccName" placeholder="Naam" required>
@@ -285,7 +285,7 @@
   "name": "Camerahardware",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Mijn huis · camerahardware" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Mijn Thuis · camerahardware" },
     { "type": "text", "id": "title", "label": "Titel", "default": "Voeg camera's toe aan uw huis" },
     { "type": "textarea", "id": "lead", "label": "Lead" }
   ],

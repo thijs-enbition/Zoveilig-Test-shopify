@@ -77,7 +77,7 @@
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "Indicatief. De eerste 3 maanden ontvangt uw 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%).",
+    "disclosure": "Indicatief. De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%).",
     "note": "50% off the monthly amount for the first 3 SEPA instalments. Odoo must apply this discount to the first 3 recurring invoices; the theme only displays it. Replaces the retired 1.5x prepayment."
   },
   "contract": {

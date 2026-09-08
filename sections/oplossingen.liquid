@@ -247,7 +247,7 @@
   {%- comment -%} Stappen + Partners are solution-agnostic; rendered once below the active panel. {%- endcomment -%}
   <section class="stappen" data-section-name="stappen">
     <h2>{{ section.settings.service_heading | default: 'Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt.' | escape }}</h2>
-    <p class="st-sub">{{ section.settings.service_intro | default: 'Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt.' | escape }}</p>
+    <p class="st-sub">{{ section.settings.service_intro | default: 'Bestel eenvoudig online of laat u adviseren door een van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt.' | escape }}</p>
     <div class="steprow">
       {%- comment -%} 4 benefit items; eyebrow/title/text are theme-editor manageable, icons are fixed per slot. {%- endcomment -%}
       {%- assign s_def = 'Online~Direct online regelen~Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt.|Advies~Persoonlijk advies~Twijfelt u? Samen kiezen we de oplossing die het beste bij uw situatie past.|Montage~Vakkundige installatie~Onze monteurs installeren alles professioneel en zorgen dat u direct aan de slag kunt.|Altijd~Ook daarna bereikbaar~Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt.' | split: '|' -%}
@@ -269,8 +269,8 @@
           {%- endcase -%}</div>
           <div><span class="sk">{{ eb | escape }}</span><b>{{ ti | escape }}</b><p>{{ tx | escape }}</p>
             {%- if idx == 4 and section.settings.phone_label != blank -%}
-              {%- assign tel = section.settings.phone | default: '0880123456' | remove: ' ' -%}
-              <a class="belbtn" href="tel:{{ tel }}" aria-label="Bel Zo Veilig, {{ section.settings.phone_label | default: '088 012 3456' | escape }}" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>{{ section.settings.phone_label | default: '088 012 3456' | escape }}</a>
+              {%- assign tel = section.settings.phone | default: '0881221111' | remove: ' ' -%}
+              <a class="belbtn" href="tel:{{ tel }}" aria-label="Bel Zo Veilig, {{ section.settings.phone_label | default: '088 122 11 11' | escape }}" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>{{ section.settings.phone_label | default: '088 122 11 11' | escape }}</a>
             {%- endif -%}
           </div>
         </div>
@@ -1371,7 +1371,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   "settings": [
     { "type": "header", "content": "Service-sectie (Online wanneer u wilt)" },
     { "type": "text", "id": "service_heading", "label": "Kop", "default": "Online wanneer u wilt. Persoonlijk wanneer u dat prettig vindt." },
-    { "type": "textarea", "id": "service_intro", "label": "Introtekst", "default": "Bestel eenvoudig online of laat u adviseren door één van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt." },
+    { "type": "textarea", "id": "service_intro", "label": "Introtekst", "default": "Bestel eenvoudig online of laat u adviseren door een van onze specialisten. U kiest zelf hoeveel ondersteuning u prettig vindt." },
     { "type": "text", "id": "benefit_1_eyebrow", "label": "1 · Eyebrow", "default": "Online" },
     { "type": "text", "id": "benefit_1_title", "label": "1 · Titel", "default": "Direct online regelen" },
     { "type": "textarea", "id": "benefit_1_text", "label": "1 · Tekst", "default": "Kies uw beschermingsniveau en bestel veilig online, wanneer het u uitkomt." },
@@ -1384,8 +1384,8 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     { "type": "text", "id": "benefit_4_eyebrow", "label": "4 · Eyebrow", "default": "Altijd" },
     { "type": "text", "id": "benefit_4_title", "label": "4 · Titel", "default": "Ook daarna bereikbaar" },
     { "type": "textarea", "id": "benefit_4_text", "label": "4 · Tekst", "default": "Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt." },
-    { "type": "text", "id": "phone", "label": "Telefoonnummer (tel:)", "default": "0880123456" },
-    { "type": "text", "id": "phone_label", "label": "Telefoon-label", "default": "088 012 3456" },
+    { "type": "text", "id": "phone", "label": "Telefoonnummer (tel:)", "default": "0881221111" },
+    { "type": "text", "id": "phone_label", "label": "Telefoon-label", "default": "088 122 11 11" },
     { "type": "header", "content": "Technologie & partners" },
     { "type": "text", "id": "partners_eyebrow", "label": "Eyebrow", "default": "De beste technologie" },
     { "type": "text", "id": "partners_heading", "label": "Kop", "default": "De beste technologie. Eén vertrouwd aanspreekpunt." },

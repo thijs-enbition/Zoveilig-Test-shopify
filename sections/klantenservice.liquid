@@ -15,7 +15,7 @@
   <section class="svc-hero">
     <div class="wrap">
       {%- if section.settings.eyebrow != blank -%}<span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | escape }}</span>{%- endif -%}
-      <h1>{{ section.settings.heading | default: 'Waar kunnen wij uw mee helpen?' | escape }}</h1>
+      <h1>{{ section.settings.heading | default: 'Waar kunnen wij u mee helpen?' | escape }}</h1>
       {%- if section.settings.intro != blank -%}<p class="intro">{{ section.settings.intro | escape }}</p>{%- endif -%}
 
       <div class="hero-search" role="search">
@@ -64,7 +64,7 @@
           {%- endif -%}
         {%- endfor -%}
       </div>
-      <div class="faq-empty" id="svcEmpty" hidden>Geen vragen gevonden. Bel ons gerust op 088-122 11 11, we helpen uw direct.</div>
+      <div class="faq-empty" id="svcEmpty" hidden>Geen vragen gevonden. Bel ons gerust op 088 122 11 11, we helpen u direct.</div>
     </div>
   </section>
 
@@ -76,7 +76,7 @@
         <h2>Liever persoonlijk contact?</h2>
       </div>
       <div class="ct-grid">
-        {%- assign tel = section.settings.phone | default: '088-122 11 11' -%}
+        {%- assign tel = section.settings.phone | default: '088 122 11 11' -%}
         <a class="ct" href="tel:{{ tel | remove: ' ' | remove: '-' }}">
           <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg></span>
           <h3>Bellen</h3>
@@ -101,7 +101,7 @@
       <div class="card">
         <div class="kt">
           <span class="eyebrow"><span class="d"></span>Nieuwe klant</span>
-          <h2>{{ section.settings.cta_heading | default: 'Wilt uw klant worden?' | escape }}</h2>
+          <h2>{{ section.settings.cta_heading | default: 'Wilt u klant worden?' | escape }}</h2>
           <p>{{ section.settings.cta_text | default: 'Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl.' | escape }}</p>
         </div>
         <div class="kb">
@@ -278,7 +278,7 @@
   "settings": [
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Klantenservice" },
-    { "type": "text", "id": "heading", "label": "Kop", "default": "Waar kunnen wij uw mee helpen?" },
+    { "type": "text", "id": "heading", "label": "Kop", "default": "Waar kunnen wij u mee helpen?" },
     { "type": "textarea", "id": "intro", "label": "Introtekst", "default": "Zoek een antwoord, bekijk de veelgestelde vragen of neem direct persoonlijk contact met ons op." },
     { "type": "text", "id": "search_placeholder", "label": "Zoek-placeholder", "default": "Typ uw vraag of zoek op onderwerp" },
     { "type": "textarea", "id": "popular", "label": "Vaak gezocht (1 per regel)", "default": "Alarm gaat af\nPincode wijzigen\nVals alarm\nOp vakantie" },
@@ -286,12 +286,12 @@
     { "type": "text", "id": "faq_heading", "label": "Kop", "default": "Vind snel een antwoord" },
     { "type": "textarea", "id": "categories", "label": "Categorieën (1 per regel, matchen met de FAQ-blokken)", "default": "Vaak gezocht\nMijn systeem\nSmarthome / Domotica\nContract en betaling\nAfspraak of annulering\nMeldkamer & alarmopvolging" },
     { "type": "header", "content": "Direct contact" },
-    { "type": "text", "id": "phone", "label": "Telefoon", "default": "088-122 11 11" },
+    { "type": "text", "id": "phone", "label": "Telefoon", "default": "088 122 11 11" },
     { "type": "text", "id": "phone_hours", "label": "Telefoon-openingstijden", "default": "Ma t/m vr, 08:30 tot 17:30 uur." },
     { "type": "text", "id": "email", "label": "E-mail", "default": "klantenservice@zoveilig.nl" },
     { "type": "text", "id": "email_sla", "label": "E-mail-reactietijd", "default": "Reactie binnen één werkdag." },
     { "type": "header", "content": "Nieuwe klant" },
-    { "type": "text", "id": "cta_heading", "label": "Kop", "default": "Wilt uw klant worden?" },
+    { "type": "text", "id": "cta_heading", "label": "Kop", "default": "Wilt u klant worden?" },
     { "type": "textarea", "id": "cta_text", "label": "Tekst", "default": "Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl." },
     { "type": "text", "id": "cta1_label", "label": "Knop 1 tekst", "default": "Maak me wegwijs" },
     { "type": "url", "id": "cta1_url", "label": "Knop 1 link" },
@@ -305,7 +305,7 @@
       "settings": [
         { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën." },
         { "type": "text", "id": "question", "label": "Vraag" },
-        { "type": "richtext", "id": "answer", "label": "Antwoord", "default": "<p>Ons klantenserviceteam helpt u hier graag persoonlijk mee. Bel 088-122 11 11 of mail klantenservice@zoveilig.nl, dan lossen we het samen snel op. In uw app en handleiding vindt u ook stapsgewijze uitleg.</p>" }
+        { "type": "richtext", "id": "answer", "label": "Antwoord", "default": "<p>Ons klantenserviceteam helpt u hier graag persoonlijk mee. Bel 088 122 11 11 of mail klantenservice@zoveilig.nl, dan lossen we het samen snel op. In uw app en handleiding vindt u ook stapsgewijze uitleg.</p>" }
       ]
     }
   ],

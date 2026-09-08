@@ -82,7 +82,7 @@
               {%- if item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
               {%- if li_sub -%}
                 {%- assign month_cents = month_cents | plus: item.final_line_price -%}
-                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso (Odoo)</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
+                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
               {%- else -%}
                 {%- assign today_cents = today_cents | plus: item.final_line_price -%}
                 <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
@@ -96,7 +96,7 @@
             {%- endif -%}
             <div class="srow total"><span>Vandaag te betalen</span><b>{{ today_cents | money }}</b></div>
             {%- if month_cents > 0 -%}
-              <div class="s-sub">Shopify int vandaag {{ today_cents | money }}. Daarna {{ month_cents | money }} per maand via SEPA-incasso (Odoo). Prijzen incl. btw.</div>
+              <div class="s-sub">U betaalt vandaag {{ today_cents | money }}. Daarna {{ month_cents | money }} per maand via SEPA-incasso. Prijzen incl. btw.</div>
             {%- else -%}
               <div class="s-sub">Verzend- en eventuele installatiekosten worden bij het afrekenen berekend. Prijzen incl. btw.</div>
             {%- endif -%}
@@ -195,7 +195,7 @@
   "name": "Winkelwagen",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Producten met deze tag tonen als maandbedrag via SEPA-incasso (Odoo) en tellen niet mee in 'Vandaag te betalen'." }
+    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Producten met deze tag tonen als maandbedrag via SEPA-incasso en tellen niet mee in 'Vandaag te betalen'." }
   ]
 }
 {% endschema %}

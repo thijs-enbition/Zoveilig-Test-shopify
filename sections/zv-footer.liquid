@@ -67,7 +67,7 @@
         {%- if section.settings.col_3_menu != blank -%}
           {%- for link in linklists[section.settings.col_3_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
         {%- else -%}
-          <a href="{% render 'zv-route', key: 'over-ons' %}">Over Ons</a>
+          <a href="{% render 'zv-route', key: 'over-ons' %}">Over ons</a>
           <a href="{% render 'zv-route', key: 'klantenservice' %}">Klantenservice</a>
           <a href="{% render 'zv-route', key: 'contact' %}">Contact</a>
           <a href="{% render 'zv-route', key: 'herroepingsrecht' %}">Aankoop herroepen</a>
@@ -114,7 +114,7 @@
     { "type": "header", "content": "Merk" },
     { "type": "image_picker", "id": "logo_light", "label": "Logo (wit)" },
     { "type": "textarea", "id": "tagline", "label": "Tagline", "default": "Slimme zorg en beveiliging voor thuis. Al 20 jaar, met een Nederlandse meldkamer die nooit slaapt." },
-    { "type": "text", "id": "phone", "label": "Telefoonnummer", "default": "088 012 3456" },
+    { "type": "text", "id": "phone", "label": "Telefoonnummer", "default": "088 122 11 11" },
     { "type": "header", "content": "Kolom 1" },
     { "type": "text", "id": "col_1_heading", "label": "Kop", "default": "Oplossingen" },
     { "type": "link_list", "id": "col_1_menu", "label": "Menu (leeg = standaard)" },

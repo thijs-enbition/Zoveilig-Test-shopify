@@ -54,7 +54,7 @@
         "collapsible-row-1": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "Shipping & Returns",
+            "heading": "Verzending & retour",
             "icon": "truck",
             "content": "",
             "page": ""
@@ -72,7 +72,7 @@
         "collapsible-row-3": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "Care Instructions",
+            "heading": "Onderhoud",
             "icon": "heart",
             "content": "",
             "page": ""
@@ -193,7 +193,7 @@
     "related-products": {
       "type": "related-products",
       "settings": {
-        "heading": "You may also like",
+        "heading": "Misschien ook interessant",
         "heading_size": "h2",
         "columns_desktop": 4,
         "color_scheme": "scheme-1",
