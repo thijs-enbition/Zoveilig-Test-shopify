@@ -84,11 +84,13 @@
   endif
 -%}
 {%- capture av_url -%}{% render 'zv-route', key: 'algemene-voorwaarden' %}{%- endcapture -%}
-{%- capture av_link_html -%}<a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a>{%- endcapture -%}
+{%- assign consent_prefix = section.settings.consent_prefix | default: 'Ik ga akkoord met de' -%}
+{%- assign consent_suffix = section.settings.consent_suffix | default: 'en de betaalplicht.' -%}
 {%- if pkg_available -%}
-  {%- capture consent_html -%}{{ section.settings.consent_label | replace: '{av_link}', av_link_html | replace: '{term}', pkg_term }}{%- endcapture -%}
+  {%- assign consent_middle = section.settings.consent_middle | default: ', de contractduur van' -%}
+  {%- capture consent_html -%}{{ consent_prefix }} <a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a>{{ consent_middle }} {{ pkg_term }} maanden {{ consent_suffix }}{%- endcapture -%}
 {%- else -%}
-  {%- capture consent_html -%}{{ section.settings.consent_label_fallback | replace: '{av_link}', av_link_html }}{%- endcapture -%}
+  {%- capture consent_html -%}{{ consent_prefix }} <a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a> {{ consent_suffix }}{%- endcapture -%}
 {%- endif -%}
 
 <div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}>
@@ -385,8 +387,9 @@
     { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
     { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
     { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eenmalige kosten voor activatie en installatie via de beveiligde Shopify-checkout." },
-    { "type": "textarea", "id": "consent_label", "label": "Akkoordtekst (met pakket)", "info": "Gebruik {av_link} voor de link naar de Algemene Voorwaarden en {term} voor de contractduur in maanden.", "default": "Ik ga akkoord met de {av_link}, de contractduur van {term} maanden en de betaalplicht." },
-    { "type": "textarea", "id": "consent_label_fallback", "label": "Akkoordtekst (zonder herkend pakket)", "info": "Gebruik {av_link} voor de link naar de Algemene Voorwaarden.", "default": "Ik ga akkoord met de {av_link} en de betaalplicht." },
+    { "type": "text", "id": "consent_prefix", "label": "Akkoordtekst · voor de link", "default": "Ik ga akkoord met de", "info": "Gevolgd door een vaste link naar de Algemene Voorwaarden." },
+    { "type": "text", "id": "consent_middle", "label": "Akkoordtekst · na de link (met pakket)", "default": ", de contractduur van", "info": "Gevolgd door de contractduur van het pakket, in maanden." },
+    { "type": "text", "id": "consent_suffix", "label": "Akkoordtekst · slot", "default": "en de betaalplicht." },
     { "type": "text", "id": "checkout_button_label", "label": "Knoptekst · afrekenen", "default": "Verder naar veilig afrekenen" },
     { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in de beveiligde Shopify-checkout." },
     { "type": "text", "id": "continue_shopping_label", "label": "Knoptekst · verder winkelen", "default": "← Verder winkelen" }
