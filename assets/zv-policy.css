@@ -7,6 +7,11 @@
   sections/legal-page.liquid (same tokens) so /policies/* looks consistent
   with the rest of the site's legal pages.
 */
+/* Break out of Dawn's narrow, off-center policy container so our own
+   sections control the layout: hero and cream band go full-bleed, and the
+   .wrap/.policy-grid elements cap content at 1000px, centered. */
+.shopify-policy__container.zv-policy-page { max-width:none !important; width:auto !important; margin:0 !important; padding:0 !important; }
+
 .zv-policy-page { color:#1a1230; }
 .zv-policy-page .crumb { max-width:1000px; margin:0 auto; padding:14px clamp(20px,3.6vw,52px) 0; font-size:13px; font-weight:700; color:#8c84a6; display:flex; gap:8px; align-items:center; }
 .zv-policy-page .crumb a { color:#8c84a6; text-decoration:none; }
