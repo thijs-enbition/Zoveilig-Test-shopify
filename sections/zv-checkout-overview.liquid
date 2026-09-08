@@ -1,0 +1,395 @@
+{%- comment -%}
+  Zo Veilig — Overzicht. Read-only final-review step inserted between Winkelwagen and
+  the Shopify checkout: Winkelwagen -> Overzicht (this page, /cart?view=overzicht) -> Afrekenen.
+  Rendered via templates/cart.overzicht.json against the live {{ cart }} — no separate data
+  source, so it always reflects exactly what will be charged.
+
+  PRICING: every amount here is either (a) read live from {{ cart }} (what Shopify will
+  actually charge today / per month), or (b) the confirmed per-package commercial terms from
+  the central pricing model (activation, intro-promo discount, contract duration, indicative
+  contract value) via the `zv-pricing` include — never a literal here (CI check #9 in
+  scripts/check_pricing.py enforces that no theme file carries an independent price/duration).
+  The package is identified by matching the cart's subscription-tagged line item (section
+  setting `sub_tag`, same convention as zv-cart.liquid) to its `custom.finder_key` product
+  metafield, mapped to a pricing.config.json package id below. If no package can be
+  identified (e.g. a cart with only accessories), the commercial-terms rows are hidden and
+  only the live cart totals are shown.
+{%- endcomment -%}
+
+{%- include 'zv-pricing' -%}
+
+{%- liquid
+  assign sub_tag = section.settings.sub_tag | default: 'abonnement'
+  assign today_cents = 0
+  assign month_cents = 0
+  assign pkg_item = nil
+  for item in cart.items
+    assign is_sub = false
+    if item.product.tags contains sub_tag
+      assign is_sub = true
+    endif
+    if is_sub
+      assign month_cents = month_cents | plus: item.final_line_price
+      if pkg_item == nil and item.product.metafields.custom.finder_key.value != blank
+        assign pkg_item = item
+      endif
+    else
+      assign today_cents = today_cents | plus: item.final_line_price
+    endif
+  endfor
+  for d in cart.cart_level_discount_applications
+    assign today_cents = today_cents | minus: d.total_allocated_amount
+  endfor
+
+  assign pkg_available = false
+  if pkg_item != nil
+    assign fk = pkg_item.product.metafields.custom.finder_key.value
+    case fk
+      when 'aware'
+        assign pkg_available = true
+        assign pkg_promo_monthly = zv_inzicht_promo_monthly
+        assign pkg_promo_discount = zv_inzicht_promo_discount
+        assign pkg_activation = zv_inzicht_activation
+        assign pkg_term = zv_inzicht_term
+        assign pkg_icv = zv_inzicht_icv
+      when 'aware_plus'
+        assign pkg_available = true
+        assign pkg_promo_monthly = zv_zeker_promo_monthly
+        assign pkg_promo_discount = zv_zeker_promo_discount
+        assign pkg_activation = zv_zeker_activation
+        assign pkg_term = zv_zeker_term
+        assign pkg_icv = zv_zeker_icv
+      when 'care'
+        assign pkg_available = true
+        assign pkg_promo_monthly = zv_beschermd_promo_monthly
+        assign pkg_promo_discount = zv_beschermd_promo_discount
+        assign pkg_activation = zv_beschermd_activation
+        assign pkg_term = zv_beschermd_term
+        assign pkg_icv = zv_beschermd_icv
+      when 'secure'
+        assign pkg_available = true
+        assign pkg_promo_monthly = zv_alert_promo_monthly
+        assign pkg_promo_discount = zv_alert_promo_discount
+        assign pkg_activation = zv_alert_activation
+        assign pkg_term = zv_alert_term
+        assign pkg_icv = zv_alert_icv
+      when 'guard'
+        assign pkg_available = true
+        assign pkg_promo_monthly = zv_protect_promo_monthly
+        assign pkg_promo_discount = zv_protect_promo_discount
+        assign pkg_activation = zv_protect_activation
+        assign pkg_term = zv_protect_term
+        assign pkg_icv = zv_protect_icv
+    endcase
+  endif
+-%}
+{%- capture av_url -%}{% render 'zv-route', key: 'algemene-voorwaarden' %}{%- endcapture -%}
+{%- capture av_link_html -%}<a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a>{%- endcapture -%}
+{%- if pkg_available -%}
+  {%- capture consent_html -%}{{ section.settings.consent_label | replace: '{av_link}', av_link_html | replace: '{term}', pkg_term }}{%- endcapture -%}
+{%- else -%}
+  {%- capture consent_html -%}{{ section.settings.consent_label_fallback | replace: '{av_link}', av_link_html }}{%- endcapture -%}
+{%- endif -%}
+
+<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}>
+  <section class="ovbar">
+    <div class="wrap">
+      <div class="ovbar-top">
+        <h1>{{ section.settings.heading | default: 'Overzicht' | escape }}</h1>
+        <a class="ovback" href="{{ routes.cart_url }}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug naar winkelwagen</a>
+      </div>
+      {%- if section.settings.subheading != blank -%}<p class="ovsub">{{ section.settings.subheading | escape }}</p>{%- endif -%}
+      <ol class="ovsteps" aria-label="Bestelstappen">
+        <li class="done"><span class="n"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Winkelwagen</li>
+        <li class="active" aria-current="step"><span class="n">2</span>Overzicht</li>
+        <li><span class="n">3</span>Afrekenen</li>
+      </ol>
+    </div>
+  </section>
+
+  <noscript><div class="wrap"><p class="ovnoscript">Deze pagina werkt het beste met JavaScript ingeschakeld. <a href="{{ routes.cart_url }}">Ga terug naar de winkelwagen</a>.</p></div></noscript>
+
+  {%- if cart.item_count > 0 -%}
+    <section class="ovwrap">
+      <div class="wrap">
+        <div class="olayout">
+          <div class="ov-left">
+            <div class="ovcard">
+              <div class="ovcard-head">
+                <h2>{{ section.settings.pkg_card_heading | default: 'Uw pakket en configuratie' | escape }}</h2>
+                <a class="ovedit" href="{{ routes.cart_url }}">{{ section.settings.pkg_card_link_label | default: 'Wijzig in winkelwagen' | escape }}</a>
+              </div>
+              <div class="ovitems">
+                {%- for item in cart.items -%}
+                  {%- assign is_sub = false -%}
+                  {%- if item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+                  <div class="ovitem">
+                    <div class="ovi-thumb">
+                      {%- if item.image -%}
+                        <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item.product.title | escape }}" width="88" height="88" loading="lazy">
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4-9-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8M12 12v8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                      {%- endif -%}
+                    </div>
+                    <div>
+                      {%- if item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
+                      <div class="ovi-name">{{ item.product.title | escape }}</div>
+                      {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
+                      <div class="ovi-meta">Aantal: {{ item.quantity }}</div>
+                    </div>
+                    <div class="ovi-right">
+                      {%- if is_sub -%}
+                        <div class="ovi-price">{{ item.final_line_price | money }} <span>p/m</span></div>
+                      {%- else -%}
+                        <div class="ovi-price">{{ item.final_line_price | money }}</div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+
+            <div class="ovcard">
+              <h2>{{ section.settings.before_heading | default: 'Voordat u afrekent' | escape }}</h2>
+              <dl class="ovdl">
+                <div><dt>Maandbedrag</dt><dd>{{ month_cents | money }}</dd></div>
+                {%- if pkg_available -%}
+                  <div><dt>Eerste 3 maanden (50% korting)</dt><dd>−{{ pkg_promo_discount }}</dd></div>
+                  <div><dt>Eenmalige kosten</dt><dd>{{ pkg_activation }}</dd></div>
+                {%- endif -%}
+                <div><dt>Vandaag te betalen</dt><dd class="strong">{{ today_cents | money }}</dd></div>
+                {%- if pkg_available -%}
+                  <div><dt>Contractduur</dt><dd>{{ pkg_term }} maanden</dd></div>
+                  <div><dt>Indicatieve totale contractwaarde</dt><dd>{{ pkg_icv }}</dd></div>
+                {%- endif -%}
+                <div><dt>Maandelijkse betaling</dt><dd>SEPA-incasso</dd></div>
+                <div><dt>Opzeggen</dt><dd>Maandelijks, na afloop van de contractduur</dd></div>
+                <div><dt>Bedenktijd</dt><dd>14 dagen herroepingsrecht</dd></div>
+                <div><dt>Installatie</dt><dd>Binnen 30 dagen, op afspraak</dd></div>
+              </dl>
+              {%- if section.settings.before_explainer != blank -%}
+                <div class="ovexplain">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <p>{{ section.settings.before_explainer | escape }}</p>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="ov-right">
+            <div class="ovcard ovcost">
+              <h2>{{ section.settings.cost_card_heading | default: 'Uw kosten in het kort' | escape }}</h2>
+              {%- if section.settings.cost_card_sub != blank -%}<p class="ovcost-sub">{{ section.settings.cost_card_sub | escape }}</p>{%- endif -%}
+
+              <div class="ovblock">
+                <span class="ovblock-eb">Vandaag te betalen</span>
+                {%- if section.settings.due_today_text != blank -%}<p>{{ section.settings.due_today_text | escape }}</p>{%- endif -%}
+                <div class="ovblock-amt">{{ today_cents | money }}</div>
+              </div>
+
+              {%- if month_cents > 0 -%}
+                <div class="ovblock">
+                  <span class="ovblock-eb">Daarna per maand · via SEPA-incasso</span>
+                  {%- if pkg_available -%}
+                    <p>Eerste 3 maanden {{ pkg_promo_monthly }} per maand, daarna {{ month_cents | money }} per maand.</p>
+                  {%- else -%}
+                    <p>{{ month_cents | money }} per maand.</p>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+
+              {%- if pkg_available -%}
+                <div class="ovblock">
+                  <span class="ovblock-eb">Contract</span>
+                  <p>Looptijd {{ pkg_term }} maanden. Indicatieve totale contractwaarde, inclusief eenmalige kosten: <b>{{ pkg_icv }}</b>.</p>
+                </div>
+              {%- endif -%}
+
+              {%- if section.settings.before_explainer != blank -%}<p class="ovcost-note">{{ section.settings.before_explainer | escape }}</p>{%- endif -%}
+
+              <div class="ovdelivery">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7h11v9H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 10h4l3 3v3h-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="18" r="1.8" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="18" r="1.8" stroke="currentColor" stroke-width="2"/></svg>
+                <p>Onze monteur neemt na uw bestelling contact op om de installatie in te plannen.</p>
+              </div>
+            </div>
+
+            <div class="ovtrust">
+              <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>Beveiligde betaling</span>
+              <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>SSL-versleuteld</span>
+              <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Securitas-meldkamer</span>
+              <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l5 5 11-11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>14 dagen retour</span>
+            </div>
+
+            <div class="ovcard ovconsent">
+              <label class="ovcheck">
+                <input type="checkbox" id="ovAvConsent">
+                <span>{{ consent_html }}</span>
+              </label>
+              <div class="ovconsent-err" data-ov-err hidden></div>
+              <button type="button" class="btn btn--gold ovcta" id="ovCheckoutBtn" disabled aria-disabled="true">
+                {{ section.settings.checkout_button_label | default: 'Verder naar veilig afrekenen' | escape }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              {%- if section.settings.closing_text != blank -%}<p class="ovclosing">{{ section.settings.closing_text | escape }}</p>{%- endif -%}
+              <a class="btn btn--ghost ovback2" href="{{ routes.cart_url }}">{{ section.settings.continue_shopping_label | default: '← Verder winkelen' | escape }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {%- endif -%}
+</div>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-zv-overzicht]');
+    if (!root) return;
+
+    if (root.hasAttribute('data-cart-empty')) {
+      window.location.replace('{{ routes.cart_url }}');
+      return;
+    }
+
+    var checkbox = root.querySelector('#ovAvConsent');
+    var btn = root.querySelector('#ovCheckoutBtn');
+    var err = root.querySelector('[data-ov-err]');
+    if (!checkbox || !btn) return;
+
+    checkbox.addEventListener('change', function () {
+      btn.disabled = !checkbox.checked;
+      btn.setAttribute('aria-disabled', checkbox.checked ? 'false' : 'true');
+      if (checkbox.checked && err) err.hidden = true;
+    });
+
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      if (err) err.hidden = true;
+      window.fetch('/cart/update.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attributes: {
+            av_akkoord: 'ja',
+            av_akkoord_tijdstip: new Date().toISOString()
+          }
+        })
+      })
+        .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+        .then(function () { window.location.href = '/checkout'; })
+        .catch(function () {
+          if (err) { err.hidden = false; err.textContent = 'Er ging iets mis. Probeer het opnieuw.'; }
+          btn.disabled = false;
+          btn.setAttribute('aria-disabled', 'false');
+        });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.zv-overzicht {
+  --ink:#1a1230; --indigo:#322469; --indigo-soft:#ece8fb; --paper:#fffdf8; --cream:#fdfaf2;
+  --gold:#e4a311; --gold-lt:#f5c84a; --belt:#b67e0a; --line:#e7e0cf; --line-2:#ddd4c0;
+  --muted:#6f6786; --muted-2:#8c84a6;
+  color:var(--ink); line-height:1.5; background:linear-gradient(180deg,#fbf5e9,#f4ecda);
+}
+.zv-overzicht .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
+.zv-overzicht .ovbar { background:var(--paper); border-bottom:1px solid var(--line); padding:22px 0 18px; }
+.zv-overzicht .ovbar-top { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+.zv-overzicht .ovbar h1 { font-size:clamp(26px,3vw,36px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; }
+.zv-overzicht .ovback { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-size:14.5px; font-weight:800; color:var(--indigo); text-decoration:none; }
+.zv-overzicht .ovback svg { width:16px; height:16px; }
+.zv-overzicht .ovsub { margin-top:6px; font-size:15px; font-weight:500; color:#5b5374; max-width:60ch; }
+.zv-overzicht .ovsteps { list-style:none; display:flex; gap:22px; margin-top:18px; flex-wrap:wrap; padding:0; }
+.zv-overzicht .ovsteps li { display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:800; color:var(--muted); }
+.zv-overzicht .ovsteps .n { width:26px; height:26px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo); display:grid; place-items:center; font-size:13px; }
+.zv-overzicht .ovsteps .n svg { width:14px; height:14px; }
+.zv-overzicht .ovsteps li.active { color:var(--indigo); }
+.zv-overzicht .ovsteps li.active .n { background:var(--gold); color:#3a2a06; }
+.zv-overzicht .ovsteps li.done .n { background:var(--indigo); color:#fff; }
+.zv-overzicht .ovnoscript { padding:16px 0; font-size:14px; color:var(--muted); }
+.zv-overzicht .ovwrap { padding:clamp(24px,3vw,40px) 0 90px; }
+.zv-overzicht .olayout { display:grid; grid-template-columns:1.15fr .85fr; gap:26px; align-items:start; }
+.zv-overzicht .ov-left, .zv-overzicht .ov-right { display:flex; flex-direction:column; gap:20px; }
+@media(max-width:920px){
+  .zv-overzicht .olayout { grid-template-columns:1fr; }
+  .zv-overzicht .ov-right { order:1; }
+  .zv-overzicht .ov-left { order:2; }
+}
+.zv-overzicht .ovcard { background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:24px; box-shadow:0 22px 52px -44px rgba(26,18,48,.5); }
+.zv-overzicht .ovcard h2 { font-size:18px; font-weight:900; color:var(--indigo); }
+.zv-overzicht .ovcard-head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:8px; }
+.zv-overzicht .ovedit { margin-left:auto; font-size:13.5px; font-weight:800; color:var(--indigo); text-decoration:none; }
+.zv-overzicht .ovitems { display:flex; flex-direction:column; }
+.zv-overzicht .ovitem { display:grid; grid-template-columns:64px 1fr auto; gap:16px; padding:16px 0; border-bottom:1px solid var(--line); align-items:center; }
+.zv-overzicht .ovitem:last-child { border-bottom:none; padding-bottom:0; }
+.zv-overzicht .ovi-thumb { width:64px; height:64px; border-radius:12px; background:var(--indigo-soft); color:var(--indigo); display:grid; place-items:center; overflow:hidden; }
+.zv-overzicht .ovi-thumb svg { width:32px; height:32px; }
+.zv-overzicht .ovi-thumb img { width:100%; height:100%; object-fit:cover; }
+.zv-overzicht .ovi-line { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--belt); }
+.zv-overzicht .ovi-name { font-size:16.5px; font-weight:900; color:var(--indigo); margin-top:2px; }
+.zv-overzicht .ovi-meta { font-size:13px; font-weight:600; color:var(--muted); margin-top:4px; }
+.zv-overzicht .ovi-right { text-align:right; }
+.zv-overzicht .ovi-price { font-size:17px; font-weight:900; color:var(--ink); white-space:nowrap; }
+.zv-overzicht .ovi-price span { font-size:12px; font-weight:700; color:var(--muted); }
+.zv-overzicht .ovdl { margin-top:12px; }
+.zv-overzicht .ovdl > div { display:flex; justify-content:space-between; gap:12px; font-size:14px; font-weight:600; color:#5b5374; padding:10px 0; border-bottom:1px solid var(--line); }
+.zv-overzicht .ovdl > div:last-child { border-bottom:none; }
+.zv-overzicht .ovdl dt { font-weight:600; }
+.zv-overzicht .ovdl dd { font-weight:800; color:var(--ink); text-align:right; }
+.zv-overzicht .ovdl dd.strong { font-size:18px; color:var(--indigo); }
+.zv-overzicht .ovexplain { margin-top:16px; display:flex; gap:11px; padding:14px 16px; background:var(--cream); border:1px solid var(--line); border-radius:14px; }
+.zv-overzicht .ovexplain svg { flex:none; width:20px; height:20px; color:var(--indigo); margin-top:1px; }
+.zv-overzicht .ovexplain p { font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.5; }
+.zv-overzicht .ovcost-sub { font-size:13.5px; font-weight:500; color:#5b5374; margin-top:4px; }
+.zv-overzicht .ovblock { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+.zv-overzicht .ovblock:first-of-type { margin-top:14px; padding-top:0; border-top:none; }
+.zv-overzicht .ovblock-eb { display:block; font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--belt); margin-bottom:6px; }
+.zv-overzicht .ovblock p { font-size:13.5px; font-weight:600; color:#5b5374; line-height:1.5; }
+.zv-overzicht .ovblock-amt { font-size:28px; font-weight:900; color:var(--indigo); margin-top:6px; }
+.zv-overzicht .ovcost-note { font-size:12px; font-weight:600; color:var(--muted); line-height:1.5; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+.zv-overzicht .ovdelivery { margin-top:16px; padding-top:16px; border-top:1px solid var(--line); display:flex; gap:11px; }
+.zv-overzicht .ovdelivery svg { flex:none; width:22px; height:22px; color:var(--indigo); }
+.zv-overzicht .ovdelivery p { font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.5; }
+.zv-overzicht .ovtrust { display:flex; flex-wrap:wrap; gap:10px 18px; padding:16px 4px; }
+.zv-overzicht .ovtrust span { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; color:var(--muted-2); }
+.zv-overzicht .ovtrust svg { width:15px; height:15px; color:var(--indigo); }
+.zv-overzicht .ovcheck { display:flex; align-items:flex-start; gap:11px; cursor:pointer; }
+.zv-overzicht .ovcheck input { width:19px; height:19px; margin-top:2px; flex:none; accent-color:var(--indigo); }
+.zv-overzicht .ovcheck span { font-size:13.5px; font-weight:600; color:#5b5374; line-height:1.5; }
+.zv-overzicht .ovcheck a { color:var(--indigo); font-weight:800; }
+.zv-overzicht .ovconsent-err { margin-top:8px; font-size:12.5px; font-weight:700; color:#c52e2f; }
+.zv-overzicht .btn { display:inline-flex; align-items:center; justify-content:center; gap:9px; border:none; cursor:pointer; border-radius:12px; font:inherit; font-weight:800; text-decoration:none; padding:14px 24px; width:100%; }
+.zv-overzicht .btn svg { width:18px; height:18px; }
+.zv-overzicht .btn--gold { background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; box-shadow:0 14px 30px -18px rgba(228,163,17,.9); }
+.zv-overzicht .btn--gold:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+.zv-overzicht .btn--ghost { background:transparent; color:var(--indigo); border:1.5px solid var(--line); }
+.zv-overzicht .ovcta { margin-top:16px; }
+.zv-overzicht .ovclosing { font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.5; margin-top:14px; text-align:center; }
+.zv-overzicht .ovback2 { margin-top:10px; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Overzicht (checkout)",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Moet overeenkomen met de tag die zv-cart.liquid gebruikt." },
+    { "type": "text", "id": "heading", "label": "Titel", "default": "Overzicht" },
+    { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U past dit hierna nog aan." },
+    { "type": "text", "id": "pkg_card_heading", "label": "Kop · pakketkaart", "default": "Uw pakket en configuratie" },
+    { "type": "text", "id": "pkg_card_link_label", "label": "Link · pakketkaart", "default": "Wijzig in winkelwagen" },
+    { "type": "text", "id": "before_heading", "label": "Kop · voordat u afrekent", "default": "Voordat u afrekent" },
+    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · voordat u afrekent", "default": "De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)." },
+    { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
+    { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
+    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eenmalige kosten voor activatie en installatie via de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "consent_label", "label": "Akkoordtekst (met pakket)", "info": "Gebruik {av_link} voor de link naar de Algemene Voorwaarden en {term} voor de contractduur in maanden.", "default": "Ik ga akkoord met de {av_link}, de contractduur van {term} maanden en de betaalplicht." },
+    { "type": "textarea", "id": "consent_label_fallback", "label": "Akkoordtekst (zonder herkend pakket)", "info": "Gebruik {av_link} voor de link naar de Algemene Voorwaarden.", "default": "Ik ga akkoord met de {av_link} en de betaalplicht." },
+    { "type": "text", "id": "checkout_button_label", "label": "Knoptekst · afrekenen", "default": "Verder naar veilig afrekenen" },
+    { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in de beveiligde Shopify-checkout." },
+    { "type": "text", "id": "continue_shopping_label", "label": "Knoptekst · verder winkelen", "default": "← Verder winkelen" }
+  ]
+}
+{% endschema %}
