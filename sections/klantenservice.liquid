@@ -49,20 +49,37 @@
       </div>
 
       <div class="faq" id="svcList">
+        {%- assign prev_cat_slug = '' -%}
         {%- for block in section.blocks -%}
+          {%- assign this_cat = block.settings.category | strip -%}
+          {%- assign cat_slug = this_cat | downcase | handle -%}
+
+          {%- if this_cat != blank and cat_slug != prev_cat_slug -%}
+            {%- assign chapter_num = 0 -%}
+            {%- for c in cats -%}
+              {%- assign c_slug = c | strip | downcase | handle -%}
+              {%- if c_slug == cat_slug -%}
+                {%- assign chapter_num = forloop.index -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+            <h3 class="faq-chapter" data-cat="{{ cat_slug }}">
+              {%- if chapter_num > 0 -%}<span class="fc-num">{{ chapter_num }}</span>{%- endif -%}
+              {{ this_cat | escape }}
+            </h3>
+            {%- assign prev_cat_slug = cat_slug -%}
+          {%- endif -%}
+
           {%- if block.type == 'faq' -%}
-            {%- assign cat_slug = block.settings.category | strip | downcase | handle -%}
             {%- assign ansid = 'svc-a-' | append: block.id -%}
             <div class="faq-item" data-cat="{{ cat_slug }}" data-text="{{ block.settings.question | append: ' ' | append: block.settings.category | append: ' ' | append: block.settings.answer | strip_html | downcase | escape }}" {{ block.shopify_attributes }}>
               <button class="faq-q" type="button" aria-expanded="false" aria-controls="{{ ansid }}">
-                {%- if block.settings.category != blank -%}<span class="qcat">{{ block.settings.category | escape }}</span>{%- endif -%}
                 <span class="qtext">{{ block.settings.question | escape }}</span>
                 <svg class="qx" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
               </button>
               <div class="faq-a" id="{{ ansid }}" role="region"><div class="faq-a-inner">{{ block.settings.answer }}</div></div>
             </div>
           {%- elsif block.type == 'note' -%}
-            {%- assign cat_slug = block.settings.category | strip | downcase | handle -%}
             <div class="faq-item faq-note" data-cat="{{ cat_slug }}" data-text="{{ block.settings.category | strip_html | downcase | escape }}" {{ block.shopify_attributes }}>
               <div class="faq-note-inner">{{ block.settings.text }}</div>
             </div>
@@ -180,10 +197,13 @@
 .zv-svc .cat .cdot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex:none; }
 .zv-svc .cat.on .cdot { background:var(--gold-lt); }
 .zv-svc .faq { max-width:720px; margin:30px auto 0; display:flex; flex-direction:column; gap:10px; }
+.zv-svc .faq-chapter { display:flex; align-items:baseline; gap:12px; font-size:clamp(19px,2.1vw,23px); font-weight:900; letter-spacing:-.01em; color:var(--indigo); margin:38px 0 4px; padding-bottom:10px; border-bottom:2px solid var(--indigo-soft); }
+.zv-svc .faq-chapter:first-child { margin-top:0; }
+.zv-svc .faq-chapter[hidden] { display:none; }
+.zv-svc .faq-chapter .fc-num { flex:none; display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; border-radius:9px; background:var(--indigo); color:#fff; font-size:14px; font-weight:900; }
 .zv-svc .faq-item { background:var(--cream); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
 .zv-svc .faq-item[hidden] { display:none; }
 .zv-svc .faq-q { width:100%; text-align:left; background:none; border:none; padding:17px 20px; display:flex; align-items:center; gap:14px; font-size:15.5px; font-weight:800; color:var(--ink); cursor:pointer; }
-.zv-svc .faq-q .qcat { font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--belt); background:var(--sand); border-radius:999px; padding:4px 9px; flex:none; }
 .zv-svc .faq-q .qtext { flex:1; }
 .zv-svc .faq-q .qx { margin-left:auto; width:22px; height:22px; flex:none; color:var(--indigo); transition:transform .2s; }
 .zv-svc .faq-item.open .faq-q .qx { transform:rotate(45deg); }
@@ -229,18 +249,25 @@
   var searchBtn = scope.querySelector('#svcSearchBtn');
   var cats = scope.querySelectorAll('.cat');
   var items = Array.prototype.slice.call(scope.querySelectorAll('.faq-item'));
+  var chapters = Array.prototype.slice.call(scope.querySelectorAll('.faq-chapter'));
   var empty = scope.querySelector('#svcEmpty');
   var activeCat = '__all';
   var term = '';
 
   function apply() {
     var shown = 0;
+    var catHasVisible = {};
     items.forEach(function (it) {
       var okCat = activeCat === '__all' || it.getAttribute('data-cat') === activeCat;
       var okTerm = !term || (it.getAttribute('data-text') || '').indexOf(term) >= 0;
       var visible = okCat && okTerm;
       it.hidden = !visible;
-      if (visible) shown++;
+      if (visible) { shown++; catHasVisible[it.getAttribute('data-cat')] = true; }
+    });
+    // Chapter headings only make sense in the "Alle" view — a single-category
+    // filter already names the category via the active pill.
+    chapters.forEach(function (h) {
+      h.hidden = activeCat !== '__all' || !catHasVisible[h.getAttribute('data-cat')];
     });
     if (empty) empty.hidden = shown !== 0;
   }
