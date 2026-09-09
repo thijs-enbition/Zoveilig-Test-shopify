@@ -120,7 +120,7 @@
           "name": "Inzicht",
           "platform": "NAMI aiAware",
           "hook": "Weet dat de dag normaal en veilig is begonnen.",
-          "sub": "NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer",
+          "sub": "NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer",
           "monthlyRecurringPrice": {
             "amountCents": 1995,
             "display": "€19,95",
@@ -135,7 +135,7 @@
           "platform": "NAMI aiCare",
           "badge": "Meest gekozen",
           "hook": "Zie subtiele veranderingen vóór het misgaat.",
-          "sub": "NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer",
+          "sub": "NAMI aiCare · 3 activiteitssensoren (~100 m²), deursensor per toegang en 2 PIR voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer",
           "monthlyRecurringPrice": {
             "amountCents": 2495,
             "display": "€24,95",
@@ -223,7 +223,7 @@
           "name": "SOS",
           "platform": "LioGo",
           "hook": "Eén druk verbindt u met de meldkamer.",
-          "sub": "Prijs en specs volgen",
+          "sub": "Prijs en specificaties volgen",
           "monthlyRecurringPrice": {
             "status": "PRICE_PENDING",
             "display": "Prijs volgt"
@@ -235,7 +235,7 @@
           "name": "Zorg",
           "platform": "LioGo",
           "hook": "24/7 zorgprofessionals regelen opvolging.",
-          "sub": "Prijs en specs volgen",
+          "sub": "Prijs en specificaties volgen",
           "monthlyRecurringPrice": {
             "status": "PRICE_PENDING",
             "display": "Prijs volgt"
