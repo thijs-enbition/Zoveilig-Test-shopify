@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0.0",
-  "edge_functions_version": "1.0.0",
+  "schema_version": "1.1.0",
+  "edge_functions_version": "1.1.0",
   "shopify_integration_version": "1.0.0",
-  "notes": "Gate 1 baseline. schema_version tracks migrations 000-003,005. 004_rpc and 006_reporting_views are Gate 2 and are intentionally NOT present yet."
+  "notes": "Gate 1 baseline plus 007_leads_contact_form_fields (schema_version now tracks 000-003,005,007). First Edge Function, capture-lead, added scoped to the Contact page form only (no Odoo call). 004_rpc and 006_reporting_views are Gate 2 and are intentionally NOT present yet."
 }

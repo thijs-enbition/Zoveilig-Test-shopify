@@ -16,11 +16,27 @@ repo right now**:
 | `002_commerce_orders_handover.sql` | 1 |
 | `003_order_lines_idempotency.sql` | 1 |
 | `005_versioning.sql` | 1 |
+| `007_leads_contact_form_fields.sql` | 1 — schema-only `leads` extension (subject/preferred_contact_time/message), added for the Contact page's `capture-lead` wiring |
 | `004_rpc.sql` | 2 — **not created yet** |
 | `006_reporting_views.sql` | 2 — **not created yet** |
 
 `004` and `006` are authored only after explicit Gate 2 approval. Until then a push
-(or per-file apply) cannot touch server logic or reporting.
+(or per-file apply) cannot touch server logic or reporting. `007` deliberately keeps
+that numbering gap open — it's a plain schema alter (same shape as `001`/`002`), not
+the RPC/reporting-views work those two reserved names are for.
+
+## Edge Functions
+
+`supabase/functions/capture-lead` (added 2026-09-09) is the first Edge Function built
+against this schema. It is scoped narrowly to the Contact page's "Plan een gratis
+adviesgesprek" form: validates required fields + a honeypot, inserts one `leads` row
+(`status = 'contact_requested'`) and one `status_history` row, and stops — no Odoo call.
+`leads.odoo_sync_status` stays at its `not_ready` default; automated Odoo sync is still
+Phase 2 per `docs/architecture/adr/ADR-004-odoo-deferred-phase-2.md`. It does **not**
+implement the broader Gate 2 recommendations still open in the reference architecture
+(§12): per-IP/journey rate limiting beyond the honeypot, the full CORS allowlist story,
+or wiring from Keuzehulp/attribution capture — those remain for whenever Gate 2 is
+formally signed off.
 
 ## Version tracking
 
