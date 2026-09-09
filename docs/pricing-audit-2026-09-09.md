@@ -28,3 +28,62 @@ Legend: 🟢 Live (Shopify product/variant) · 🟡 Config (pricing.config.json 
 2. **The contract**, from month 4 onward: SEPA, run entirely through the existing Shopify → Odoo connector once the order exists with clear product/line data. Not modeled or validated in the theme — out of scope for theme work entirely.
 
 Implementation of the purchase-side fix is the current task (see the relevant task history for the product list and exact mechanism).
+
+## Update 2026-09-09 (later same day) — activation fee wired in, promo deferred
+
+The "Activatie en installatie" product now exists in Shopify (published to Online Store,
+handle `activatie-en-installatie`, SKU `ACT-INSTALL`, €49,00, `product_type: service`, no
+tracked inventory) and is confirmed by direct query against `zoveiligdev.myshopify.com` via
+`shopify theme dev`'s local proxy and `shopify theme console` — not by product.json handle
+guessing. It's now wired into every package add-to-cart flow (Oplossingen page, Vergelijk
+pakketten advice bar) as a second cart line, resolved by handle via
+`pricing.config.json` → `activation.productHandle`/`sku` (no hardcoded variant id), deduped
+against the live cart in JS so it's only ever charged once per cart regardless of how many
+packages/add-ons are added afterwards.
+
+The promo product ("eerste 3 maanden" 50%-off line item) does **not** exist yet.
+`pricing.config.json` `promo.enabled` is set to `false` for now (the agreed 50%/3-months
+figures are left in place, untouched, so re-enabling is a one-line flip back to `true` plus
+`python3 scripts/build_pricing.py` once the promo product lands). `build_pricing.py` computes
+a `promo.active` flag (`enabled AND ratePercent > 0`); every promo-specific display (the
+Overzicht "Eerste 3 maanden (X% korting)" row, the cost-card's discounted-then-full-price
+copy, the `/pages/actie-korting` promo landing page's badge/struck-through pricing/disclosure)
+renders conditionally on `zv_promo_active` and is currently hidden. `actie-korting.liquid`
+degrades to a plain package-price page rather than being unpublished, so the URL keeps
+working; nothing there currently claims a discount that isn't real.
+
+**The "Vandaag te betalen" bug this whole audit was chasing is now fixed, not just
+documented.** `zv-cart.liquid` and `zv-checkout-overview.liquid` previously excluded
+subscription line items from "Vandaag te betalen" on the theory they'd be priced at €0 or
+carry a selling plan in Shopify — neither was ever true. Verified directly against a real
+cart: adding one Langer Thuis Zeker (€24,95) + the activation fee (€49,00) makes Shopify's
+own `cart.total_price` **€73,95**, while the theme was displaying "Vandaag te betalen:
+€49,00" (or €0,00 before the activation fee existed) — a real, verified undercount of what
+the customer is actually charged. Both files now sum every cart line into "Vandaag te
+betalen" unconditionally (no is-subscription exclusion), so it always equals
+`cart.total_price` by construction and can't drift from what Shopify actually charges again.
+Subscription-item classification is now purely informational (the "p/m" badge, the
+"Maandbedrag" figure representing the amount that continues via SEPA-incasso each month
+after today) — verified against three hand-computed scenarios (package only: €19,95 = cart
+total exactly; package + activation: €68,95/€73,95 depending on package, matching
+`cart.total_price` exactly in both cases; indicative contract value cross-checked against
+`pricing.generated.json`'s own formula).
+
+**New findings from this pass, not yet actioned:**
+- **Langer Thuis Inzicht (LT-INZ) is live-priced at €0,50 in Shopify admin**, not the €19,95
+  in `pricing.config.json` — confirmed 2026-09-09 via the same live product query. Every
+  other package's live price matches its config value exactly; only this one drifted. Not
+  changed by this pass (a Shopify admin product-price edit is a business action, not a theme
+  fix, and this may be a live test Thijs is running) — flagging so it isn't mistaken for a
+  theme bug if a Langer Thuis Inzicht checkout total ever looks unexpectedly low.
+- **The standalone Shopify product page (`/products/<package-handle>`, `templates/product.json`,
+  Dawn's stock `buy_buttons` block) is live and reachable, and lets a customer add a package
+  to cart with no activation-fee line and no cart-total fix applied** — it's the generic Dawn
+  buy-button shared by every product in the store, not something this pass touched. If that
+  page is a real customer entry point (not just an internal/preview URL), it needs the same
+  activation-fee wiring the Oplossingen and Vergelijk pakketten pages now have, or should be
+  kept out of the customer journey (e.g. via the theme editor / navigation) until it does.
+- The promo product's absence is why `discountPercent` isn't a new schema field: this pass
+  reused the existing `promo.enabled` flag rather than adding one, since it already implements
+  exactly "0 discount, full price charged, one-line revert" — see `pricing.config.json`
+  `promo.enabledNote` for the reasoning.
