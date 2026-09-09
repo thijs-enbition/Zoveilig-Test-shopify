@@ -58,6 +58,10 @@ def build():
     promo_enabled = bool(promo.get("enabled", True))
     promo_months = int(promo["months"])
     promo_rate = Decimal(str(promo["ratePercent"])) / Decimal(100)
+    # True only when the promo is both switched on AND has a non-zero rate, so either
+    # `enabled: false` or `ratePercent: 0` fully hides every promo-specific display
+    # (badge, disclosure, discount rows) via zv_promo_active, without a second flag to keep in sync.
+    promo_active = promo_enabled and promo_rate > 0
 
     out = {
         "generatedFrom": "pricing.config.json",
@@ -65,9 +69,12 @@ def build():
         "currency": cfg["currency"],
         "rounding": cfg["rounding"],
         "activation": {"amountCents": activation_cents, "display": eur(activation_cents),
-                       "label": cfg["labels"]["activation"]},
+                       "label": cfg["labels"]["activation"],
+                       "productHandle": cfg["activation"].get("productHandle"),
+                       "sku": cfg["activation"].get("sku")},
         "promo": {
             "enabled": promo_enabled,
+            "active": promo_active,
             "months": promo_months,
             "ratePercent": promo["ratePercent"],
             "label": promo["label"],
@@ -186,9 +193,12 @@ def build():
         "</script>",
         "",
         f"{{%- assign zv_promo_months = {out['promo']['months']} -%}}",
+        f"{{%- assign zv_promo_active = {str(promo_active).lower()} -%}}",
         f"{{%- assign zv_promo_badge = '{out['promo']['cardBadge']}' -%}}",
         f"{{%- assign zv_promo_timeline = '{out['promo']['timelineLabel']}' -%}}",
         f"{{%- assign zv_promo_disclosure = '{out['promo']['disclosure']}' -%}}",
+        f"{{%- assign zv_activation_handle = '{out['activation'].get('productHandle') or ''}' -%}}",
+        f"{{%- assign zv_activation_sku = '{out['activation'].get('sku') or ''}' -%}}",
     ]
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")

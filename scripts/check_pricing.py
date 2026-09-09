@@ -74,10 +74,11 @@ check(all(p["activationPriceCents"] == activation for p in priced),
       "every package uses the central activation value")
 
 print("\n3. Today's payment (activation only) + intro promo")
+cfg_promo_enabled = bool(cfg["promo"].get("enabled", True))
 for p in priced:
     m = p["monthlyRecurringPriceCents"]
-    exp_promo_monthly = half_up(Decimal(m) * (Decimal(1) - promo_rate))
-    exp_promo_disc = half_up(Decimal(promo_months) * Decimal(m) * promo_rate)
+    exp_promo_monthly = half_up(Decimal(m) * (Decimal(1) - promo_rate)) if cfg_promo_enabled else m
+    exp_promo_disc = half_up(Decimal(promo_months) * Decimal(m) * promo_rate) if cfg_promo_enabled else 0
     check(p["initialPaymentDueTodayCents"] == activation,
           f"{p['name']} due today = activation only",
           f"got {p['initialPaymentDueTodayCents']} expected {activation}")
@@ -92,6 +93,17 @@ check(half_up(Decimal("3742.5")) == 3743,
 check(cfg["rounding"]["method"] == "ROUND_HALF_UP", "config declares ROUND_HALF_UP")
 check(cfg["commitment"].get("retired") is True,
       "the 1.5x commitment is marked retired (superseded by promo)")
+promo_active = bool(cfg["promo"].get("enabled")) and promo_rate > 0
+check(gen["promo"]["active"] == promo_active,
+      "generated promo.active matches enabled AND rate > 0",
+      f"got {gen['promo']['active']} expected {promo_active}")
+if not promo_active:
+    for p in priced:
+        check(p["promoDiscountTotalCents"] == 0,
+              f"{p['name']} promo discount is 0 while promo is inactive",
+              f"got {p['promoDiscountTotalCents']}")
+        check(p["promoMonthlyCents"] == p["monthlyRecurringPriceCents"],
+              f"{p['name']} promo monthly equals full monthly while promo is inactive")
 
 print("\n4. Contract duration")
 check(cfg["contract"]["defaultTermMonths"] == 36, "default term is 36 months")

@@ -27,7 +27,9 @@
     "label": "Eenmalige activatie en installatie",
     "billing": "oneoff",
     "collectedBy": "shopify",
-    "note": "Centrally configurable. Change here only, never in a page component."
+    "productHandle": "activatie-en-installatie",
+    "sku": "ACT-INSTALL",
+    "note": "Centrally configurable. Change here only, never in a page component. productHandle/sku identify the real Shopify product added to the cart alongside a package (confirmed live 2026-09-09, published to Online Store: service product, price EUR 49,00, no tracked inventory)."
   },
   "commitment": {
     "id": "initial-commitment",
@@ -69,7 +71,8 @@
   },
   "promo": {
     "id": "intro-3-months-50",
-    "enabled": true,
+    "enabled": false,
+    "enabledNote": "Disabled 2026-09-09 pending the promo product (Thijs will set the real discount once store access lands, ETA a day or two). While disabled, build_pricing.py computes 0 discount and every promo-specific display (badge, disclosure, discount rows) is hidden by the theme via zv_promo_active. Re-enabling is a one-line change here plus `python3 scripts/build_pricing.py` — the agreed 50%/3-months figures below are left untouched so they come straight back.",
     "months": 3,
     "ratePercent": 50,
     "basis": "monthlyRecurringPrice",
