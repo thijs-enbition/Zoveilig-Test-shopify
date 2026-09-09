@@ -27,6 +27,30 @@ picking one package's numbers — a 36-month Inzicht contract and a 12-month Ale
 can't both be represented by a single set of rows, and showing either alone would be wrong,
 not just incomplete.
 
+## Pakket-matcher (Vergelijk pakketten page)
+
+`/pages/vergelijk-pakketten` (`templates/page.vergelijk-pakketten.json` → `sections/vergelijk-pakketten.liquid`)
+carries the "Welk pakket past bij uw situatie?" scenario cards above the Inzicht/Zeker/Beschermd table.
+Note: this lives on the *Vergelijk pakketten* page, not `/pages/oplossingen` — the Oplossingen page has
+its own package cards and links here via `zv-route` key `vergelijk-pakketten`.
+
+- Each card is a `scenario` block; its `package` setting (inzicht/zeker/beschermd) is the scoring
+  mapping and is editable in the theme editor. **The shipped mapping is a placeholder and still
+  needs product sign-off (Robi/Robert)** — it was guessed from the card wording, not confirmed.
+- Scoring is pure client-side (`{% javascript %}` in the section): most selected cards per package
+  wins; ties go to the higher tier (beschermd > zeker > inzicht); zero selected → nothing highlighted.
+- The advice bar's add-to-cart resolves package → real product through the same
+  `custom.finder_key` metafield mapping the Overzicht page uses (`aware`→inzicht, `aware_plus`→zeker,
+  `care`→beschermd) on the section's `collection` setting (default `langer-thuis`). No variant ids in
+  code. If the same variant is already in the cart it bumps that line via `/cart/change.js` instead
+  of adding a second line (Shopify only merges lines whose properties match exactly, and the
+  Oplossingen card-add attaches `Bron: Oplossingen` while this one attaches `Bron: Vergelijk pakketten`).
+- The "Meest geschikt voor" table row and the advice bar share the three tagline settings
+  (`tagline_inzicht/zeker/beschermd`); JS reads the bar's text from the table cell so they can't drift.
+- The store's Langer Thuis products are tagged `keuzehulp` + `Langer Thuis`, **not** `abonnement` —
+  so `zv-cart.liquid` / the Overzicht page (which classify subscriptions by the `abonnement` tag) will
+  currently treat them as one-time items. That's a product-data gap in Shopify admin, not theme code.
+
 ## Pricing pipeline
 
 `pricing/pricing.config.json` is the single source of truth for activation fee, intro promo,
