@@ -1,9 +1,16 @@
 {%- comment -%}
   Zo Veilig — Winkelwagen. Visual 1:1 port of the design pack cart, wired to
   the live Shopify {{ cart }}: real line items, quantities (/cart/change),
-  and checkout. Payment split: subscription packages are shown as MONTHLY via
-  SEPA-incasso (Odoo) and are EXCLUDED from "Vandaag te betalen"; everything
-  else is one-time and billed today via Shopify.
+  and checkout.
+
+  "Vandaag te betalen" = the FULL live cart total (every line, minus cart-level
+  discounts) — i.e. exactly what Shopify will actually charge at checkout, full
+  stop. It is never reduced by excluding subscription line items: Shopify always
+  charges the complete cart regardless of how a line is categorised in the
+  theme, so a total that hid part of the cart would show a smaller number than
+  the customer is actually charged (confirmed live 2026-09-09: a cart holding
+  one Langer Thuis Zeker line + the activation-fee line charges the sum of
+  both, not the activation fee alone).
 
   Subscription detection: a line is a subscription if its product's `type`
   equals section setting `sub_type` (default "Beveiligingsabonnement" — the
@@ -13,14 +20,11 @@
   compatibility — no live product currently uses this tag; tags differ per
   line, e.g. Langer Thuis carries "Langer Thuis" + "keuzehulp", Mijn Thuis
   carries "Mijn Thuis" + "keuzehulp", so a tag alone can't identify a
-  subscription across all lines the way `type` reliably does).
-
-  ⚠️ MONEY-FLOW REQUIREMENT: Shopify charges the FULL cart total at checkout.
-  For the actual charge to equal the displayed "Vandaag te betalen", the
-  subscription products must be priced at zero in Shopify (the monthly amount is
-  billed in Odoo via SEPA), OR use a Shopify selling plan. Otherwise Shopify
-  also collects the monthly amount today. Confirm the product setup with ops.
-  Header/footer come from the theme layout.
+  subscription across all lines the way `type` reliably does). This
+  classification is now purely informational: it drives the "p/m" badge and
+  the "Maandbedrag" line (the recurring amount that continues via SEPA-incasso
+  each month after today) — it no longer subtracts anything from "Vandaag te
+  betalen". Header/footer come from the theme layout.
 {%- endcomment -%}
 
 {%- assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement' -%}
@@ -73,7 +77,7 @@
                   {%- if is_sub -%}
                     <div class="ci-price" style="color:var(--indigo)">{{ item.final_line_price | money }} <span>p/m</span></div>
                     <span class="ci-badge">Abonnement</span>
-                    <span class="ci-note">Via SEPA-incasso (Odoo).<br>Niet vandaag betaald.</span>
+                    <span class="ci-note">Inbegrepen bij vandaag te betalen.<br>Loopt daarna door via SEPA-incasso.</span>
                   {%- else -%}
                     <div class="ci-price">{{ item.final_line_price | money }}</div>
                     {%- if item.original_line_price > item.final_line_price -%}<span class="ci-note">Korting toegepast</span>{%- endif -%}
@@ -90,11 +94,11 @@
             {%- for item in cart.items -%}
               {%- assign li_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
+              {%- assign today_cents = today_cents | plus: item.final_line_price -%}
               {%- if li_sub -%}
                 {%- assign month_cents = month_cents | plus: item.final_line_price -%}
                 <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
               {%- else -%}
-                {%- assign today_cents = today_cents | plus: item.final_line_price -%}
                 <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- endif -%}
             {%- endfor -%}
