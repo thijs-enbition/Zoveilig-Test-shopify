@@ -21,12 +21,20 @@
 
   Deferred to a separate milestone (by design): a custom slide-in cart drawer (we navigate to
   /cart instead), and the GTM/GA4/Consent wiring (only data-* hooks are emitted here).
+
+  ACTIVATION FEE: every add-to-cart here also adds the universal one-time "Activatie en
+  installatie" product (pricing.config.json activation.productHandle/sku, confirmed live in
+  Shopify 2026-09-09 — never a hardcoded variant id) alongside the package, deduped in JS
+  against the live cart so it's only ever added once regardless of how many packages/add-ons
+  a customer adds. See the shared addToCart() function below.
 {%- endcomment -%}
 
+{%- include 'zv-pricing' -%}
+{%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 
 {%- if sols.size > 0 -%}
-<div class="opl-page" id="oplossingen-page" data-zv-oplossingen>
+<div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}">
 
   <div class="catnav" role="tablist" aria-label="Onze oplossingen">
     <span class="catnav__lbl">Onze oplossingen</span>
@@ -853,17 +861,40 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
      so a stale server-rendered count (e.g. left over from a cart emptied elsewhere) is corrected. */
   window.fetch('/cart.js').then(function (r) { return r.json(); }).then(updateCartCount).catch(function () {});
 
+  /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
+     activation.productHandle/sku), resolved server-side into a data attribute — never
+     a hardcoded id here. Adds it alongside a package on every add-to-cart, but only
+     once: checks the live cart first so adding a second package or add-on later never
+     charges the fee twice. Returns a Promise<string|null> (the variant id to add, or
+     null if it's missing from the page or already in the cart). */
+  var activationVariantId = page.dataset.activationVariantId || null;
+  function activationLineToAdd() {
+    if (!activationVariantId) return Promise.resolve(null);
+    return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+      var already = (cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
+      return already ? null : activationVariantId;
+    }).catch(function () { return null; });
+  }
+
   function addToCart(variantId, properties, mode, btn) {
     if (!variantId || (btn && btn.dataset.busy === '1')) return;
     var label = '';
     if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
     var errEl = btn && btn.parentNode && btn.parentNode.querySelector('.pcard__err'); if (errEl) errEl.remove();
-    return window.fetch('/cart/add.js', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: [{ id: variantId, quantity: 1, properties: properties || {} }] })
+    return activationLineToAdd().then(function (activationId) {
+      var items = [{ id: variantId, quantity: 1, properties: properties || {} }];
+      if (activationId) items.push({ id: activationId, quantity: 1 });
+      return window.fetch('/cart/add.js', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: items })
+      });
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (line) {
+      .then(function (res) {
+        // /cart/add.js always responds { items: [...] } for an items-array POST (one entry
+        // per line added, package first) — find the package's own line for analytics, not the
+        // activation-fee line.
+        var line = (res && res.items && res.items[0]) || res;
         var ZV = window.ZVMeasurement;
         if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
         if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }

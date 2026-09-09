@@ -1,10 +1,17 @@
 {%- include 'zv-pricing' -%}
 {%- comment -%}
   Zo Veilig — Actie: 50% korting (Langer Thuis + Mijn Thuis).
-  Promo landing page for the already-configured intro offer (pricing/pricing.config.json
-  "promo": intro-3-months-50, enabled). This page only surfaces it commercially; every
-  price and the discount rate itself come from the zv-pricing include, never a literal
-  here (CI check #9 in scripts/check_pricing.py enforces that).
+  Promo landing page for the intro offer (pricing/pricing.config.json "promo":
+  intro-3-months-50). This page only surfaces it commercially; every price and the
+  discount rate itself come from the zv-pricing include, never a literal here (CI
+  check #9 in scripts/check_pricing.py enforces that).
+
+  While the promo is inactive (`zv_promo_active` false — pricing.config.json
+  `promo.enabled: false`, disabled 2026-09-09 pending the promo product), the whole
+  page degrades to a plain package overview: no discount badge, no struck-through
+  "was" price, no disclosure text. It stays live rather than being unpublished so
+  the URL keeps working; re-enabling the promo in config brings the discount
+  framing straight back with no further changes here.
 
   Cards link out to the existing, tested purchase flow on /pages/oplossingen (deep-linked
   per package via zv-route's "pakket" key) rather than re-implementing add-to-cart, so this
@@ -20,8 +27,13 @@
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow"><span class="d"></span>{{ section.settings.eyebrow | default: 'Tijdelijke actie' | escape }}</span>
-      <h1>{{ zv_promo_badge }} op Langer Thuis en Mijn Thuis</h1>
-      <p class="sub">{{ section.settings.sub | default: 'Kies het pakket dat past bij uw situatie. De eerste maanden betaalt u nog maar de helft, daarna gewoon het vaste maandbedrag. Geen verrassingen, wel meteen gemoedsrust.' | escape }}</p>
+      {%- if zv_promo_active -%}
+        <h1>{{ zv_promo_badge }} op Langer Thuis en Mijn Thuis</h1>
+        <p class="sub">{{ section.settings.sub | default: 'Kies het pakket dat past bij uw situatie. De eerste maanden betaalt u nog maar de helft, daarna gewoon het vaste maandbedrag. Geen verrassingen, wel meteen gemoedsrust.' | escape }}</p>
+      {%- else -%}
+        <h1>Onze pakketten voor Langer Thuis en Mijn Thuis</h1>
+        <p class="sub">Kies het pakket dat past bij uw situatie. Vast maandbedrag, geen verrassingen.</p>
+      {%- endif -%}
       <div class="hero-cta">
         <a class="btn btn--gold" href="#pakketten">Bekijk de pakketten{{ arrow }}</a>
         <a class="btn btn--ghost-light" href="{% render 'zv-route', key: 'keuzehulp' %}" data-zv-finder>Doe de Keuzehulp</a>
@@ -51,6 +63,7 @@
             {%- when 'zeker' -%}{%- assign monthly = zv_zeker_monthly -%}{%- assign promo_monthly = zv_zeker_promo_monthly -%}
             {%- when 'beschermd' -%}{%- assign monthly = zv_beschermd_monthly -%}{%- assign promo_monthly = zv_beschermd_promo_monthly -%}
           {%- endcase -%}
+          {%- unless zv_promo_active -%}{%- assign promo_monthly = blank -%}{%- endunless -%}
           {%- render 'zv-actie-card', name: lt_names[i], hook: lt_hooks[i], popular: lt_popular[i], monthly: monthly, promo_monthly: promo_monthly, promo_badge: zv_promo_badge, fk: lt_fks[i] -%}
         {%- endfor -%}
       </div>
@@ -79,11 +92,12 @@
             {%- when 'protect' -%}{%- assign monthly = zv_protect_monthly -%}{%- assign promo_monthly = zv_protect_promo_monthly -%}
             {%- when 'vista' -%}{%- assign monthly = zv_vista_monthly -%}{%- assign promo_monthly = blank -%}
           {%- endcase -%}
+          {%- unless zv_promo_active -%}{%- assign promo_monthly = blank -%}{%- endunless -%}
           {%- render 'zv-actie-card', name: mt_names[i], hook: mt_hooks[i], popular: mt_popular[i], monthly: monthly, promo_monthly: promo_monthly, promo_badge: zv_promo_badge, fk: mt_fks[i] -%}
         {%- endfor -%}
       </div>
 
-      <p class="fine">{{ zv_promo_disclosure }}</p>
+      {%- if zv_promo_active -%}<p class="fine">{{ zv_promo_disclosure }}</p>{%- endif -%}
     </div>
   </section>
 
