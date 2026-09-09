@@ -109,6 +109,7 @@
         assign pkg_activation = zv_inzicht_activation
         assign pkg_term = zv_inzicht_term
         assign pkg_icv = zv_inzicht_icv
+        assign pkg_meldkamer = false
       when 'aware_plus'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_zeker_promo_monthly
@@ -116,6 +117,7 @@
         assign pkg_activation = zv_zeker_activation
         assign pkg_term = zv_zeker_term
         assign pkg_icv = zv_zeker_icv
+        assign pkg_meldkamer = false
       when 'care'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_beschermd_promo_monthly
@@ -123,6 +125,7 @@
         assign pkg_activation = zv_beschermd_activation
         assign pkg_term = zv_beschermd_term
         assign pkg_icv = zv_beschermd_icv
+        assign pkg_meldkamer = true
       when 'secure'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_alert_promo_monthly
@@ -130,6 +133,7 @@
         assign pkg_activation = zv_alert_activation
         assign pkg_term = zv_alert_term
         assign pkg_icv = zv_alert_icv
+        assign pkg_meldkamer = false
       when 'guard'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_protect_promo_monthly
@@ -137,6 +141,7 @@
         assign pkg_activation = zv_protect_activation
         assign pkg_term = zv_protect_term
         assign pkg_icv = zv_protect_icv
+        assign pkg_meldkamer = true
     endcase
   endif
 -%}
@@ -277,7 +282,9 @@
             <div class="ovtrust">
               <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>Beveiligde betaling</span>
               <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9.5C8 19.2 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>SSL-versleuteld</span>
-              <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Securitas-meldkamer</span>
+              {%- if pkg_available and pkg_meldkamer -%}
+                <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Securitas-meldkamer</span>
+              {%- endif -%}
               <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l5 5 11-11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>14 dagen retour</span>
             </div>
 
