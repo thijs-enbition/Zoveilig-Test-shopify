@@ -32,6 +32,14 @@
 {%- include 'zv-pricing' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
+{%- comment -%}
+  Pakket-matcher, embedded under the Langer Thuis pricing cards below (not a separate
+  section) — see snippets/zv-pakket-matcher.liquid for why it's a shared snippet + static
+  assets rather than duplicated markup/JS/CSS.
+{%- endcomment -%}
+{%- assign matcher_scenarios = section.blocks | where: 'type', 'scenario' -%}
+{{ 'zv-vergelijk-pakketten.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
 {%- if sols.size > 0 -%}
 <div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}" data-cart-url="{{ routes.cart_url }}">
@@ -96,7 +104,7 @@
         <div class="pak__head">
           <div class="pak__head-row">
             {%- if is_coming_soon -%}<h3>Binnenkort beschikbaar</h3>{%- elsif b.settings.pak_heading != blank -%}<h3>{{ b.settings.pak_heading }}</h3>{%- endif -%}
-            {%- unless is_coming_soon -%}<a class="compare" href="{{ b.settings.compare_url | default: '/#keuzehulp' }}" data-zv-event="compare_packages" data-solution-type="{{ anchor }}" data-cta-name="niet_zeker" data-cta-position="{{ anchor }}_paks" data-zv-finder>{{ b.settings.compare_label | default: 'Niet zeker welk niveau bij u past?' }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>{%- endunless -%}
+            {%- unless is_coming_soon or b.settings.hide_compare_cta -%}<a class="compare" href="{{ b.settings.compare_url | default: '/#keuzehulp' }}" data-zv-event="compare_packages" data-solution-type="{{ anchor }}" data-cta-name="niet_zeker" data-cta-position="{{ anchor }}_paks" data-zv-finder>{{ b.settings.compare_label | default: 'Niet zeker welk niveau bij u past?' }}<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>{%- endunless -%}
           </div>
           {%- if b.settings.pak_sub != blank -%}<p class="ph-sub">{{ b.settings.pak_sub }}</p>{%- endif -%}
         </div>
@@ -217,6 +225,16 @@
           </div>
         {%- endif -%}
       </section>
+
+      {%- if anchor == 'langer-thuis' -%}
+        {%- render 'zv-pakket-matcher',
+          scenarios: matcher_scenarios,
+          activation_variant_id: activation_variant_id,
+          zv_inzicht_monthly: zv_inzicht_monthly,
+          zv_zeker_monthly: zv_zeker_monthly,
+          zv_beschermd_monthly: zv_beschermd_monthly
+        -%}
+      {%- endif -%}
 
       {%- comment -%} Waarom Zo Veilig — WhyBlock (design shows the first two feature rows). {%- endcomment -%}
       {%- if b.settings.why_heading != blank and b.settings.why_1_img != blank -%}
@@ -1462,6 +1480,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         { "type": "textarea", "id": "pak_sub", "label": "Pakketten-subtekst" },
         { "type": "text", "id": "compare_label", "label": "Vergelijk-link tekst", "default": "Niet zeker welk niveau bij u past?" },
         { "type": "url", "id": "compare_url", "label": "Vergelijk-link" },
+        { "type": "checkbox", "id": "hide_compare_cta", "label": "Vergelijk-link verbergen", "default": false, "info": "Zet aan wanneer de pakket-matcher al direct onder de pakketten van deze oplossing wordt getoond (bv. Langer Thuis) — de link zou dan naar dezelfde inhoud verwijzen." },
         { "type": "textarea", "id": "uitbreidingen", "label": "Uitbreidingen (Naam of Naam|Prijs, 1 per regel; leeg = 'Prijs volgt')", "default": "Huisdier-upgrade\nExtra sensoren\nExtra toegangspunten" },
         { "type": "text", "id": "note", "label": "Binnenkort-notitie (optioneel)" },
         { "type": "header", "content": "Waarom Zo Veilig" },
@@ -1476,6 +1495,25 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         { "type": "textarea", "id": "why_2_body", "label": "Kaart 2 · tekst" },
         { "type": "text", "id": "why_2_link_label", "label": "Kaart 2 · link-tekst" },
         { "type": "url", "id": "why_2_link_url", "label": "Kaart 2 · link" }
+      ]
+    },
+    {
+      "type": "scenario",
+      "name": "Matcher-scenariokaart",
+      "settings": [
+        { "type": "paragraph", "content": "Voor de pakket-matcher die onder de Langer Thuis-pakketten wordt getoond. Dezelfde 9 kaarten als op de Vergelijk pakketten-pagina — zie snippets/zv-pakket-matcher.liquid." },
+        { "type": "text", "id": "title", "label": "Titel" },
+        { "type": "text", "id": "quote", "label": "Voorbeeldmelding (cursief)" },
+        { "type": "select", "id": "package", "label": "Past bij pakket", "options": [
+          { "value": "inzicht", "label": "Inzicht" },
+          { "value": "zeker", "label": "Zeker" },
+          { "value": "beschermd", "label": "Beschermd" }
+        ], "default": "zeker" },
+        { "type": "select", "id": "row", "label": "Rij", "options": [
+          { "value": "1", "label": "Rij 1" },
+          { "value": "2", "label": "Rij 2" },
+          { "value": "3", "label": "Rij 3" }
+        ], "default": "1" }
       ]
     }
   ],
