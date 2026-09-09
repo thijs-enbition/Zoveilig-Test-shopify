@@ -98,7 +98,23 @@
       },
       "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg"],
       "settings": {}
+    },
+    "vergelijk_pakketten": {
+      "type": "vergelijk-pakketten",
+      "blocks": {
+        "s1": { "type": "scenario", "settings": { "title": "Weet dat de dag goed is begonnen", "quote": "Vanochtend om 08:27 opgestaan.", "package": "inzicht", "row": "1" } },
+        "s2": { "type": "scenario", "settings": { "title": "Zie wanneer er iets verandert", "quote": "Vannacht meerdere keren beweging.", "package": "zeker", "row": "1" } },
+        "s3": { "type": "scenario", "settings": { "title": "Krijg een seintje als het stil blijft", "quote": "Sinds 13:45 geen beweging.", "package": "inzicht", "row": "1" } },
+        "s4": { "type": "scenario", "settings": { "title": "Waarschuwing bij onverwachte situaties", "quote": "Voordeur is vannacht om 03:18 geopend.", "package": "zeker", "row": "1" } },
+        "s5": { "type": "scenario", "settings": { "title": "Een mogelijke val eerder signaleren", "quote": "10:41, looproute stopt onverwacht in de gang.", "package": "zeker", "row": "2" } },
+        "s6": { "type": "scenario", "settings": { "title": "Zie wanneer een routine ineens verandert", "quote": "09:15, de keuken is vandaag nog niet bezocht.", "package": "zeker", "row": "2" } },
+        "s7": { "type": "scenario", "settings": { "title": "Snelle hulp als iedere seconde telt", "quote": "04:40 noodknop ingedrukt, meldkamer belt contactpersonen.", "package": "beschermd", "row": "2" } },
+        "s8": { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer directe connectie met 112.", "package": "beschermd", "row": "3" } },
+        "s9": { "type": "scenario", "settings": { "title": "Opvolging aan huis mogelijk", "quote": "Als extra optie is een zorgpartner aan huis mogelijk.", "package": "beschermd", "row": "3" } }
+      },
+      "block_order": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"],
+      "settings": {}
     }
   },
-  "order": ["oplossingen"]
+  "order": ["oplossingen", "vergelijk_pakketten"]
 }
