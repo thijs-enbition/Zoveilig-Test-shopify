@@ -232,7 +232,7 @@
     },
     {
       "id": "vo-sos",
-      "name": "SOS",
+      "name": "Paniek Meldkamer",
       "lineId": "veilig-onderweg",
       "lineName": "Veilig Onderweg",
       "cat": "persoonlijk",
@@ -248,7 +248,7 @@
     },
     {
       "id": "vo-zorg",
-      "name": "Zorg",
+      "name": "Zorgmeldkamer",
       "lineId": "veilig-onderweg",
       "lineName": "Veilig Onderweg",
       "cat": "persoonlijk",
