@@ -105,40 +105,30 @@
       when 'aware'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_inzicht_promo_monthly
-        assign pkg_promo_discount = zv_inzicht_promo_discount
-        assign pkg_activation = zv_inzicht_activation
         assign pkg_term = zv_inzicht_term
         assign pkg_icv = zv_inzicht_icv
         assign pkg_meldkamer = false
       when 'aware_plus'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_zeker_promo_monthly
-        assign pkg_promo_discount = zv_zeker_promo_discount
-        assign pkg_activation = zv_zeker_activation
         assign pkg_term = zv_zeker_term
         assign pkg_icv = zv_zeker_icv
         assign pkg_meldkamer = false
       when 'care'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_beschermd_promo_monthly
-        assign pkg_promo_discount = zv_beschermd_promo_discount
-        assign pkg_activation = zv_beschermd_activation
         assign pkg_term = zv_beschermd_term
         assign pkg_icv = zv_beschermd_icv
         assign pkg_meldkamer = true
       when 'secure'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_alert_promo_monthly
-        assign pkg_promo_discount = zv_alert_promo_discount
-        assign pkg_activation = zv_alert_activation
         assign pkg_term = zv_alert_term
         assign pkg_icv = zv_alert_icv
         assign pkg_meldkamer = false
       when 'guard'
         assign pkg_available = true
         assign pkg_promo_monthly = zv_protect_promo_monthly
-        assign pkg_promo_discount = zv_protect_promo_discount
-        assign pkg_activation = zv_protect_activation
         assign pkg_term = zv_protect_term
         assign pkg_icv = zv_protect_icv
         assign pkg_meldkamer = true
@@ -217,33 +207,6 @@
               </div>
             </div>
 
-            <div class="ovcard">
-              <h2>{{ section.settings.before_heading | default: 'Voordat u afrekent' | escape }}</h2>
-              <dl class="ovdl">
-                <div><dt>Maandbedrag</dt><dd>{{ month_cents | money }}</dd></div>
-                {%- if pkg_available and zv_promo_active -%}
-                  <div><dt>Eerste 3 maanden ({{ zv_promo_badge }})</dt><dd>−{{ pkg_promo_discount }}</dd></div>
-                {%- endif -%}
-                {%- if pkg_available -%}
-                  <div><dt>Eenmalige kosten</dt><dd>{{ pkg_activation }}</dd></div>
-                {%- endif -%}
-                <div><dt>Vandaag te betalen</dt><dd class="strong">{{ today_cents | money }}</dd></div>
-                {%- if pkg_available -%}
-                  <div><dt>Contractduur</dt><dd>{{ pkg_term }} maanden</dd></div>
-                  <div><dt>Indicatieve totale contractwaarde</dt><dd>{{ pkg_icv }}</dd></div>
-                {%- endif -%}
-                <div><dt>Maandelijkse betaling</dt><dd>SEPA-incasso</dd></div>
-                <div><dt>Opzeggen</dt><dd>Maandelijks, na afloop van de contractduur</dd></div>
-                <div><dt>Bedenktijd</dt><dd>14 dagen <a href="{{ herroeping_url }}" target="_blank" rel="noopener">herroepingsrecht</a></dd></div>
-                <div><dt>Installatie</dt><dd>Binnen 30 dagen, op afspraak</dd></div>
-              </dl>
-              {%- if zv_promo_active and section.settings.before_explainer != blank -%}
-                <div class="ovexplain">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <p>{{ section.settings.before_explainer | escape }}</p>
-                </div>
-              {%- endif -%}
-            </div>
           </div>
 
           <div class="ov-right">
@@ -279,6 +242,13 @@
               {%- endif -%}
 
               {%- if zv_promo_active and section.settings.before_explainer != blank -%}<p class="ovcost-note">{{ section.settings.before_explainer | escape }}</p>{%- endif -%}
+
+              <dl class="ovdl">
+                <div><dt>Maandelijkse betaling</dt><dd>SEPA-incasso</dd></div>
+                <div><dt>Opzeggen</dt><dd>Maandelijks, na afloop van de contractduur</dd></div>
+                <div><dt>Bedenktijd</dt><dd>14 dagen <a href="{{ herroeping_url }}" target="_blank" rel="noopener">herroepingsrecht</a></dd></div>
+                <div><dt>Installatie</dt><dd>Binnen 30 dagen, op afspraak</dd></div>
+              </dl>
 
               <div class="ovdelivery">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7h11v9H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 10h4l3 3v3h-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="18" r="1.8" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="18" r="1.8" stroke="currentColor" stroke-width="2"/></svg>
@@ -462,11 +432,10 @@
     { "type": "text", "id": "sub_type", "label": "Abonnement-producttype", "default": "Beveiligingsabonnement", "info": "Moet overeenkomen met het producttype dat zv-cart.liquid gebruikt." },
     { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag (fallback)", "default": "abonnement", "info": "Moet overeenkomen met de fallback-tag die zv-cart.liquid gebruikt." },
     { "type": "text", "id": "heading", "label": "Titel", "default": "Overzicht" },
-    { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U past dit hierna nog aan." },
+    { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U kunt dit hieronder nog wijzigen." },
     { "type": "text", "id": "pkg_card_heading", "label": "Kop · pakketkaart", "default": "Uw pakket en configuratie" },
     { "type": "text", "id": "pkg_card_link_label", "label": "Link · pakketkaart", "default": "Wijzig in winkelwagen" },
-    { "type": "text", "id": "before_heading", "label": "Kop · voordat u afrekent", "default": "Voordat u afrekent" },
-    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · voordat u afrekent", "default": "De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)." },
+    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)." },
     { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
     { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
     { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eenmalige kosten voor activatie en installatie via de beveiligde Shopify-checkout." },
