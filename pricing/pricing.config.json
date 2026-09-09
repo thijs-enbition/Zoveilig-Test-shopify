@@ -220,7 +220,7 @@
       "packages": [
         {
           "id": "vo-sos",
-          "name": "SOS",
+          "name": "Paniek Meldkamer",
           "platform": "LioGo",
           "hook": "Eén druk verbindt u met de meldkamer.",
           "sub": "Prijs en specificaties volgen",
@@ -232,7 +232,7 @@
         },
         {
           "id": "vo-zorg",
-          "name": "Zorg",
+          "name": "Zorgmeldkamer",
           "platform": "LioGo",
           "hook": "24/7 zorgprofessionals regelen opvolging.",
           "sub": "Prijs en specificaties volgen",
