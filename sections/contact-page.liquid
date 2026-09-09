@@ -1,9 +1,15 @@
 {%- comment -%}
   Zo Veilig — Contact & afspraak. 1:1 port of the design pack Contact page
   (page-hero + cn-grid: adviesgesprek-formulier + belopties/openingstijden).
-  The Netlify form is converted to a Shopify {% form 'contact' %}; success is
-  handled by Shopify's form.posted_successfully?. Header/footer come from the
-  theme layout, so only the page body is rendered here.
+  Header/footer come from the theme layout, so only the page body is rendered here.
+
+  The form posts as JSON (fetch) to the Supabase `capture-lead` Edge Function
+  (supabase/functions/capture-lead) instead of Shopify's native contact-form
+  mailer, so the lead lands in the Supabase `leads` table (see
+  docs/architecture/zo-veilig-commerce-architecture.md). Success/error state is
+  handled client-side below since there's no full-page reload. `capture_lead_endpoint`
+  / `capture_lead_anon_key` are theme settings (Supabase anon/public key — not the
+  service role key, safe to ship in the browser per RLS deny-by-default).
 {%- endcomment -%}
 
 <div class="zv-contact">
@@ -23,30 +29,39 @@
           <h2>Plan een gratis adviesgesprek</h2>
           <p class="hint">Vul uw gegevens in, dan bellen we u terug op een moment dat u uitkomt. Meestal binnen één werkdag.</p>
 
-          {%- form 'contact', id: 'zv-contact-form' -%}
-            {%- if form.posted_successfully? -%}
-              <div class="cn-ok" style="display:block">Bedankt, we hebben uw aanvraag ontvangen. Een adviseur neemt binnen één werkdag contact met u op.</div>
-            {%- else -%}
-              {%- if form.errors -%}
-                <div class="cn-err">Controleer even de gemarkeerde velden en probeer het opnieuw.</div>
-              {%- endif -%}
-              <div class="fld-row">
-                <div class="fld"><label for="c-naam">Naam</label><input id="c-naam" name="contact[Naam]" placeholder="Voor- en achternaam" required></div>
-                <div class="fld"><label for="c-tel">Telefoon</label><input id="c-tel" name="contact[Telefoon]" type="tel" placeholder="06 12 34 56 78" required></div>
-              </div>
-              <div class="fld-row">
-                <div class="fld"><label for="c-mail">E-mailadres</label><input id="c-mail" name="contact[email]" type="email" placeholder="uw@email.nl" required></div>
-                <div class="fld"><label for="c-ond">Onderwerp</label><select id="c-ond" name="contact[Onderwerp]"><option>Advies over een oplossing</option><option>Langer Thuis (zorg &amp; sensoren)</option><option>Mijn Thuis (alarm &amp; camera)</option><option>Veilig Onderweg (personenalarm)</option><option>Zakelijk</option><option>Bestaande klant / service</option></select></div>
-              </div>
-              <div class="fld"><label for="c-tijd">Wanneer belt u het liefst?</label><select id="c-tijd" name="contact[Voorkeurstijd]"><option>Maakt niet uit</option><option>Ochtend (09:00 - 12:00)</option><option>Middag (12:00 - 17:00)</option><option>Avond (17:00 - 20:00)</option></select></div>
-              <div class="fld"><label for="c-msg">Uw vraag of situatie (optioneel)</label><textarea id="c-msg" name="contact[body]" placeholder="Vertel kort waar u mee zit, dan kunnen we u gerichter helpen."></textarea></div>
-              <input type="hidden" name="contact[Bron]" value="Contactpagina">
-              <div class="cn-submit">
-                <button class="btn btn--gold" type="submit">Vraag adviesgesprek aan <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <span class="cn-priv">Uw gegevens worden alleen gebruikt om contact met u op te nemen. Zie de <a href="{% render 'zv-route', key: 'privacyverklaring' %}">privacyverklaring</a>.</span>
-              </div>
-            {%- endif -%}
-          {%- endform -%}
+          <div id="cn-ok" class="cn-ok" hidden>Bedankt, we hebben uw aanvraag ontvangen. Een adviseur neemt binnen één werkdag contact met u op.</div>
+          <div id="cn-err" class="cn-err" hidden>Controleer even de gemarkeerde velden en probeer het opnieuw.</div>
+
+          <form id="zv-contact-form" data-capture-lead-endpoint="{{ section.settings.capture_lead_endpoint | escape }}" data-capture-lead-key="{{ section.settings.capture_lead_anon_key | escape }}">
+            <div class="fld-row">
+              <div class="fld"><label for="c-naam">Naam</label><input id="c-naam" name="Naam" placeholder="Voor- en achternaam" required></div>
+              <div class="fld"><label for="c-tel">Telefoon</label><input id="c-tel" name="Telefoon" type="tel" placeholder="06 12 34 56 78" required></div>
+            </div>
+            <div class="fld-row">
+              <div class="fld"><label for="c-mail">E-mailadres</label><input id="c-mail" name="email" type="email" placeholder="uw@email.nl" required></div>
+              <div class="fld"><label for="c-ond">Onderwerp</label><select id="c-ond" name="Onderwerp">
+                <option value="advies">Advies over een oplossing</option>
+                <option value="langer_thuis">Langer Thuis (zorg &amp; sensoren)</option>
+                <option value="mijn_thuis">Mijn Thuis (alarm &amp; camera)</option>
+                <option value="veilig_onderweg">Veilig Onderweg (personenalarm)</option>
+                <option value="zakelijk">Zakelijk</option>
+                <option value="bestaand_klant">Bestaande klant / service</option>
+              </select></div>
+            </div>
+            <div class="fld"><label for="c-tijd">Wanneer belt u het liefst?</label><select id="c-tijd" name="Voorkeurstijd">
+              <option value="any">Maakt niet uit</option>
+              <option value="morning">Ochtend (09:00 - 12:00)</option>
+              <option value="afternoon">Middag (12:00 - 17:00)</option>
+              <option value="evening">Avond (17:00 - 20:00)</option>
+            </select></div>
+            <div class="fld"><label for="c-msg">Uw vraag of situatie (optioneel)</label><textarea id="c-msg" name="body" placeholder="Vertel kort waar u mee zit, dan kunnen we u gerichter helpen."></textarea></div>
+            <input type="hidden" name="Bron" value="Contactpagina">
+            <div class="cn-hp" aria-hidden="true"><label for="c-web">Website</label><input id="c-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+            <div class="cn-submit">
+              <button class="btn btn--gold" type="submit">Vraag adviesgesprek aan <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="cn-priv">Uw gegevens worden alleen gebruikt om contact met u op te nemen. Zie de <a href="{% render 'zv-route', key: 'privacyverklaring' %}">privacyverklaring</a>.</span>
+            </div>
+          </form>
         </div>
 
         <div class="cn-side">
@@ -91,8 +106,9 @@
 .zv-contact .cn-submit { margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .zv-contact .cn-priv { font-size:12.5px; font-weight:600; color:var(--muted); max-width:34ch; line-height:1.45; }
 .zv-contact .cn-priv a { color:var(--indigo); font-weight:800; }
-.zv-contact .cn-ok { margin-top:0; background:rgba(47,143,91,.1); border:1px solid rgba(47,143,91,.4); border-radius:12px; padding:16px 18px; color:#256b45; font-size:14.5px; font-weight:700; }
-.zv-contact .cn-err { background:rgba(197,46,47,.08); border:1px solid rgba(197,46,47,.35); border-radius:12px; padding:13px 16px; color:#9a2b2b; font-size:14px; font-weight:700; margin-bottom:4px; }
+.zv-contact .cn-ok { margin-top:0; margin-bottom:18px; background:rgba(47,143,91,.1); border:1px solid rgba(47,143,91,.4); border-radius:12px; padding:16px 18px; color:#256b45; font-size:14.5px; font-weight:700; }
+.zv-contact .cn-err { margin-bottom:14px; background:rgba(197,46,47,.08); border:1px solid rgba(197,46,47,.35); border-radius:12px; padding:13px 16px; color:#9a2b2b; font-size:14px; font-weight:700; }
+.zv-contact .cn-hp { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .zv-contact .btn { display:inline-flex; align-items:center; gap:9px; border:none; cursor:pointer; border-radius:12px; font:inherit; font-weight:800; text-decoration:none; }
 .zv-contact .btn svg { width:18px; height:18px; }
 .zv-contact .btn--gold { background:linear-gradient(180deg,var(--gold-lt),var(--gold)); color:#3a2a06; padding:14px 24px; box-shadow:0 14px 30px -18px rgba(228,163,17,.9); }
@@ -114,6 +130,57 @@
 .zv-contact .cn-hours .now i { width:8px; height:8px; border-radius:50%; background:var(--ok); }
 {% endstylesheet %}
 
+{% javascript %}
+(function () {
+  var form = document.getElementById('zv-contact-form');
+  if (!form) return;
+  var okEl = document.getElementById('cn-ok');
+  var errEl = document.getElementById('cn-err');
+  var endpoint = form.getAttribute('data-capture-lead-endpoint');
+  var anonKey = form.getAttribute('data-capture-lead-key');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errEl.hidden = true;
+
+    var formData = new FormData(form);
+    var payload = {};
+    formData.forEach(function (value, key) { payload[key] = value; });
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': anonKey,
+        'Authorization': 'Bearer ' + anonKey
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (json) {
+          return { httpOk: res.ok, json: json };
+        });
+      })
+      .then(function (result) {
+        if (result.httpOk && result.json && result.json.ok) {
+          form.hidden = true;
+          okEl.hidden = false;
+        } else {
+          errEl.hidden = false;
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      })
+      .catch(function () {
+        errEl.hidden = false;
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  });
+})();
+{% endjavascript %}
+
 {% schema %}
 {
   "name": "Contactpagina",
@@ -122,7 +189,23 @@
     { "type": "text", "id": "crumb", "label": "Broodkruimel", "default": "Contact" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Contact & afspraak" },
     { "type": "text", "id": "title", "label": "Titel", "default": "Persoonlijk advies, wanneer het u uitkomt" },
-    { "type": "textarea", "id": "lead", "label": "Lead" }
+    { "type": "textarea", "id": "lead", "label": "Lead" },
+    {
+      "type": "header",
+      "content": "Adviesgesprek-formulier (Supabase capture-lead)"
+    },
+    {
+      "type": "text",
+      "id": "capture_lead_endpoint",
+      "label": "capture-lead endpoint URL",
+      "info": "Bijv. https://<project-ref>.supabase.co/functions/v1/capture-lead. Leeg = formulier toont een foutmelding bij versturen."
+    },
+    {
+      "type": "text",
+      "id": "capture_lead_anon_key",
+      "label": "Supabase anon (public) API key",
+      "info": "De publieke anon key van het Supabase-project, niet de service role key."
+    }
   ],
   "presets": [{ "name": "Contactpagina" }]
 }
