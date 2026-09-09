@@ -295,7 +295,7 @@
           {%- endcase -%}</div>
           <div><span class="sk">{{ eb | escape }}</span><b>{{ ti | escape }}</b><p>{{ tx | escape }}</p>
             {%- if idx == 4 and section.settings.phone_label != blank -%}
-              {%- assign tel = section.settings.phone | default: '0881221111' | remove: ' ' -%}
+              {%- assign tel = section.settings.phone_label | default: '088 122 11 11' | remove: ' ' | remove: '-' -%}
               <a class="belbtn" href="tel:{{ tel }}" aria-label="Bel Zo Veilig, {{ section.settings.phone_label | default: '088 122 11 11' | escape }}" data-zv-event="call_click" data-cta-name="bel_ons" data-cta-position="stappen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg>{{ section.settings.phone_label | default: '088 122 11 11' | escape }}</a>
             {%- endif -%}
           </div>
@@ -1439,8 +1439,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     { "type": "text", "id": "benefit_4_eyebrow", "label": "4 · Eyebrow", "default": "Altijd" },
     { "type": "text", "id": "benefit_4_title", "label": "4 · Titel", "default": "Ook daarna bereikbaar" },
     { "type": "textarea", "id": "benefit_4_text", "label": "4 · Tekst", "default": "Vragen of later uitbreiden? Wij blijven uw vaste aanspreekpunt." },
-    { "type": "text", "id": "phone", "label": "Telefoonnummer (tel:)", "default": "0881221111" },
-    { "type": "text", "id": "phone_label", "label": "Telefoon-label", "default": "088 122 11 11" },
+    { "type": "text", "id": "phone_label", "label": "Telefoonnummer", "info": "Gebruikt voor zowel het weergegeven nummer als de tel:-link (spaties/streepjes worden automatisch verwijderd).", "default": "088 122 11 11" },
     { "type": "header", "content": "Technologie & partners" },
     { "type": "text", "id": "partners_eyebrow", "label": "Eyebrow", "default": "De beste technologie" },
     { "type": "text", "id": "partners_heading", "label": "Kop", "default": "De beste technologie. Eén vertrouwd aanspreekpunt." },
