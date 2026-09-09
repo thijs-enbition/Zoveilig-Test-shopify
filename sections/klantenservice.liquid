@@ -61,6 +61,11 @@
               </button>
               <div class="faq-a" id="{{ ansid }}" role="region"><div class="faq-a-inner">{{ block.settings.answer }}</div></div>
             </div>
+          {%- elsif block.type == 'note' -%}
+            {%- assign cat_slug = block.settings.category | strip | downcase | handle -%}
+            <div class="faq-item faq-note" data-cat="{{ cat_slug }}" data-text="{{ block.settings.category | strip_html | downcase | escape }}" {{ block.shopify_attributes }}>
+              <div class="faq-note-inner">{{ block.settings.text }}</div>
+            </div>
           {%- endif -%}
         {%- endfor -%}
       </div>
@@ -90,7 +95,22 @@
           <p>{{ section.settings.email_sla | default: 'Reactie binnen één werkdag.' | escape }}</p>
           <span class="cv">{{ mail | escape }}</span>
         </a>
+        {%- assign storing_tel = section.settings.storingen_phone | default: '088 122 11 11' -%}
+        <a class="ct" href="tel:{{ storing_tel | remove: ' ' | remove: '-' }}">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 4.4L2.9 17.2A1.8 1.8 0 0 0 4.4 20h15.2a1.8 1.8 0 0 0 1.5-2.8L13.7 4.4a1.8 1.8 0 0 0-3.4 0z"/></svg></span>
+          <h3>Storingen (24/7)</h3>
+          <p>{{ section.settings.storingen_email | default: 'storingen@zoveilig.nl' | escape }}</p>
+          <span class="cv">{{ storing_tel | escape }}</span>
+        </a>
+        {%- assign meldkamer_tel = section.settings.meldkamer_phone | default: '040 289 41 41' -%}
+        <a class="ct" href="tel:{{ meldkamer_tel | remove: ' ' | remove: '-' }}">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 6.5-7 9-4-2.5-7-5-7-9V6l7-3z"/></svg></span>
+          <h3>Meldkamer Securitas</h3>
+          <p>Bij een alarmmelding</p>
+          <span class="cv">{{ meldkamer_tel | escape }}</span>
+        </a>
       </div>
+      <p class="hk-note">Liever per post? {{ section.settings.post_address | default: 'Zo Veilig B.V., Xenonstraat 60, 1362 GG Almere' | escape }}</p>
       <p class="hk-note">Online iets gekocht en toch bedenken? <a href="{% render 'zv-route', key: 'herroepingsrecht' %}">Bestelling herroepen binnen 14 dagen</a></p>
     </div>
   </section>
@@ -171,12 +191,14 @@
 .zv-svc .faq-a-inner { padding:0 20px 18px; font-size:14.5px; font-weight:500; color:#5b5374; line-height:1.6; }
 .zv-svc .faq-a-inner a { color:var(--indigo); font-weight:700; }
 .zv-svc .faq-empty { text-align:center; font-size:14.5px; font-weight:600; color:var(--muted); padding:24px; }
+.zv-svc .faq-note { background:var(--indigo-soft); border-color:var(--indigo-soft); }
+.zv-svc .faq-note-inner { padding:16px 20px; font-size:14px; font-weight:600; color:var(--indigo); line-height:1.6; }
 
 /* direct contact */
 .zv-svc .svc-direct { padding:clamp(44px,5vw,72px) 0; }
 .zv-svc .svc-direct .head { text-align:center; max-width:640px; margin:0 auto 34px; }
 .zv-svc .svc-direct .head h2 { font-size:clamp(28px,3.4vw,40px); font-weight:900; letter-spacing:-.02em; margin-top:11px; }
-.zv-svc .ct-grid { display:grid; grid-template-columns:repeat(2,minmax(0,320px)); gap:16px; justify-content:center; }
+.zv-svc .ct-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(0,280px)); gap:16px; justify-content:center; }
 @media (max-width:520px) { .zv-svc .ct-grid { grid-template-columns:1fr; } }
 .zv-svc .ct { display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:26px 22px; text-align:left; transition:transform .15s,box-shadow .15s,border-color .15s; box-shadow:0 26px 54px -46px rgba(26,18,48,.4); }
 .zv-svc .ct:hover { transform:translateY(-3px); border-color:var(--indigo-soft); box-shadow:0 32px 60px -44px rgba(26,18,48,.5); }
@@ -290,6 +312,10 @@
     { "type": "text", "id": "phone_hours", "label": "Telefoon-openingstijden", "default": "Ma t/m do 08.30–17.00 uur, vr 08.30–13.00 uur." },
     { "type": "text", "id": "email", "label": "E-mail", "default": "klantenservice@zoveilig.nl" },
     { "type": "text", "id": "email_sla", "label": "E-mail-reactietijd", "default": "Reactie binnen één werkdag." },
+    { "type": "text", "id": "storingen_phone", "label": "Storingen · telefoon (24/7)", "default": "088 122 11 11" },
+    { "type": "text", "id": "storingen_email", "label": "Storingen · e-mail", "default": "storingen@zoveilig.nl" },
+    { "type": "text", "id": "meldkamer_phone", "label": "Meldkamer Securitas · telefoon", "default": "040 289 41 41" },
+    { "type": "text", "id": "post_address", "label": "Postadres", "default": "Zo Veilig B.V., Xenonstraat 60, 1362 GG Almere" },
     { "type": "header", "content": "Nieuwe klant" },
     { "type": "text", "id": "cta_heading", "label": "Kop", "default": "Wilt u klant worden?" },
     { "type": "textarea", "id": "cta_text", "label": "Tekst", "default": "Ontdek welke beveiligingsoplossing past bij uw woning, gezin en levensstijl." },
@@ -306,6 +332,14 @@
         { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën." },
         { "type": "text", "id": "question", "label": "Vraag" },
         { "type": "richtext", "id": "answer", "label": "Antwoord", "default": "<p>Ons klantenserviceteam helpt u hier graag persoonlijk mee. Bel 088 122 11 11 of mail klantenservice@zoveilig.nl, dan lossen we het samen snel op. In uw app en handleiding vindt u ook stapsgewijze uitleg.</p>" }
+      ]
+    },
+    {
+      "type": "note",
+      "name": "Categorie-toelichting",
+      "settings": [
+        { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën. Verschijnt als niet-uitklapbare toelichting binnen die categorie." },
+        { "type": "richtext", "id": "text", "label": "Toelichting" }
       ]
     }
   ],
