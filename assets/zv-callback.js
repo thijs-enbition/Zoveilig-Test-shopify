@@ -67,7 +67,7 @@
       var endpoint = form.getAttribute('data-endpoint');
       if (!endpoint) {
         // No endpoint configured: fail loudly, never pretend the lead was sent.
-        setStatus(form, 'Er ging iets mis. Bel ons gerust direct op 088 012 3456.', 'error');
+        setStatus(form, 'Er ging iets mis. Bel ons gerust direct op 088 122 11 11.', 'error');
         if (ZV.callbackRequestError) ZV.callbackRequestError({ reason: 'no_endpoint', lead_type: 'callback_request' });
         return;
       }
@@ -109,7 +109,7 @@
         })
         .catch(function () {
           if (btn) { btn.disabled = false; }
-          setStatus(form, 'Versturen lukte niet. Probeer opnieuw of bel 088 012 3456.', 'error');
+          setStatus(form, 'Versturen lukte niet. Probeer opnieuw of bel 088 122 11 11.', 'error');
           var c = ctx(form); c.reason = 'request_failed';
           if (ZV.callbackRequestError) ZV.callbackRequestError(c);
         });
