@@ -14,8 +14,13 @@
   to a real product the same way the Overzicht page does — through the product's
   `custom.finder_key` metafield (aware → inzicht, aware_plus → zeker, care → beschermd)
   on the configured collection — so there is one mapping and no hardcoded variant ids.
+
+  Every add resolves the same way to the universal one-time "Activatie en installatie"
+  product (pricing.config.json activation.productHandle/sku) and adds it alongside the
+  package, deduped against the live cart so it's only ever charged once.
 {%- endcomment -%}
 
+{%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
 {%- liquid
   assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
   assign no = '<span class="no" aria-hidden="true">–</span>'
@@ -74,7 +79,7 @@
 
       {%- if scenarios.size > 0 -%}
         <!-- PAKKET-MATCHER -->
-        <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}">
+        <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}">
           <script type="application/json" data-pm-products>{{ pm_products | strip }}</script>
           <div class="pm-head">
             <h3>{{ section.settings.pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h3>
@@ -205,6 +210,16 @@
     try { products = JSON.parse((root.querySelector('[data-pm-products]') || {}).textContent || '{}'); } catch (e) { products = {}; }
     var current = null;
     var addedTimer = null;
+    var activationVariantId = root.getAttribute('data-activation-variant-id') || null;
+
+    /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
+       activation.productHandle/sku) — deduped against the live cart so it's only ever
+       added once, same as the Oplossingen page. */
+    function activationLineToAdd(cart) {
+      if (!activationVariantId) return null;
+      var already = (cart && cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
+      return already ? null : activationVariantId;
+    }
 
     function taglineFor(pkg) {
       var td = table && table.querySelector('[data-pm-tagline-for="' + pkg + '"]');
@@ -305,17 +320,29 @@
           .then(function (r) { return r.json(); })
           .then(function (cart) {
             var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
+            var activationId = activationLineToAdd(cart);
             if (line) {
-              return window.fetch('/cart/change.js', {
+              var changePromise = window.fetch('/cart/change.js', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
               });
+              if (!activationId) return changePromise;
+              // Package line already exists but the activation fee doesn't yet (e.g. it was
+              // removed from the cart separately) — bump the package, then add the fee.
+              return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
+                return window.fetch('/cart/add.js', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ items: [{ id: activationId, quantity: 1 }] })
+                });
+              });
             }
+            var items = [{ id: prod.variantId, quantity: 1, properties: {
+              'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': 'Vergelijk pakketten'
+            } }];
+            if (activationId) items.push({ id: activationId, quantity: 1 });
             return window.fetch('/cart/add.js', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: [{ id: prod.variantId, quantity: 1, properties: {
-                'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': 'Vergelijk pakketten'
-              } }] })
+              body: JSON.stringify({ items: items })
             });
           })
           .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
