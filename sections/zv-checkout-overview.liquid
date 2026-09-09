@@ -260,7 +260,10 @@
                 <div class="ovblock">
                   <span class="ovblock-eb">Daarna per maand · via SEPA-incasso</span>
                   {%- if pkg_available and zv_promo_active -%}
-                    <p>Eerste 3 maanden {{ pkg_promo_monthly }} per maand, daarna {{ month_cents | money }} per maand.</p>
+                    <dl class="ovdl">
+                      <div><dt>Maand 1 t/m {{ zv_promo_months }}</dt><dd>{{ pkg_promo_monthly }} / maand</dd></div>
+                      <div><dt>Maand {{ zv_promo_months | plus: 1 }} t/m {{ pkg_term }}</dt><dd>{{ month_cents | money }} / maand</dd></div>
+                    </dl>
                   {%- else -%}
                     <p>{{ month_cents | money }} per maand.</p>
                   {%- endif -%}
