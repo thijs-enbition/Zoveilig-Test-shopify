@@ -1,10 +1,19 @@
 {%- comment -%}
   Zo Veilig — Winkelwagen. Visual 1:1 port of the design pack cart, wired to
   the live Shopify {{ cart }}: real line items, quantities (/cart/change),
-  and checkout. Payment split: products carrying the subscription tag
-  (section setting `sub_tag`, default "abonnement") are shown as MONTHLY via
-  SEPA-incasso (Odoo) and are EXCLUDED from "Vandaag te betalen"; untagged lines
-  are one-time and billed today via Shopify.
+  and checkout. Payment split: subscription packages are shown as MONTHLY via
+  SEPA-incasso (Odoo) and are EXCLUDED from "Vandaag te betalen"; everything
+  else is one-time and billed today via Shopify.
+
+  Subscription detection: a line is a subscription if its product's `type`
+  equals section setting `sub_type` (default "Beveiligingsabonnement" — the
+  real product_type shared by every live package across Langer Thuis, Mijn
+  Thuis and Veilig Onderweg, confirmed from actual store data), OR if it
+  carries the `sub_tag` tag (default "abonnement", kept for forward
+  compatibility — no live product currently uses this tag; tags differ per
+  line, e.g. Langer Thuis carries "Langer Thuis" + "keuzehulp", Mijn Thuis
+  carries "Mijn Thuis" + "keuzehulp", so a tag alone can't identify a
+  subscription across all lines the way `type` reliably does).
 
   ⚠️ MONEY-FLOW REQUIREMENT: Shopify charges the FULL cart total at checkout.
   For the actual charge to equal the displayed "Vandaag te betalen", the
@@ -14,6 +23,7 @@
   Header/footer come from the theme layout.
 {%- endcomment -%}
 
+{%- assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement' -%}
 {%- assign sub_tag = section.settings.sub_tag | default: 'abonnement' -%}
 <div class="zv-cart">
   <section class="cartbar">
@@ -31,7 +41,7 @@
           <div class="citems">
             {%- for item in cart.items -%}
               {%- assign is_sub = false -%}
-              {%- if item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+              {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
@@ -79,7 +89,7 @@
             {%- assign month_cents = 0 -%}
             {%- for item in cart.items -%}
               {%- assign li_sub = false -%}
-              {%- if item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
+              {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
               {%- if li_sub -%}
                 {%- assign month_cents = month_cents | plus: item.final_line_price -%}
                 <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
@@ -195,7 +205,8 @@
   "name": "Winkelwagen",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Producten met deze tag tonen als maandbedrag via SEPA-incasso en tellen niet mee in 'Vandaag te betalen'." }
+    { "type": "text", "id": "sub_type", "label": "Abonnement-producttype", "default": "Beveiligingsabonnement", "info": "Producten met dit type (Shopify 'Type' veld) tonen als maandbedrag via SEPA-incasso en tellen niet mee in 'Vandaag te betalen'." },
+    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag (fallback)", "default": "abonnement", "info": "Alternatief: producten met deze tag tellen ook als abonnement. Geen huidig pakket gebruikt deze tag; het producttype hierboven is de betrouwbare indicator." }
   ]
 }
 {% endschema %}

@@ -9,16 +9,19 @@
   the central pricing model (activation, intro-promo discount, contract duration, indicative
   contract value) via the `zv-pricing` include — never a literal here (CI check #9 in
   scripts/check_pricing.py enforces that no theme file carries an independent price/duration).
-  The package is identified by matching the cart's subscription-tagged line item (section
-  setting `sub_tag`, same convention as zv-cart.liquid) to its `custom.finder_key` product
-  metafield, mapped to a pricing.config.json package id below. If no package can be
-  identified (e.g. a cart with only accessories), the commercial-terms rows are hidden and
-  only the live cart totals are shown.
+  The package is identified by matching the cart's subscription line item (section setting
+  `sub_type`, same convention as zv-cart.liquid — a subscription is any product whose `type`
+  equals this, confirmed from real store data as "Beveiligingsabonnement" across every live
+  package; `sub_tag` is kept only as a fallback OR, since no current product uses it) to its
+  `custom.finder_key` product metafield, mapped to a pricing.config.json package id below. If
+  no package can be identified (e.g. a cart with only accessories), the commercial-terms rows
+  are hidden and only the live cart totals are shown.
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
 
 {%- liquid
+  assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement'
   assign sub_tag = section.settings.sub_tag | default: 'abonnement'
   assign today_cents = 0
   assign month_cents = 0
@@ -26,7 +29,7 @@
   assign distinct_fks = ''
   for item in cart.items
     assign is_sub = false
-    if item.product.tags contains sub_tag
+    if item.product.type == sub_type or item.product.tags contains sub_tag
       assign is_sub = true
     endif
     if is_sub
@@ -140,7 +143,7 @@
               <div class="ovitems">
                 {%- for item in cart.items -%}
                   {%- assign is_sub = false -%}
-                  {%- if item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+                  {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
                   <div class="ovitem">
                     <div class="ovi-thumb">
                       {%- if item.image -%}
@@ -393,7 +396,8 @@
   "name": "Overzicht (checkout)",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag", "default": "abonnement", "info": "Moet overeenkomen met de tag die zv-cart.liquid gebruikt." },
+    { "type": "text", "id": "sub_type", "label": "Abonnement-producttype", "default": "Beveiligingsabonnement", "info": "Moet overeenkomen met het producttype dat zv-cart.liquid gebruikt." },
+    { "type": "text", "id": "sub_tag", "label": "Abonnement-producttag (fallback)", "default": "abonnement", "info": "Moet overeenkomen met de fallback-tag die zv-cart.liquid gebruikt." },
     { "type": "text", "id": "heading", "label": "Titel", "default": "Overzicht" },
     { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U past dit hierna nog aan." },
     { "type": "text", "id": "pkg_card_heading", "label": "Kop · pakketkaart", "default": "Uw pakket en configuratie" },

@@ -18,14 +18,49 @@ Pricing on the Overzicht page never hardcodes an amount or duration (enforced by
 `scripts/check_pricing.py` check #9). It reads live cart totals (`item.final_line_price`)
 for what Shopify actually charges, and the confirmed per-package commercial terms
 (activation, intro-promo discount, contract duration, indicative contract value) via
-`{%- include 'zv-pricing' -%}`, matched to the cart's subscription-tagged line item through
-its `custom.finder_key` product metafield. See the comment at the top of
-`sections/zv-checkout-overview.liquid` for the finder_key → package id mapping.
+`{%- include 'zv-pricing' -%}`, matched to the cart's subscription line item (see **Product
+data** below for how a subscription is identified) through its `custom.finder_key` product
+metafield. See the comment at the top of `sections/zv-checkout-overview.liquid` for the
+finder_key → package id mapping.
 **If the cart holds more than one distinct recognized package** (e.g. Langer Thuis Inzicht +
 Mijn Thuis Alert together), the commercial-terms rows are hidden entirely rather than
 picking one package's numbers — a 36-month Inzicht contract and a 12-month Alert contract
 can't both be represented by a single set of rows, and showing either alone would be wrong,
 not just incomplete.
+
+## Product data (confirmed from the real store, 2026-09-09)
+
+Pulled live via `shopify theme dev`'s local proxy (`/products.json`) and `shopify theme
+console` against `zoveiligdev.myshopify.com` — not guessed. Re-pull if this ever looks stale;
+don't re-guess it.
+
+**Subscription detection: use `product.type`, not a tag.** Every live package product across
+all three lines shares `product.type == "Beveiligingsabonnement"`. Tags differ per line and
+none of them carry `abonnement`:
+
+| Product (title) | handle | type | tags | `custom.finder_key` | SKU |
+|---|---|---|---|---|---|
+| Langer Thuis Inzicht | `langer-thuis-inzicht` | Beveiligingsabonnement | keuzehulp, Langer Thuis | `aware` | LT-INZ |
+| Langer Thuis Zeker | `langer-thuis-zeker` | Beveiligingsabonnement | keuzehulp, Langer Thuis | `aware_plus` | LT-ZEK |
+| Langer Thuis Beschermd | `langer-thuis-beschermd` | Beveiligingsabonnement | keuzehulp, Langer Thuis | `care` | LT-BES |
+| Mijn Thuis Alert | `mijn-thuis-alert` | Beveiligingsabonnement | keuzehulp, Mijn Thuis | `secure` | MT-ALE |
+| Mijn Thuis Protect | `mijn-thuis-protect` | Beveiligingsabonnement | keuzehulp, Mijn Thuis | `guard` | MT-PRO |
+| Mijn Thuis Vista | `mijn-thuis-vista` | Beveiligingsabonnement | keuzehulp, Mijn Thuis | `secure_plus` | MT-VIS |
+| Veilig Onderweg Paniek Meldkamer | `veilig-onderweg-paniek-meldkamer` | Beveiligingsabonnement | keuzehulp, prijs-volgt, Veilig Onderweg | `liogo_solo` | — |
+| Veilig Onderweg Zorgmeldkamer | `veilig-onderweg-zorgmeldkamer` | Beveiligingsabonnement | keuzehulp, prijs-volgt, Veilig Onderweg | `liogo_guard` | — |
+
+`sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` both classify a line item
+as a subscription via `item.product.type == sub_type or item.product.tags contains sub_tag`
+(`sub_type` setting, default `Beveiligingsabonnement`, is the real signal; `sub_tag`, default
+`abonnement`, is kept only as a fallback OR — no live product currently uses it, tags aren't
+reliable across lines the way `type` is).
+
+**The pakket-matcher's `custom.finder_key` mapping (`aware`→inzicht, `aware_plus`→zeker,
+`care`→beschermd) was already correct** — confirmed against the table above, not changed.
+"Langer Thuis Inzicht/Zeker/Beschermd" sharing their names with the Oplossingen package names
+is not a separate, undiscovered mapping to switch to; it's the same finder_key scheme already
+pointing at exactly those products under the hood. Not purchasable/unpriced: CR123 (0 stock,
+an accessory SKU, not a package) and a Draft "TEST – Odoo Sync" product (ignore, test data).
 
 ## Pakket-matcher (Vergelijk pakketten page)
 
@@ -47,9 +82,8 @@ its own package cards and links here via `zv-route` key `vergelijk-pakketten`.
   Oplossingen card-add attaches `Bron: Oplossingen` while this one attaches `Bron: Vergelijk pakketten`).
 - The "Meest geschikt voor" table row and the advice bar share the three tagline settings
   (`tagline_inzicht/zeker/beschermd`); JS reads the bar's text from the table cell so they can't drift.
-- The store's Langer Thuis products are tagged `keuzehulp` + `Langer Thuis`, **not** `abonnement` —
-  so `zv-cart.liquid` / the Overzicht page (which classify subscriptions by the `abonnement` tag) will
-  currently treat them as one-time items. That's a product-data gap in Shopify admin, not theme code.
+- See **Product data** below for the confirmed `finder_key` → product mapping this uses and for
+  how the cart/Overzicht page now correctly recognizes these packages as subscriptions.
 
 ## Pricing pipeline
 
