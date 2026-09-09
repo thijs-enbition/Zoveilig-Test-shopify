@@ -34,7 +34,7 @@
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 
 {%- if sols.size > 0 -%}
-<div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}">
+<div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}" data-cart-url="{{ routes.cart_url }}">
 
   <div class="catnav" role="tablist" aria-label="Onze oplossingen">
     <span class="catnav__lbl">Onze oplossingen</span>
@@ -868,6 +868,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
      charges the fee twice. Returns a Promise<string|null> (the variant id to add, or
      null if it's missing from the page or already in the cart). */
   var activationVariantId = page.dataset.activationVariantId || null;
+  /* Every checkout entry point on this page must land on the Overzicht
+     read-only review step (same as the main /cart page), never straight on
+     Shopify's own /checkout — Overzicht is where av_akkoord consent is
+     captured, so skipping it is a compliance gap, not just a UX shortcut. */
+  var overzichtUrl = (page.dataset.cartUrl || '/cart') + '?view=overzicht';
   function activationLineToAdd() {
     if (!activationVariantId) return Promise.resolve(null);
     return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
@@ -898,7 +903,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         var ZV = window.ZVMeasurement;
         if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
         if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }
-        if (mode === 'checkout') { window.location.href = '/checkout'; return; }
+        if (mode === 'checkout') { window.location.href = overzichtUrl; return; }
         return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
           updateCartCount(cart);
           openCart(cart);
@@ -988,7 +993,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         '<div class="addcart__scroll">' + body + '</div>' +
         '<footer class="addcart__foot">' +
           '<button type="button" class="addcart__cont" data-cart-close>Verder winkelen</button>' +
-          '<a class="addcart__go" href="/checkout" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' + CART_ARROW + '</a>' +
+          '<a class="addcart__go" href="' + esc(overzichtUrl) + '" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' + CART_ARROW + '</a>' +
         '</footer></aside>';
     // Reflect shared add-on state from the Shopify cart attributes.
     cartEl.querySelectorAll('[data-zv-addon]').forEach(function (inp) { inp.checked = !!attrs[inp.getAttribute('data-zv-addon')]; });
