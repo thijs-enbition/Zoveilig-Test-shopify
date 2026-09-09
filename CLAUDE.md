@@ -126,3 +126,8 @@ with a valid login (that's exactly what happened once already).
   tell the user you're waiting, and do not kill the process, work around it, or push
   without having validated. The user completes the login in their own browser; once done
   once, the CLI stays authenticated on their machine.
+- **Investigation findings meant to inform future work must be written into `docs/` or
+  `CLAUDE.md`, not just reported back in a chat session** — Claude Code sessions do not
+  share context with each other or with the web chat. A finding that only exists in a past
+  conversation is invisible to the next session and will get silently re-investigated or,
+  worse, assumed not to exist. If it matters later, it needs a file in this repo.
