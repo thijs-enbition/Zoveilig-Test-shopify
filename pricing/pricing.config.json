@@ -71,8 +71,8 @@
   },
   "promo": {
     "id": "intro-3-months-50",
-    "enabled": false,
-    "enabledNote": "Disabled 2026-09-09 pending the promo product (Thijs will set the real discount once store access lands, ETA a day or two). While disabled, build_pricing.py computes 0 discount and every promo-specific display (badge, disclosure, discount rows) is hidden by the theme via zv_promo_active. Re-enabling is a one-line change here plus `python3 scripts/build_pricing.py` — the agreed 50%/3-months figures below are left untouched so they come straight back.",
+    "enabled": true,
+    "enabledNote": "This flag means 'the promo mechanism is a confirmed, computed part of the pricing model' — it's what makes build_pricing.py compute promoMonthly/promoDiscountTotal at all, using the rate/months below. It's NOT the day-to-day on/off switch: whether the promo is actually LIVE on the storefront right now is controlled entirely by the Shopify theme setting `zv_promo_live` (Zo Veilig · Introductiekorting, in config/settings_schema.json), a checkbox Thijs can flip from the theme editor with no code change or redeploy. Its default is off, matching today's state (the promo product doesn't exist in Shopify yet); flipping it to on in Shopify admin shows the already-computed 50%/3-months figures immediately. Only set `enabled` to false here if the promo concept itself is retired for good, not for a temporary pause.",
     "months": 3,
     "ratePercent": 50,
     "basis": "monthlyRecurringPrice",

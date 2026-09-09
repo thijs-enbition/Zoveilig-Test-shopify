@@ -6,11 +6,14 @@
   discount rate itself come from the zv-pricing include, never a literal here (CI
   check #9 in scripts/check_pricing.py enforces that).
 
-  While the promo is inactive (`zv_promo_active` false — pricing.config.json
-  `promo.enabled: false`, disabled 2026-09-09 pending the promo product), the whole
-  page degrades to a plain package overview: no discount badge, no struck-through
-  "was" price, no disclosure text. It stays live rather than being unpublished so
-  the URL keeps working; re-enabling the promo in config brings the discount
+  Whether the promo is actually live right now is controlled by the Shopify theme
+  setting `zv_promo_live` (Zo Veilig · Introductiekorting) — a checkbox Thijs can flip
+  from the theme editor, no code change or redeploy needed. `zv_promo_active` (from
+  zv-pricing, i.e. pricing.config.json `promo.enabled`/`ratePercent`) confirms the
+  mechanism itself is valid; both must be true for the discount to show. While either
+  is off, the whole page degrades to a plain package overview: no discount badge, no
+  struck-through "was" price, no disclosure text. It stays live rather than being
+  unpublished so the URL keeps working; turning the setting on brings the discount
   framing straight back with no further changes here.
 
   Cards link out to the existing, tested purchase flow on /pages/oplossingen (deep-linked
@@ -18,6 +21,11 @@
   stays a lightweight top-of-funnel page.
 {%- endcomment -%}
 
+{%- assign zv_promo_mechanism_active = zv_promo_active -%}
+{%- assign zv_promo_active = false -%}
+{%- if zv_promo_mechanism_active and settings.zv_promo_live -%}
+  {%- assign zv_promo_active = true -%}
+{%- endif -%}
 {%- liquid
   assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 -%}

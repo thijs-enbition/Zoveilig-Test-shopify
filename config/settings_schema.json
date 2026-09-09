@@ -1459,5 +1459,13 @@
       { "type": "paragraph", "content": "URL waar alle terugbel- en contactformulieren hun lead als JSON naartoe POSTen (Odoo CRM webhook of proxy). Leeg = leads worden alleen lokaal bewaard, niet verzonden." },
       { "type": "text", "id": "callback_endpoint", "label": "Lead-endpoint URL", "info": "Bijv. https://hooks.example.com/zo-veilig/lead . Publiek endpoint zonder client-side secret." }
     ]
+  },
+  {
+    "name": "Zo Veilig · Introductiekorting",
+    "settings": [
+      { "type": "header", "content": "Introductiekorting (eerste 3 maanden)" },
+      { "type": "paragraph", "content": "Het percentage en de looptijd (3 maanden) staan vast in pricing/pricing.config.json en zijn al doorgerekend — deze schakelaar bepaalt alleen OF de korting nu zichtbaar en actief is. Aanzetten hier is genoeg: geen code-wijziging of nieuwe deploy nodig. Uitgangspunt vandaag: uit, tot de kortingsactie (het losse Shopify-product voor de korting) klaarstaat." },
+      { "type": "checkbox", "id": "zv_promo_live", "label": "Introductiekorting nu tonen", "default": false, "info": "Aan = 50% korting op de eerste 3 maanden zichtbaar op Overzicht en de actiepagina. Uit = volledige prijs, geen kortingstekst." }
+    ]
   }
 ]
