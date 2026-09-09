@@ -1,0 +1,44 @@
+{%- comment -%}
+  Zo Veilig — cart guard. Ensures a subscription package never sits in the live
+  cart without the universal one-time "Activatie en installatie" fee
+  (pricing.config.json activation.productHandle/sku).
+
+  The Oplossingen and Vergelijk pakketten add-to-cart flows already add the fee
+  alongside a package, but nothing stops it being removed afterwards in the
+  cart, or a package reaching the cart through an entry point that doesn't add
+  it — e.g. the standalone Shopify product page's default "Toevoegen aan
+  winkelwagen" button (Dawn's stock buy-buttons, no custom wiring).
+
+  On every page that renders this, checks the live cart on load: if a
+  subscription line exists (product.type == sub_type, the same signal
+  zv-cart.liquid/zv-checkout-overview.liquid use — tags aren't reliable here,
+  the Cart AJAX API doesn't expose them on line items at all) with no matching
+  activation-fee line, it adds the fee and reloads the page. Silent no-op if
+  the activation product can't be resolved (activation_variant_id blank) or if
+  the add fails (e.g. offline) — the caller is expected to also fail safe
+  server-side (see zv-checkout-overview.liquid's cart_needs_activation gate,
+  which blocks checkout regardless of whether this script runs or succeeds).
+
+  Params: activation_variant_id, sub_type
+{%- endcomment -%}
+{%- if activation_variant_id != blank -%}
+<script>
+(function () {
+  if (window.__zvCartGuardRan) return;
+  window.__zvCartGuardRan = true;
+  var ACTIVATION_ID = {{ activation_variant_id | json }};
+  var SUB_TYPE = {{ sub_type | json }};
+  window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+    var items = (cart && cart.items) || [];
+    var hasSub = items.some(function (it) { return it.product_type === SUB_TYPE; });
+    var hasActivation = items.some(function (it) { return String(it.variant_id) === String(ACTIVATION_ID); });
+    if (hasSub && !hasActivation) {
+      return window.fetch('/cart/add.js', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ id: ACTIVATION_ID, quantity: 1 }] })
+      }).then(function (r) { if (r.ok) window.location.reload(); });
+    }
+  }).catch(function () { /* fail safe: server-side gate (Overzicht) still blocks checkout */ });
+})();
+</script>
+{%- endif -%}

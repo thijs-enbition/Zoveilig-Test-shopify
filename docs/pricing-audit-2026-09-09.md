@@ -87,3 +87,62 @@ total exactly; package + activation: €68,95/€73,95 depending on package, mat
   reused the existing `promo.enabled` flag rather than adding one, since it already implements
   exactly "0 discount, full price charged, one-line revert" — see `pricing.config.json`
   `promo.enabledNote` for the reasoning.
+
+## Update 2026-09-09 (later same day, second pass) — checkout routing bug, activation-fee enforcement, live promo toggle
+
+Two real bugs found via live testing on the store, both fixed:
+
+**1. Checkout routing bypass, Oplossingen page.** `/cart` → `/cart?view=overzicht` → `/checkout`
+is the required path (Overzicht is where `av_akkoord` consent is captured). Two buttons on the
+Oplossingen page skipped straight to `/checkout`, bypassing consent capture entirely: the
+post-add-to-cart drawer's "Naar afrekenen" link, and the package detail modal's "Direct
+afrekenen" button. Both now resolve `routes.cart_url` (exposed as a `data-cart-url` attribute,
+since the surrounding script is a static `{% javascript %}` block with no Liquid interpolation)
+into `/cart?view=overzicht` and use that instead. Confirmed via the compiled theme bundle
+(`shopify theme dev`'s served `scripts.js`) that no literal `/checkout` string remains outside
+`zv-checkout-overview.liquid` itself. **Grep for a bare `/checkout` string outside that file as
+a quick regression check before shipping any new checkout entry point.**
+
+**2. Activation fee could be removed from cart, or never added.** Nothing previously stopped a
+customer removing the activation-fee line after it was added, or reaching cart via an entry
+point that never adds it (the standalone product page). Now enforced twice:
+- **Client-side**, `snippets/zv-cart-guard.liquid` (rendered on `/cart` and
+  `/cart?view=overzicht`): checks the live cart on load, and if a subscription line exists with
+  no matching activation-fee line, adds it and reloads. Verified live: added only a package
+  variant via `/cart/add.js` (simulating a bypass entry point), confirmed the Overzicht page's
+  server-side gate caught it (below); the client-side auto-heal itself couldn't be exercised
+  through `curl` (no JS execution available outside a real browser — the storefront is
+  password-protected so no click-through testing either), so it's verified by code reading only,
+  not a live click-through.
+- **Server-side fail-safe**, `zv-checkout-overview.liquid`: computes `cart_needs_activation`
+  and disables the checkout button outright regardless of AV consent, with a visible message,
+  if the fee is missing. Verified live: cart with only "Langer Thuis Zeker" (no activation fee)
+  → Overzicht rendered the blocking message and `disabled` on the checkout button; adding the
+  fee and re-rendering made both disappear and "Vandaag te betalen" correctly read €73,95.
+
+**Standalone product page — the previously flagged gap, now handled two different ways:**
+Its regular "Toevoegen aan winkelwagen" button doesn't add the activation fee in the same
+request, but no longer matters in practice — Dawn's default flow doesn't redirect straight to
+checkout, so the customer still passes through `/cart` or `/cart?view=overzicht` before
+checkout, where the guard now catches and fixes it. Its Dynamic Checkout buttons (Shop Pay
+etc., `show_dynamic_checkout` in `templates/product.json`) were a *separate*, more serious
+bypass: they skip straight to Shopify checkout with no chance for either guard to run at all
+(no client-side hook into that flow exists). Disabled entirely (`show_dynamic_checkout: false`)
+rather than patched, since patching isn't possible and it's a generic Dawn block shared by
+every product in the store (this store currently sells nothing else) — this closes both the
+consent-routing and activation-fee gaps for that page's Buy-it-now path. The regular
+"add to cart" flow through that page is now safe but still doesn't itself add the fee up front;
+flagging in case that's ever surprising in an order.
+
+**Confirmation on the discount toggle, and a new mechanism added because of it:** previously,
+"discount = 0" was implemented as `pricing.config.json` `promo.enabled: false` — a *code*
+value, requiring a config edit + `python3 scripts/build_pricing.py` + commit + deploy to
+change. There was no way to flip it from Shopify admin. Added a genuine live toggle: a new
+Shopify **theme setting**, `zv_promo_live` ("Zo Veilig · Introductiekorting" in the theme
+editor, `config/settings_schema.json`), defaulting to off. `promo.enabled` in config reverted
+to `true` (it now means "the promo mechanism is valid," not "is it live right now") so
+`build_pricing.py` computes the real 50%/3-months figures again — they're already baked into
+`zv-pricing.liquid`, just not displayed. Every promo-facing render now requires both the config
+mechanism AND the live setting to be true (`zv_promo_active` folds both together). Thijs can
+turn the discount on from the Shopify theme editor with **no code change or redeploy**; the
+default stays off, matching "discount stays as-is" from this task's brief.

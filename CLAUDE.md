@@ -28,6 +28,28 @@ picking one package's numbers — a 36-month Inzicht contract and a 12-month Ale
 can't both be represented by a single set of rows, and showing either alone would be wrong,
 not just incomplete.
 
+**Every checkout entry point must land on `/cart?view=overzicht` first, never straight on
+Shopify's own `/checkout`** — Overzicht is where `av_akkoord` consent is captured, so
+skipping it is a compliance gap, not a UX inconsistency. This bit a real bug once (confirmed
+2026-09-09): the Oplossingen page's post-add-to-cart drawer ("Naar afrekenen") and its detail
+modal's "Direct afrekenen" button both linked straight to `/checkout`. Both now resolve a
+`data-cart-url` (from `routes.cart_url`) into `overzichtUrl` and use that instead — see
+`sections/oplossingen.liquid`'s `addToCart()`. If you add a new checkout entry point anywhere
+in the theme, it must go through Overzicht the same way; grep for a literal `/checkout` string
+outside `sections/zv-checkout-overview.liquid` itself as a quick regression check.
+
+**A subscription package must never sit in cart without the activation fee** (see **Pricing
+pipeline** below for what that is). Enforced twice, since nothing stops the fee being removed
+after the fact or a package reaching cart through an entry point that doesn't add it (e.g. the
+standalone Shopify product page): client-side, `snippets/zv-cart-guard.liquid` (rendered on
+`/cart` and `/cart?view=overzicht`) checks the live cart on load and auto-adds the fee, then
+reloads, if a subscription line exists without it; server-side, `zv-checkout-overview.liquid`
+computes `cart_needs_activation` and disables the checkout button outright as a fail-safe if
+the client-side fix hasn't run yet or fails. The standalone product page's own Dynamic
+Checkout buttons (Shop Pay etc., `show_dynamic_checkout` in `templates/product.json`) skip
+straight to Shopify checkout with no chance for either guard to run, so they're switched off
+entirely (2026-09-09) rather than patched — there's no client-side hook into that flow.
+
 ## Product data (confirmed from the real store, 2026-09-09)
 
 Pulled live via `shopify theme dev`'s local proxy (`/products.json`) and `shopify theme
@@ -92,6 +114,25 @@ contract terms and indicative contract value. `python3 scripts/build_pricing.py`
 `pricing/pricing.generated.json` and `snippets/zv-pricing.liquid` (committed, generated —
 don't hand-edit). `python3 scripts/check_pricing.py` verifies the maths and that no theme
 file carries an independent literal price or duration; CI runs both on every push/PR.
+
+**Activation fee**: `activation.productHandle`/`sku` in the config identify the real Shopify
+product ("Activatie en installatie", confirmed live 2026-09-09) — add-to-cart flows resolve it
+by handle (`all_products[zv_activation_handle]`), never a hardcoded variant id, same pattern as
+package lookup via `finder_key`. See **Checkout flow** above for how its presence in cart is
+enforced.
+
+**Intro promo, live on/off switch**: `promo.enabled` in the config means "this promo mechanism
+is a confirmed, computed part of the pricing model" (build_pricing.py won't compute
+`promoMonthly`/`promoDiscountTotal` at all if it's `false`) — it is **not** the day-to-day
+toggle and should almost never change. Whether the discount is actually showing on the
+storefront right now is controlled entirely by the Shopify **theme setting** `zv_promo_live`
+("Zo Veilig · Introductiekorting" in the theme editor, schema in
+`config/settings_schema.json`), a checkbox Thijs can flip himself with **no code change or
+redeploy** — every promo-specific render (`zv_promo_active` in `zv-checkout-overview.liquid`
+and `actie-korting.liquid`) is gated on `promo.enabled`/`ratePercent` from config AND this live
+setting both being true. Default is off (2026-09-09: the promo product doesn't exist in
+Shopify yet), with the real 50%/3-months figures already computed and waiting in
+`zv-pricing.liquid` — turning the setting on shows them immediately, nothing else to do.
 
 ## Shopify store
 

@@ -25,10 +25,18 @@
   the "Maandbedrag" line (the recurring amount that continues via SEPA-incasso
   each month after today) — it no longer subtracts anything from "Vandaag te
   betalen". Header/footer come from the theme layout.
+
+  Renders zv-cart-guard: if a subscription package ever ends up in the cart
+  without the activation fee (e.g. added via the standalone Shopify product
+  page, which doesn't wire the fee in), it's added automatically and the
+  page reloads. See snippets/zv-cart-guard.liquid.
 {%- endcomment -%}
 
+{%- include 'zv-pricing' -%}
 {%- assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement' -%}
 {%- assign sub_tag = section.settings.sub_tag | default: 'abonnement' -%}
+{%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
