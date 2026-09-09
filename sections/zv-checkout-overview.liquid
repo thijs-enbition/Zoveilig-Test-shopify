@@ -24,27 +24,48 @@
   package line together charge the sum of both). "Maandbedrag" / the promo rows below are
   purely informational: the recurring amount that continues via SEPA-incasso each month after
   today, not an amount excluded from today's charge. The promo rows (discount, "Eerste 3
-  maanden") only render while `zv_promo_active` is true — see snippets/zv-pricing.liquid,
-  driven by pricing.config.json `promo.enabled`/`ratePercent` (currently disabled: the promo
-  product doesn't exist in Shopify yet, so the discount is 0 until it does).
+  maanden") only render while `zv_promo_active` is true. That flag folds together two
+  gates: the mechanism being valid (pricing.config.json `promo.enabled`/`ratePercent`,
+  via snippets/zv-pricing.liquid) AND the Shopify theme setting `zv_promo_live` (Zo
+  Veilig · Introductiekorting) — a checkbox Thijs flips from the theme editor, no code
+  change or redeploy needed, currently off.
+
+  ACTIVATION FEE ENFORCEMENT: a subscription package must never reach checkout without the
+  universal one-time activation fee (pricing.config.json activation.productHandle/sku). This
+  is enforced twice: client-side, zv-cart-guard auto-adds the fee and reloads if it's ever
+  missing (covers e.g. the standalone Shopify product page, which doesn't wire the fee in);
+  server-side, `cart_needs_activation` below blocks the checkout button outright as a
+  fail-safe if the client-side fix hasn't run yet or failed (offline, JS disabled).
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
+{%- assign zv_promo_mechanism_active = zv_promo_active -%}
+{%- assign zv_promo_active = false -%}
+{%- if zv_promo_mechanism_active and settings.zv_promo_live -%}
+  {%- assign zv_promo_active = true -%}
+{%- endif -%}
 
 {%- liquid
   assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement'
   assign sub_tag = section.settings.sub_tag | default: 'abonnement'
+  assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id
   assign today_cents = 0
   assign month_cents = 0
   assign pkg_item = nil
   assign distinct_fks = ''
+  assign has_sub_item = false
+  assign has_activation_line = false
   for item in cart.items
     assign is_sub = false
     if item.product.type == sub_type or item.product.tags contains sub_tag
       assign is_sub = true
     endif
+    if activation_variant_id != blank and item.variant_id == activation_variant_id
+      assign has_activation_line = true
+    endif
     assign today_cents = today_cents | plus: item.final_line_price
     if is_sub
+      assign has_sub_item = true
       assign month_cents = month_cents | plus: item.final_line_price
       assign item_fk = item.product.metafields.custom.finder_key.value
       if item_fk != blank
@@ -61,6 +82,13 @@
   for d in cart.cart_level_discount_applications
     assign today_cents = today_cents | minus: d.total_allocated_amount
   endfor
+  assign cart_needs_activation = false
+  if has_sub_item and has_activation_line == false
+    assign cart_needs_activation = true
+  endif
+-%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type -%}
+{%- liquid
 
   comment
     Commercial-terms rows (promo, activation, contract duration, ICV) only apply when
@@ -122,7 +150,7 @@
   {%- capture consent_html -%}{{ consent_prefix }} <a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a> {{ consent_suffix }}{%- endcapture -%}
 {%- endif -%}
 
-<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}>
+<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}{% if cart_needs_activation %} data-needs-activation{% endif %}>
   <section class="ovbar">
     <div class="wrap">
       <div class="ovbar-top">
@@ -254,6 +282,9 @@
             </div>
 
             <div class="ovcard ovconsent">
+              {%- if cart_needs_activation -%}
+                <div class="ovconsent-err" data-ov-needs-activation role="alert">Er ontbreekt een onderdeel van uw bestelling (activatie en installatie). We herstellen dit automatisch — ververs de pagina als dit blijft staan.</div>
+              {%- endif -%}
               <label class="ovcheck">
                 <input type="checkbox" id="ovAvConsent">
                 <span>{{ consent_html }}</span>
@@ -288,14 +319,20 @@
     var err = root.querySelector('[data-ov-err]');
     if (!checkbox || !btn) return;
 
+    // Fail-safe: while the cart is missing the activation fee, the checkout button
+    // stays disabled no matter what the consent checkbox does. zv-cart-guard (rendered
+    // above) tries to fix this and reload; this just makes sure checkout can't proceed
+    // in the meantime, or if that fix fails (offline, JS disabled elsewhere).
+    var needsActivation = root.hasAttribute('data-needs-activation');
+
     checkbox.addEventListener('change', function () {
-      btn.disabled = !checkbox.checked;
-      btn.setAttribute('aria-disabled', checkbox.checked ? 'false' : 'true');
+      btn.disabled = needsActivation || !checkbox.checked;
+      btn.setAttribute('aria-disabled', btn.disabled ? 'true' : 'false');
       if (checkbox.checked && err) err.hidden = true;
     });
 
     btn.addEventListener('click', function () {
-      if (btn.disabled) return;
+      if (btn.disabled || needsActivation) return;
       btn.disabled = true;
       btn.setAttribute('aria-disabled', 'true');
       if (err) err.hidden = true;
