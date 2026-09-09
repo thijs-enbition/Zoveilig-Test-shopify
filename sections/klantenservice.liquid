@@ -80,7 +80,7 @@
         <a class="ct" href="tel:{{ tel | remove: ' ' | remove: '-' }}">
           <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5V19a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 1-2z"/></svg></span>
           <h3>Bellen</h3>
-          <p>{{ section.settings.phone_hours | default: 'Ma t/m vr, 08:30 tot 17:30 uur.' | escape }}</p>
+          <p>{{ section.settings.phone_hours | default: 'Ma t/m vr 08.30–17.30 uur.' | escape }}</p>
           <span class="cv">{{ tel | escape }}</span>
         </a>
         {%- assign mail = section.settings.email | default: 'klantenservice@zoveilig.nl' -%}
@@ -287,7 +287,7 @@
     { "type": "textarea", "id": "categories", "label": "Categorieën (1 per regel, matchen met de FAQ-blokken)", "default": "Vaak gezocht\nMijn systeem\nSmarthome / Domotica\nContract en betaling\nAfspraak of annulering\nMeldkamer & alarmopvolging" },
     { "type": "header", "content": "Direct contact" },
     { "type": "text", "id": "phone", "label": "Telefoon", "default": "088 122 11 11" },
-    { "type": "text", "id": "phone_hours", "label": "Telefoon-openingstijden", "default": "Ma t/m vr, 08:30 tot 17:30 uur." },
+    { "type": "text", "id": "phone_hours", "label": "Telefoon-openingstijden", "default": "Ma t/m vr 08.30–17.30 uur." },
     { "type": "text", "id": "email", "label": "E-mail", "default": "klantenservice@zoveilig.nl" },
     { "type": "text", "id": "email_sla", "label": "E-mail-reactietijd", "default": "Reactie binnen één werkdag." },
     { "type": "header", "content": "Nieuwe klant" },

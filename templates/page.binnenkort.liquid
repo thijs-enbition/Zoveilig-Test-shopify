@@ -92,17 +92,15 @@
             {%- endif -%}
           {%- endform -%}
           <div class="cs-trust">
-            <span><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Al 20 jaar ervaring</span>
+            <span><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Al bijna twintig jaar ervaring</span>
             <span><i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Nederlandse meldkamer, 24/7</span>
           </div>
         </div>
-        <div class="cs-visual">
-          {%- if settings.binnenkort_image != blank -%}
+        {%- if settings.binnenkort_image != blank -%}
+          <div class="cs-visual">
             <img src="{{ settings.binnenkort_image | image_url: width: 900 }}" alt="Zo Veilig" width="900" height="1125" loading="lazy">
-          {%- else -%}
-            <div class="ph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9l8-5 8 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Lifestyle / product<br>fotoslot</span></div>
-          {%- endif -%}
-        </div>
+          </div>
+        {%- endif -%}
       </div>
     </div>
   </section>
