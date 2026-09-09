@@ -20,6 +20,7 @@
             "pak_sub": "Van een extra oogje in het zeil tot een compleet vangnet. Altijd privacy-first, zonder camera. Alle abonnementen: +€4 p/m per extra etage.",
             "compare_label": "Niet zeker welk ondersteuningsniveau bij u past?",
             "compare_url": "/pages/vergelijk-pakketten",
+            "hide_compare_cta": true,
             "uitbreidingen": "Huisdier-upgrade\nExtra sensoren\nExtra toegangspunten",
             "why_heading": "Waarom kiezen zoveel mensen voor Zo Veilig?",
             "why_1_img": "opl-why-living-1.jpg",
@@ -94,14 +95,7 @@
             "why_2_link_label": "Hoe valdetectie werkt",
             "why_2_link_url": "/pages/kenniscentrum"
           }
-        }
-      },
-      "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg"],
-      "settings": {}
-    },
-    "vergelijk_pakketten": {
-      "type": "vergelijk-pakketten",
-      "blocks": {
+        },
         "s1": { "type": "scenario", "settings": { "title": "Weet dat de dag goed is begonnen", "quote": "Vanochtend om 08:27 opgestaan.", "package": "inzicht", "row": "1" } },
         "s2": { "type": "scenario", "settings": { "title": "Zie wanneer er iets verandert", "quote": "Vannacht meerdere keren beweging.", "package": "zeker", "row": "1" } },
         "s3": { "type": "scenario", "settings": { "title": "Krijg een seintje als het stil blijft", "quote": "Sinds 13:45 geen beweging.", "package": "inzicht", "row": "1" } },
@@ -112,9 +106,9 @@
         "s8": { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer directe connectie met 112.", "package": "beschermd", "row": "3" } },
         "s9": { "type": "scenario", "settings": { "title": "Opvolging aan huis mogelijk", "quote": "Als extra optie is een zorgpartner aan huis mogelijk.", "package": "beschermd", "row": "3" } }
       },
-      "block_order": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"],
+      "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"],
       "settings": {}
     }
   },
-  "order": ["oplossingen", "vergelijk_pakketten"]
+  "order": ["oplossingen"]
 }

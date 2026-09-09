@@ -1,0 +1,152 @@
+{%- comment -%}
+  Pakket-matcher: the Langer Thuis scenario cards + Inzicht/Zeker/Beschermd comparison
+  table. Single source of truth, rendered from two places:
+    - sections/vergelijk-pakketten.liquid (the standalone /pages/vergelijk-pakketten page)
+    - sections/oplossingen.liquid (embedded under the Langer Thuis pricing cards)
+  Scoring/highlight JS lives in assets/zv-vergelijk-pakketten.js (static asset, not a
+  section {% javascript %} block, because {% javascript %}/{% stylesheet %} only work in
+  section files — not in snippets — see snippets/zv-actie-card.liquid for the same note).
+  Both callers must load assets/zv-vergelijk-pakketten.css and .js themselves (once each,
+  outside this snippet) and must have already run {%- include 'zv-pricing' -%}.
+
+  Params:
+    scenarios              required. `section.blocks | where: 'type', 'scenario'` — the
+                            9 scenario blocks (title/quote/package/row settings).
+    activation_variant_id  required. All_products[zv_activation_handle]'s variant id.
+    zv_inzicht_monthly / zv_zeker_monthly / zv_beschermd_monthly
+                            required. From the zv-pricing include.
+    collection              optional. Handle/object of the pakketten collection. Falls
+                            back to the 'langer-thuis' collection, same as the standalone
+                            page's own default.
+    pm_heading, pm_sub, advies_label, cta_label, cta_added, cta_view_cart, match_badge,
+    tagline_inzicht, tagline_zeker, tagline_beschermd
+                            optional editorial copy. On the standalone page, callers pass
+                            their own section.settings.* (full theme-editor control,
+                            unchanged from before). The Oplossingen embed currently omits
+                            these and gets the same built-in defaults below — it does not
+                            yet have its own independently editable copy.
+    opl_url                 optional, defaults to '/pages/oplossingen'.
+{%- endcomment -%}
+
+{%- liquid
+  assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+  assign no = '<span class="no" aria-hidden="true">–</span>'
+  assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  assign opl = opl_url | default: '/pages/oplossingen'
+  assign pkgs = 'inzicht,zeker,beschermd' | split: ','
+  assign tag_inzicht = tagline_inzicht | default: 'Rustig eerste inzicht'
+  assign tag_zeker = tagline_zeker | default: 'Vroeg signaleren van veranderingen'
+  assign tag_beschermd = tagline_beschermd | default: 'Snelle hulp bij een val of noodsituatie'
+  assign match_badge = match_badge | default: 'Past bij uw situatie'
+  assign pm_coll = collections[collection]
+  if pm_coll == blank or pm_coll.products_count == 0
+    assign pm_coll = collections['langer-thuis']
+  endif
+-%}
+
+{%- comment -%} package id -> real product, via custom.finder_key (same mapping as zv-checkout-overview) {%- endcomment -%}
+{%- capture pm_products -%}
+  {%- assign first = true -%}
+  {
+  {%- for p in pm_coll.products -%}
+    {%- assign fk = p.metafields.custom.finder_key.value -%}
+    {%- assign pid = '' -%}
+    {%- case fk -%}
+      {%- when 'aware' -%}{%- assign pid = 'inzicht' -%}
+      {%- when 'aware_plus' -%}{%- assign pid = 'zeker' -%}
+      {%- when 'care' -%}{%- assign pid = 'beschermd' -%}
+    {%- endcase -%}
+    {%- if pid != blank -%}
+      {%- assign v = p.selected_or_first_available_variant -%}
+      {%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}
+      {%- unless first %},{% endunless -%}{%- assign first = false -%}
+      {{ pid | json }}:{"variantId":{{ v.id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
+    {%- endif -%}
+  {%- endfor -%}
+  }
+{%- endcapture -%}
+
+<div class="zv-vergelijk zv-pakket-matcher">
+  <div class="wrap">
+    {%- if scenarios.size > 0 -%}
+      <!-- PAKKET-MATCHER -->
+      <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}">
+        <script type="application/json" data-pm-products>{{ pm_products | strip }}</script>
+        <div class="pm-head">
+          <h3>{{ pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h3>
+          {%- if pm_sub != blank -%}<p>{{ pm_sub | escape }}</p>{%- endif -%}
+        </div>
+        <div class="pm-cards" role="group" aria-label="{{ pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}">
+          {%- for r in (1..3) -%}
+            {%- assign row_str = r | append: '' -%}
+            {%- capture row_html -%}
+              {%- for b in scenarios -%}
+                {%- assign b_row = b.settings.row | default: '1' -%}
+                {%- if b_row == row_str -%}
+                  <button type="button" class="pm-card" aria-pressed="false" data-pm-card data-pm-pkg="{{ b.settings.package | default: 'zeker' }}" {{ b.shopify_attributes }}>
+                    <span class="pm-card__t">{{ b.settings.title | escape }}</span>
+                    {%- if b.settings.quote != blank -%}<span class="pm-card__q">{{ b.settings.quote | escape }}</span>{%- endif -%}
+                  </button>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            {%- if row_html contains 'pm-card' -%}<div class="pm-row">{{ row_html }}</div>{%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <div class="pm-advies" data-pm-advies hidden>
+          <span class="pm-advies__chk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <p class="pm-advies__txt"><b>{{ advies_label | default: 'Ons advies:' | escape }} <span data-pm-name></span>.</b> <span data-pm-tagline></span></p>
+          <div class="pm-advies__cta">
+            <button type="button" class="btn btn--gold" data-pm-add data-label="{{ cta_label | default: 'Voeg [pakket] toe aan winkelwagen' | escape }}" data-added="{{ cta_added | default: 'Toegevoegd ✓' | escape }}"><span data-pm-add-text></span>{{ arrow }}</button>
+            <a class="btn btn--gold" href="{{ routes.cart_url }}" data-pm-viewcart hidden>{{ cta_view_cart | default: 'Bekijk winkelwagen' | escape }}{{ arrow }}</a>
+          </div>
+          <div class="pm-advies__err" data-pm-err role="alert" hidden></div>
+        </div>
+        <p class="visually-hidden" role="status" aria-live="polite" data-pm-status></p>
+      </div>
+    {%- endif -%}
+
+    <div class="tbl-wrap">
+      <table class="cmp-tbl" data-pm-table>
+        <thead>
+          <tr>
+            <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
+            <th class="plan" scope="col" data-pm-pkg="inzicht"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Inzicht</span><span class="price">{{ zv_inzicht_monthly }}<span> p/m</span></span></th>
+            <th class="plan rec" scope="col" data-pm-pkg="zeker"><span class="pm-badge">{{ match_badge | escape }}</span><span class="badge">Meest gekozen</span><span class="pn">Zeker</span><span class="price">{{ zv_zeker_monthly }}<span> p/m</span></span></th>
+            <th class="plan" scope="col" data-pm-pkg="beschermd"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Beschermd</span><span class="price">{{ zv_beschermd_monthly }}<span> p/m</span></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feat">Meest geschikt voor<small>Waar dit pakket het sterkst in is</small></td>
+            <td class="val txt tag" data-pm-pkg="inzicht" data-pm-tagline-for="inzicht">{{ tag_inzicht | escape }}</td>
+            <td class="val txt tag" data-pm-pkg="zeker" data-pm-tagline-for="zeker">{{ tag_zeker | escape }}</td>
+            <td class="val txt tag" data-pm-pkg="beschermd" data-pm-tagline-for="beschermd">{{ tag_beschermd | escape }}</td>
+          </tr>
+          {%- comment -%} feat | small | inzicht | zeker | beschermd  (§ splits rows, | splits fields) {%- endcomment -%}
+          {%- assign rows = 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|n|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | split: '§' -%}
+          {%- for row in rows -%}
+            {%- assign f = row | split: '|' -%}
+            <tr>
+              <td class="feat">{{ f[0] }}<small>{{ f[1] }}</small></td>
+              {%- for i in (2..4) -%}
+                {%- assign v = f[i] -%}
+                {%- assign ci = i | minus: 2 -%}
+                {%- if v == 'y' -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ check }}</td>
+                {%- elsif v == 'n' -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ no }}</td>
+                {%- else -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ v }}</td>{%- endif -%}
+              {%- endfor -%}
+            </tr>
+          {%- endfor -%}
+          <tr class="cta">
+            <td></td>
+            <td data-pm-pkg="inzicht"><a class="btn btn--ghost" href="{{ opl }}">Kies Inzicht</a></td>
+            <td class="rec-cell" data-pm-pkg="zeker"><a class="btn btn--gold" href="{{ opl }}">Kies Zeker {{ arrow }}</a></td>
+            <td data-pm-pkg="beschermd"><a class="btn btn--ghost" href="{{ opl }}">Kies Beschermd</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

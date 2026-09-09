@@ -6,59 +6,22 @@
   (prijs volgt), Keuzehulp help-CTA. Header + footer come from the theme.
   Prices are the finalized Langer Thuis tiers per the project constitution.
 
-  PAKKET-MATCHER (scenario cards above the table): each `scenario` block is a
-  multi-select toggle mapped to one package via its `package` block setting (editable
-  in the theme editor — the shipped mapping is a placeholder pending product sign-off).
-  Pure client-side scoring: most selected cards per package wins; ties go to the higher
-  tier (beschermd > zeker > inzicht). The advice bar's add-to-cart resolves each package
-  to a real product the same way the Overzicht page does — through the product's
-  `custom.finder_key` metafield (aware → inzicht, aware_plus → zeker, care → beschermd)
-  on the configured collection — so there is one mapping and no hardcoded variant ids.
-
-  Every add resolves the same way to the universal one-time "Activatie en installatie"
-  product (pricing.config.json activation.productHandle/sku) and adds it alongside the
-  package, deduped against the live cart so it's only ever charged once.
+  PAKKET-MATCHER (scenario cards + comparison table): rendered via the shared
+  snippets/zv-pakket-matcher.liquid — the same snippet sections/oplossingen.liquid uses to
+  embed the matcher under the Langer Thuis pricing cards, so there is exactly one copy of
+  the matcher markup and (in assets/zv-vergelijk-pakketten.js) its scoring/highlight logic.
+  See that snippet's header comment for the full mapping/scoring notes.
 {%- endcomment -%}
+
+{{ 'zv-vergelijk-pakketten.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
 {%- liquid
-  assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
-  assign no = '<span class="no" aria-hidden="true">–</span>'
   assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   assign opl = '/pages/oplossingen'
-  assign pkgs = 'inzicht,zeker,beschermd' | split: ','
-  assign tag_inzicht = section.settings.tagline_inzicht | default: 'Rustig eerste inzicht'
-  assign tag_zeker = section.settings.tagline_zeker | default: 'Vroeg signaleren van veranderingen'
-  assign tag_beschermd = section.settings.tagline_beschermd | default: 'Snelle hulp bij een val of noodsituatie'
-  assign match_badge = section.settings.match_badge | default: 'Past bij uw situatie'
   assign scenarios = section.blocks | where: 'type', 'scenario'
-  assign pm_coll = collections[section.settings.collection]
-  if pm_coll == blank or pm_coll.products_count == 0
-    assign pm_coll = collections['langer-thuis']
-  endif
 -%}
-
-{%- comment -%} package id -> real product, via custom.finder_key (same mapping as zv-checkout-overview) {%- endcomment -%}
-{%- capture pm_products -%}
-  {%- assign first = true -%}
-  {
-  {%- for p in pm_coll.products -%}
-    {%- assign fk = p.metafields.custom.finder_key.value -%}
-    {%- assign pid = '' -%}
-    {%- case fk -%}
-      {%- when 'aware' -%}{%- assign pid = 'inzicht' -%}
-      {%- when 'aware_plus' -%}{%- assign pid = 'zeker' -%}
-      {%- when 'care' -%}{%- assign pid = 'beschermd' -%}
-    {%- endcase -%}
-    {%- if pid != blank -%}
-      {%- assign v = p.selected_or_first_available_variant -%}
-      {%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}
-      {%- unless first %},{% endunless -%}{%- assign first = false -%}
-      {{ pid | json }}:{"variantId":{{ v.id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
-    {%- endif -%}
-  {%- endfor -%}
-  }
-{%- endcapture -%}
 
 <div class="zv-vergelijk">
   <!-- HERO -->
@@ -76,88 +39,29 @@
       <div class="cmp-lead">Langer Thuis</div>
       <h2>Vergelijk de drie niveaus</h2>
       <p class="sub">Alle pakketten werken zonder camera. U kiest hoeveel opvolging en zekerheid u wilt.</p>
+    </div>
 
-      {%- if scenarios.size > 0 -%}
-        <!-- PAKKET-MATCHER -->
-        <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}">
-          <script type="application/json" data-pm-products>{{ pm_products | strip }}</script>
-          <div class="pm-head">
-            <h3>{{ section.settings.pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h3>
-            {%- if section.settings.pm_sub != blank -%}<p>{{ section.settings.pm_sub | escape }}</p>{%- endif -%}
-          </div>
-          <div class="pm-cards" role="group" aria-label="{{ section.settings.pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}">
-            {%- for r in (1..3) -%}
-              {%- assign row_str = r | append: '' -%}
-              {%- capture row_html -%}
-                {%- for b in scenarios -%}
-                  {%- assign b_row = b.settings.row | default: '1' -%}
-                  {%- if b_row == row_str -%}
-                    <button type="button" class="pm-card" aria-pressed="false" data-pm-card data-pm-pkg="{{ b.settings.package | default: 'zeker' }}" {{ b.shopify_attributes }}>
-                      <span class="pm-card__t">{{ b.settings.title | escape }}</span>
-                      {%- if b.settings.quote != blank -%}<span class="pm-card__q">{{ b.settings.quote | escape }}</span>{%- endif -%}
-                    </button>
-                  {%- endif -%}
-                {%- endfor -%}
-              {%- endcapture -%}
-              {%- if row_html contains 'pm-card' -%}<div class="pm-row">{{ row_html }}</div>{%- endif -%}
-            {%- endfor -%}
-          </div>
+    {%- render 'zv-pakket-matcher',
+      scenarios: scenarios,
+      collection: section.settings.collection,
+      pm_heading: section.settings.pm_heading,
+      pm_sub: section.settings.pm_sub,
+      advies_label: section.settings.advies_label,
+      cta_label: section.settings.cta_label,
+      cta_added: section.settings.cta_added,
+      cta_view_cart: section.settings.cta_view_cart,
+      match_badge: section.settings.match_badge,
+      tagline_inzicht: section.settings.tagline_inzicht,
+      tagline_zeker: section.settings.tagline_zeker,
+      tagline_beschermd: section.settings.tagline_beschermd,
+      activation_variant_id: activation_variant_id,
+      zv_inzicht_monthly: zv_inzicht_monthly,
+      zv_zeker_monthly: zv_zeker_monthly,
+      zv_beschermd_monthly: zv_beschermd_monthly,
+      opl_url: opl
+    -%}
 
-          <div class="pm-advies" data-pm-advies hidden>
-            <span class="pm-advies__chk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <p class="pm-advies__txt"><b>{{ section.settings.advies_label | default: 'Ons advies:' | escape }} <span data-pm-name></span>.</b> <span data-pm-tagline></span></p>
-            <div class="pm-advies__cta">
-              <button type="button" class="btn btn--gold" data-pm-add data-label="{{ section.settings.cta_label | default: 'Voeg [pakket] toe aan winkelwagen' | escape }}" data-added="{{ section.settings.cta_added | default: 'Toegevoegd ✓' | escape }}"><span data-pm-add-text></span>{{ arrow }}</button>
-              <a class="btn btn--gold" href="{{ routes.cart_url }}" data-pm-viewcart hidden>{{ section.settings.cta_view_cart | default: 'Bekijk winkelwagen' | escape }}{{ arrow }}</a>
-            </div>
-            <div class="pm-advies__err" data-pm-err role="alert" hidden></div>
-          </div>
-          <p class="visually-hidden" role="status" aria-live="polite" data-pm-status></p>
-        </div>
-      {%- endif -%}
-
-      <div class="tbl-wrap">
-        <table class="cmp-tbl" data-pm-table>
-          <thead>
-            <tr>
-              <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
-              <th class="plan" scope="col" data-pm-pkg="inzicht"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Inzicht</span><span class="price">{{ zv_inzicht_monthly }}<span> p/m</span></span></th>
-              <th class="plan rec" scope="col" data-pm-pkg="zeker"><span class="pm-badge">{{ match_badge | escape }}</span><span class="badge">Meest gekozen</span><span class="pn">Zeker</span><span class="price">{{ zv_zeker_monthly }}<span> p/m</span></span></th>
-              <th class="plan" scope="col" data-pm-pkg="beschermd"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Beschermd</span><span class="price">{{ zv_beschermd_monthly }}<span> p/m</span></span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="feat">Meest geschikt voor<small>Waar dit pakket het sterkst in is</small></td>
-              <td class="val txt tag" data-pm-pkg="inzicht" data-pm-tagline-for="inzicht">{{ tag_inzicht | escape }}</td>
-              <td class="val txt tag" data-pm-pkg="zeker" data-pm-tagline-for="zeker">{{ tag_zeker | escape }}</td>
-              <td class="val txt tag" data-pm-pkg="beschermd" data-pm-tagline-for="beschermd">{{ tag_beschermd | escape }}</td>
-            </tr>
-            {%- comment -%} feat | small | inzicht | zeker | beschermd  (§ splits rows, | splits fields) {%- endcomment -%}
-            {%- assign rows = 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|n|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | split: '§' -%}
-            {%- for row in rows -%}
-              {%- assign f = row | split: '|' -%}
-              <tr>
-                <td class="feat">{{ f[0] }}<small>{{ f[1] }}</small></td>
-                {%- for i in (2..4) -%}
-                  {%- assign v = f[i] -%}
-                  {%- assign ci = i | minus: 2 -%}
-                  {%- if v == 'y' -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ check }}</td>
-                  {%- elsif v == 'n' -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ no }}</td>
-                  {%- else -%}<td class="val txt" data-pm-pkg="{{ pkgs[ci] }}">{{ v }}</td>{%- endif -%}
-                {%- endfor -%}
-              </tr>
-            {%- endfor -%}
-            <tr class="cta">
-              <td></td>
-              <td data-pm-pkg="inzicht"><a class="btn btn--ghost" href="{{ opl }}">Kies Inzicht</a></td>
-              <td class="rec-cell" data-pm-pkg="zeker"><a class="btn btn--gold" href="{{ opl }}">Kies Zeker {{ arrow }}</a></td>
-              <td data-pm-pkg="beschermd"><a class="btn btn--ghost" href="{{ opl }}">Kies Beschermd</a></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
+    <div class="wrap">
       <!-- OTHER LINES -->
       <div class="cmp-more">
         <div class="cmp-card">
@@ -189,299 +93,6 @@
     </div>
   </section>
 </div>
-
-{% javascript %}
-(function () {
-  var TIER = { inzicht: 1, zeker: 2, beschermd: 3 };
-  var NAMES = { inzicht: 'Inzicht', zeker: 'Zeker', beschermd: 'Beschermd' };
-
-  function init(root) {
-    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-pm-card]'));
-    var table = root.parentNode.querySelector('[data-pm-table]');
-    var advies = root.querySelector('[data-pm-advies]');
-    var nameEl = root.querySelector('[data-pm-name]');
-    var tagEl = root.querySelector('[data-pm-tagline]');
-    var status = root.querySelector('[data-pm-status]');
-    var addBtn = root.querySelector('[data-pm-add]');
-    var addText = root.querySelector('[data-pm-add-text]');
-    var viewCart = root.querySelector('[data-pm-viewcart]');
-    var err = root.querySelector('[data-pm-err]');
-    var products = {};
-    try { products = JSON.parse((root.querySelector('[data-pm-products]') || {}).textContent || '{}'); } catch (e) { products = {}; }
-    var current = null;
-    var addedTimer = null;
-    var activationVariantId = root.getAttribute('data-activation-variant-id') || null;
-
-    /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
-       activation.productHandle/sku) — deduped against the live cart so it's only ever
-       added once, same as the Oplossingen page. */
-    function activationLineToAdd(cart) {
-      if (!activationVariantId) return null;
-      var already = (cart && cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
-      return already ? null : activationVariantId;
-    }
-
-    function taglineFor(pkg) {
-      var td = table && table.querySelector('[data-pm-tagline-for="' + pkg + '"]');
-      return td ? td.textContent.trim() : '';
-    }
-
-    function recommend() {
-      var score = { inzicht: 0, zeker: 0, beschermd: 0 };
-      var any = false;
-      cards.forEach(function (c) {
-        if (c.getAttribute('aria-pressed') === 'true') {
-          var p = c.getAttribute('data-pm-pkg');
-          if (score.hasOwnProperty(p)) { score[p] += 1; any = true; }
-        }
-      });
-      if (!any) return null;
-      var best = null;
-      Object.keys(score).forEach(function (p) {
-        if (best === null || score[p] > score[best] || (score[p] === score[best] && TIER[p] > TIER[best])) best = p;
-      });
-      return best;
-    }
-
-    function setBtnLabel(pkg) {
-      if (!addBtn || !addText) return;
-      addText.textContent = (addBtn.getAttribute('data-label') || '').replace('[pakket]', NAMES[pkg] || pkg);
-    }
-
-    function resetCta(pkg) {
-      if (addedTimer) { clearTimeout(addedTimer); addedTimer = null; }
-      if (err) { err.hidden = true; err.textContent = ''; }
-      var prod = products[pkg];
-      if (addBtn) {
-        addBtn.hidden = !prod || !prod.available;
-        addBtn.disabled = false; addBtn.removeAttribute('aria-busy'); addBtn.dataset.busy = '';
-        setBtnLabel(pkg);
-      }
-      if (viewCart) viewCart.hidden = true;
-    }
-
-    function render() {
-      var pkg = recommend();
-      if (table) {
-        table.querySelectorAll('[data-pm-pkg]').forEach(function (cell) {
-          cell.classList.toggle('is-match', !!pkg && cell.getAttribute('data-pm-pkg') === pkg);
-        });
-      }
-      if (pkg !== current) {
-        current = pkg;
-        if (pkg) {
-          if (nameEl) nameEl.textContent = NAMES[pkg];
-          if (tagEl) tagEl.textContent = taglineFor(pkg);
-          resetCta(pkg);
-          if (advies) advies.hidden = false;
-          if (status) status.textContent = 'Ons advies: ' + NAMES[pkg] + '. ' + taglineFor(pkg);
-        } else {
-          if (advies) advies.hidden = true;
-          if (status) status.textContent = '';
-        }
-      }
-    }
-
-    cards.forEach(function (c) {
-      c.addEventListener('click', function () {
-        var on = c.getAttribute('aria-pressed') === 'true';
-        c.setAttribute('aria-pressed', on ? 'false' : 'true');
-        c.classList.toggle('on', !on);
-        render();
-      });
-    });
-
-    function refreshCart() {
-      return window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { return r.json(); })
-        .then(function (cart) {
-          try { document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: { cart: cart } })); } catch (e) {}
-          try { document.dispatchEvent(new CustomEvent('zv:cart:added')); } catch (e) {}
-          return cart;
-        });
-    }
-
-    function failed() {
-      if (addBtn) { addBtn.disabled = false; addBtn.removeAttribute('aria-busy'); addBtn.dataset.busy = ''; }
-      if (err) { err.textContent = 'Toevoegen mislukt. Probeer het opnieuw.'; err.hidden = false; }
-    }
-
-    if (addBtn) {
-      addBtn.addEventListener('click', function () {
-        var pkg = current;
-        var prod = pkg && products[pkg];
-        if (!prod || addBtn.dataset.busy === '1') return;
-        addBtn.dataset.busy = '1'; addBtn.disabled = true; addBtn.setAttribute('aria-busy', 'true');
-        if (err) err.hidden = true;
-        var vid = String(prod.variantId);
-        // Same variant already in the cart -> bump that line (matches Shopify's merge-on-repeat-add
-        // behaviour on the Oplossingen page) instead of creating a second line with different properties.
-        window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
-          .then(function (r) { return r.json(); })
-          .then(function (cart) {
-            var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
-            var activationId = activationLineToAdd(cart);
-            if (line) {
-              var changePromise = window.fetch('/cart/change.js', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
-              });
-              if (!activationId) return changePromise;
-              // Package line already exists but the activation fee doesn't yet (e.g. it was
-              // removed from the cart separately) — bump the package, then add the fee.
-              return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
-                return window.fetch('/cart/add.js', {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ items: [{ id: activationId, quantity: 1 }] })
-                });
-              });
-            }
-            var items = [{ id: prod.variantId, quantity: 1, properties: {
-              'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': 'Vergelijk pakketten'
-            } }];
-            if (activationId) items.push({ id: activationId, quantity: 1 });
-            return window.fetch('/cart/add.js', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: items })
-            });
-          })
-          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-          .then(function () {
-            var ZV = window.ZVMeasurement;
-            if (ZV && ZV.addToCart) { try { ZV.addToCart({ item_id: prod.sku, item_name: prod.name, item_brand: 'Zo Veilig', quantity: 1 }, { cta_location: 'vergelijk_pakketten' }); } catch (e) {} }
-            addBtn.dataset.busy = ''; addBtn.removeAttribute('aria-busy');
-            if (addText) addText.textContent = addBtn.getAttribute('data-added') || 'Toegevoegd';
-            if (status) status.textContent = (addBtn.getAttribute('data-added') || 'Toegevoegd') + ' — ' + (prod.name || NAMES[pkg]);
-            addedTimer = setTimeout(function () {
-              addBtn.hidden = true; addBtn.disabled = false;
-              if (viewCart) { viewCart.hidden = false; viewCart.focus(); }
-            }, 1800);
-            return refreshCart();
-          })
-          .catch(failed);
-      });
-    }
-
-    render();
-  }
-
-  function ready() {
-    document.querySelectorAll('[data-pm-root]').forEach(init);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
-  else ready();
-})();
-{% endjavascript %}
-
-{% stylesheet %}
-.zv-vergelijk {
-  --ink:#1a1230; --indigo:#322469; --indigo-deep:#281c54; --indigo-soft:#efecf7; --paper:#fffdf8;
-  --cream:#fdfaf2; --band:#f4f0e6; --gold:#e4a311; --gold-lt:#f5c84a; --gold-soft:#fbf0d4; --belt:#b67e0a;
-  --ok:#2f8f5b; --line:#e7e0cf; --line-2:#dcd2bd; --muted:#6f6786; --muted-2:#8c84a6;
-  color:var(--ink); line-height:1.5;
-}
-.zv-vergelijk .wrap { max-width:1080px; margin:0 auto; padding:0 clamp(20px,3.6vw,52px); }
-.zv-vergelijk .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
-.zv-vergelijk .btn { font-weight:800; font-size:14px; border:none; border-radius:12px; padding:12px 18px; line-height:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; text-decoration:none; transition:transform .15s,box-shadow .15s; white-space:nowrap; }
-.zv-vergelijk .btn svg { width:16px; height:16px; }
-.zv-vergelijk .btn--gold { background:var(--gold); color:var(--ink); box-shadow:0 10px 26px -14px rgba(180,126,10,.85); }
-.zv-vergelijk .btn--gold:hover { transform:translateY(-2px); }
-.zv-vergelijk .btn--gold:disabled { opacity:.6; cursor:progress; transform:none; }
-.zv-vergelijk .btn--ghost { background:transparent; color:var(--indigo); border:1.6px solid var(--line-2); }
-.zv-vergelijk .btn--ghost:hover { border-color:var(--indigo); }
-.zv-vergelijk .btn--ghost-light { color:#fff; border:1.5px solid rgba(255,255,255,.4); background:transparent; }
-.zv-vergelijk a:focus-visible, .zv-vergelijk button:focus-visible { outline:2px solid var(--gold-lt); outline-offset:2px; }
-
-/* hero */
-.zv-vergelijk .page-hero { background:radial-gradient(64% 120% at 92% 0%,rgba(197,46,47,.34) 0%,rgba(197,46,47,0) 55%),radial-gradient(66% 122% at 4% 102%,rgba(0,80,159,.5) 0%,rgba(0,80,159,0) 58%),linear-gradient(180deg,#2c3076 0%,#241c54 100%); color:#fff; padding:clamp(48px,6vw,84px) 0 clamp(40px,5vw,60px); }
-.zv-vergelijk .page-hero .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-lt); }
-.zv-vergelijk .page-hero .eyebrow .d { width:8px; height:8px; border-radius:50%; background:var(--gold); }
-.zv-vergelijk .page-hero h1 { font-size:clamp(30px,4vw,52px); font-weight:900; letter-spacing:-.02em; line-height:1.03; margin-top:14px; max-width:20ch; text-wrap:balance; }
-.zv-vergelijk .page-hero .sub { font-size:clamp(16px,1.5vw,19px); font-weight:500; color:#e4dffb; margin-top:16px; max-width:56ch; line-height:1.5; }
-
-/* comparison */
-.zv-vergelijk .cmp { background:var(--cream); padding:clamp(30px,4vw,56px) 0 clamp(50px,6vw,90px); }
-.zv-vergelijk .cmp-lead { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--belt); margin-bottom:8px; }
-.zv-vergelijk .cmp h2 { font-size:clamp(24px,2.8vw,34px); font-weight:900; color:var(--indigo); letter-spacing:-.02em; }
-.zv-vergelijk .cmp .sub { font-size:16px; font-weight:500; color:var(--muted); margin-top:10px; max-width:60ch; line-height:1.55; }
-
-/* pakket-matcher: scenario cards */
-.zv-vergelijk .pm { margin-top:34px; }
-.zv-vergelijk .pm-head h3 { font-size:clamp(20px,2.2vw,26px); font-weight:900; color:var(--indigo); letter-spacing:-.015em; }
-.zv-vergelijk .pm-head p { font-size:15px; font-weight:500; color:var(--muted); margin-top:6px; }
-.zv-vergelijk .pm-cards { display:flex; flex-direction:column; gap:14px; margin-top:18px; }
-.zv-vergelijk .pm-row { display:flex; gap:14px; flex-wrap:wrap; }
-.zv-vergelijk .pm-card { flex:1 1 0; min-width:200px; display:flex; flex-direction:column; gap:8px; text-align:left; background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px 18px 16px; cursor:pointer; font:inherit; color:var(--ink); box-shadow:0 16px 40px -40px rgba(26,18,48,.5); transition:background .15s,border-color .15s,color .15s,transform .15s; }
-.zv-vergelijk .pm-card:hover { border-color:var(--indigo); transform:translateY(-2px); }
-.zv-vergelijk .pm-card__t { font-size:15.5px; font-weight:800; color:var(--indigo); line-height:1.3; }
-.zv-vergelijk .pm-card__q { font-size:13.5px; font-weight:500; font-style:italic; color:var(--muted); line-height:1.45; }
-/* Selected = the same dark navy the utility bar / dark UI uses (var(--indigo-deep) in zv-chrome.css). */
-.zv-vergelijk .pm-card.on, .zv-vergelijk .pm-card[aria-pressed="true"] { background:var(--indigo-deep); border-color:var(--indigo-deep); }
-.zv-vergelijk .pm-card.on .pm-card__t, .zv-vergelijk .pm-card[aria-pressed="true"] .pm-card__t { color:#fff; }
-.zv-vergelijk .pm-card.on .pm-card__q, .zv-vergelijk .pm-card[aria-pressed="true"] .pm-card__q { color:var(--zv-body-on-dark, #d8d2ef); }
-@media(max-width:900px){ .zv-vergelijk .pm-card { flex-basis:calc(50% - 7px); } }
-@media(max-width:600px){ .zv-vergelijk .pm-card { flex-basis:100%; min-width:0; } }
-
-/* pakket-matcher: advice bar */
-.zv-vergelijk .pm-advies { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:18px; background:var(--paper); border:1.5px solid var(--indigo); border-radius:16px; padding:14px 16px 14px 18px; }
-.zv-vergelijk .pm-advies__chk { flex:none; width:30px; height:30px; border-radius:50%; background:var(--band); color:var(--indigo); display:grid; place-items:center; }
-.zv-vergelijk .pm-advies__chk svg { width:16px; height:16px; }
-.zv-vergelijk .pm-advies__txt { flex:1 1 260px; font-size:15px; font-weight:500; color:#5b5374; line-height:1.45; margin:0; }
-.zv-vergelijk .pm-advies__txt b { color:var(--indigo); font-weight:900; }
-.zv-vergelijk .pm-advies__cta { flex:none; }
-.zv-vergelijk .pm-advies__err { flex-basis:100%; font-size:13px; font-weight:700; color:#c52e2f; }
-@media(max-width:600px){ .zv-vergelijk .pm-advies__cta { flex-basis:100%; } .zv-vergelijk .pm-advies__cta .btn { width:100%; } }
-
-/* table */
-.zv-vergelijk .tbl-wrap { overflow-x:auto; margin-top:26px; border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 24px 54px -46px rgba(26,18,48,.5); }
-.zv-vergelijk .cmp-tbl { border-collapse:collapse; width:100%; min-width:680px; }
-.zv-vergelijk .cmp-tbl th, .zv-vergelijk .cmp-tbl td { padding:16px 20px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
-.zv-vergelijk .cmp-tbl thead th { background:var(--band); }
-.zv-vergelijk .cmp-tbl thead .plan { text-align:center; }
-.zv-vergelijk .cmp-tbl thead .plan .pn { display:block; font-size:19px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; }
-.zv-vergelijk .cmp-tbl thead .plan.rec { background:linear-gradient(180deg,#faf3e2,#f6ecd3); }
-.zv-vergelijk .cmp-tbl thead .plan .badge { display:inline-block; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--ink); background:var(--gold); border-radius:999px; padding:3px 10px; margin-bottom:6px; }
-.zv-vergelijk .cmp-tbl thead .plan .price { display:block; font-size:22px; font-weight:900; color:var(--ink); margin-top:4px; }
-.zv-vergelijk .cmp-tbl thead .plan .price span { font-size:12px; font-weight:700; color:var(--muted); }
-.zv-vergelijk .cmp-tbl .feat { font-size:14.5px; font-weight:700; color:var(--ink); }
-.zv-vergelijk .cmp-tbl .feat small { display:block; font-size:12.5px; font-weight:500; color:var(--muted); margin-top:2px; }
-.zv-vergelijk .cmp-tbl td.val { text-align:center; }
-.zv-vergelijk .cmp-tbl .yes { width:26px; height:26px; border-radius:50%; background:rgba(47,143,91,.14); color:var(--ok); display:inline-grid; place-items:center; }
-.zv-vergelijk .cmp-tbl .yes svg { width:15px; height:15px; }
-.zv-vergelijk .cmp-tbl .no { color:var(--muted-2); font-size:18px; }
-.zv-vergelijk .cmp-tbl td.val.txt { font-size:13.5px; font-weight:700; color:var(--indigo); }
-.zv-vergelijk .cmp-tbl td.val.tag { font-size:13px; font-weight:600; color:#5b5374; line-height:1.4; }
-.zv-vergelijk .cmp-tbl tr.cta td { padding:20px; text-align:center; background:var(--cream); }
-.zv-vergelijk .cmp-tbl .rec-cell { background:#fdf8ee; }
-/* pakket-matcher: matched column (declared after .rec so it wins on the Zeker header too) */
-.zv-vergelijk .cmp-tbl .pm-badge { display:none; font-size:10px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--indigo); border-radius:999px; padding:3px 10px; margin-bottom:6px; }
-.zv-vergelijk .cmp-tbl thead .plan.is-match { background:var(--indigo-soft); box-shadow:inset 0 3px 0 var(--indigo); }
-.zv-vergelijk .cmp-tbl thead .plan.is-match .pm-badge { display:inline-block; }
-.zv-vergelijk .cmp-tbl thead .plan.is-match .badge { display:none; }
-.zv-vergelijk .cmp-tbl td.is-match { background:var(--indigo-soft); }
-.zv-vergelijk .cmp-tbl tr.cta td.is-match { background:var(--indigo-soft); }
-
-/* other lines */
-.zv-vergelijk .cmp-more { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:38px; }
-@media(max-width:760px){ .zv-vergelijk .cmp-more{ grid-template-columns:1fr; } }
-.zv-vergelijk .cmp-card { background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:28px 26px; box-shadow:0 20px 48px -44px rgba(26,18,48,.5); }
-.zv-vergelijk .cmp-card .k { font-size:11.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--belt); }
-.zv-vergelijk .cmp-card h3 { font-size:23px; font-weight:900; color:var(--indigo); letter-spacing:-.015em; margin-top:6px; }
-.zv-vergelijk .cmp-card p { font-size:15px; font-weight:500; color:#5b5374; margin-top:10px; line-height:1.55; }
-.zv-vergelijk .cmp-tiers { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
-.zv-vergelijk .cmp-tier { font-size:12.5px; font-weight:800; color:var(--indigo); background:var(--indigo-soft); border-radius:999px; padding:6px 13px; }
-.zv-vergelijk .cmp-card .soon { display:inline-flex; align-items:center; gap:8px; margin-top:18px; font-size:13px; font-weight:800; color:var(--belt); background:var(--gold-soft); border-radius:999px; padding:8px 14px; }
-.zv-vergelijk .cmp-card .lk { display:flex; align-items:center; gap:8px; margin-top:18px; font-size:14.5px; font-weight:800; color:var(--indigo); text-decoration:none; }
-.zv-vergelijk .cmp-card .lk svg { width:16px; height:16px; transition:transform .15s; }
-.zv-vergelijk .cmp-card .lk:hover svg { transform:translateX(3px); }
-
-/* help */
-.zv-vergelijk .cmp-help { margin-top:40px; background:var(--indigo-deep); color:#fff; border-radius:20px; padding:clamp(28px,3.5vw,46px); text-align:center; position:relative; overflow:hidden; }
-.zv-vergelijk .cmp-help::before { content:""; position:absolute; width:460px; height:460px; border-radius:50%; left:-140px; bottom:-180px; background:radial-gradient(circle,rgba(0,80,159,.4),transparent 60%); }
-.zv-vergelijk .cmp-help h3 { font-size:clamp(22px,2.4vw,30px); font-weight:900; letter-spacing:-.015em; position:relative; }
-.zv-vergelijk .cmp-help p { font-size:16px; color:#d8d2ef; margin:12px auto 0; max-width:52ch; line-height:1.55; position:relative; }
-.zv-vergelijk .cmp-help .row { display:flex; gap:13px; justify-content:center; flex-wrap:wrap; margin-top:24px; position:relative; }
-{% endstylesheet %}
 
 {% schema %}
 {
