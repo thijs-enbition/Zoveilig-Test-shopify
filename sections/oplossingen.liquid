@@ -164,7 +164,7 @@
                     {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
                   </div>
                   {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
-                  {%- if v.sku != blank -%}<div class="pcard__sku">SKU · {{ v.sku }}</div>{%- endif -%}
+                  {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
 
                   {%- if price_known -%}
                     <details class="pcard__plus">
@@ -770,6 +770,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-err{font-size:12px;font-weight:700;color:#e24b4a;}
 .pcard__vista-done{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:#2f8f5b;padding:6px 2px;}
 .pcard__vista-done svg{width:17px;height:17px;flex:none;}
+.pcard__vista-form[hidden],.pcard__vista-done[hidden]{display:none;}
 {% endstylesheet %}
 
 {% javascript %}
@@ -970,13 +971,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var p = it.properties || {};
     // Full label = "Oplossing · Pakket" (e.g. "Langer Thuis · Zeker"), from the line's own properties.
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(p['Pakket'] || it.product_title || '');
-    var sku = p['SKU'] || it.sku || '';
     var pkg = p['Pakket'] || it.product_title || 'item';
     var woningOn = !!p['Woning'];
     return '<li class="addcart__item">' +
       '<div class="addcart__item-head"><div class="addcart__info">' +
         '<span class="addcart__name">' + full + '</span>' +
-        (sku ? '<span class="addcart__meta">Pakket · ' + esc(sku) + '</span>' : '') +
       '</div><div class="addcart__pricewrap">' +
         '<span class="addcart__price">' + money(it.price) + '<span class="per">/mnd</span></span>' +
         '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
@@ -1236,7 +1235,6 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
     var flag = d.popular === 'true' ? '<span class="pbd-flag">Meest gekozen</span>' : '';
     var lead = (plat ? '<b>' + esc(plat) + '. </b>' : '') + esc(pk.hook || '');
-    var sku = d.packageSku ? '<div class="pbd-plat" style="color:var(--belt);margin-top:6px">SKU · ' + esc(d.packageSku) + '</div>' : '';
     var perHtml = (priceKnown && d.per) ? '<span class="pbd-per">' + esc(d.per) + '</span>' : '';
 
     scrim.innerHTML =
@@ -1251,7 +1249,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
             '<details class="pbd-pkg" open><summary class="pbd-sec-h pbd-sec-toggle">Wat zit er in het pakket' + ICON.chev + '</summary>' +
             '<ul class="pbd-items">' + items + '</ul></details>' + infoHtml(pk.info) +
           '</section><aside class="pbd-buy"><div class="pbd-buy-card">' +
-            '<div class="pbd-plat">' + esc(plat) + '</div><div class="pbd-buy-name">' + esc(name) + '</div>' + sku +
+            '<div class="pbd-plat">' + esc(plat) + '</div><div class="pbd-buy-name">' + esc(name) + '</div>' +
             '<div class="pbd-price"><span class="pbd-amt" data-pb-amt data-base="' + baseCents + '">' + esc(d.price) + '</span>' + perHtml + '</div>' +
             (pk.sub ? '<div class="pbd-sub">' + esc(pk.sub) + '</div>' : '') + plusHtml + buyHtml +
           '</div><div class="pbd-guarantee">' + ICON.info + '<span>Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt <b>14 dagen bedenktijd</b> na levering.</span></div>' +
