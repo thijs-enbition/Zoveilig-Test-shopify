@@ -190,9 +190,8 @@
                     {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
                       {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
                       <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
-                        <button type="button" class="btn btn--gold" data-vista-open data-zv-event="vista_lead_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="bel_mij_terug_vista" data-cta-position="{{ anchor }}_paks">Bel mij terug over Vista<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                         <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-                        <form class="pcard__vista-form" data-vista-form hidden>
+                        <form class="pcard__vista-form" data-vista-form>
                           <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
                           <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
                           <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
@@ -234,6 +233,13 @@
           zv_zeker_monthly: zv_zeker_monthly,
           zv_beschermd_monthly: zv_beschermd_monthly
         -%}
+      {%- endif -%}
+
+      {%- if anchor == 'mijn-thuis' -%}
+        <section class="mt-camhw">
+          <h3>Benieuwd naar de camerahardware?</h3>
+          <a class="mt-camhw__btn" href="/pages/camera-hardware" data-zv-event="mt_camera_hardware" data-cta-name="bekijk_camerahardware" data-cta-position="{{ anchor }}_paks">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </section>
       {%- endif -%}
 
       {%- comment -%} Waarom Zo Veilig — WhyBlock (design shows the first two feature rows). {%- endcomment -%}
@@ -523,6 +529,11 @@
 .pgnote .pn-ic svg { width: 20px; height: 20px; color: var(--indigo); }
 .pgnote b { color: var(--indigo); font-weight: 800; }
 .pgnote span { font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
+.mt-camhw { max-width: 1080px; margin: 30px auto 0; padding: clamp(28px, 3.2vw, 42px) clamp(24px, 3.4vw, 48px); background: var(--gold); border-radius: 16px; box-shadow: 0 2px 0 var(--belt); display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.mt-camhw h3 { font-size: clamp(20px, 2.2vw, 27px); font-weight: 800; color: var(--ink); letter-spacing: -0.01em; margin: 0; }
+.mt-camhw__btn { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15.5px; color: var(--ink); background: var(--paper); border-radius: 13px; padding: 15px 26px; text-decoration: none; transition: transform 0.14s; }
+.mt-camhw__btn:hover { transform: translateY(-1px); }
+.mt-camhw__btn svg { width: 18px; height: 18px; }
 @media (max-width: 820px) { .vhero__copy { margin: 0 16px -28px; max-width: none; } }
 @media (max-width: 720px) { .pgrid, .pgrid[data-n="2"], .pgrid[data-n="3"] { --cols: 1; max-width: 420px; } }
 
@@ -1389,11 +1400,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   function init() {
     document.querySelectorAll('[data-vista]').forEach(function (box) {
       if (box.dataset.bound) return; box.dataset.bound = '1';
-      var openBtn = box.querySelector('[data-vista-open]'),
-          form = box.querySelector('[data-vista-form]'),
+      var form = box.querySelector('[data-vista-form]'),
           done = box.querySelector('[data-vista-done]'),
           err = box.querySelector('[data-vista-err]');
-      if (openBtn) openBtn.addEventListener('click', function () { openBtn.hidden = true; if (form) form.hidden = false; });
       if (form) form.addEventListener('submit', function (e) {
         e.preventDefault();
         var name = ((form.querySelector('[name=name]') || {}).value || '').trim();
