@@ -4,31 +4,52 @@
   Rendered via templates/cart.overzicht.json against the live {{ cart }} — no separate data
   source, so it always reflects exactly what will be charged.
 
-  PRICING: every amount here is either (a) read live from {{ cart }} (what Shopify will
-  actually charge today / per month), or (b) the confirmed per-package commercial terms from
-  the central pricing model (activation, intro-promo discount, contract duration, indicative
-  contract value) via the `zv-pricing` include — never a literal here (CI check #9 in
-  scripts/check_pricing.py enforces that no theme file carries an independent price/duration).
-  The package is identified by matching the cart's subscription line item (section setting
+  PRICING: "Vandaag te betalen" (today's total) is always read live from {{ cart }} — see
+  below for why. Every recurring "per maand" figure (the item-row "p/m" prices, "Maandbedrag",
+  "Daarna per maand", the promo-period rate) is instead the confirmed per-package monthly rate
+  from the central pricing model, via the `zv-pricing` include and `zv-package-monthly-cents`
+  — never read off `item.final_line_price` — for the reason below. Package-specific commercial
+  terms (activation, intro-promo discount, contract duration, indicative contract value) come
+  from the same confirmed model, matched to the cart's subscription line item (section setting
   `sub_type`, same convention as zv-cart.liquid — a subscription is any product whose `type`
   equals this, confirmed from real store data as "Beveiligingsabonnement" across every live
   package; `sub_tag` is kept only as a fallback OR, since no current product uses it) to its
   `custom.finder_key` product metafield, mapped to a pricing.config.json package id below. If
   no package can be identified (e.g. a cart with only accessories), the commercial-terms rows
-  are hidden and only the live cart totals are shown.
+  are hidden; per-line and total "per maand" figures still show, falling back to that line's
+  live price if its finder_key can't be resolved (never a literal here regardless — CI check
+  #9 in scripts/check_pricing.py enforces that no theme file carries an independent
+  price/duration).
+
+  WHY THE MONTHLY FIGURES CAN'T BE LIVE-CART-DERIVED (as of 2026-09-10): the package product's
+  live Shopify price stops representing one month's rate once the interim intro-promo
+  mechanism goes live — instead of a separate promo SKU, the plan reuses the existing package
+  product priced as a discounted multi-month bundle (list price = monthly x promo period,
+  with a real Shopify Discount taking the promo rate off that, scoped to package products
+  only), charged in full today, with the *actual* ongoing monthly SEPA billing owned entirely
+  by Odoo post-order — Shopify never sees it again. So `item.final_line_price` on a package
+  line is "what this bundle costs," not "what one month costs," and every "per maand" figure
+  has to come from the confirmed config instead, scaled by `item.quantity` (the cart's +/-
+  qty stepper works on package lines same as anything else, so this isn't optional — a static
+  per-unit figure would silently under-report a qty-2 line by half). KNOWN GAP: this makes the
+  confirmed config the sole source for "the ongoing monthly rate" with no live signal left to
+  cross-check it against — if pricing.config.json's monthlyRecurringPrice ever drifts from
+  what Odoo is actually configured to bill monthly, nothing here would catch it. That has to
+  stay a manually-verified sync point between this repo and Odoo's subscription setup.
 
   "Vandaag te betalen" = the FULL live cart total (every line, minus cart-level discounts) —
   exactly what Shopify actually charges at checkout. Shopify always charges the complete cart
   regardless of how a line is categorised here, so subscription line items are included in
   this total the same as everything else (confirmed live 2026-09-09: activation fee + one
-  package line together charge the sum of both). "Maandbedrag" / the promo rows below are
-  purely informational: the recurring amount that continues via SEPA-incasso each month after
-  today, not an amount excluded from today's charge. The promo rows (discount, "Eerste 3
-  maanden") only render while `zv_promo_active` is true. That flag folds together two
-  gates: the mechanism being valid (pricing.config.json `promo.enabled`/`ratePercent`,
+  package line together charge the sum of both) — this is unaffected by the repricing above,
+  since it's just today's real charge, bundle price included. The promo rows (discount,
+  "Eerste 3 maanden") only render while `zv_promo_active` is true. That flag folds together
+  two gates: the mechanism being valid (pricing.config.json `promo.enabled`/`ratePercent`,
   via snippets/zv-pricing.liquid) AND the Shopify theme setting `zv_promo_live` (Zo
   Veilig · Introductiekorting) — a checkbox Thijs flips from the theme editor, no code
-  change or redeploy needed, currently off.
+  change or redeploy needed, currently off. The "Daarna per maand" / "Maandbedrag" confirmed
+  monthly figures render regardless of `zv_promo_active`, since they're the steady-state rate
+  a customer pays either way — only the promo-period discount rows are gated on it.
 
   ACTIVATION FEE ENFORCEMENT: a subscription package must never reach checkout without the
   universal one-time activation fee (pricing.config.json activation.productHandle/sku). This
@@ -50,7 +71,8 @@
   assign sub_tag = section.settings.sub_tag | default: 'abonnement'
   assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id
   assign today_cents = 0
-  assign month_cents = 0
+  assign true_month_cents = 0
+  assign resolved_sub_qty = 0
   assign pkg_item = nil
   assign distinct_fks = ''
   assign has_sub_item = false
@@ -66,8 +88,18 @@
     assign today_cents = today_cents | plus: item.final_line_price
     if is_sub
       assign has_sub_item = true
-      assign month_cents = month_cents | plus: item.final_line_price
       assign item_fk = item.product.metafields.custom.finder_key.value
+      capture li_monthly_cents_raw
+        render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents
+      endcapture
+      assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0
+      if li_monthly_cents > 0
+        assign li_month_total_cents = li_monthly_cents | times: item.quantity
+        assign true_month_cents = true_month_cents | plus: li_month_total_cents
+        assign resolved_sub_qty = resolved_sub_qty | plus: item.quantity
+      else
+        assign true_month_cents = true_month_cents | plus: item.final_line_price
+      endif
       if item_fk != blank
         if pkg_item == nil
           assign pkg_item = item
@@ -104,40 +136,44 @@
     case fk
       when 'aware'
         assign pkg_available = true
-        assign pkg_promo_monthly = zv_inzicht_promo_monthly
+        assign pkg_promo_monthly_cents_unit = zv_inzicht_promo_monthly_cents
         assign pkg_promo_discount = zv_inzicht_promo_discount
         assign pkg_activation = zv_inzicht_activation
         assign pkg_term = zv_inzicht_term
         assign pkg_icv = zv_inzicht_icv
       when 'aware_plus'
         assign pkg_available = true
-        assign pkg_promo_monthly = zv_zeker_promo_monthly
+        assign pkg_promo_monthly_cents_unit = zv_zeker_promo_monthly_cents
         assign pkg_promo_discount = zv_zeker_promo_discount
         assign pkg_activation = zv_zeker_activation
         assign pkg_term = zv_zeker_term
         assign pkg_icv = zv_zeker_icv
       when 'care'
         assign pkg_available = true
-        assign pkg_promo_monthly = zv_beschermd_promo_monthly
+        assign pkg_promo_monthly_cents_unit = zv_beschermd_promo_monthly_cents
         assign pkg_promo_discount = zv_beschermd_promo_discount
         assign pkg_activation = zv_beschermd_activation
         assign pkg_term = zv_beschermd_term
         assign pkg_icv = zv_beschermd_icv
       when 'secure'
         assign pkg_available = true
-        assign pkg_promo_monthly = zv_alert_promo_monthly
+        assign pkg_promo_monthly_cents_unit = zv_alert_promo_monthly_cents
         assign pkg_promo_discount = zv_alert_promo_discount
         assign pkg_activation = zv_alert_activation
         assign pkg_term = zv_alert_term
         assign pkg_icv = zv_alert_icv
       when 'guard'
         assign pkg_available = true
-        assign pkg_promo_monthly = zv_protect_promo_monthly
+        assign pkg_promo_monthly_cents_unit = zv_protect_promo_monthly_cents
         assign pkg_promo_discount = zv_protect_promo_discount
         assign pkg_activation = zv_protect_activation
         assign pkg_term = zv_protect_term
         assign pkg_icv = zv_protect_icv
     endcase
+  endif
+  assign pkg_promo_monthly_total_cents = 0
+  if pkg_available
+    assign pkg_promo_monthly_total_cents = pkg_promo_monthly_cents_unit | times: resolved_sub_qty
   endif
 -%}
 {%- capture av_url -%}{% render 'zv-route', key: 'algemene-voorwaarden' %}{%- endcapture -%}
@@ -182,6 +218,16 @@
                 {%- for item in cart.items -%}
                   {%- assign is_sub = false -%}
                   {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+                  {%- if is_sub -%}
+                    {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
+                    {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
+                    {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
+                    {%- if li_monthly_cents > 0 -%}
+                      {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
+                    {%- else -%}
+                      {%- assign li_month_total_cents = item.final_line_price -%}
+                    {%- endif -%}
+                  {%- endif -%}
                   <div class="ovitem">
                     <div class="ovi-thumb">
                       {%- if item.image -%}
@@ -198,7 +244,7 @@
                     </div>
                     <div class="ovi-right">
                       {%- if is_sub -%}
-                        <div class="ovi-price">{{ item.final_line_price | money }} <span>p/m</span></div>
+                        <div class="ovi-price">{{ li_month_total_cents | money }} <span>p/m</span></div>
                       {%- else -%}
                         <div class="ovi-price">{{ item.final_line_price | money }}</div>
                       {%- endif -%}
@@ -211,7 +257,7 @@
             <div class="ovcard">
               <h2>{{ section.settings.before_heading | default: 'Voordat u afrekent' | escape }}</h2>
               <dl class="ovdl">
-                <div><dt>Maandbedrag</dt><dd>{{ month_cents | money }}</dd></div>
+                <div><dt>Maandbedrag</dt><dd>{{ true_month_cents | money }}</dd></div>
                 {%- if pkg_available and zv_promo_active -%}
                   <div><dt>Eerste 3 maanden ({{ zv_promo_badge }})</dt><dd>−{{ pkg_promo_discount }}</dd></div>
                 {%- endif -%}
@@ -248,13 +294,13 @@
                 <div class="ovblock-amt">{{ today_cents | money }}</div>
               </div>
 
-              {%- if month_cents > 0 -%}
+              {%- if true_month_cents > 0 -%}
                 <div class="ovblock">
                   <span class="ovblock-eb">Daarna per maand · via SEPA-incasso</span>
                   {%- if pkg_available and zv_promo_active -%}
-                    <p>Eerste 3 maanden {{ pkg_promo_monthly }} per maand, daarna {{ month_cents | money }} per maand.</p>
+                    <p>Eerste 3 maanden {{ pkg_promo_monthly_total_cents | money }} per maand, daarna {{ true_month_cents | money }} per maand.</p>
                   {%- else -%}
-                    <p>{{ month_cents | money }} per maand.</p>
+                    <p>{{ true_month_cents | money }} per maand.</p>
                   {%- endif -%}
                 </div>
               {%- endif -%}
