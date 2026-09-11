@@ -71,7 +71,7 @@
           "settings": {
             "anchor": "veilig-onderweg",
             "eyebrow": "Veilig Onderweg",
-            "sublabel": "Onderweg",
+            "sublabel": "",
             "headline": "Veilig, waar u ook bent.",
             "trust": "GPS-paniekknop voor onderweg\nAutomatische valdetectie\nSecuritas-meldkamer inbegrepen",
             "hero_asset": "opl-hero-veilig-onderweg.jpg",
