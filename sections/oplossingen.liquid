@@ -1445,6 +1445,19 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
           item_name: box.getAttribute('data-item') || 'Mijn Thuis Vista', item_id: box.getAttribute('data-odoo') || 'MT-VIS',
           monthly_price: box.getAttribute('data-price') || '', solution_category: 'security', cta_location: 'oplossingen_vista'
         });
+        // GTM/GA4 reporting only — additive, no PII (name/phone/consent stay out of the
+        // dataLayer, same convention as the main callback form). Mirrors the event the "Bel
+        // mij terug" form pushes on a confirmed lead (assets/zv-callback.js), so an existing
+        // GTM trigger on callback_request already picks up Vista leads via lead_type.
+        var ZV = window.ZVMeasurement;
+        if (ZV && ZV.callbackRequestSuccess) {
+          ZV.callbackRequestSuccess({
+            lead_type: 'vista',
+            item_id: box.getAttribute('data-odoo') || 'MT-VIS',
+            item_name: box.getAttribute('data-item') || 'Mijn Thuis Vista',
+            cta_location: 'oplossingen_vista'
+          });
+        }
         if (form) form.hidden = true; if (done) done.hidden = false;
       });
     });
