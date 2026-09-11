@@ -81,7 +81,19 @@
     {n:'Streamrecorder (NVR)', type:'Recorder', koop:500.00, huur:43.75, k:'nvr', sku:'NVR-STREAM'},
     {n:'Video deurbel bedraad VDB 750', type:'Deurbel', koop:299.00, huur:26.16, k:'vdb_750', sku:'VDB-750'},
     {n:'Video deurbel bedraad VDB 755 + chime', type:'Deurbel', koop:325.00, huur:28.44, k:'vdb_755', sku:'VDB-755'},
-    {n:'Video deurbel draadloos VDB780B + chime', type:'Deurbel', koop:425.00, huur:37.19, k:'vdb_780', sku:'VDB-780'}
+    {n:'Video deurbel draadloos VDB780B + chime', type:'Deurbel', koop:425.00, huur:37.19, k:'vdb_780', sku:'VDB-780'},
+    {n:'(Koop) Magneetcontact (DC-23)', type:'Sensor', koop:60.00, huur:null, huurSku:null, k:'magneetcontact_dc23', sku:'CL001'},
+    {n:'4MP_WIFI_MICKEY_MOUSE', type:'Camera', koop:475.00, huur:null, huurSku:null, k:'cam_adc_mm', sku:'ADC-MM'},
+    {n:'(Koop) huisdier fotopir (bewegingsmelder)', type:'Sensor', koop:125.00, huur:null, huurSku:null, k:'huisdier_fotopir', sku:'C00H01'},
+    {n:'(Koop) Huisdier PIR (bewegingsmelder)', type:'Sensor', koop:49.00, huur:null, huurSku:null, k:'huisdier_pir', sku:'C00H02'},
+    {n:'(Koop) PIR Bewegingsdetector', type:'Sensor', koop:60.00, huur:null, huurSku:null, k:'pir_bewegingsdetector', sku:'CL002'},
+    {n:'(Koop) Foto bewegingsdetector 868', type:'Sensor', koop:125.00, huur:null, huurSku:null, k:'foto_bewegingsdetector_868', sku:'CL003A'},
+    {n:'(Koop) Afstandsbediening', type:'Accessoire', koop:40.00, huur:null, huurSku:null, k:'afstandsbediening', sku:'CL004'},
+    {n:'(Koop) Rookmelder', type:'Sensor', koop:60.00, huur:null, huurSku:null, k:'rookmelder', sku:'CL005'},
+    {n:'(Koop) Binnensirene', type:'Sensor', koop:90.00, huur:null, huurSku:null, k:'binnensirene', sku:'CL006A'},
+    {n:'(Koop) Glasbreukmelder', type:'Sensor', koop:75.00, huur:null, huurSku:null, k:'glasbreukmelder', sku:'CL007'},
+    {n:'(Koop) Magneetcontact met shocksensor', type:'Sensor', koop:60.00, huur:null, huurSku:null, k:'magneetcontact_shocksensor', sku:'CL2212'},
+    {n:'(Koop) SA-220 Roldeur behuizing', type:'Accessoire', koop:129.00, huur:null, huurSku:null, k:'roldeur_behuizing', sku:'ROL'}
   ];
   var state={ lines:{} };
   function euro(n){ return '€ '+Number(n).toFixed(2).replace('.',','); }
@@ -101,6 +113,9 @@
   captureSource();
 
   function modeChip(h,mode){
+    if(mode==='huur' && h.huur==null){
+      return '<button type="button" class="modechip huur soon" disabled><span class="ml">Huren</span><span class="mp">Binnenkort</span><span class="mu">beschikbaar</span></button>';
+    }
     var l=state.lines[h.k], on=l&&l.mode===mode;
     var price=euro(mode==='koop'?h.koop:h.huur);
     var lab=mode==='koop'?'Kopen':'Huren', unit=mode==='koop'?'eenmalig':'per maand';
@@ -110,7 +125,8 @@
     var rows=document.getElementById('rows'); rows.innerHTML='';
     HW.forEach(function(h){
       var l=state.lines[h.k], q=l?l.qty:0, hasMode=!!(l&&l.mode);
-      var chosen=hasMode?'<span class="hw-chosen">Gekozen: '+(l.mode==='koop'?'Kopen · eenmalig':'Huren · maandelijks')+' &middot; '+h.sku+'</span>':'';
+      var chosenSku=hasMode&&l.mode==='huur'&&h.huurSku?h.huurSku:h.sku;
+      var chosen=hasMode?'<span class="hw-chosen">Gekozen: '+(l.mode==='koop'?'Kopen · eenmalig':'Huren · maandelijks')+' &middot; '+chosenSku+'</span>':'';
       var el=document.createElement('div'); el.className='hw'+(q>0?' has':''); el.setAttribute('data-k',h.k);
       el.innerHTML=
         '<div class="hw-main"><div class="hw-name">'+h.n+'</div>'+chosen+'</div>'+
@@ -140,7 +156,7 @@
     var cams=0, koop=0, huur=0;
     keys.forEach(function(k){
       var h=HW.find(function(x){return x.k===k;}); var l=state.lines[k], q=l.qty;
-      if(h.type!=='Recorder') cams+=q;
+      if(h.type!=='Recorder' && h.type!=='Sensor' && h.type!=='Accessoire') cams+=q;
       var isKoop=l.mode==='koop', unit=isKoop?h.koop:h.huur, line=unit*q;
       if(isKoop) koop+=line; else huur+=line;
       list.insertAdjacentHTML('beforeend','<div class="sl"><span><span class="q">'+q+'×</span> '+h.n+' <em style="color:'+(isKoop?'var(--belt)':'var(--indigo-2)')+';font-style:normal;font-weight:800">('+(isKoop?'Kopen':'Huren')+')</em></span><span class="v">'+euro(line)+(isKoop?'':'/m')+'</span></div>');
@@ -161,7 +177,7 @@
     var keys=Object.keys(state.lines); if(!keys.length) return;
     var lines=keys.map(function(k){
       var h=HW.find(function(x){return x.k===k;}); var l=state.lines[k], isKoop=l.mode==='koop';
-      return { sku:h.sku, key:k, name:h.n, type:h.type, mode:isKoop?'Kopen':'Huren',
+      return { sku:isKoop?h.sku:(h.huurSku||h.sku), key:k, name:h.n, type:h.type, mode:isKoop?'Kopen':'Huren',
         bucket:isKoop?'Eenmalig':'Maandelijks', unit:isKoop?h.koop:h.huur, qty:l.qty };
     });
     var payload={ lines:lines, source:captureSource() };
@@ -231,6 +247,9 @@
 .zv-camera .modechip.on .mp { color:var(--indigo); }
 .zv-camera .modechip.koop.on { border-color:var(--belt); background:#fbf1e0; }
 .zv-camera .modechip.koop.on .ml, .zv-camera .modechip.koop.on .mp { color:var(--belt); }
+.zv-camera .modechip.soon { cursor:default; opacity:.55; border-style:dashed; }
+.zv-camera .modechip.soon:hover { border-color:var(--line-2); }
+.zv-camera .modechip.soon .mp { font-size:12.5px; }
 .zv-camera .rows { display:flex; flex-direction:column; gap:10px; }
 .zv-camera .hw { display:grid; grid-template-columns:1fr auto auto; gap:16px; align-items:center; background:var(--paper); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; transition:border-color .14s,box-shadow .14s; }
 .zv-camera .hw.has { border-color:var(--indigo); box-shadow:0 10px 26px -18px rgba(50,36,105,.6); }
