@@ -26,6 +26,15 @@
                             these and gets the same built-in defaults below — it does not
                             yet have its own independently editable copy.
     opl_url                 optional, defaults to '/pages/oplossingen'.
+    embedded                optional, defaults to false. When true (the Oplossingen embed),
+                            the comparison table's "Kies Inzicht/Zeker/Beschermd" row adds
+                            the matching package to cart directly (same variant-resolution
+                            and activation-fee dedup as the pricing cards' own "In
+                            winkelwagen") instead of linking to opl_url — on the standalone
+                            Vergelijk-pakketten page those links correctly navigate the
+                            visitor to Oplossingen to buy, but embedded on Oplossingen
+                            itself they only reloaded the current page (2026-09-11 audit,
+                            item e). See assets/zv-vergelijk-pakketten.js's addPackageToCart().
 {%- endcomment -%}
 
 {%- liquid
@@ -139,14 +148,24 @@
               {%- endfor -%}
             </tr>
           {%- endfor -%}
-          <tr class="cta">
-            <td></td>
-            <td data-pm-pkg="inzicht"><a class="btn btn--ghost" href="{{ opl }}">Kies Inzicht</a></td>
-            <td class="rec-cell" data-pm-pkg="zeker"><a class="btn btn--gold" href="{{ opl }}">Kies Zeker {{ arrow }}</a></td>
-            <td data-pm-pkg="beschermd"><a class="btn btn--ghost" href="{{ opl }}">Kies Beschermd</a></td>
-          </tr>
+          {%- if embedded -%}
+            <tr class="cta">
+              <td></td>
+              <td data-pm-pkg="inzicht"><button type="button" class="btn btn--ghost" data-pm-choose="inzicht">Kies Inzicht</button></td>
+              <td class="rec-cell" data-pm-pkg="zeker"><button type="button" class="btn btn--gold" data-pm-choose="zeker">Kies Zeker {{ arrow }}</button></td>
+              <td data-pm-pkg="beschermd"><button type="button" class="btn btn--ghost" data-pm-choose="beschermd">Kies Beschermd</button></td>
+            </tr>
+          {%- else -%}
+            <tr class="cta">
+              <td></td>
+              <td data-pm-pkg="inzicht"><a class="btn btn--ghost" href="{{ opl }}">Kies Inzicht</a></td>
+              <td class="rec-cell" data-pm-pkg="zeker"><a class="btn btn--gold" href="{{ opl }}">Kies Zeker {{ arrow }}</a></td>
+              <td data-pm-pkg="beschermd"><a class="btn btn--ghost" href="{{ opl }}">Kies Beschermd</a></td>
+            </tr>
+          {%- endif -%}
         </tbody>
       </table>
+      {%- if embedded -%}<div class="pm-tbl-err" data-pm-tbl-err role="alert" hidden></div>{%- endif -%}
     </div>
   </div>
 </div>
