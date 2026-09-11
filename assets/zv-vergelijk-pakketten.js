@@ -118,61 +118,108 @@
       if (err) { err.textContent = 'Toevoegen mislukt. Probeer het opnieuw.'; err.hidden = false; }
     }
 
+    /* Shared add-to-cart: resolves the real product for `pkg` via the finder_key mapping
+       (data-pm-products), bumps an existing line instead of duplicating it (matches
+       Shopify's merge-on-repeat-add behaviour on the Oplossingen page's own cards), and
+       dedupes the universal activation fee the same way as sections/oplossingen.liquid's
+       addToCart(). Used by both the advies-bar's own add button and, when embedded on
+       Oplossingen, the comparison table's "Kies Inzicht/Zeker/Beschermd" buttons. */
+    function addPackageToCart(pkg, btn, opts) {
+      var prod = pkg && products[pkg];
+      if (!prod || !btn || btn.dataset.busy === '1') return;
+      var cfg = opts || {};
+      var ctaLocation = cfg.ctaLocation || 'vergelijk_pakketten', bron = cfg.bron || 'Vergelijk pakketten';
+      btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true');
+      var vid = String(prod.variantId);
+      window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (cart) {
+          var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
+          var activationId = activationLineToAdd(cart);
+          if (line) {
+            var changePromise = window.fetch('/cart/change.js', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
+            });
+            if (!activationId) return changePromise;
+            // Package line already exists but the activation fee doesn't yet (e.g. it was
+            // removed from the cart separately) — bump the package, then add the fee.
+            return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
+              return window.fetch('/cart/add.js', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: [{ id: activationId, quantity: 1 }] })
+              });
+            });
+          }
+          var items = [{ id: prod.variantId, quantity: 1, properties: {
+            'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': bron
+          } }];
+          if (activationId) items.push({ id: activationId, quantity: 1 });
+          return window.fetch('/cart/add.js', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: items })
+          });
+        })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function () {
+          var ZV = window.ZVMeasurement;
+          if (ZV && ZV.addToCart) { try { ZV.addToCart({ item_id: prod.sku, item_name: prod.name, item_brand: 'Zo Veilig', quantity: 1 }, { cta_location: ctaLocation }); } catch (e) {} }
+          btn.dataset.busy = ''; btn.removeAttribute('aria-busy');
+          refreshCart();
+          if (cfg.onDone) cfg.onDone(prod);
+        })
+        .catch(function () {
+          btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy');
+          if (cfg.onError) cfg.onError();
+        });
+    }
+
     if (addBtn) {
       addBtn.addEventListener('click', function () {
         var pkg = current;
-        var prod = pkg && products[pkg];
-        if (!prod || addBtn.dataset.busy === '1') return;
-        addBtn.dataset.busy = '1'; addBtn.disabled = true; addBtn.setAttribute('aria-busy', 'true');
         if (err) err.hidden = true;
-        var vid = String(prod.variantId);
-        // Same variant already in the cart -> bump that line (matches Shopify's merge-on-repeat-add
-        // behaviour on the Oplossingen page) instead of creating a second line with different properties.
-        window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
-          .then(function (r) { return r.json(); })
-          .then(function (cart) {
-            var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
-            var activationId = activationLineToAdd(cart);
-            if (line) {
-              var changePromise = window.fetch('/cart/change.js', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
-              });
-              if (!activationId) return changePromise;
-              // Package line already exists but the activation fee doesn't yet (e.g. it was
-              // removed from the cart separately) — bump the package, then add the fee.
-              return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
-                return window.fetch('/cart/add.js', {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ items: [{ id: activationId, quantity: 1 }] })
-                });
-              });
-            }
-            var items = [{ id: prod.variantId, quantity: 1, properties: {
-              'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': 'Vergelijk pakketten'
-            } }];
-            if (activationId) items.push({ id: activationId, quantity: 1 });
-            return window.fetch('/cart/add.js', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: items })
-            });
-          })
-          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-          .then(function () {
-            var ZV = window.ZVMeasurement;
-            if (ZV && ZV.addToCart) { try { ZV.addToCart({ item_id: prod.sku, item_name: prod.name, item_brand: 'Zo Veilig', quantity: 1 }, { cta_location: 'vergelijk_pakketten' }); } catch (e) {} }
-            addBtn.dataset.busy = ''; addBtn.removeAttribute('aria-busy');
+        addPackageToCart(pkg, addBtn, {
+          ctaLocation: 'vergelijk_pakketten',
+          bron: 'Vergelijk pakketten',
+          onDone: function (prod) {
             if (addText) addText.textContent = addBtn.getAttribute('data-added') || 'Toegevoegd';
             if (status) status.textContent = (addBtn.getAttribute('data-added') || 'Toegevoegd') + ' — ' + (prod.name || NAMES[pkg]);
             addedTimer = setTimeout(function () {
               addBtn.hidden = true; addBtn.disabled = false;
               if (viewCart) { viewCart.hidden = false; viewCart.focus(); }
             }, 1800);
-            return refreshCart();
-          })
-          .catch(failed);
+          },
+          onError: failed
+        });
       });
     }
+
+    /* Comparison table "Kies Inzicht/Zeker/Beschermd" — only rendered as buttons (instead
+       of links to opl_url) when this snippet is embedded on Oplossingen itself (see
+       snippets/zv-pakket-matcher.liquid's `embedded` param and the 2026-09-11 audit item e:
+       on that page the links just reloaded the current page). Adds the same package the
+       matching pricing card above would, via the same finder_key-resolved variant. */
+    var chooseBtns = table ? Array.prototype.slice.call(table.querySelectorAll('[data-pm-choose]')) : [];
+    var tblErr = root.parentNode.querySelector('[data-pm-tbl-err]');
+    chooseBtns.forEach(function (btn) {
+      var original = btn.innerHTML;
+      btn.addEventListener('click', function () {
+        var pkg = btn.getAttribute('data-pm-choose');
+        if (tblErr) tblErr.hidden = true;
+        addPackageToCart(pkg, btn, {
+          ctaLocation: 'oplossingen_vergelijk_tabel',
+          bron: 'Oplossingen',
+          onDone: function () {
+            btn.innerHTML = 'Toegevoegd ✓';
+            setTimeout(function () { btn.innerHTML = original; btn.disabled = false; }, 1800);
+          },
+          onError: function () {
+            btn.innerHTML = original; btn.disabled = false;
+            if (tblErr) { tblErr.textContent = 'Toevoegen mislukt. Probeer het opnieuw.'; tblErr.hidden = false; }
+          }
+        });
+      });
+    });
 
     render();
   }
