@@ -112,9 +112,9 @@
         <thead>
           <tr>
             <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
-            <th class="plan" scope="col" data-pm-pkg="inzicht"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Inzicht</span><span class="price">{{ zv_inzicht_monthly }}<span> p/m</span></span></th>
-            <th class="plan rec" scope="col" data-pm-pkg="zeker"><span class="pm-badge">{{ match_badge | escape }}</span><span class="badge">Meest gekozen</span><span class="pn">Zeker</span><span class="price">{{ zv_zeker_monthly }}<span> p/m</span></span></th>
-            <th class="plan" scope="col" data-pm-pkg="beschermd"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Beschermd</span><span class="price">{{ zv_beschermd_monthly }}<span> p/m</span></span></th>
+            <th class="plan" scope="col" data-pm-pkg="inzicht"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Inzicht</span><span class="price">{{ zv_inzicht_monthly | remove: ' ' }}<span>/mnd</span></span></th>
+            <th class="plan rec" scope="col" data-pm-pkg="zeker"><span class="pm-badge">{{ match_badge | escape }}</span><span class="badge">Meest gekozen</span><span class="pn">Zeker</span><span class="price">{{ zv_zeker_monthly | remove: ' ' }}<span>/mnd</span></span></th>
+            <th class="plan" scope="col" data-pm-pkg="beschermd"><span class="pm-badge">{{ match_badge | escape }}</span><span class="pn">Beschermd</span><span class="price">{{ zv_beschermd_monthly | remove: ' ' }}<span>/mnd</span></span></th>
           </tr>
         </thead>
         <tbody>
