@@ -912,7 +912,32 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }).catch(function () { return null; });
   }
 
-  function addToCart(variantId, properties, mode, btn) {
+  /* GA4 add_to_cart must report the confirmed recurring monthly rate (pricing.config.json,
+     read from the #zv-pricing-config JSON script tag the zv-pricing snippet already renders
+     near the top of this section), never the live /cart/add.js line price — once the intro
+     promo is live that live price is a discounted multi-month bundle charged today, not one
+     month. Keyed by finder_key so it works regardless of which call site adds the package. A
+     finder_key with no confirmed monthly rate (e.g. an unrecognized/pending package) falls
+     back to the live line price further down, same convention used elsewhere in the theme. */
+  var PKG_MONTHLY_CENTS = (function () {
+    var FK_TO_ID = { aware: 'inzicht', aware_plus: 'zeker', care: 'beschermd', secure: 'alert', guard: 'protect' };
+    var byId = {};
+    try {
+      var el = document.getElementById('zv-pricing-config');
+      var cfg = el && JSON.parse(el.textContent || '{}');
+      (cfg && cfg.packages || []).forEach(function (p) {
+        if (p && p.id && p.monthlyRecurringPriceCents) byId[p.id] = p.monthlyRecurringPriceCents;
+      });
+    } catch (e) { /* leave byId empty; callers fall back to the live line price */ }
+    var byFk = {};
+    Object.keys(FK_TO_ID).forEach(function (fk) {
+      var cents = byId[FK_TO_ID[fk]];
+      if (cents) byFk[fk] = cents;
+    });
+    return byFk;
+  })();
+
+  function addToCart(variantId, properties, mode, btn, finderKey) {
     if (!variantId || (btn && btn.dataset.busy === '1')) return;
     var label = '';
     if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
@@ -932,7 +957,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         // activation-fee line.
         var line = (res && res.items && res.items[0]) || res;
         var ZV = window.ZVMeasurement;
-        if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: (line && line.price) ? line.price / 100 : undefined, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
+        var staticCents = PKG_MONTHLY_CENTS[finderKey];
+        var itemPrice = staticCents ? (staticCents / 100) : ((line && line.price) ? line.price / 100 : undefined);
+        if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (line && line.sku) || (properties && properties['SKU']), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: itemPrice, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
         if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }
         if (mode === 'checkout') { window.location.href = overzichtUrl; return; }
         return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
@@ -1144,7 +1171,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (o.woning) props['Woning'] = o.woning;
     if (o.terms.length) props['Abonnement'] = o.terms.join(', ');
     if (o.addons.length) props['Uitbreidingen'] = o.addons.join(', ');
-    addToCart(d.variantId, props, 'drawer', btn);
+    addToCart(d.variantId, props, 'drawer', btn, d.finderKey);
   });
 
   /* ============================================================
@@ -1332,7 +1359,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
       var variant = actor.getAttribute('data-variant');
       closeModal();   // design closes the detail modal, then shows the cart confirmation
-      addToCart(variant, props, buy ? 'checkout' : 'drawer', null);
+      addToCart(variant, props, buy ? 'checkout' : 'drawer', null, fk);
     }
   });
 
