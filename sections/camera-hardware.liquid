@@ -73,15 +73,55 @@
   var scope = document.querySelector('.zv-camera'); if(!scope || !document.getElementById('rows')) return;
   var HW=[
     {n:'Binnencamera met SD kaart', type:'Binnen', koop:175.00, huur:15.31, k:'cam_binnen', sku:'CAM-BINNEN'},
-    {n:'Buitencamera wifi 724', type:'Buiten', koop:325.00, huur:28.44, k:'cam_724', sku:'CAM-724'},
-    {n:'Buitencamera wifi 730', type:'Buiten', koop:325.00, huur:28.44, k:'cam_730', sku:'CAM-730'},
-    {n:'Binnen/Buitencamera bedraad 727', type:'Binnen+Buiten', koop:349.00, huur:30.54, k:'cam_727', sku:'CAM-727'},
+    {n:'Buitencamera wifi 724', type:'Buiten', koop:325.00, huur:28.44, k:'cam_724', sku:'CAM-724', model:'Alarm.com ADC-V724', specs:[
+      ['Resolutie','1/3", 2MP, 1920×1080, H.264'],
+      ['Beeldhoek','117° horizontaal, 65° verticaal, 140° diagonaal'],
+      ['Nachtzicht','IR-bereik tot ~49 ft (15m); 0.5 lux met IR'],
+      ['Opslag','microSD (niet inbegrepen), tot 1.5TB (firmware 0.8.6.060+)'],
+      ['Verbinding','Wi-Fi 802.11 b/g/n/ac, 2.4 en 5GHz'],
+      ['Voeding','12V–1A DC-adapter (inbegrepen)'],
+      ['Waterdichtheid','IP66']
+    ]},
+    {n:'Buitencamera wifi 730', type:'Buiten', koop:325.00, huur:28.44, k:'cam_730', sku:'CAM-730', model:'Alarm.com ADC-V730', specs:[
+      ['Resolutie','4MP, max 2688×1520, 1/3" HDR-sensor'],
+      ['Beeldhoek','129° horizontaal, 68° verticaal, 153° diagonaal'],
+      ['Nachtzicht','IR + kleuren-spotlightmodus; IR-bereik ~49 ft (15m)'],
+      ['Opslag','microSD, tot 1TB'],
+      ['Verbinding','Dual-band Wi-Fi 6, 802.11b/g/n/ac/ax, 2.4 en 5GHz'],
+      ['Voeding','12V, 1.5A DC-adapter (inbegrepen), 10ft kabel'],
+      ['Waterdichtheid','IP66; -40°F tot 122°F (-40°C tot 50°C)']
+    ]},
+    {n:'Binnen/Buitencamera bedraad 727', type:'Binnen+Buiten', koop:349.00, huur:30.54, k:'cam_727', sku:'CAM-727', model:'Alarm.com ADC-VC727P', specs:[
+      ['Resolutie','1920×1080 (ook 1280×720, 640×360)'],
+      ['Beeldhoek','117°'],
+      ['Nachtzicht','tot 49 ft (15m) IR, 0 lux met IR'],
+      ['Opslag','microSD, tot 512GB'],
+      ['Verbinding','PoE (802.3af) of 10/100 Ethernet — bedraad, geen wifi'],
+      ['Voeding','12VDC ±10% (adapter apart) of PoE 802.3af'],
+      ['Waterdichtheid','IP66; -30°C tot 50°C']
+    ]},
     {n:'Dome camera met SD kaart', type:'Dome', koop:399.00, huur:34.91, k:'cam_dome', sku:'CAM-DOME'},
     {n:'Wifi floodlight camera (ADC-V7294)', type:'Buiten', koop:475.00, huur:41.56, k:'cam_flood', sku:'CAM-FLOOD'},
     {n:'Streamrecorder (NVR)', type:'Recorder', koop:500.00, huur:43.75, k:'nvr', sku:'NVR-STREAM'},
-    {n:'Video deurbel bedraad VDB 750', type:'Deurbel', koop:299.00, huur:26.16, k:'vdb_750', sku:'VDB-750'},
+    {n:'Video deurbel bedraad VDB 750', type:'Deurbel', koop:299.00, huur:26.16, k:'vdb_750', sku:'VDB-750', model:'Alarm.com ADC-VDB750', specs:[
+      ['Resolutie','max 1440×1440 (2MP, 1/2.4" HDR-sensor)'],
+      ['Beeldhoek','165° horizontaal, 145° verticaal'],
+      ['Tweerichtingsaudio','ja, full-duplex'],
+      ['Nachtzicht','IR, 0 lux met IR; bereik tot 15ft (5m)'],
+      ['Voeding','AC 16–24VAC 10–40VA (16VAC/10VA aanbevolen), of DC 15–24V 6–20W'],
+      ['Chime','compatibel met Alarm.com Smart Chime (ADC-W115C); mechanische chime vereist 22Ω 5W vlamvertragende weerstand'],
+      ['Waterdichtheid','IP65; -58°F tot 122°F (-50°C tot 50°C); vochtigheid onder 95% RV, niet-condenserend']
+    ]},
     {n:'Video deurbel bedraad VDB 755 + chime', type:'Deurbel', koop:325.00, huur:28.44, k:'vdb_755', sku:'VDB-755'},
-    {n:'Video deurbel draadloos VDB780B + chime', type:'Deurbel', koop:425.00, huur:37.19, k:'vdb_780', sku:'VDB-780'},
+    {n:'Video deurbel draadloos VDB780B + chime', type:'Deurbel', koop:425.00, huur:37.19, k:'vdb_780', sku:'VDB-780', model:'Alarm.com ADC-VDB780B', specs:[
+      ['Resolutie','1920×1080, 2.12MP Sony IMX323-sensor'],
+      ['Beeldhoek','160° horizontaal, 90° verticaal, 175° diagonaal'],
+      ['Tweerichtingsaudio','ja; 1W/8Ω speaker, omnidirectionele microfoon'],
+      ['Nachtzicht','IR tot 15ft (5m); 0.5 lux bij weinig licht'],
+      ['Batterij','9540mAh oplaadbaar, opladen via micro-USB (~7 uur), ~6 maanden per lading bij normaal gebruik'],
+      ['Chime','inbegrepen Alarm.com Smart Chime ADC-W115C: 1.5W/77dB, instelbare tonen, fungeert ook als 2.4GHz wifi-versterker'],
+      ['Waterdichtheid','IP66; -20°C tot 50°C; 20–100% RV, niet-condenserend']
+    ]},
     {n:'(Koop) Magneetcontact (DC-23)', type:'Sensor', koop:60.00, huur:null, huurSku:null, k:'magneetcontact_dc23', sku:'CL001'},
     {n:'4MP_WIFI_MICKEY_MOUSE', type:'Camera', koop:475.00, huur:null, huurSku:null, k:'cam_adc_mm', sku:'ADC-MM'},
     {n:'(Koop) huisdier fotopir (bewegingsmelder)', type:'Sensor', koop:125.00, huur:null, huurSku:null, k:'huisdier_fotopir', sku:'C00H01'},
@@ -121,21 +161,41 @@
     var lab=mode==='koop'?'Kopen':'Huren', unit=mode==='koop'?'eenmalig':'per maand';
     return '<button type="button" class="modechip '+mode+(on?' on':'')+'" data-mode="'+mode+'"><span class="ml">'+lab+'</span><span class="mp">'+price+'</span><span class="mu">'+unit+'</span></button>';
   }
+  function specHtml(h){
+    if(!h.specs){
+      return '<p class="hw-spec-soon">Specificaties volgen.</p>';
+    }
+    var model=h.model?'<div class="hw-spec-model">'+h.model+'</div>':'';
+    var rows=h.specs.map(function(s){
+      return '<div class="hw-spec-row"><span class="hw-spec-l">'+s[0]+'</span><span class="hw-spec-v">'+s[1]+'</span></div>';
+    }).join('');
+    return model+'<div class="hw-spec-list">'+rows+'</div>';
+  }
   function renderRows(){
     var rows=document.getElementById('rows'); rows.innerHTML='';
     HW.forEach(function(h){
       var l=state.lines[h.k], q=l?l.qty:0, hasMode=!!(l&&l.mode);
       var chosenSku=hasMode&&l.mode==='huur'&&h.huurSku?h.huurSku:h.sku;
       var chosen=hasMode?'<span class="hw-chosen">Gekozen: '+(l.mode==='koop'?'Kopen · eenmalig':'Huren · maandelijks')+' &middot; '+chosenSku+'</span>':'';
+      var specsId='specs-'+h.k;
       var el=document.createElement('div'); el.className='hw'+(q>0?' has':''); el.setAttribute('data-k',h.k);
       el.innerHTML=
-        '<div class="hw-main"><div class="hw-name">'+h.n+'</div>'+chosen+'</div>'+
+        '<div class="hw-main"><div class="hw-name">'+h.n+'<button type="button" class="hw-spec-btn" aria-expanded="false" aria-controls="'+specsId+'">Specificaties<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>'+chosen+'</div>'+
         '<div class="hw-modes">'+modeChip(h,'koop')+modeChip(h,'huur')+'</div>'+
-        '<div class="stepper"><button type="button" data-d="-1"'+(q===0?' disabled':'')+'>−</button><span class="q">'+q+'</span><button type="button" data-d="1"'+(hasMode?'':' disabled')+'>+</button></div>';
+        '<div class="stepper"><button type="button" data-d="-1"'+(q===0?' disabled':'')+'>−</button><span class="q">'+q+'</span><button type="button" data-d="1"'+(hasMode?'':' disabled')+'>+</button></div>'+
+        '<div class="hw-specs" id="'+specsId+'" role="region"><div class="hw-specs-in">'+specHtml(h)+'</div></div>';
       rows.appendChild(el);
     });
   }
   document.getElementById('rows').addEventListener('click',function(e){
+    var specBtn=e.target.closest('.hw-spec-btn');
+    if(specBtn){
+      var hwEl=specBtn.closest('.hw'), panel=hwEl.querySelector('.hw-specs');
+      var open=hwEl.classList.toggle('specs-open');
+      specBtn.setAttribute('aria-expanded', open?'true':'false');
+      panel.style.maxHeight=open?panel.scrollHeight+'px':'0';
+      return;
+    }
     var chip=e.target.closest('.modechip');
     if(chip){
       var k=chip.closest('.hw').getAttribute('data-k'), m=chip.getAttribute('data-mode');
@@ -254,8 +314,20 @@
 .zv-camera .hw { display:grid; grid-template-columns:1fr auto auto; gap:16px; align-items:center; background:var(--paper); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; transition:border-color .14s,box-shadow .14s; }
 .zv-camera .hw.has { border-color:var(--indigo); box-shadow:0 10px 26px -18px rgba(50,36,105,.6); }
 .zv-camera .hw .hw-main { min-width:0; }
-.zv-camera .hw .hw-name { font-size:15px; font-weight:800; color:var(--ink); line-height:1.2; }
+.zv-camera .hw .hw-name { font-size:15px; font-weight:800; color:var(--ink); line-height:1.2; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .zv-camera .hw .hw-chosen { display:block; margin-top:7px; font-size:11px; font-weight:800; color:var(--ok); }
+.zv-camera .hw-spec-btn { display:inline-flex; align-items:center; gap:4px; font-family:inherit; font-size:11px; font-weight:800; letter-spacing:.01em; color:var(--indigo); background:none; border:none; padding:2px 0; cursor:pointer; }
+.zv-camera .hw-spec-btn svg { width:12px; height:12px; transition:transform .16s; }
+.zv-camera .hw-spec-btn[aria-expanded="true"] svg { transform:rotate(180deg); }
+.zv-camera .hw-specs { grid-column:1 / -1; max-height:0; overflow:hidden; transition:max-height .2s ease; }
+.zv-camera .hw-specs-in { padding-top:12px; margin-top:2px; border-top:1px solid var(--line); }
+.zv-camera .hw-spec-model { font-size:11px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.zv-camera .hw-spec-list { display:flex; flex-direction:column; gap:6px; }
+.zv-camera .hw-spec-row { display:flex; justify-content:space-between; gap:14px; font-size:12.5px; font-weight:600; color:#3a3550; }
+.zv-camera .hw-spec-l { color:var(--muted); font-weight:700; flex:none; }
+.zv-camera .hw-spec-v { text-align:right; }
+.zv-camera .hw-spec-soon { font-size:12.5px; font-weight:600; color:var(--muted-2); margin:0; }
+@media(max-width:680px){ .zv-camera .hw-spec-row { flex-direction:column; gap:1px; } .zv-camera .hw-spec-v { text-align:left; } }
 .zv-camera .stepper { display:inline-flex; align-items:center; border:1.5px solid var(--line-2); border-radius:11px; overflow:hidden; background:#fff; }
 .zv-camera .stepper button { width:38px; height:40px; border:none; background:#fff; color:var(--indigo); font-size:20px; font-weight:800; line-height:1; display:grid; place-items:center; }
 .zv-camera .stepper button:disabled { color:var(--line-2); cursor:default; }
