@@ -3585,10 +3585,6 @@ details-disclosure > details {
 }
 
 @keyframes indeterminateAnimation {
-  /* Ankerlinks niet onder de sticky header laten vallen */
-[id] {
-  scroll-margin-top: calc(var(--header-height, 10rem) + 2rem);
-}
   0% {
     transform: translateX(-20%) scaleX(0);
   }
@@ -3598,4 +3594,10 @@ details-disclosure > details {
   100% {
     transform: translateX(100%) scaleX(0);
   }
+}
+}
+
+/* Ankerlinks niet onder de sticky header laten vallen */
+[id] {
+  scroll-margin-top: calc(var(--header-height, 10rem) + 2rem);
 }
