@@ -15,18 +15,24 @@ Winkelwagen → Overzicht → Shopify checkout.
   - `av_akkoord_tijdstip` — ISO 8601 timestamp of that click.
 
 Pricing on the Overzicht page never hardcodes an amount or duration (enforced by
-`scripts/check_pricing.py` check #9). It reads live cart totals (`item.final_line_price`)
-for what Shopify actually charges, and the confirmed per-package commercial terms
-(activation, intro-promo discount, contract duration, indicative contract value) via
-`{%- include 'zv-pricing' -%}`, matched to the cart's subscription line item (see **Product
-data** below for how a subscription is identified) through its `custom.finder_key` product
-metafield. See the comment at the top of `sections/zv-checkout-overview.liquid` for the
-finder_key → package id mapping.
+`scripts/check_pricing.py` check #9). "Vandaag te betalen" (today's total) always reads the
+live cart (`item.final_line_price`) — that never changes. Every recurring "per maand" figure
+(item-row prices, "Maandbedrag", "Daarna per maand", the promo-period rate) instead comes from
+the confirmed per-package monthly rate via `{%- include 'zv-pricing' -%}` +
+`snippets/zv-package-monthly-cents.liquid`, scaled by `item.quantity` — **not** from
+`item.final_line_price` — see **Pricing pipeline → Interim intro-promo repricing** below for
+why. Package-specific commercial terms (activation, intro-promo discount, contract duration,
+indicative contract value) come from the same confirmed model, matched to the cart's
+subscription line item (see **Product data** below for how a subscription is identified)
+through its `custom.finder_key` product metafield. See the comment at the top of
+`sections/zv-checkout-overview.liquid` for the finder_key → package id mapping.
 **If the cart holds more than one distinct recognized package** (e.g. Langer Thuis Inzicht +
 Mijn Thuis Alert together), the commercial-terms rows are hidden entirely rather than
 picking one package's numbers — a 36-month Inzicht contract and a 12-month Alert contract
 can't both be represented by a single set of rows, and showing either alone would be wrong,
-not just incomplete.
+not just incomplete. The "per maand" total is unaffected by this restriction — it's just a sum
+of each recognized line's own confirmed rate, so it stays correct even across multiple
+distinct packages in one cart.
 
 **Every checkout entry point must land on `/cart?view=overzicht` first, never straight on
 Shopify's own `/checkout`** — Overzicht is where `av_akkoord` consent is captured, so
@@ -133,6 +139,35 @@ and `actie-korting.liquid`) is gated on `promo.enabled`/`ratePercent` from confi
 setting both being true. Default is off (2026-09-09: the promo product doesn't exist in
 Shopify yet), with the real 50%/3-months figures already computed and waiting in
 `zv-pricing.liquid` — turning the setting on shows them immediately, nothing else to do.
+
+**Interim intro-promo repricing (planned, not yet live as of 2026-09-10)**: rather than a
+dedicated 3-month-bundle SKU, the plan is to reprice the *existing* package product itself —
+its live Shopify price becomes the 3-month bundle total (`monthly × promo.months`), with a
+real Shopify Discount taking `promo.ratePercent` off that, scoped to package products only
+(never activation) — charged in full today. Ongoing monthly SEPA billing is owned entirely by
+Odoo after the order; Shopify never sees it again. Consequence: once this repricing is live,
+`item.final_line_price` on a package line stops meaning "one month's rate" and starts meaning
+"this bundle's price" — any UI that read that value as a monthly figure would be showing a
+multi-month bundle price labelled as monthly, which is exactly the bug this section's
+`item.final_line_price`-based "per maand" displays used to have.
+
+**Fix**: `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` now source every
+"per maand" figure from the confirmed monthly rate (`zv_{pkg}_monthly_cents` /
+`zv_{pkg}_promo_monthly_cents`, emitted by `build_pricing.py`) via the shared
+`snippets/zv-package-monthly-cents.liquid` (finder_key → cents lookup, one place instead of
+duplicated per call site), scaled by `item.quantity` — the cart's `+`/`−` stepper works on
+package lines same as anything else, so a flat per-unit figure would silently under-report a
+qty-2 line by half. A line whose finder_key can't be resolved falls back to its own live price
+(degraded, same convention as an unrecognized product elsewhere). "Vandaag te betalen" is
+untouched — it stays 100% live, since it's just today's real charge, bundle price included.
+
+**Known gap, accepted as unavoidable for now**: this makes `pricing.config.json`'s
+`monthlyRecurringPrice` the sole source for "the ongoing monthly rate" shown to the customer,
+with no live signal left in Shopify to cross-check it against (Shopify only ever sees the
+bundle price; the true monthly rate lives in Odoo's subscription setup). If config and Odoo
+ever drift apart, nothing here would catch it — that has to stay a manually-verified sync
+point between this repo and whoever configures Odoo's recurring billing, not an automated
+check. Re-verify this section is still accurate once the repricing actually ships.
 
 ## Shopify store
 

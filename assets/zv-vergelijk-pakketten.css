@@ -59,6 +59,8 @@
 .zv-vergelijk .pm-advies__txt b { color:var(--indigo); font-weight:900; }
 .zv-vergelijk .pm-advies__cta { flex:none; }
 .zv-vergelijk .pm-advies__err { flex-basis:100%; font-size:13px; font-weight:700; color:#c52e2f; }
+.zv-vergelijk .pm-tbl-err { margin-top:10px; text-align:center; font-size:13px; font-weight:700; color:#c52e2f; }
+.zv-vergelijk .cta .btn[aria-busy="true"] { opacity:.6; cursor:default; }
 @media(max-width:600px){ .zv-vergelijk .pm-advies__cta { flex-basis:100%; } .zv-vergelijk .pm-advies__cta .btn { width:100%; } }
 
 /* table */

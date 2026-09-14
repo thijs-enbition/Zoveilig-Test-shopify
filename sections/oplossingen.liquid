@@ -152,70 +152,163 @@
               {%- comment -%} Vista (MT-VIS / secure_plus) is callout-only (maatwerk): geen vaste prijs, geen koop-accordions, alleen de VISTA Lead callback. {%- endcomment -%}
               {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
-              <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
-                       data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
-                       data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
-                       data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
-                       data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
-                {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
-                {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
-                <div class="pcard__foot">
+              {%- comment -%}
+                Card-grid redesign (Langer Thuis only, 2026-09-11 — Robi feedback + confirmed
+                mockup): icon/tagline/checklist copy Robi already approved, keyed by finder_key.
+                Mijn Thuis / Veilig Onderweg keep the original tile-card design below untouched.
+              {%- endcomment -%}
+              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
+              {%- case fk -%}
+                {%- when 'aware' -%}
+                  {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
+                  {%- assign ltc_bullets = 'Daginzicht in het ritme|Alleen een melding bij afwijking|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
+                {%- when 'aware_plus' -%}
+                  {%- assign ltc_tagline = 'Vroeg signaleren' -%}
+                  {%- assign ltc_intro = 'Alles van Inzicht, plus:' -%}
+                  {%- assign ltc_bullets = 'Dag- en nachtzicht|Bewegingsmelders voor meer zicht|Meerdere contactpersonen' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 14 L49 20 V35 C49 47 32 54 32 54 C32 54 15 47 15 35 V20 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 45 C27 40 20 41.5 20 33.5 C20 28.5 27 27 32 32.5 C37 27 44 28.5 44 33.5 C44 41.5 37 40 32 45 Z" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'care' -%}
+                  {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
+                  {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
+              {%- endcase -%}
+              {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
+              {%- if anchor == 'langer-thuis' -%}
+                <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
+                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
+                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
+                  {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
+                  <div class="ltc__head">
+                    <span class="ltc__icon">{{ ltc_icon }}</span>
+                    <div class="ltc__headtext"><h4 class="ltc__name">{{ short_name }}</h4><p class="ltc__tagline">{{ ltc_tagline }}</p></div>
+                  </div>
                   <div class="pcard__price">
-                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
                   </div>
-                  {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                  {%- if term != blank -%}<div class="ltc__term">Looptijd {{ term }} maanden</div>{%- endif -%}
+                  <ul class="ltc__checklist">
+                    {%- if ltc_intro != blank -%}<li class="ltc__intro">{{ ltc_intro }}</li>{%- endif -%}
+                    {%- for bullet in ltc_bullet_list -%}
+                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
+                    {%- endfor -%}
+                  </ul>
+                  <hr class="ltc__div">
+                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
-
-                  {%- if price_known -%}
-                    <details class="pcard__plus">
-                      <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
-                    </details>
-                    <details class="pcard__plus">
-                      <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
-                      {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
-                      {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
-                        <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
-                      {%- endif -%}{%- endfor -%}
-                    </details>
-                    <details class="pcard__plus">
-                      <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
-                    </details>
-                  {%- endif -%}
-
-                  {%- if term != blank -%}<div class="pcard__term">Looptijd: {{ term }} maanden</div>{%- endif -%}
-
-                  <div class="pcard__cta">
-                    {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
-                      {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
-                      <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
-                        <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-                        <form class="pcard__vista-form" data-vista-form>
-                          <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
-                          <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
-                          <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
-                          <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
-                          <div class="pcard__vista-err" data-vista-err hidden></div>
-                          <button type="submit">Verstuur terugbelverzoek</button>
-                        </form>
-                        <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
-                      </div>
-                    {%- else -%}
-                      {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
-                      <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %}" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                      {%- if price_known and v.available -%}
-                        <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                      {%- endif -%}
+                  <div class="pcard__cta ltc__cta">
+                    {%- if price_known and v.available -%}
+                      <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %} ltc__buy" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- endif -%}
+                    <div class="ltc__links">
+                      {%- if price_known -%}
+                        {%- comment -%}
+                          "Wat zit erin?" consolidates the three former accordions (m² /
+                          uitbreidingen / extra diensten) into one panel — same checkboxes,
+                          same pcard__plus-opt/-pr classes and readCardOptions() handler as
+                          before, grouped by an explicit data-group instead of sniffing the
+                          old per-accordion <summary> text (see functional mapping doc).
+                        {%- endcomment -%}
+                        <details class="ltc__watzit">
+                          <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            <div class="ltc__optgroup" data-group="woning">
+                              <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra verdieping of 100 m² extra</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                            </div>
+                            <div class="ltc__optgroup" data-group="addons">
+                              <p class="ltc__optgroup-h">Uitbreidingen toevoegen</p>
+                              {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
+                              {%- comment -%} Add-on prices are provisional: show the pending label, never a literal amount. {%- endcomment -%}
+                              {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
+                                <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
+                              {%- endif -%}{%- endfor -%}
+                            </div>
+                            <div class="ltc__optgroup" data-group="terms">
+                              <p class="ltc__optgroup-h">Extra diensten (optioneel)</p>
+                              <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                            </div>
+                          </div>
+                        </details>
+                      {%- endif -%}
+                      {%- comment -%} Kept as its own separate, untouched feature alongside "Wat zit erin?" — see functional mapping doc's "Meer informatie" decision. {%- endcomment -%}
+                      <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              {%- else -%}
+                <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
+                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
+                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
+                  {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
+                  {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
+                  <div class="pcard__foot">
+                    <div class="pcard__price">
+                      {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                    </div>
+                    {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                    {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
+
+                    {%- if price_known -%}
+                      <details class="pcard__plus">
+                        <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                      </details>
+                      <details class="pcard__plus">
+                        <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
+                        {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
+                        {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
+                          <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
+                        {%- endif -%}{%- endfor -%}
+                      </details>
+                      <details class="pcard__plus">
+                        <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                      </details>
+                    {%- endif -%}
+
+                    {%- if term != blank -%}<div class="pcard__term">Looptijd: {{ term }} maanden</div>{%- endif -%}
+
+                    <div class="pcard__cta">
+                      {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
+                        {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
+                        <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
+                          <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                          <form class="pcard__vista-form" data-vista-form>
+                            <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
+                            <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
+                            <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
+                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
+                            <div class="pcard__vista-err" data-vista-err hidden></div>
+                            <button type="submit">Verstuur terugbelverzoek</button>
+                          </form>
+                          <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
+                        </div>
+                      {%- else -%}
+                        {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
+                        <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %}" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        {%- if price_known and v.available -%}
+                          <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        {%- endif -%}
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </article>
+              {%- endif -%}
             {%- endfor -%}
           </div>
+          {%- if anchor == 'langer-thuis' -%}
+            <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
+          {%- endif -%}
         {%- elsif request.design_mode -%}
           <p class="ph-sub" style="text-align:center;">Koppel de collectie "{{ b.settings.collection }}".</p>
         {%- endif -%}
@@ -234,7 +327,8 @@
           activation_variant_id: activation_variant_id,
           zv_inzicht_monthly: zv_inzicht_monthly,
           zv_zeker_monthly: zv_zeker_monthly,
-          zv_beschermd_monthly: zv_beschermd_monthly
+          zv_beschermd_monthly: zv_beschermd_monthly,
+          embedded: true
         -%}
       {%- endif -%}
 
@@ -529,6 +623,43 @@
 .pcard__direct svg { width: 15px; height: 15px; transition: transform 0.16s; }
 .pcard__direct:hover { color: var(--belt); }
 .pcard__direct:hover svg { transform: translateX(3px); }
+
+/* Card-grid redesign (Langer Thuis only, 2026-09-11). Reuses .pcard/.pcard__flag/.pcard__price/
+   .pcard__plus-opt/.pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
+.pcard--ltc { padding-top: 24px; }
+.ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.ltc__icon { flex: none; width: 40px; height: 40px; }
+.ltc__icon svg { width: 100%; height: 100%; }
+.ltc__headtext { min-width: 0; }
+.ltc__name { margin: 0; font-size: 18px; font-weight: 900; color: var(--ink); }
+.ltc__tagline { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+.ltc__term { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 4px 0 0; }
+.ltc__checklist { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.ltc__checklist li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
+.ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
+.ltc__checklist .bchk svg { width: 11px; height: 11px; }
+.ltc__intro { font-weight: 800; color: var(--indigo); }
+.ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
+.ltc__hw { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; }
+.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
+.ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+.ltc__watzit { text-align: center; }
+.ltc__watzit summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
+.ltc__watzit summary:hover { color: var(--belt); }
+.ltc__watzit summary::-webkit-details-marker { display: none; }
+.ltc__watzit summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.ltc__watzit[open] summary svg { transform: rotate(180deg); }
+.ltc__watzit + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
+.ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.ltc__optgroup-h { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--indigo); }
+.ltc__more { display: inline-flex; align-items: center; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer; padding: 4px 2px; transition: color 0.14s; }
+.ltc__more:hover { color: var(--belt); }
+.ltc__footnote { max-width: 760px; margin: 22px auto 0; font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.5; text-align: center; }
+.ltc__buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
+
 .pgnote { display: flex; align-items: center; gap: 12px; margin: 26px auto 0; background: var(--indigo-soft); border: 1px solid #ddd5f0; border-radius: 14px; padding: 14px 18px; max-width: 760px; }
 .pgnote .pn-ic { width: 34px; height: 34px; border-radius: 10px; background: #fff; display: grid; place-items: center; flex: none; box-shadow: inset 0 0 0 1px #ddd5f0; }
 .pgnote .pn-ic svg { width: 20px; height: 20px; color: var(--indigo); }
@@ -1106,15 +1237,23 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
-    card.querySelectorAll('.pcard__plus').forEach(function (det) {
-      var head = det.querySelector('summary');
-      var label = head ? head.textContent.trim().toLowerCase() : '';
+    // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
+    // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
+    // .ltc__optgroup (added when the three accordions were consolidated into one "Wat
+    // zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md).
+    card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
+      var group = det.getAttribute('data-group');
+      if (!group) {
+        var head = det.querySelector('summary');
+        var label = head ? head.textContent.trim().toLowerCase() : '';
+        group = label.indexOf('woning') === 0 ? 'woning' : (label.indexOf('abonnement') === 0 ? 'terms' : 'addons');
+      }
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
         if (!name) return;
-        if (label.indexOf('woning') === 0) out.woning = 'Groter dan 100 m² (+€4/mnd per etage)';
-        else if (label.indexOf('abonnement') === 0) out.terms.push(name);
+        if (group === 'woning') out.woning = 'Groter dan 100 m² (+€4/mnd per extra verdieping of per 100 m² extra woonoppervlak)';
+        else if (group === 'terms') out.terms.push(name);
         else out.addons.push(name);
       });
     });
@@ -1187,7 +1326,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     chev: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  function cardsIn(panel) { return [].slice.call(panel.querySelectorAll('.pcard--tile')); }
+  function cardsIn(panel) { return [].slice.call(panel.querySelectorAll('.pcard')); }
   function cardByFk(panel, fk) { var m = cardsIn(panel).filter(function (c) { return c.dataset.finderKey === fk; }); return m[0] || null; }
 
   function itemHtml(entry) {

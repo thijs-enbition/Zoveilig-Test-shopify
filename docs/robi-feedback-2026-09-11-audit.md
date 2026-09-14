@@ -36,6 +36,31 @@ but never sets the `link` URL setting, so it falls through to the `#` default.
 under that exact content in this repo; needs Thijs to confirm the target page before this
 is a one-line change).
 
+**Fixed 2026-09-11** (branch `fix/lees-ons-verhaal-link`): `/pages/over-ons` is a real,
+resolving page (`templates/page.over-ons.json`, already linked from the footer via
+`{% render 'zv-route', key: 'over-ons' %}` in `sections/zv-footer.liquid`) — confirmed live
+via Playwright against a throwaway unpublished theme, not guessed. Set
+`templates/index.json`'s `"story"` block `settings.link` to `/pages/over-ons`.
+
+**Audit note — same `default: '#'` pattern elsewhere:** this isn't a hardcoded `"#"`
+anywhere in schema; it's a standard Liquid fallback (`| default: '#'`) used across many
+sections for an *optional*, merchant-configurable URL setting, so it isn't inherently a
+bug — a section only renders a dead `#` link if the setting is left unconfigured in the
+JSON template that uses it, same root cause as this one. Other places using the identical
+`default: '#'` pattern, not checked here for whether their setting is actually configured
+(none fixed, per this task's scope — only (a) above was in scope):
+[sections/zv-header.liquid:71](sections/zv-header.liquid#L71) (`cta_link`),
+[sections/kc-hero.liquid:34](sections/kc-hero.liquid#L34) (block `link`),
+[sections/kc-bridge.liquid:24](sections/kc-bridge.liquid#L24) (`cta_link`),
+[sections/kc-cta-band.liquid:24,35](sections/kc-cta-band.liquid#L24) (`primary_link`,
+`secondary_link`), [sections/cta-block.liquid:36,39](sections/cta-block.liquid#L36)
+(`primary_button_link`, `secondary_button_link`),
+[sections/finder-preview.liquid:56](sections/finder-preview.liquid#L56) (block `link` /
+`finder_url`), [sections/faq.liquid:55,61,67](sections/faq.liquid#L55) (`btn1_link`,
+`btn2_link`, `btn3_link`), [sections/oplossingen.liquid:319](sections/oplossingen.liquid#L319)
+(`walkthrough_url`). Worth a follow-up pass to confirm each is actually configured wherever
+it's used in a JSON template.
+
 ### b) "Help mij kiezen" / "Start de Keuzehulp" CTAs land at an awkward scroll position
 **Files:** [sections/hero-banner.liquid:97-99](sections/hero-banner.liquid#L97-L99) (hero
 CTAs), [sections/faq.liquid:118](sections/faq.liquid#L118) (btn1, `/#keuzehulp` default),

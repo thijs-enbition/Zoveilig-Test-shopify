@@ -8,9 +8,13 @@
   Partner logos come from the partner metaobject (active, sorted by display_order).
 {%- endcomment -%}
 
-{%- comment -%} The Oplossingen page ends at its own "De beste technologie" band (as in the
-  design pack), so the global footer is intentionally not rendered on that template. {%- endcomment -%}
-{%- unless template.suffix == 'oplossingen' -%}
+{%- comment -%}
+  Reinstated on the Oplossingen page (2026-09-11, Robi feedback audit item f). Previously
+  omitted on the assumption the page's own "De beste technologie" band was a sufficient
+  close, but that left the page with no legal links (privacy/herroepingsrecht), no secondary
+  nav, and no contact info below the partner band — a real gap, not a design feature worth
+  preserving. See docs/robi-feedback-2026-09-11-audit.md item (f).
+{%- endcomment -%}
 {%- liquid
   assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
 -%}
@@ -105,7 +109,6 @@
     </div>
   </div>
 </footer>
-{%- endunless -%}
 
 {% schema %}
 {

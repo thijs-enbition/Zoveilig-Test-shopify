@@ -124,6 +124,35 @@ On click (`:1132-1148`):
   accordion checkboxes so the delegated `change`/`click` handlers keep finding it via
   `closest('.pcard')` / `card.querySelector('[data-zv-add]')`.
 
+## Addendum — concurrent branch work landed mid-task
+
+While this mapping was being written, a **separate, concurrent session was actively
+committing to `fix/robi-feedback-content-2026-09-11` in the same working directory**
+(discovered via `git status`/`git reflog` showing commits appear in real time). Three
+commits landed there during this task: `31bbbed` (112/meldkamer wording), `aac146c`
+("Langer Thuis: looptijd on cards, uitbreidingsregel wording, jargon cleanup"), and
+`a485913` ("Price notation: standardize on /mnd, sync jargon in pricing config"). These
+are exactly the "already fixed in the previous branch" premises this task's brief referred
+to — they weren't false, they simply hadn't landed yet at the moment this task started.
+
+To avoid the two sessions colliding on the same file in the same physical checkout (asked,
+confirmed 2026-09-11), this task's work was moved into an isolated git worktree
+(`.claude/worktrees/redesign-2026-09-11`) on `fix/robi-feedback-redesign-2026-09-11`,
+rebased onto the finished tip of `fix/robi-feedback-content-2026-09-11` (`a485913`). All
+line numbers and quoted strings above were re-verified against that tip.
+
+**One consequence worth flagging:** `aac146c` renamed the "Abonnementen" accordion summary
+to "Extra diensten (optioneel)" but didn't update `readCardOptions()` in
+`sections/oplossingen.liquid`, which classifies that group by sniffing whether the
+`<summary>` text starts with the literal word "abonnement" (`label.indexOf('abonnement')
+=== 0`). "Extra diensten (optioneel)" no longer matches, so as of `a485913` this group
+silently misfiles into `out.addons[]` instead of `out.terms[]` — a Domotica/Ontzorgpakket
+selection now lands in the cart line's `Uitbreidingen` property instead of `Abonnement`.
+This is a regression from the concurrent branch, not from this task. It is not being fixed
+as a separate patch here; the relocation into "Wat zit erin?" (below) replaces the whole
+text-sniffing mechanism with an explicit `data-group` attribute per option group, which
+fixes this as a natural side effect of the planned refactor, not as bonus scope.
+
 ## Conclusion
 
 Everything maps cleanly onto "same inputs/handlers, just relocated into one 'Wat zit
