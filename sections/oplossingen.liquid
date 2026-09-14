@@ -256,11 +256,11 @@
                     {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
 
                     {%- if price_known -%}
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="woning">
                         <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
                       </details>
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="addons">
                         <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
                         {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
@@ -268,7 +268,7 @@
                           <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
                         {%- endif -%}{%- endfor -%}
                       </details>
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="terms">
                         <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
                         <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
@@ -1233,21 +1233,18 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
   });
 
-  /* categorise a card's checked options into { woning, terms[], addons[] } */
+  /* categorise a card's checked options into { woning, terms[], addons[] }.
+     Every option group (.pcard__plus and .ltc__optgroup alike) carries an explicit
+     data-group attribute set in the markup — never inferred from the visible
+     <summary>/heading text. A prior version sniffed that text and broke silently when
+     "Abonnementen" was relabelled to "Extra diensten (optioneel)" (commit aac146c),
+     misfiling every option in that group as "Uitbreidingen" in /cart/add.js instead of
+     "Abonnement". data-group makes future copy edits safe by construction. */
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
-    // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
-    // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
-    // .ltc__optgroup (added when the three accordions were consolidated into one "Wat
-    // zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md).
     card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
       var group = det.getAttribute('data-group');
-      if (!group) {
-        var head = det.querySelector('summary');
-        var label = head ? head.textContent.trim().toLowerCase() : '';
-        group = label.indexOf('woning') === 0 ? 'woning' : (label.indexOf('abonnement') === 0 ? 'terms' : 'addons');
-      }
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
