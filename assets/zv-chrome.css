@@ -117,6 +117,7 @@
 .fp-note { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; color: #a89fd0; }
 .foot-base { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 22px 0 30px; border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 13px; font-weight: 600; color: #9b92c8; }
 .foot-base .fb-links { display: flex; gap: 22px; flex-wrap: wrap; }
+.foot-legal-details { margin-top: 4px; }
 .foot-base a { color: #9b92c8; }
 .foot-base a:hover { color: #fff; }
 
