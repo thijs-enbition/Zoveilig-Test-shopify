@@ -171,15 +171,18 @@
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
                   {%- assign ltc_bullets = 'Daginzicht in het ritme|Alleen een melding bij afwijking|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiAware|3 wifi-sensorstekkers|1 deursensor|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
                 {%- when 'aware_plus' -%}
                   {%- assign ltc_tagline = 'Vroeg signaleren' -%}
                   {%- assign ltc_intro = 'Alles van Inzicht, plus:' -%}
                   {%- assign ltc_bullets = 'Dag- en nachtzicht|Bewegingsmelders voor meer zicht|Meerdere contactpersonen' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiCare|3 wifi-sensorstekkers (~100 m²)|Deursensor per toegang|2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar)|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 14 L49 20 V35 C49 47 32 54 32 54 C32 54 15 47 15 35 V20 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 45 C27 40 20 41.5 20 33.5 C20 28.5 27 27 32 32.5 C37 27 44 28.5 44 33.5 C44 41.5 37 40 32 45 Z" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'care' -%}
                   {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
                   {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
+                  {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'secure' -%}
                   {%- comment -%} Alert. Tagline reuses pricing.config.json packages[].hook verbatim (see comment above). Bullets extracted from the retired opl-tile-04.jpg "IN HET PAKKET" pill list, same wording. {%- endcomment -%}
@@ -236,7 +239,6 @@
                     </div>
                   {%- endif -%}
                   <hr class="ltc__div">
-                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
                     {%- if price_known and v.available -%}
@@ -245,14 +247,30 @@
                     <div class="ltc__links">
                       {%- if price_known -%}
                         {%- comment -%}
-                          "Wat zit erin?" consolidates the three former accordions (m² /
-                          uitbreidingen / extra diensten) into one panel — same checkboxes,
-                          same pcard__plus-opt/-pr classes and readCardOptions() handler as
-                          before, grouped by an explicit data-group instead of sniffing the
-                          old per-accordion <summary> text (see functional mapping doc).
+                          "Wat zit erin?" = what's physically in the box (hardware
+                          description, formerly a standalone line above this row).
+                          "Uitbreidingen" (below) is the separate, optional add-ons panel —
+                          m² / uitbreidingen / extra diensten — split back out of "Wat zit
+                          erin?" so the two aren't conflated: one describes the package
+                          contents, the other lets you configure it. Same checkboxes, same
+                          pcard__plus-opt/-pr classes and readCardOptions() handler either
+                          way — only the container changed (see functional mapping doc for
+                          the original consolidation this reverses).
                         {%- endcomment -%}
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            {%- if ltc_hw_bullets != blank -%}
+                              <ul class="ltc__hw">
+                                {%- for hw in ltc_hw_bullet_list -%}
+                                  <li>{{ hw }}</li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
+                          </div>
+                        </details>
+                        <details class="ltc__uitbreidingen">
+                          <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
                             <div class="ltc__optgroup" data-group="woning">
                               <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
@@ -337,11 +355,11 @@
                     {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
 
                     {%- if price_known -%}
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="woning">
                         <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
                       </details>
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="addons">
                         <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
                         {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
@@ -349,7 +367,7 @@
                           <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
                         {%- endif -%}{%- endfor -%}
                       </details>
-                      <details class="pcard__plus">
+                      <details class="pcard__plus" data-group="terms">
                         <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
                         <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
@@ -710,6 +728,11 @@
    Alert/Protect). Reuses .pcard/.pcard__flag/.pcard__price/.pcard__plus-opt/
    .pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
 .pcard--ltc { padding-top: 24px; }
+/* Popular flag straddles the card's top border instead of sitting in flex flow (Robi
+   feedback, 2026-09-14): the base .pcard.pop .pcard__flag rule pushes .ltc__head down on
+   the popular card only, misaligning the three-card header row. Out of flow here, .ltc__head
+   is the true first flex child on every ltc card regardless of which one is popular. */
+.pcard--ltc.pop .pcard__flag { position: absolute; top: -13px; right: 16px; margin-bottom: 0; white-space: nowrap; z-index: 1; }
 .ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .ltc__icon { flex: none; width: 40px; height: 40px; }
 .ltc__icon svg { width: 100%; height: 100%; }
@@ -735,17 +758,21 @@
 .ltc__badge--nee { background: var(--indigo-soft); color: var(--muted); }
 .ltc__badge--optioneel { background: var(--gold-soft); color: var(--belt); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
-.ltc__hw { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; }
+.ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
+.ltc__hw li::before { content: '\2013'; position: absolute; left: 0; }
 .ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
 .ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
 .ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
-.ltc__watzit { text-align: center; }
-.ltc__watzit summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
-.ltc__watzit summary:hover { color: var(--belt); }
-.ltc__watzit summary::-webkit-details-marker { display: none; }
-.ltc__watzit summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
-.ltc__watzit[open] summary svg { transform: rotate(180deg); }
-.ltc__watzit + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__watzit, .ltc__uitbreidingen { text-align: center; }
+.ltc__watzit summary, .ltc__uitbreidingen summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
+.ltc__watzit summary:hover, .ltc__uitbreidingen summary:hover { color: var(--belt); }
+.ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
+.ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
+/* row is "Wat zit erin? - Uitbreidingen - Meer informatie" — each item after the first gets a leading dot. */
+.ltc__watzit + .ltc__uitbreidingen summary::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__uitbreidingen + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
 .ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
@@ -1328,21 +1355,25 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
   });
 
-  /* categorise a card's checked options into { woning, terms[], addons[] } */
+  /* categorise a card's checked options into { woning, terms[], addons[] }.
+     Every option group (.pcard__plus and .ltc__optgroup alike) carries an explicit
+     data-group attribute set in the markup — never inferred from the visible
+     <summary>/heading text. A prior version sniffed that text and broke silently when
+     "Abonnementen" was relabelled to "Extra diensten (optioneel)" (commit aac146c),
+     misfiling every option in that group as "Uitbreidingen" in /cart/add.js instead of
+     "Abonnement". data-group makes future copy edits safe by construction. */
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
     // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
     // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
-    // .ltc__optgroup (added when the three accordions were consolidated into one "Wat
-    // zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md).
+    // .ltc__optgroup (added when the three accordions were first consolidated into one
+    // "Wat zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md — and
+    // later moved into their own sibling "Uitbreidingen" accordion). querySelectorAll is
+    // scoped to the whole card, not a specific accordion, so which <details> wraps them
+    // doesn't matter here.
     card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
       var group = det.getAttribute('data-group');
-      if (!group) {
-        var head = det.querySelector('summary');
-        var label = head ? head.textContent.trim().toLowerCase() : '';
-        group = label.indexOf('woning') === 0 ? 'woning' : (label.indexOf('abonnement') === 0 ? 'terms' : 'addons');
-      }
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';

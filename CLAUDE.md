@@ -181,6 +181,11 @@ silently cached as this project's default store in `~/Library/Preferences/shopif
 nodejs/config.json` and causes every subsequent command to fail against the wrong store, even
 with a valid login (that's exactly what happened once already).
 
+`shopify.theme.toml` is gitignored (local machine config, not committed) — a fresh `git
+worktree add` does not carry it over, so `--environment zoveiligdev` fails there with no store
+configured until you copy the file in from the main checkout (or pass `--store
+zoveiligdev.myshopify.com` explicitly on every command instead).
+
 ## Working rules for Claude Code on this repo
 
 - **`shopify theme check` does not catch every deploy-breaking error.** Shopify's GitHub
