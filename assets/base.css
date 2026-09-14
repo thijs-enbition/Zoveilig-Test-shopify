@@ -3595,7 +3595,6 @@ details-disclosure > details {
     transform: translateX(100%) scaleX(0);
   }
 }
-}
 
 /* Ankerlinks niet onder de sticky header laten vallen */
 [id] {
