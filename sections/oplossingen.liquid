@@ -133,8 +133,8 @@
                 {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}
                 {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}
                 {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
-                {%- when 'secure' -%}{%- assign tile = 'opl-tile-04.jpg' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
-                {%- when 'guard' -%}{%- assign tile = 'opl-tile-05.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
+                {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
+                {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
                 {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
@@ -195,7 +195,11 @@
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
-              {%- if anchor == 'langer-thuis' -%}
+              {%- assign use_ltc = false -%}
+              {%- if fk == 'aware' or fk == 'aware_plus' or fk == 'care' or fk == 'secure' or fk == 'guard' -%}
+                {%- assign use_ltc = true -%}
+              {%- endif -%}
+              {%- if use_ltc -%}
                 <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
@@ -216,6 +220,21 @@
                       <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
                     {%- endfor -%}
                   </ul>
+                  {%- comment -%}
+                    Meldkamer/Camera status — optional field, new 2026-09-14 for Mijn Thuis
+                    Alert/Protect (ltc_meldkamer/ltc_camera set in the case block above).
+                    Langer Thuis packages leave both blank, so this renders nothing for them.
+                  {%- endcomment -%}
+                  {%- if ltc_meldkamer != blank or ltc_camera != blank -%}
+                    <div class="ltc__badges">
+                      {%- if ltc_meldkamer != blank -%}
+                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Meldkamer</span><span class="ltc__badge ltc__badge--{{ ltc_meldkamer }}">{{ ltc_meldkamer | capitalize }}</span></div>
+                      {%- endif -%}
+                      {%- if ltc_camera != blank -%}
+                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Camera</span><span class="ltc__badge ltc__badge--{{ ltc_camera }}">{{ ltc_camera | capitalize }}</span></div>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
                   <hr class="ltc__div">
                   {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
@@ -327,7 +346,8 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
-          {%- if anchor == 'langer-thuis' -%}
+          {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
+          {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
             <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
           {%- endif -%}
         {%- elsif request.design_mode -%}
@@ -645,8 +665,9 @@
 .pcard__direct:hover { color: var(--belt); }
 .pcard__direct:hover svg { transform: translateX(3px); }
 
-/* Card-grid redesign (Langer Thuis only, 2026-09-11). Reuses .pcard/.pcard__flag/.pcard__price/
-   .pcard__plus-opt/.pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
+/* Card-grid redesign (2026-09-11 Langer Thuis, 2026-09-14 extended to Mijn Thuis
+   Alert/Protect). Reuses .pcard/.pcard__flag/.pcard__price/.pcard__plus-opt/
+   .pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
 .pcard--ltc { padding-top: 24px; }
 .ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .ltc__icon { flex: none; width: 40px; height: 40px; }
@@ -660,6 +681,18 @@
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
+/* Meldkamer/Camera status badges — optional field, new 2026-09-14 for Mijn Thuis
+   Alert/Protect (blank/omitted for Langer Thuis). Ja reuses the same green "yes" pill
+   colors as .zv-vergelijk .cmp-tbl .yes (assets/zv-vergelijk-pakketten.css); Optioneel
+   reuses the existing gold/belt "flag" accent so all three states stay in the page's
+   established palette rather than introducing new colors. */
+.ltc__badges { display: flex; gap: 22px; margin: 14px 0 0; }
+.ltc__badge-col { display: flex; flex-direction: column; gap: 6px; }
+.ltc__badge-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); }
+.ltc__badge { display: inline-flex; align-self: flex-start; align-items: center; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+.ltc__badge--ja { background: rgba(47, 143, 91, 0.14); color: var(--ok); }
+.ltc__badge--nee { background: var(--indigo-soft); color: var(--muted); }
+.ltc__badge--optioneel { background: var(--gold-soft); color: var(--belt); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; }
 .ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
