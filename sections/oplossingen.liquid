@@ -196,7 +196,6 @@
                     {%- endfor -%}
                   </ul>
                   <hr class="ltc__div">
-                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
                     {%- if price_known and v.available -%}
@@ -205,14 +204,24 @@
                     <div class="ltc__links">
                       {%- if price_known -%}
                         {%- comment -%}
-                          "Wat zit erin?" consolidates the three former accordions (m² /
-                          uitbreidingen / extra diensten) into one panel — same checkboxes,
-                          same pcard__plus-opt/-pr classes and readCardOptions() handler as
-                          before, grouped by an explicit data-group instead of sniffing the
-                          old per-accordion <summary> text (see functional mapping doc).
+                          "Wat zit erin?" = what's physically in the box (hardware
+                          description, formerly a standalone line above this row).
+                          "Uitbreidingen" (below) is the separate, optional add-ons panel —
+                          m² / uitbreidingen / extra diensten — split back out of "Wat zit
+                          erin?" so the two aren't conflated: one describes the package
+                          contents, the other lets you configure it. Same checkboxes, same
+                          pcard__plus-opt/-pr classes and readCardOptions() handler either
+                          way — only the container changed (see functional mapping doc for
+                          the original consolidation this reverses).
                         {%- endcomment -%}
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
+                          </div>
+                        </details>
+                        <details class="ltc__uitbreidingen">
+                          <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
                             <div class="ltc__optgroup" data-group="woning">
                               <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
@@ -1239,8 +1248,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (!card) return out;
     // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
     // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
-    // .ltc__optgroup (added when the three accordions were consolidated into one "Wat
-    // zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md).
+    // .ltc__optgroup (added when the three accordions were first consolidated into one
+    // "Wat zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md — and
+    // later moved into their own sibling "Uitbreidingen" accordion). querySelectorAll is
+    // scoped to the whole card, not a specific accordion, so which <details> wraps them
+    // doesn't matter here.
     card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
       var group = det.getAttribute('data-group');
       if (!group) {
