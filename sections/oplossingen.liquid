@@ -133,9 +133,9 @@
                 {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}
                 {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}
                 {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
-                {%- when 'secure' -%}{%- assign tile = 'opl-tile-04.jpg' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}
-                {%- when 'guard' -%}{%- assign tile = 'opl-tile-05.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}
-                {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
+                {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
+                {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
+                {%- when 'secure_plus' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
               {%- endcase -%}
@@ -153,11 +153,20 @@
               {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               {%- comment -%}
-                Card-grid redesign (Langer Thuis only, 2026-09-11 — Robi feedback + confirmed
-                mockup): icon/tagline/checklist copy Robi already approved, keyed by finder_key.
-                Mijn Thuis / Veilig Onderweg keep the original tile-card design below untouched.
+                Card-grid redesign (2026-09-11 Langer Thuis, extended 2026-09-14 to Mijn
+                Thuis Alert/Protect — see docs/mijn-thuis-card-redesign-research-2026-09-14.md):
+                icon/tagline/checklist copy keyed by finder_key. Inzicht/Zeker/Beschermd copy
+                was Robi-approved with PR #19. The Alert/Protect tagline text below reuses the
+                already-approved `hook` line from pricing.config.json / opl-modal-data verbatim
+                (not new marketing copy); their icons are a first engineering draft, NOT yet
+                design-signed-off — see PR description / research doc open question #3. Vista
+                (secure_plus) is intentionally not given ltc_* copy here: it stays on its own
+                lead-form branch below, never the shared card markup. This case block only
+                assembles the data — the markup below still renders it exactly as before
+                (Langer Thuis only) until the next commit switches Alert/Protect over too.
               {%- endcomment -%}
-              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}{%- assign ltc_hw_bullets = '' -%}
+              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
+              {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
@@ -175,10 +184,25 @@
                   {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
                   {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'secure' -%}
+                  {%- comment -%} Alert. Tagline reuses pricing.config.json packages[].hook verbatim (see comment above). Bullets extracted from the retired opl-tile-04.jpg "IN HET PAKKET" pill list, same wording. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Slim alarm dat u zelf in de gaten houdt.' -%}
+                  {%- assign ltc_bullets = 'Alarm Pod|SensePlug|PIR|Deursensor|Codepaneel' -%}
+                  {%- assign ltc_meldkamer = 'nee' -%}{%- assign ltc_camera = 'nee' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 C24 12 19 18 19 27 V34 L14 42 H50 L45 34 V27 C45 18 40 12 32 12 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 47 A6 6 0 0 0 38 47" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="16" r="4.5" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'guard' -%}
+                  {%- comment -%} Protect. Tagline reuses pricing.config.json packages[].hook verbatim. Bullets extracted from the retired opl-tile-05.jpg "IN HET PAKKET" pill list, same wording. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Alarm met 24/7 meldkamer die meekijkt.' -%}
+                  {%- assign ltc_bullets = 'Hub|Codepaneel|Rookmelder|PIR|Deurcontact' -%}
+                  {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
-              {%- assign ltc_hw_bullet_list = ltc_hw_bullets | split: '|' -%}
-              {%- if anchor == 'langer-thuis' -%}
+              {%- assign use_ltc = false -%}
+              {%- if fk == 'aware' or fk == 'aware_plus' or fk == 'care' or fk == 'secure' or fk == 'guard' -%}
+                {%- assign use_ltc = true -%}
+              {%- endif -%}
+              {%- if use_ltc -%}
                 <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
@@ -199,6 +223,21 @@
                       <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
                     {%- endfor -%}
                   </ul>
+                  {%- comment -%}
+                    Meldkamer/Camera status — optional field, new 2026-09-14 for Mijn Thuis
+                    Alert/Protect (ltc_meldkamer/ltc_camera set in the case block above).
+                    Langer Thuis packages leave both blank, so this renders nothing for them.
+                  {%- endcomment -%}
+                  {%- if ltc_meldkamer != blank or ltc_camera != blank -%}
+                    <div class="ltc__badges">
+                      {%- if ltc_meldkamer != blank -%}
+                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Meldkamer</span><span class="ltc__badge ltc__badge--{{ ltc_meldkamer }}">{{ ltc_meldkamer | capitalize }}</span></div>
+                      {%- endif -%}
+                      {%- if ltc_camera != blank -%}
+                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Camera</span><span class="ltc__badge ltc__badge--{{ ltc_camera }}">{{ ltc_camera | capitalize }}</span></div>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
                   <hr class="ltc__div">
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
@@ -259,7 +298,48 @@
                     </div>
                   </div>
                 </article>
+              {%- elsif is_vista -%}
+                {%- comment -%}
+                  Vista (secure_plus) visual-only restyle, 2026-09-14 — see
+                  docs/mijn-thuis-card-redesign-research-2026-09-14.md §4. This is
+                  deliberately NOT the shared ltc card markup (no checklist/badges/price
+                  data model): only the header chrome (icon + name + tagline, using the
+                  same .ltc__head/.ltc__icon/.ltc__tagline classes and spacing as
+                  Inzicht/Zeker/Beschermd/Alert/Protect) is new. Everything below —
+                  the "Geen vast pakket" line, the hardware sub-line, the camera-hardware
+                  link, and the ENTIRE lead-capture form (.pcard__vista and its children,
+                  data-vista/-form/-err/-done attributes) — is byte-for-byte the same
+                  markup this branch already rendered, so the existing JS handlers and the
+                  Odoo webhook submission (window.ZV_LEAD_ENDPOINT) need no changes.
+                {%- endcomment -%}
+                <article class="pcard pcard--ltc pcard--vista" data-odoo-sku="{{ v.sku }}"
+                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
+                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-price-known="{{ price_known }}" data-price="Geen vast pakket" data-price-cents="{{ p.price }}" data-per="">
+                  <div class="ltc__head">
+                    <span class="ltc__icon"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="14" y="24" width="36" height="26" rx="5" stroke="var(--indigo)" stroke-width="3.4"/><circle cx="32" cy="37" r="7" stroke="var(--indigo)" stroke-width="3.4"/><circle cx="32" cy="37" r="2.4" fill="var(--red)"/><path d="M24 24 L27 17 H37 L40 24" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                    <div class="ltc__headtext"><h4 class="ltc__name">{{ short_name }}</h4><p class="ltc__tagline">Complete beveiliging met meldkamer én camera.</p></div>
+                  </div>
+                  <div class="pcard__price"><span class="amt">Geen vast pakket</span></div>
+                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
+                  <div class="ltc__cta">
+                    <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
+                      <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                      <form class="pcard__vista-form" data-vista-form>
+                        <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
+                        <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
+                        <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
+                        <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
+                        <div class="pcard__vista-err" data-vista-err hidden></div>
+                        <button type="submit">Verstuur terugbelverzoek</button>
+                      </form>
+                      <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
+                    </div>
+                  </div>
+                </article>
               {%- else -%}
+                {%- comment -%} Fallback tile-card, kept for any product whose finder_key isn't one of the ltc-eligible keys above and isn't Vista — e.g. a future Veilig Onderweg product, or an unrecognized finder_key. Not exercised by any live product as of 2026-09-14. {%- endcomment -%}
                 <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
@@ -325,7 +405,8 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
-          {%- if anchor == 'langer-thuis' -%}
+          {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
+          {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
             <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
           {%- endif -%}
         {%- elsif request.design_mode -%}
@@ -643,8 +724,9 @@
 .pcard__direct:hover { color: var(--belt); }
 .pcard__direct:hover svg { transform: translateX(3px); }
 
-/* Card-grid redesign (Langer Thuis only, 2026-09-11). Reuses .pcard/.pcard__flag/.pcard__price/
-   .pcard__plus-opt/.pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
+/* Card-grid redesign (2026-09-11 Langer Thuis, 2026-09-14 extended to Mijn Thuis
+   Alert/Protect). Reuses .pcard/.pcard__flag/.pcard__price/.pcard__plus-opt/
+   .pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
 .pcard--ltc { padding-top: 24px; }
 /* Popular flag straddles the card's top border instead of sitting in flex flow (Robi
    feedback, 2026-09-14): the base .pcard.pop .pcard__flag rule pushes .ltc__head down on
@@ -663,6 +745,18 @@
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
+/* Meldkamer/Camera status badges — optional field, new 2026-09-14 for Mijn Thuis
+   Alert/Protect (blank/omitted for Langer Thuis). Ja reuses the same green "yes" pill
+   colors as .zv-vergelijk .cmp-tbl .yes (assets/zv-vergelijk-pakketten.css); Optioneel
+   reuses the existing gold/belt "flag" accent so all three states stay in the page's
+   established palette rather than introducing new colors. */
+.ltc__badges { display: flex; gap: 22px; margin: 14px 0 0; }
+.ltc__badge-col { display: flex; flex-direction: column; gap: 6px; }
+.ltc__badge-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); }
+.ltc__badge { display: inline-flex; align-self: flex-start; align-items: center; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+.ltc__badge--ja { background: rgba(47, 143, 91, 0.14); color: var(--ok); }
+.ltc__badge--nee { background: var(--indigo-soft); color: var(--muted); }
+.ltc__badge--optioneel { background: var(--gold-soft); color: var(--belt); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
