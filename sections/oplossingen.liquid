@@ -157,23 +157,27 @@
                 mockup): icon/tagline/checklist copy Robi already approved, keyed by finder_key.
                 Mijn Thuis / Veilig Onderweg keep the original tile-card design below untouched.
               {%- endcomment -%}
-              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
+              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}{%- assign ltc_hw_bullets = '' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
                   {%- assign ltc_bullets = 'Daginzicht in het ritme|Alleen een melding bij afwijking|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiAware|3 wifi-sensorstekkers|1 deursensor|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
                 {%- when 'aware_plus' -%}
                   {%- assign ltc_tagline = 'Vroeg signaleren' -%}
                   {%- assign ltc_intro = 'Alles van Inzicht, plus:' -%}
                   {%- assign ltc_bullets = 'Dag- en nachtzicht|Bewegingsmelders voor meer zicht|Meerdere contactpersonen' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiCare|3 wifi-sensorstekkers (~100 m²)|Deursensor per toegang|2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar)|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 14 L49 20 V35 C49 47 32 54 32 54 C32 54 15 47 15 35 V20 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 45 C27 40 20 41.5 20 33.5 C20 28.5 27 27 32 32.5 C37 27 44 28.5 44 33.5 C44 41.5 37 40 32 45 Z" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'care' -%}
                   {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
                   {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
+                  {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
+              {%- assign ltc_hw_bullet_list = ltc_hw_bullets | split: '|' -%}
               {%- if anchor == 'langer-thuis' -%}
                 <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
@@ -217,7 +221,13 @@
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
-                            {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
+                            {%- if ltc_hw_bullets != blank -%}
+                              <ul class="ltc__hw">
+                                {%- for hw in ltc_hw_bullet_list -%}
+                                  <li>{{ hw }}</li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
                           </div>
                         </details>
                         <details class="ltc__uitbreidingen">
@@ -636,6 +646,11 @@
 /* Card-grid redesign (Langer Thuis only, 2026-09-11). Reuses .pcard/.pcard__flag/.pcard__price/
    .pcard__plus-opt/.pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
 .pcard--ltc { padding-top: 24px; }
+/* Popular flag straddles the card's top border instead of sitting in flex flow (Robi
+   feedback, 2026-09-14): the base .pcard.pop .pcard__flag rule pushes .ltc__head down on
+   the popular card only, misaligning the three-card header row. Out of flow here, .ltc__head
+   is the true first flex child on every ltc card regardless of which one is popular. */
+.pcard--ltc.pop .pcard__flag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); margin-bottom: 0; white-space: nowrap; z-index: 1; }
 .ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .ltc__icon { flex: none; width: 40px; height: 40px; }
 .ltc__icon svg { width: 100%; height: 100%; }
@@ -649,7 +664,9 @@
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
-.ltc__hw { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; }
+.ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
+.ltc__hw li::before { content: '\2013'; position: absolute; left: 0; }
 .ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
 .ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
 .ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
