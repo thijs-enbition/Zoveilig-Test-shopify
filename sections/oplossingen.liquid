@@ -31,6 +31,7 @@
 
 {%- include 'zv-pricing' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
+{%- assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order' -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 {%- comment -%}
   Pakket-matcher, embedded under the Langer Thuis pricing cards below (not a separate
@@ -91,10 +92,21 @@
         <div class="vhero__partners">
           <span class="vhero__pnote">Beveiligd met bewezen partners</span>
           <div class="vhero__logos">
-            <span class="lchip sec"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="30"></span>
-            <span class="lchip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="24"></span>
-            <span class="lchip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="24"></span>
-            <span class="lchip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="24"></span>
+            {%- for partner in partners -%}
+              {%- if partner.logo != blank -%}
+                {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
+                {%- capture chip_class -%}lchip{% if forloop.first %} sec{% endif %}{%- endcapture -%}
+                {%- if partner.website != blank -%}
+                  <a class="{{ chip_class }}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                    {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                  </a>
+                {%- else -%}
+                  <span class="{{ chip_class }}">
+                    {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                  </span>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
           </div>
         </div>
       </section>
