@@ -133,8 +133,8 @@
                 {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}
                 {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}
                 {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
-                {%- when 'secure' -%}{%- assign tile = 'opl-tile-04.jpg' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}
-                {%- when 'guard' -%}{%- assign tile = 'opl-tile-05.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}
+                {%- when 'secure' -%}{%- assign tile = 'opl-tile-04.jpg' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
+                {%- when 'guard' -%}{%- assign tile = 'opl-tile-05.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
                 {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
@@ -153,11 +153,20 @@
               {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
               {%- comment -%}
-                Card-grid redesign (Langer Thuis only, 2026-09-11 — Robi feedback + confirmed
-                mockup): icon/tagline/checklist copy Robi already approved, keyed by finder_key.
-                Mijn Thuis / Veilig Onderweg keep the original tile-card design below untouched.
+                Card-grid redesign (2026-09-11 Langer Thuis, extended 2026-09-14 to Mijn
+                Thuis Alert/Protect — see docs/mijn-thuis-card-redesign-research-2026-09-14.md):
+                icon/tagline/checklist copy keyed by finder_key. Inzicht/Zeker/Beschermd copy
+                was Robi-approved with PR #19. The Alert/Protect tagline text below reuses the
+                already-approved `hook` line from pricing.config.json / opl-modal-data verbatim
+                (not new marketing copy); their icons are a first engineering draft, NOT yet
+                design-signed-off — see PR description / research doc open question #3. Vista
+                (secure_plus) is intentionally not given ltc_* copy here: it stays on its own
+                lead-form branch below, never the shared card markup. This case block only
+                assembles the data — the markup below still renders it exactly as before
+                (Langer Thuis only) until the next commit switches Alert/Protect over too.
               {%- endcomment -%}
               {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
+              {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
@@ -172,6 +181,18 @@
                   {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
                   {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'secure' -%}
+                  {%- comment -%} Alert. Tagline reuses pricing.config.json packages[].hook verbatim (see comment above). Bullets extracted from the retired opl-tile-04.jpg "IN HET PAKKET" pill list, same wording. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Slim alarm dat u zelf in de gaten houdt.' -%}
+                  {%- assign ltc_bullets = 'Alarm Pod|SensePlug|PIR|Deursensor|Codepaneel' -%}
+                  {%- assign ltc_meldkamer = 'nee' -%}{%- assign ltc_camera = 'nee' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 C24 12 19 18 19 27 V34 L14 42 H50 L45 34 V27 C45 18 40 12 32 12 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 47 A6 6 0 0 0 38 47" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="16" r="4.5" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'guard' -%}
+                  {%- comment -%} Protect. Tagline reuses pricing.config.json packages[].hook verbatim. Bullets extracted from the retired opl-tile-05.jpg "IN HET PAKKET" pill list, same wording. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Alarm met 24/7 meldkamer die meekijkt.' -%}
+                  {%- assign ltc_bullets = 'Hub|Codepaneel|Rookmelder|PIR|Deurcontact' -%}
+                  {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
               {%- if anchor == 'langer-thuis' -%}
