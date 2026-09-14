@@ -1233,21 +1233,18 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
   });
 
-  /* categorise a card's checked options into { woning, terms[], addons[] } */
+  /* categorise a card's checked options into { woning, terms[], addons[] }.
+     Every option group (.pcard__plus and .ltc__optgroup alike) carries an explicit
+     data-group attribute set in the markup — never inferred from the visible
+     <summary>/heading text. A prior version sniffed that text and broke silently when
+     "Abonnementen" was relabelled to "Extra diensten (optioneel)" (commit aac146c),
+     misfiling every option in that group as "Uitbreidingen" in /cart/add.js instead of
+     "Abonnement". data-group makes future copy edits safe by construction. */
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
-    // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
-    // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
-    // .ltc__optgroup (added when the three accordions were consolidated into one "Wat
-    // zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md).
     card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
       var group = det.getAttribute('data-group');
-      if (!group) {
-        var head = det.querySelector('summary');
-        var label = head ? head.textContent.trim().toLowerCase() : '';
-        group = label.indexOf('woning') === 0 ? 'woning' : (label.indexOf('abonnement') === 0 ? 'terms' : 'addons');
-      }
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
