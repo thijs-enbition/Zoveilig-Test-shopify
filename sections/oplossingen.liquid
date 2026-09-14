@@ -646,6 +646,11 @@
 /* Card-grid redesign (Langer Thuis only, 2026-09-11). Reuses .pcard/.pcard__flag/.pcard__price/
    .pcard__plus-opt/.pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
 .pcard--ltc { padding-top: 24px; }
+/* Popular flag straddles the card's top border instead of sitting in flex flow (Robi
+   feedback, 2026-09-14): the base .pcard.pop .pcard__flag rule pushes .ltc__head down on
+   the popular card only, misaligning the three-card header row. Out of flow here, .ltc__head
+   is the true first flex child on every ltc card regardless of which one is popular. */
+.pcard--ltc.pop .pcard__flag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); margin-bottom: 0; white-space: nowrap; z-index: 1; }
 .ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .ltc__icon { flex: none; width: 40px; height: 40px; }
 .ltc__icon svg { width: 100%; height: 100%; }
