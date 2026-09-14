@@ -196,7 +196,6 @@
                     {%- endfor -%}
                   </ul>
                   <hr class="ltc__div">
-                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
                     {%- if price_known and v.available -%}
@@ -205,14 +204,24 @@
                     <div class="ltc__links">
                       {%- if price_known -%}
                         {%- comment -%}
-                          "Wat zit erin?" consolidates the three former accordions (m² /
-                          uitbreidingen / extra diensten) into one panel — same checkboxes,
-                          same pcard__plus-opt/-pr classes and readCardOptions() handler as
-                          before, grouped by an explicit data-group instead of sniffing the
-                          old per-accordion <summary> text (see functional mapping doc).
+                          "Wat zit erin?" = what's physically in the box (hardware
+                          description, formerly a standalone line above this row).
+                          "Uitbreidingen" (below) is the separate, optional add-ons panel —
+                          m² / uitbreidingen / extra diensten — split back out of "Wat zit
+                          erin?" so the two aren't conflated: one describes the package
+                          contents, the other lets you configure it. Same checkboxes, same
+                          pcard__plus-opt/-pr classes and readCardOptions() handler either
+                          way — only the container changed (see functional mapping doc for
+                          the original consolidation this reverses).
                         {%- endcomment -%}
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
+                          </div>
+                        </details>
+                        <details class="ltc__uitbreidingen">
+                          <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
                             <div class="ltc__optgroup" data-group="woning">
                               <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
@@ -644,13 +653,15 @@
 .ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
 .ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
 .ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
-.ltc__watzit { text-align: center; }
-.ltc__watzit summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
-.ltc__watzit summary:hover { color: var(--belt); }
-.ltc__watzit summary::-webkit-details-marker { display: none; }
-.ltc__watzit summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
-.ltc__watzit[open] summary svg { transform: rotate(180deg); }
-.ltc__watzit + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__watzit, .ltc__uitbreidingen { text-align: center; }
+.ltc__watzit summary, .ltc__uitbreidingen summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
+.ltc__watzit summary:hover, .ltc__uitbreidingen summary:hover { color: var(--belt); }
+.ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
+.ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
+/* row is "Wat zit erin? - Uitbreidingen - Meer informatie" — each item after the first gets a leading dot. */
+.ltc__watzit + .ltc__uitbreidingen summary::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__uitbreidingen + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
 .ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
@@ -1243,6 +1254,13 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
+    // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
+    // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
+    // .ltc__optgroup (added when the three accordions were first consolidated into one
+    // "Wat zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md — and
+    // later moved into their own sibling "Uitbreidingen" accordion). querySelectorAll is
+    // scoped to the whole card, not a specific accordion, so which <details> wraps them
+    // doesn't matter here.
     card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
       var group = det.getAttribute('data-group');
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
