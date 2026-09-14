@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "kc_hero": {
@@ -25,9 +34,13 @@
           }
         }
       },
-      "block_order": ["chip_1", "chip_2", "chip_3"],
+      "block_order": [
+        "chip_1",
+        "chip_2",
+        "chip_3"
+      ],
       "settings": {
-        "eyebrow": "Langer Thuis Kenniscentrum",
+        "eyebrow": "Zo Veilig Kenniscentrum",
         "heading": "Alles over langer thuis wonen, veilig en gerust.",
         "sub": "Alles wat u wilt weten over langer zelfstandig thuis wonen. Onafhankelijke kennis, praktische tips en slimme oplossingen.",
         "chips_label": "Populair:"
@@ -50,5 +63,9 @@
       }
     }
   },
-  "order": ["kc_hero", "kc_hub", "kc_cta"]
+  "order": [
+    "kc_hero",
+    "kc_hub",
+    "kc_cta"
+  ]
 }
