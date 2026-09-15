@@ -142,7 +142,7 @@
   <div class="wrap">
     {%- if scenarios.size > 0 -%}
       <!-- PAKKET-MATCHER -->
-      <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}" data-pm-tier="{{ pm_tier_attr | strip }}" data-pm-names="{{ pm_names_attr | strip }}" data-pm-lead-pkgs="{{ lead_only_pkgs }}" data-pm-lead-url="{{ lead_url | escape }}">
+      <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}" data-pm-tier="{{ pm_tier_attr | strip | escape }}" data-pm-names="{{ pm_names_attr | strip | escape }}" data-pm-lead-pkgs="{{ lead_only_pkgs | escape }}" data-pm-lead-url="{{ lead_url | escape }}">
         <script type="application/json" data-pm-products>{{ pm_products | strip }}</script>
         <div class="pm-head">
           <h3>{{ pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h3>
