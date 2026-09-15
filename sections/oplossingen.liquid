@@ -237,21 +237,6 @@
                       <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
                     {%- endfor -%}
                   </ul>
-                  {%- comment -%}
-                    Meldkamer/Camera status — optional field, new 2026-09-14 for Mijn Thuis
-                    Alert/Protect (ltc_meldkamer/ltc_camera set in the case block above).
-                    Langer Thuis packages leave both blank, so this renders nothing for them.
-                  {%- endcomment -%}
-                  {%- if ltc_meldkamer != blank or ltc_camera != blank -%}
-                    <div class="ltc__badges">
-                      {%- if ltc_meldkamer != blank -%}
-                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Meldkamer</span><span class="ltc__badge ltc__badge--{{ ltc_meldkamer }}">{{ ltc_meldkamer | capitalize }}</span></div>
-                      {%- endif -%}
-                      {%- if ltc_camera != blank -%}
-                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Camera</span><span class="ltc__badge ltc__badge--{{ ltc_camera }}">{{ ltc_camera | capitalize }}</span></div>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
                   <hr class="ltc__div">
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
@@ -274,11 +259,19 @@
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
-                            {%- if ltc_hw_bullets != blank -%}
+                            {%- if ltc_hw_bullets != blank or ltc_meldkamer != blank or ltc_camera != blank -%}
                               <ul class="ltc__hw">
                                 {%- for hw in ltc_hw_bullet_list -%}
                                   <li>{{ hw }}</li>
                                 {%- endfor -%}
+                                {%- comment -%}
+                                  Meldkamer/Camera status, moved here from a front-of-card
+                                  banner (2026-09-15) — plain text lines in the same list,
+                                  not a new visual treatment. ltc_meldkamer/ltc_camera are
+                                  blank for Langer Thuis, so these render nothing there.
+                                {%- endcomment -%}
+                                {%- if ltc_meldkamer != blank -%}<li>Meldkamer: {{ ltc_meldkamer | capitalize }}</li>{%- endif -%}
+                                {%- if ltc_camera != blank -%}<li>Camera: {{ ltc_camera | capitalize }}</li>{%- endif -%}
                               </ul>
                             {%- endif -%}
                           </div>
@@ -311,6 +304,7 @@
                       <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
                     </div>
                   </div>
+                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
                 </article>
               {%- else -%}
                 <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
@@ -374,6 +368,7 @@
                       {%- endif -%}
                     </div>
                   </div>
+                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
                 </article>
               {%- endif -%}
             {%- endfor -%}
@@ -663,15 +658,27 @@
 .pak__head .compare svg { width: 16px; height: 16px; }
 .pgrid { display: grid; gap: 20px; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); max-width: calc(var(--cols, 3) * 360px); margin-left: auto; margin-right: auto; }
 .pgrid[data-n="1"] { --cols: 1; } .pgrid[data-n="2"] { --cols: 2; } .pgrid[data-n="3"] { --cols: 3; }
-/* Mijn Thuis only, 2026-09-15: CSS Grid's default align-items:stretch forces every
-   .pcard in a row to the row's tallest sibling. Protect (guard) is naturally the
-   tallest of Alert/Protect/Vista, so Alert's shorter content was being stretched to
-   match it, and .ltc__cta's margin-top:auto absorbed the difference as a large gap
-   above the "In winkelwagen" button — confirmed via computed-style measurement, not
-   guessed (see docs/mijn-thuis-vista-images-card-height-2026-09-15.md). Scoped to
-   Mijn Thuis only so Langer Thuis's already-approved equal-height card row (PR #19)
-   is untouched. */
-.pgrid[data-anchor="mijn-thuis"] { align-items: start; }
+/* Mijn Thuis only, 2026-09-15, revised: the align-items:start fix from the prior
+   commit removed the dead-space gap but left the three cards at visibly uneven
+   heights (Alert/Protect/Vista are naturally 510/569/452px tall), which read as
+   broken rather than intentional. Reverted back to the grid's default
+   align-items:stretch (all three cards equal-height again, matching Protect, the
+   naturally tallest), and instead the leftover height is collapsed into an
+   explicit trailing spacer (.ltc__spacer, flex:1 1 auto, rendered only for Mijn
+   Thuis cards — see the Liquid markup below) placed after
+   all real content, so it sits below "Meer informatie" (ltc cards) or the lead
+   form (Vista) instead of between the badges and the CTA. .ltc__cta and
+   .pcard__foot keep their base margin-top:auto rule (used by Langer Thuis and
+   Veilig Onderweg respectively) — both are overridden back to a normal margin
+   only inside the Mijn Thuis grid, so neither shared class's default behavior
+   changes anywhere else. */
+.pgrid[data-anchor="mijn-thuis"] .ltc__cta { margin-top: 0; }
+.pgrid[data-anchor="mijn-thuis"] .pcard__foot { margin-top: 0; }
+/* .pcard .ltc__spacer (2 classes) outranks the base reset `div:empty{display:none}`
+   (element+pseudo-class), same fix already used for .addcart__scrim below — the
+   spacer has no children by design, so without this override the base reset hides
+   it and flex:1 1 auto never gets a chance to apply. */
+.pcard .ltc__spacer { display: block; flex: 1 1 auto; }
 .pcard { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 26px 24px 24px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(26, 18, 48, 0.04); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .pcard:hover { border-color: var(--line-2); box-shadow: 0 6px 20px -12px rgba(26, 18, 48, 0.22); }
 .pcard.pop { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 18px 44px -22px rgba(50, 36, 105, 0.45); }
@@ -727,18 +734,6 @@
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
-/* Meldkamer/Camera status badges — optional field, new 2026-09-14 for Mijn Thuis
-   Alert/Protect (blank/omitted for Langer Thuis). Ja reuses the same green "yes" pill
-   colors as .zv-vergelijk .cmp-tbl .yes (assets/zv-vergelijk-pakketten.css); Optioneel
-   reuses the existing gold/belt "flag" accent so all three states stay in the page's
-   established palette rather than introducing new colors. */
-.ltc__badges { display: flex; gap: 22px; margin: 14px 0 0; }
-.ltc__badge-col { display: flex; flex-direction: column; gap: 6px; }
-.ltc__badge-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); }
-.ltc__badge { display: inline-flex; align-self: flex-start; align-items: center; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; }
-.ltc__badge--ja { background: rgba(47, 143, 91, 0.14); color: var(--ok); }
-.ltc__badge--nee { background: var(--indigo-soft); color: var(--muted); }
-.ltc__badge--optioneel { background: var(--gold-soft); color: var(--belt); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
