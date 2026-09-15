@@ -33,11 +33,15 @@
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 {%- comment -%}
-  Pakket-matcher, embedded under the Langer Thuis pricing cards below (not a separate
-  section) — see snippets/zv-pakket-matcher.liquid for why it's a shared snippet + static
-  assets rather than duplicated markup/JS/CSS.
+  Pakket-matcher, embedded under the Langer Thuis AND Mijn Thuis pricing cards below (not
+  separate sections) — see snippets/zv-pakket-matcher.liquid for why it's a shared snippet +
+  static assets rather than duplicated markup/JS/CSS, and for why Mijn Thuis's scenario cards
+  are a separate block type ('scenario_mijn_thuis') from Langer Thuis's ('scenario') — both
+  live in the same section.blocks list, so `where: 'type', …` is what keeps the two matchers'
+  card pools from mixing.
 {%- endcomment -%}
 {%- assign matcher_scenarios = section.blocks | where: 'type', 'scenario' -%}
+{%- assign matcher_scenarios_mt = section.blocks | where: 'type', 'scenario_mijn_thuis' -%}
 {{ 'zv-vergelijk-pakketten.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
@@ -402,6 +406,43 @@
       {%- endif -%}
 
       {%- if anchor == 'mijn-thuis' -%}
+        {%- comment -%}
+          Mijn Thuis pakket-matcher: same shared snippet as Langer Thuis's, generalized
+          (2026-09-15) to accept a package-line's finder keys/tier order/copy instead of
+          Langer Thuis's hardcoded inzicht/zeker/beschermd — see snippets/zv-pakket-matcher.liquid's
+          header comment for the full param list. Vista (secure_plus) has no fixed price and
+          no cart action: `lead_only_pkgs`/`lead_url` route its "Kies Vista" (and an outright
+          Vista recommendation) to '#mijn-thuis-vista' instead — the same deep-link hash this
+          page's own tab handler (applyHash()/focusVista(), below) already resolves into
+          "select the Mijn Thuis panel, scroll to and focus Vista's real lead form". Vista can
+          also only ever WIN the recommendation outright (never via a tie) — see recommend()'s
+          leadPkgs handling in assets/zv-vergelijk-pakketten.js.
+
+          Feature-row cells for Vista's sensors/rookmelder/app-besturing are 'n' (dash) rather
+          than a checkmark: no confirmed source data exists for them in pricing.config.json
+          (Vista's own `sub` only confirms hub, binnen-/buitencamera, videodeurbel, meldkamer)
+          — same three open questions already flagged in the PR #37 static table, not
+          re-guessed here. Content overall pending Robi's read-through — see PR description.
+        {%- endcomment -%}
+        {%- capture mt_pkg_meta -%}
+          secure|Alert|{{ zv_alert_monthly | remove: ' ' }}|/mnd|Basisbeveiliging tegen inbraak§guard|Protect|{{ zv_protect_monthly | remove: ' ' }}|/mnd|Inbraak én brand in één systeem§secure_plus|Vista|{{ zv_vista_monthly }}||Camerabeveiliging op maat
+        {%- endcapture -%}
+        {%- capture mt_feature_rows -%}
+          Bewegings- en deursensoren||y|y|n§Rookmelder||n|y|n§Meldkameropvolging (24/7)||n|y|y§Camera||n|Optioneel|y§Zelf in- en uitschakelen via de app||y|y|n§Contractduur||{{ zv_alert_term }} maanden|{{ zv_protect_term }} maanden|Op maat§Jaarlijks onderhoud||y|y|y
+        {%- endcapture -%}
+        {%- render 'zv-pakket-matcher',
+          scenarios: matcher_scenarios_mt,
+          collection: 'mijn-thuis',
+          activation_variant_id: activation_variant_id,
+          pkg_meta: mt_pkg_meta,
+          recommended_pkg: 'guard',
+          finder_key_map: 'secure:secure,guard:guard,secure_plus:secure_plus',
+          feature_rows: mt_feature_rows,
+          lead_only_pkgs: 'secure_plus',
+          lead_url: '#mijn-thuis-vista',
+          embedded: true
+        -%}
+
         <section class="mt-camhw">
           <h3>Benieuwd naar de camerahardware?</h3>
           <a class="mt-camhw__btn" href="/pages/camera-hardware" data-zv-event="mt_camera_hardware" data-cta-name="bekijk_camerahardware" data-cta-position="{{ anchor }}_paks">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -1781,6 +1822,25 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
           { "value": "zeker", "label": "Zeker" },
           { "value": "beschermd", "label": "Beschermd" }
         ], "default": "zeker" },
+        { "type": "select", "id": "row", "label": "Rij", "options": [
+          { "value": "1", "label": "Rij 1" },
+          { "value": "2", "label": "Rij 2" },
+          { "value": "3", "label": "Rij 3" }
+        ], "default": "1" }
+      ]
+    },
+    {
+      "type": "scenario_mijn_thuis",
+      "name": "Scenariokaart Mijn Thuis",
+      "settings": [
+        { "type": "paragraph", "content": "Voor de pakket-matcher die onder de Mijn Thuis-pakketten wordt getoond. Aparte bloktype van 'Matcher-scenariokaart' (Langer Thuis) zodat de twee kaartensets niet door elkaar lopen — zie snippets/zv-pakket-matcher.liquid." },
+        { "type": "text", "id": "title", "label": "Titel" },
+        { "type": "text", "id": "quote", "label": "Voorbeeldmelding (cursief)" },
+        { "type": "select", "id": "package", "label": "Past bij pakket", "options": [
+          { "value": "secure", "label": "Alert" },
+          { "value": "guard", "label": "Protect" },
+          { "value": "secure_plus", "label": "Vista" }
+        ], "default": "guard" },
         { "type": "select", "id": "row", "label": "Rij", "options": [
           { "value": "1", "label": "Rij 1" },
           { "value": "2", "label": "Rij 2" },
