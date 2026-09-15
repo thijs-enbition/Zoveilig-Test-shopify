@@ -237,21 +237,6 @@
                       <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
                     {%- endfor -%}
                   </ul>
-                  {%- comment -%}
-                    Meldkamer/Camera status — optional field, new 2026-09-14 for Mijn Thuis
-                    Alert/Protect (ltc_meldkamer/ltc_camera set in the case block above).
-                    Langer Thuis packages leave both blank, so this renders nothing for them.
-                  {%- endcomment -%}
-                  {%- if ltc_meldkamer != blank or ltc_camera != blank -%}
-                    <div class="ltc__badges">
-                      {%- if ltc_meldkamer != blank -%}
-                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Meldkamer</span><span class="ltc__badge ltc__badge--{{ ltc_meldkamer }}">{{ ltc_meldkamer | capitalize }}</span></div>
-                      {%- endif -%}
-                      {%- if ltc_camera != blank -%}
-                        <div class="ltc__badge-col"><span class="ltc__badge-lbl">Camera</span><span class="ltc__badge ltc__badge--{{ ltc_camera }}">{{ ltc_camera | capitalize }}</span></div>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
                   <hr class="ltc__div">
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
                   <div class="pcard__cta ltc__cta">
@@ -274,11 +259,19 @@
                         <details class="ltc__watzit">
                           <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
-                            {%- if ltc_hw_bullets != blank -%}
+                            {%- if ltc_hw_bullets != blank or ltc_meldkamer != blank or ltc_camera != blank -%}
                               <ul class="ltc__hw">
                                 {%- for hw in ltc_hw_bullet_list -%}
                                   <li>{{ hw }}</li>
                                 {%- endfor -%}
+                                {%- comment -%}
+                                  Meldkamer/Camera status, moved here from a front-of-card
+                                  banner (2026-09-15) — plain text lines in the same list,
+                                  not a new visual treatment. ltc_meldkamer/ltc_camera are
+                                  blank for Langer Thuis, so these render nothing there.
+                                {%- endcomment -%}
+                                {%- if ltc_meldkamer != blank -%}<li>Meldkamer: {{ ltc_meldkamer | capitalize }}</li>{%- endif -%}
+                                {%- if ltc_camera != blank -%}<li>Camera: {{ ltc_camera | capitalize }}</li>{%- endif -%}
                               </ul>
                             {%- endif -%}
                           </div>
@@ -741,18 +734,6 @@
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
-/* Meldkamer/Camera status badges — optional field, new 2026-09-14 for Mijn Thuis
-   Alert/Protect (blank/omitted for Langer Thuis). Ja reuses the same green "yes" pill
-   colors as .zv-vergelijk .cmp-tbl .yes (assets/zv-vergelijk-pakketten.css); Optioneel
-   reuses the existing gold/belt "flag" accent so all three states stay in the page's
-   established palette rather than introducing new colors. */
-.ltc__badges { display: flex; gap: 22px; margin: 14px 0 0; }
-.ltc__badge-col { display: flex; flex-direction: column; gap: 6px; }
-.ltc__badge-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); }
-.ltc__badge { display: inline-flex; align-self: flex-start; align-items: center; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; }
-.ltc__badge--ja { background: rgba(47, 143, 91, 0.14); color: var(--ok); }
-.ltc__badge--nee { background: var(--indigo-soft); color: var(--muted); }
-.ltc__badge--optioneel { background: var(--gold-soft); color: var(--belt); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
