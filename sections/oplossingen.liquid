@@ -125,7 +125,7 @@
             </div>
           </div>
         {%- elsif coll and coll.products.size > 0 -%}
-          <div class="pgrid" data-n="{{ coll.products.size }}">
+          <div class="pgrid" data-n="{{ coll.products.size }}" data-anchor="{{ anchor }}">
             {%- for p in coll.products -%}
               {%- assign fk = p.metafields.custom.finder_key.value -%}
               {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}{%- assign term = '' -%}
@@ -663,6 +663,15 @@
 .pak__head .compare svg { width: 16px; height: 16px; }
 .pgrid { display: grid; gap: 20px; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); max-width: calc(var(--cols, 3) * 360px); margin-left: auto; margin-right: auto; }
 .pgrid[data-n="1"] { --cols: 1; } .pgrid[data-n="2"] { --cols: 2; } .pgrid[data-n="3"] { --cols: 3; }
+/* Mijn Thuis only, 2026-09-15: CSS Grid's default align-items:stretch forces every
+   .pcard in a row to the row's tallest sibling. Protect (guard) is naturally the
+   tallest of Alert/Protect/Vista, so Alert's shorter content was being stretched to
+   match it, and .ltc__cta's margin-top:auto absorbed the difference as a large gap
+   above the "In winkelwagen" button — confirmed via computed-style measurement, not
+   guessed (see docs/mijn-thuis-vista-images-card-height-2026-09-15.md). Scoped to
+   Mijn Thuis only so Langer Thuis's already-approved equal-height card row (PR #19)
+   is untouched. */
+.pgrid[data-anchor="mijn-thuis"] { align-items: start; }
 .pcard { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 26px 24px 24px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(26, 18, 48, 0.04); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .pcard:hover { border-color: var(--line-2); box-shadow: 0 6px 20px -12px rgba(26, 18, 48, 0.22); }
 .pcard.pop { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 18px 44px -22px rgba(50, 36, 105, 0.45); }
