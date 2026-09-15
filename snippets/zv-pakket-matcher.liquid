@@ -39,7 +39,9 @@
   Params (new, all optional — generalization surface):
     pkg_meta                '§'-joined records, one per package, each
                             `id|display name|price|unit|tagline`, e.g.
-                            `secure|Alert|€19,95|/mnd|Basisbeveiliging tegen inbraak`. Leave
+                            `secure|Alert|{{ zv_alert_monthly }}|/mnd|Basisbeveiliging tegen inbraak`
+                            (never a literal amount — see scripts/check_pricing.py check #9).
+                            Leave
                             `unit` empty for a non-recurring price (Vista's "Op maat" has no
                             "/mnd"). Order = tie-break precedence, ascending (see `recommend()`
                             in the JS — the LAST package in this list wins a tie against any
