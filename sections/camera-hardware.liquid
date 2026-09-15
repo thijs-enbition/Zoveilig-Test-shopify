@@ -253,7 +253,7 @@
     var err=document.getElementById('ccErr');
     if(!name || !phone){ err.textContent='Vul uw naam en telefoonnummer in.'; err.style.display='block'; return; }
     err.style.display='none';
-    var payload={ lead_type:'vista', source_page:'camera-hardware', name:name, phone:phone, email:email||null,
+    var payload={ lead_type:'camerahardware', source_page:'camera-hardware', name:name, phone:phone, email:email||null,
       cta_location:'camera_hardware_page', source:captureSource() };
     if (window.ZVLeadWebhook) { window.ZVLeadWebhook.send(payload, 'camera_hardware'); }
     try{ var leads=JSON.parse(localStorage.getItem('zv_leads')||'[]'); leads.push(payload); localStorage.setItem('zv_leads', JSON.stringify(leads)); }catch(ex){}
