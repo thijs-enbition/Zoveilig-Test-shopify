@@ -1687,7 +1687,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
         if (!consent) { err.textContent = 'Ga akkoord met het privacybeleid om verder te gaan.'; err.hidden = false; return; }
         err.hidden = true;
-        submitLead({ lead_type: 'coming-soon-onderweg', email: email, phone: phone, consent: consent, cta_location: 'coming_soon_onderweg' });
+        submitLead({ lead_type: 'onderweg', email: email, phone: phone, consent: consent, cta_location: 'coming_soon_onderweg' });
         form.style.display = 'none'; if (done) done.hidden = false;
       });
     });
