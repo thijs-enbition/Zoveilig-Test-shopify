@@ -135,7 +135,18 @@
                 {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
                 {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
                 {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
-                {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
+                {%- when 'secure_plus' -%}
+                  {%- comment -%}
+                    Vista, 2026-09-15: product-photo tile image removed (was
+                    assets/opl-tile-06.jpg, now deleted) — see
+                    docs/mijn-thuis-vista-images-card-height-2026-09-15.md. That image baked
+                    together the product photos, the "IN HET PAKKET" pill list, and the
+                    Meldkamer/Camera badges as one graphic; none of that has a live markup
+                    equivalent yet, so Vista's card front is intentionally sparser (sub-line
+                    + "Geen vast pakket" + lead form only) until its copy is drafted and
+                    signed off, same open item as the other Alert/Protect redesign work.
+                  {%- endcomment -%}
+                  {%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
               {%- endcase -%}
