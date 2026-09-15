@@ -149,6 +149,87 @@
           </div>
         </div>
       </div>
+
+      <div class="tbl-wrap">
+        <table class="cmp-tbl">
+          <thead>
+            <tr>
+              <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
+              <th class="plan" scope="col">
+                <span class="pn">Alert</span>
+                <span class="price">{{ zv_alert_monthly | remove: ' ' }}<span>/mnd</span></span>
+                <span class="term">Looptijd {{ zv_alert_term }} maanden</span>
+              </th>
+              <th class="plan rec" scope="col">
+                <span class="badge">Meest gekozen</span>
+                <span class="pn">Protect</span>
+                <span class="price">{{ zv_protect_monthly | remove: ' ' }}<span>/mnd</span></span>
+                <span class="term">Looptijd {{ zv_protect_term }} maanden</span>
+              </th>
+              <th class="plan" scope="col">
+                <span class="pn">Vista</span>
+                <span class="price">{{ zv_vista_monthly }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feat">Meest geschikt voor</td>
+              <td class="val txt">Basisbeveiliging tegen inbraak</td>
+              <td class="val txt">Inbraak én brand in één systeem</td>
+              <td class="val txt">Camerabeveiliging op maat</td>
+            </tr>
+            <tr>
+              <td class="feat">Bewegings- en deursensoren</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Rookmelder</td>
+              <td class="val">{{ no }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Meldkameropvolging (24/7)</td>
+              <td class="val">{{ no }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Camera</td>
+              <td class="val">{{ no }}</td>
+              <td class="val txt">Optioneel</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Zelf in- en uitschakelen via de app</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Contractduur</td>
+              <td class="val txt">{{ zv_alert_term }} maanden</td>
+              <td class="val txt">{{ zv_protect_term }} maanden</td>
+              <td class="val txt">Op maat</td>
+            </tr>
+            <tr>
+              <td class="feat">Jaarlijks onderhoud</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr class="cta">
+              <td></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}#mijn-thuis">Kies Alert</a></td>
+              <td class="rec-cell"><a class="btn btn--gold" href="{{ opl }}#mijn-thuis">Kies Protect {{ arrow }}</a></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}#mijn-thuis-vista" data-cta-name="vraag_vista_aan" data-cta-position="mijn_thuis_vergelijk">Vraag Vista aan {{ arrow }}</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 </div>

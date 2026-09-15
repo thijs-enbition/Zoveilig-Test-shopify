@@ -1051,11 +1051,28 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
   tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-opl-tab'), true); }); });
 
+  /* A trailing "-vista" on the deep-link hash (e.g. #mijn-thuis-vista, used by the
+     Vergelijk pakketten page's Vista CTA) both selects the panel and scrolls/focuses
+     the Vista lead-capture form within it — same deep-link mechanism as a plain
+     #<anchor>, just with an extra step. */
+  var VISTA_SUFFIX = '-vista';
+  function focusVista() {
+    var box = page.querySelector('[data-vista]');
+    if (!box) return;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var input = box.querySelector('[data-vista-form] input');
+    if (input) input.focus({ preventScroll: true });
+  }
+  function applyHash(h, push) {
+    var wantsVista = h.slice(-VISTA_SUFFIX.length) === VISTA_SUFFIX;
+    var panelId = wantsVista ? h.slice(0, -VISTA_SUFFIX.length) : h;
+    if (panelId && panels[panelId]) show(panelId, push);
+    if (wantsVista) focusVista();
+  }
   var hash = (location.hash || '').replace('#', '');
-  if (hash && panels[hash]) show(hash, false);
+  if (hash) applyHash(hash, false);
   window.addEventListener('hashchange', function () {
-    var h = (location.hash || '').replace('#', '');
-    if (panels[h]) show(h, false);
+    applyHash((location.hash || '').replace('#', ''), false);
   });
 
   /* ---------- shared cart helper (Shopify line item properties) ---------- */
