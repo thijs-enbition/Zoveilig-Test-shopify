@@ -185,12 +185,16 @@
                   {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'secure' -%}
-                  {%- comment -%} Alert. Raw hardware list (was the front-of-card checklist pre-2026-09-14) moves into the "Wat zit erin?" panel, same wording as the retired opl-tile-04.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-04.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Directe melding bij inbraak' -%}
+                  {%- assign ltc_bullets = 'Beweging en deur worden direct herkend|Zelf in- en uitschakelen met de app|Geen camera, wel een waakzaam systeem' -%}
                   {%- assign ltc_hw_bullets = 'Alarm Pod|SensePlug|PIR|Deursensor|Codepaneel' -%}
                   {%- assign ltc_meldkamer = 'nee' -%}{%- assign ltc_camera = 'nee' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 C24 12 19 18 19 27 V34 L14 42 H50 L45 34 V27 C45 18 40 12 32 12 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 47 A6 6 0 0 0 38 47" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="16" r="4.5" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'guard' -%}
-                  {%- comment -%} Protect. Raw hardware list (was the front-of-card checklist pre-2026-09-14) moves into the "Wat zit erin?" panel, same wording as the retired opl-tile-05.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- comment -%} Protect. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-05.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Inbraak én brand, in één systeem bewaakt' -%}
+                  {%- assign ltc_bullets = 'Rookmelder direct gekoppeld aan de meldkamer|Beweging, deur en rook in één overzicht|Meldkamer schakelt direct de hulpdiensten in' -%}
                   {%- assign ltc_hw_bullets = 'Hub|Codepaneel|Rookmelder|PIR|Deurcontact' -%}
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
