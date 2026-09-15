@@ -1,11 +1,41 @@
 /* Pakket-matcher scoring/highlight logic. Rendered by snippets/zv-pakket-matcher.liquid,
-   used on both /pages/vergelijk-pakketten and the Langer Thuis panel of /pages/oplossingen.
-   Static asset (not a section {% javascript %} block) so both pages load the exact same
-   file — see snippets/zv-pakket-matcher.liquid for why. Auto-inits every [data-pm-root]
-   found on the page, so it works whether there's one instance or several. */
+   used on /pages/vergelijk-pakketten (Langer Thuis) and the Langer Thuis + Mijn Thuis panels
+   of /pages/oplossingen. Static asset (not a section {% javascript %} block) so every caller
+   loads the exact same file — see snippets/zv-pakket-matcher.liquid for why. Auto-inits every
+   [data-pm-root] found on the page, so it works whether there's one instance or several —
+   Oplossingen has two simultaneously (Langer Thuis + Mijn Thuis), each with its own package
+   vocabulary, which is why TIER/NAMES are read per-instance below instead of being one
+   shared module-level object like before this file was generalized (2026-09-15).
+
+   Generalization added two per-instance concepts, both read from [data-pm-root] attributes
+   the Liquid snippet emits (defaults reproduce the original Langer Thuis-only behavior when
+   a caller doesn't emit them, so nothing here changed for that call site):
+     data-pm-tier / data-pm-names  "id:value,id:value,…" — tie-break precedence (higher wins
+                                    a tie) and display-name maps, in place of the old hardcoded
+                                    { inzicht: 1, zeker: 2, beschermd: 3 } / … NAMES object.
+     data-pm-lead-pkgs / -lead-url a comma list of package ids that have no cart action (e.g.
+                                    Mijn Thuis's Vista — no fixed price, no purchasable variant
+                                    in this matcher's sense) plus the href their "Kies X" (and,
+                                    if they win the recommendation, the advice bar's own CTA)
+                                    should link to instead. See recommend() and resetCta(). */
 (function () {
-  var TIER = { inzicht: 1, zeker: 2, beschermd: 3 };
-  var NAMES = { inzicht: 'Inzicht', zeker: 'Zeker', beschermd: 'Beschermd' };
+  var DEFAULT_TIER = { inzicht: 1, zeker: 2, beschermd: 3 };
+  var DEFAULT_NAMES = { inzicht: 'Inzicht', zeker: 'Zeker', beschermd: 'Beschermd' };
+
+  /* Parses the "id:value,id:value" attribute format shared by data-pm-tier/data-pm-names —
+     numeric-looking values become numbers (for TIER), everything else stays a string (for
+     NAMES). Returns `fallback` unchanged if the attribute is missing/empty. */
+  function parsePairs(str, fallback) {
+    if (!str) return fallback;
+    var out = {};
+    str.split(',').forEach(function (pair) {
+      var i = pair.indexOf(':');
+      if (i < 0) return;
+      var k = pair.slice(0, i).trim(), v = pair.slice(i + 1).trim();
+      out[k] = (v !== '' && !isNaN(v)) ? Number(v) : v;
+    });
+    return out;
+  }
 
   function init(root) {
     var cards = Array.prototype.slice.call(root.querySelectorAll('[data-pm-card]'));
@@ -17,12 +47,18 @@
     var addBtn = root.querySelector('[data-pm-add]');
     var addText = root.querySelector('[data-pm-add-text]');
     var viewCart = root.querySelector('[data-pm-viewcart]');
+    var leadCta = root.querySelector('[data-pm-lead-cta]');
+    var leadText = root.querySelector('[data-pm-lead-text]');
     var err = root.querySelector('[data-pm-err]');
     var products = {};
     try { products = JSON.parse((root.querySelector('[data-pm-products]') || {}).textContent || '{}'); } catch (e) { products = {}; }
     var current = null;
     var addedTimer = null;
     var activationVariantId = root.getAttribute('data-activation-variant-id') || null;
+    var TIER = parsePairs(root.getAttribute('data-pm-tier'), DEFAULT_TIER);
+    var NAMES = parsePairs(root.getAttribute('data-pm-names'), DEFAULT_NAMES);
+    var leadPkgs = (root.getAttribute('data-pm-lead-pkgs') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var leadUrl = root.getAttribute('data-pm-lead-url') || '';
 
     /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
        activation.productHandle/sku) — deduped against the live cart so it's only ever
@@ -39,17 +75,36 @@
     }
 
     function recommend() {
-      var score = { inzicht: 0, zeker: 0, beschermd: 0 };
+      var score = {};
+      cards.forEach(function (c) { score[c.getAttribute('data-pm-pkg')] = 0; });
       var any = false;
       cards.forEach(function (c) {
         if (c.getAttribute('aria-pressed') === 'true') {
-          var p = c.getAttribute('data-pm-pkg');
-          if (score.hasOwnProperty(p)) { score[p] += 1; any = true; }
+          score[c.getAttribute('data-pm-pkg')] += 1;
+          any = true;
         }
       });
       if (!any) return null;
+
+      /* A leadPkgs package (no cart action — see the file header) may only win by an
+         outright majority: strictly higher than every other scored package. If it doesn't
+         clear that bar it's removed from consideration entirely for this call — a tie
+         involving it never lets it win — and the remaining packages fall back to the
+         ordinary highest-score/higher-tier-wins-a-tie rule below. leadPkgs is empty for
+         Langer Thuis, so this is a no-op there: `outright` stays null and `eligible`
+         is every scored package, same as before generalization. */
+      var ids = Object.keys(score);
+      var outright = null;
+      leadPkgs.forEach(function (lp) {
+        if (outright !== null || !score.hasOwnProperty(lp) || score[lp] === 0) return;
+        var beatsAll = ids.every(function (other) { return other === lp || score[lp] > score[other]; });
+        if (beatsAll) outright = lp;
+      });
+      if (outright !== null) return outright;
+
+      var eligible = ids.filter(function (p) { return leadPkgs.indexOf(p) === -1; });
       var best = null;
-      Object.keys(score).forEach(function (p) {
+      eligible.forEach(function (p) {
         if (best === null || score[p] > score[best] || (score[p] === score[best] && TIER[p] > TIER[best])) best = p;
       });
       return best;
@@ -63,6 +118,19 @@
     function resetCta(pkg) {
       if (addedTimer) { clearTimeout(addedTimer); addedTimer = null; }
       if (err) { err.hidden = true; err.textContent = ''; }
+      var isLead = leadPkgs.indexOf(pkg) !== -1;
+      if (leadCta) {
+        leadCta.hidden = !isLead;
+        if (isLead) {
+          leadCta.setAttribute('href', leadUrl);
+          if (leadText) leadText.textContent = 'Kies ' + (NAMES[pkg] || pkg);
+        }
+      }
+      if (isLead) {
+        if (addBtn) addBtn.hidden = true;
+        if (viewCart) viewCart.hidden = true;
+        return;
+      }
       var prod = products[pkg];
       if (addBtn) {
         addBtn.hidden = !prod || !prod.available;
