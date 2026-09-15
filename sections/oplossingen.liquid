@@ -135,7 +135,7 @@
                 {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
                 {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
                 {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
-                {%- when 'secure_plus' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
+                {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
               {%- endcase -%}
@@ -298,48 +298,7 @@
                     </div>
                   </div>
                 </article>
-              {%- elsif is_vista -%}
-                {%- comment -%}
-                  Vista (secure_plus) visual-only restyle, 2026-09-14 — see
-                  docs/mijn-thuis-card-redesign-research-2026-09-14.md §4. This is
-                  deliberately NOT the shared ltc card markup (no checklist/badges/price
-                  data model): only the header chrome (icon + name + tagline, using the
-                  same .ltc__head/.ltc__icon/.ltc__tagline classes and spacing as
-                  Inzicht/Zeker/Beschermd/Alert/Protect) is new. Everything below —
-                  the "Geen vast pakket" line, the hardware sub-line, the camera-hardware
-                  link, and the ENTIRE lead-capture form (.pcard__vista and its children,
-                  data-vista/-form/-err/-done attributes) — is byte-for-byte the same
-                  markup this branch already rendered, so the existing JS handlers and the
-                  Odoo webhook submission (window.ZV_LEAD_ENDPOINT) need no changes.
-                {%- endcomment -%}
-                <article class="pcard pcard--ltc pcard--vista" data-odoo-sku="{{ v.sku }}"
-                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
-                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
-                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
-                         data-price-known="{{ price_known }}" data-price="Geen vast pakket" data-price-cents="{{ p.price }}" data-per="">
-                  <div class="ltc__head">
-                    <span class="ltc__icon"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="14" y="24" width="36" height="26" rx="5" stroke="var(--indigo)" stroke-width="3.4"/><circle cx="32" cy="37" r="7" stroke="var(--indigo)" stroke-width="3.4"/><circle cx="32" cy="37" r="2.4" fill="var(--red)"/><path d="M24 24 L27 17 H37 L40 24" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                    <div class="ltc__headtext"><h4 class="ltc__name">{{ short_name }}</h4><p class="ltc__tagline">Complete beveiliging met meldkamer én camera.</p></div>
-                  </div>
-                  <div class="pcard__price"><span class="amt">Geen vast pakket</span></div>
-                  {%- if sub != blank -%}<div class="ltc__hw">{{ sub }}</div>{%- endif -%}
-                  <div class="ltc__cta">
-                    <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
-                      <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-                      <form class="pcard__vista-form" data-vista-form>
-                        <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
-                        <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
-                        <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
-                        <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
-                        <div class="pcard__vista-err" data-vista-err hidden></div>
-                        <button type="submit">Verstuur terugbelverzoek</button>
-                      </form>
-                      <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
-                    </div>
-                  </div>
-                </article>
               {%- else -%}
-                {%- comment -%} Fallback tile-card, kept for any product whose finder_key isn't one of the ltc-eligible keys above and isn't Vista — e.g. a future Veilig Onderweg product, or an unrecognized finder_key. Not exercised by any live product as of 2026-09-14. {%- endcomment -%}
                 <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
