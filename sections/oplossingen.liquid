@@ -351,6 +351,7 @@
                           <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                           <form class="pcard__vista-form" data-vista-form>
                             <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
+                            <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
                             <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
                             <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
                             <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
@@ -1653,15 +1654,17 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       if (form) form.addEventListener('submit', function (e) {
         e.preventDefault();
         var name = ((form.querySelector('[name=name]') || {}).value || '').trim();
+        var email = ((form.querySelector('[name=email]') || {}).value || '').trim();
         var phone = ((form.querySelector('[name=phone]') || {}).value || '').trim();
         var time = ((form.querySelector('[name=time]') || {}).value || '').trim();
         var consent = !!(form.querySelector('[name=consent]') || {}).checked;
         if (!name) { err.textContent = 'Vul uw naam in.'; err.hidden = false; return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Vul een geldig e-mailadres in.'; err.hidden = false; return; }
         if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
         if (!consent) { err.textContent = 'Bevestig dat wij u mogen terugbellen.'; err.hidden = false; return; }
         err.hidden = true;
         submitLead({
-          lead_type: 'vista', name: name, phone: phone, preferred_callback_time: time, consent: consent,
+          lead_type: 'vista', name: name, email: email, phone: phone, preferred_callback_time: time, consent: consent,
           item_name: box.getAttribute('data-item') || 'Mijn Thuis Vista', item_id: box.getAttribute('data-odoo') || 'MT-VIS',
           monthly_price: box.getAttribute('data-price') || '', solution_category: 'security', cta_location: 'oplossingen_vista'
         });
