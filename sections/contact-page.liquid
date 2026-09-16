@@ -175,6 +175,28 @@
     var payload = {};
     formData.forEach(function (value, key) { payload[key] = value; });
 
+    // Additive Odoo CRM dual-write — fires independently, never blocks or waits on the
+    // Supabase capture-lead call below. See docs/contact-odoo-dual-write-2026-09-16.md
+    // for the field-mapping rationale (including the 'any' preferred-time and consent
+    // open questions).
+    try {
+      if (window.ZVMeasurement && window.ZVMeasurement.buildCallbackLead && window.ZVLeadWebhook) {
+        var TIJD_MAP = { morning: 'ochtend', afternoon: 'middag', evening: 'avond' };
+        var tijd = payload.Voorkeurstijd || '';
+        var rec = window.ZVMeasurement.buildCallbackLead({
+          lead_type: 'contact_page',
+          cta_location: 'contact_page',
+          name: payload.Naam || '',
+          phone: payload.Telefoon || '',
+          email: payload.email || '',
+          preferred_callback_time: TIJD_MAP[tijd] || tijd,
+          contact_subject: payload.Onderwerp || '',
+          message: payload.body || ''
+        });
+        window.ZVLeadWebhook.send(rec, 'contact_page');
+      }
+    } catch (e) { /* never block the Supabase submit below on this */ }
+
     var submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
