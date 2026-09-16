@@ -116,3 +116,40 @@ tell which." No handle chosen — see Open questions.**
 Given 1-4 are all open, **Step 2 has not been started** — there is currently no confirmed item
 to wire into `sections/oplossingen.liquid` for either package line without guessing on at least
 one of the above.
+
+## Status (2026-09-16, after Thijs's answers)
+
+Thijs answered questions 1-3 directly: Inzicht/Zeker/Alert ship with no add-on checkboxes for
+now (question 1); the one-off € price is shown as-is on the four Climax items, no monthly
+figure needed (question 2); the videodeurbel is the plain 750
+(`koop-video-deurbel-750`, €299,00), not 780 or 770 (question 3). On question 4 — none of the
+confirmed products being published to the Online Store channel — Thijs said he'll publish them
+in Shopify admin himself; nothing else to do on the code side once that's done, since
+`all_products[handle]` already resolves live with no redeploy needed.
+
+`sections/oplossingen.liquid`'s "Uitbreidingen toevoegen" list for Beschermd/Protect (care/
+guard) now shows the 7 confirmed Group B items above, each priced live via
+`all_products[handle].price`, replacing the old shared `b.settings.uitbreidingen` textarea with
+a per-package `case`/`when` list ("Prijs volgt" only as a fallback if a handle can't resolve).
+Inzicht/Zeker/Alert (aware/aware_plus/secure) render no add-ons optgroup at all, per question
+1's answer — not guessed, not left as a stray empty "Uitbreidingen toevoegen" heading.
+
+Validated: `python3 scripts/check_pricing.py` (all pass), `shopify theme check` (0 errors; the
+one new warning nudged, LiquidComplexity 122→126, is the same pre-existing over-120 warning
+`origin/main` already carries, not a new offense caused by this change), and a push to a
+disposable unpublished theme (`zz-validate-package-addons-20260916165236`, deleted immediately
+after). Pushed to `origin/feature/package-addons-uitbreidingen-2026-09-16` — never
+`veronica-origin`. No PR opened; Thijs opens that manually.
+
+### Open items
+
+- **Blocking, Shopify-admin-side, not code**: none of the 7 confirmed care/guard add-on
+  products are published to the Online Store sales channel (`ACTIVE` in admin, but 404 on the
+  storefront JSON proxy as of 2026-09-16) — every checkbox shows "Prijs volgt" until this is
+  fixed. Thijs is publishing them himself; the Liquid needs no further change once that
+  happens.
+- The duplicate "780 + Chime (WiFi)" product in Shopify
+  (`koop-video-deurbel-draadloos-780-chime-wifi` and `...-1`, same title/price, different
+  handle+SKU) is unrelated to what shipped (plain 750 was chosen instead) but is still sitting
+  in the store as a data-quality issue worth cleaning up separately.
+- PR not yet opened — Thijs opens it manually per his own instruction.
