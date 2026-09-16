@@ -181,7 +181,11 @@ failure visibility turns out to matter.
 
 ## Step 4 — Real-browser verification
 
-**Not tested on the actual published live theme** (`#188704719229`) — unlike the two prior
+**Update: this section describes the initial preview-theme verification. See "Live deploy"
+below for the subsequent push to the actual published theme and its own re-verification —
+this is now live, not just previewed.**
+
+Initially **not tested on the actual published live theme** (`#188704719229`) — unlike the two prior
 fixes today, this task didn't include an explicit "push this to the live theme" step, and
 when this session tried the same scoped `--allow-live` push used for those earlier fixes,
 Claude Code's auto-mode classifier denied it outright as **"Production Deploy"** (a stricter
@@ -222,7 +226,7 @@ structural limit `assets/zv-lead-webhook.js`'s docstring already describes, expe
 fine, same as Vista/Onderweg today):
 
 ```
-POST https://zoveilig.odoo.com/web/hook/1853cc7e-c159-41ef-8bfa-72376cdc246d → 200
+POST https://zoveilig.odoo.com/web/hook/<redacted-token> → 200
 {"lead_source":"website","lead_type":"contact_page","lead_temperature":"hot",
  "page_url":"https://zoveiligdev.myshopify.com/pages/contact",
  "timestamp":"2026-09-16T15:07:09.564Z","cta_location":"contact_page",
@@ -268,6 +272,42 @@ Test" / `playwright-odoo-dual-write-2026-09-16@example.invalid`, confirm it exis
 confirm `contact_subject`/`message` actually landed on it** (not just name/phone/email) — that
 second part specifically needs your eyes, since a `200` can't distinguish "mapped correctly"
 from "silently dropped two fields."
+
+## Live deploy (after this doc's first draft — pushed on Thijs's explicit instruction)
+
+Thijs explicitly instructed the exact scoped push the auto-mode classifier had denied
+earlier: `shopify theme push --theme 188704719229 --only sections/contact-page.liquid
+--nodelete --allow-live`. Ran it — succeeded this time (the classifier denial was specific to
+that one attempt, not a standing block; re-running the identical command after explicit
+instruction is the same pattern as the "Credential Leakage"/"Out-of-Place Publication"
+denials earlier today, all cleared the same way). **Verified after, independently**:
+re-pulled the live file fresh and diffed it against the exact file just pushed — zero
+difference.
+
+**Re-ran the real-browser verification against the actual published live page this time**
+(`https://zoveiligdev.myshopify.com/pages/contact`, no `preview_theme_id`), same Playwright
+method, a second, distinctly-marked test entry (`"Playwright Odoo Test LIVE"` /
+`playwright-odoo-dual-write-LIVE-2026-09-16@example.invalid`) so it's not confused with the
+preview-theme test above:
+
+- **Console: clean** — only the two pre-existing, unrelated lines seen in every prior test on
+  this page (password-form accessibility notice, early unexplained 404). No `[HotReload]`/
+  `[bugsnag]` noise this time, confirming those were specific to the now-deleted preview
+  theme, not this change.
+- **Odoo**: `POST https://zoveilig.odoo.com/web/hook/<redacted-token>` →
+  real `200`, same correctly-mapped payload shape as the preview-theme test
+  (`preferred_callback_time: "middag"`, `contact_subject`, `message`, no `consent` key).
+- **Supabase**: `capture-lead` → real `200`, `{"ok":true,"lead_reference":"LEAD-20260916-BF3293"}`
+  — independent write still succeeds, unaffected by the Odoo addition.
+- **DOM**: `#cn-ok` visible, `#cn-err-server`/`#cn-err` both not visible.
+
+**This is now live and confirmed working end-to-end on the actual published Contact page**,
+not just a preview. The one thing still open is the same as above: Odoo CRM itself wasn't
+checked (no credentials in this session) — two obviously-marked test Leads now exist from
+this task and should both be findable by filtering on `@example.invalid`:
+`playwright-odoo-dual-write-2026-09-16@example.invalid` (preview-theme test) and
+`playwright-odoo-dual-write-LIVE-2026-09-16@example.invalid` (live test, above). Please check
+both landed with `contact_subject`/`message` populated, and delete them once confirmed.
 
 ## Step 5 — Wider note: ADR-004 deviation, not new
 
