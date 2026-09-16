@@ -83,6 +83,11 @@
 
     {%- comment -%} Zo Veilig — single lead endpoint for every callback/contact form (Odoo CRM webhook or proxy). Blank = leads stay local. {%- endcomment -%}
     <script>window.ZV_LEAD_ENDPOINT = {{ settings.callback_endpoint | json }};</script>
+    {%- comment -%} Optional Supabase Edge Function that logs a failed ZV_LEAD_ENDPOINT send (see assets/zv-lead-webhook.js). Blank = failures stay silent, same as before this existed. {%- endcomment -%}
+    <script>
+      window.ZV_WEBHOOK_FAILURE_LOG_ENDPOINT = {{ settings.webhook_failure_log_endpoint | json }};
+      window.ZV_WEBHOOK_FAILURE_LOG_KEY = {{ settings.webhook_failure_log_key | json }};
+    </script>
 
     {%- liquid
       assign body_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
@@ -428,6 +433,7 @@
       Utilities only: attaches no listeners and fires no events yet.
     {%- endcomment -%}
     <script src="{{ 'zv-measurement.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'zv-lead-webhook.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'zv-track.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'zv-callback.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'oplossingen.js' | asset_url }}" defer="defer"></script>

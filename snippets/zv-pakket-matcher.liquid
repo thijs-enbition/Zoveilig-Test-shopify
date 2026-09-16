@@ -1,0 +1,252 @@
+{%- comment -%}
+  Pakket-matcher: scenario cards + comparison table, scored client-side. Single source of
+  truth, rendered from three places:
+    - sections/vergelijk-pakketten.liquid (the standalone /pages/vergelijk-pakketten page,
+      Langer Thuis only)
+    - sections/oplossingen.liquid, embedded under the Langer Thuis pricing cards
+    - sections/oplossingen.liquid, embedded under the Mijn Thuis pricing cards
+  Scoring/highlight JS lives in assets/zv-vergelijk-pakketten.js (static asset, not a
+  section {% javascript %} block, because {% javascript %}/{% stylesheet %} only work in
+  section files — not in snippets — see snippets/zv-actie-card.liquid for the same note).
+  Both callers must load assets/zv-vergelijk-pakketten.css and .js themselves (once each,
+  outside this snippet) and must have already run {%- include 'zv-pricing' -%}.
+
+  Originally Langer Thuis-only (3 hardcoded packages: inzicht/zeker/beschermd). Generalized
+  2026-09-15 to also serve Mijn Thuis (secure/guard/secure_plus) — every new param below is
+  OPTIONAL and defaults to reproducing the original Langer Thuis output byte-for-byte, so
+  the two existing call sites needed no changes.
+
+  Params (existing, unchanged):
+    scenarios              required. `section.blocks | where: 'type', 'scenario'`.
+    activation_variant_id  required. All_products[zv_activation_handle]'s variant id.
+    collection              optional. Handle/object of the packages collection. Falls back
+                            to the 'langer-thuis' collection if blank/empty.
+    pm_heading, pm_sub, advies_label, cta_label, cta_added, cta_view_cart, match_badge
+                            optional editorial copy, shared across every package.
+    opl_url                 optional, defaults to '/pages/oplossingen'.
+    embedded                optional, defaults to false. When true, the comparison table's
+                            "Kies …" row adds the matching package to cart directly instead
+                            of linking to opl_url — see assets/zv-vergelijk-pakketten.js's
+                            addPackageToCart(). Ignored for a package listed in
+                            `lead_only_pkgs` (see below), which is always a plain link.
+    zv_inzicht_monthly / zv_zeker_monthly / zv_beschermd_monthly, tagline_inzicht /
+    tagline_zeker / tagline_beschermd
+                            optional. Only used to build the DEFAULT `pkg_meta` (below) when
+                            the caller doesn't pass one — i.e. only Langer Thuis's two call
+                            sites still rely on these; a new line should just pass `pkg_meta`
+                            directly instead of adding more named price/tagline params here.
+
+  Params (new, all optional — generalization surface):
+    pkg_meta                '§'-joined records, one per package, each
+                            `id|display name|price|unit|tagline`, e.g.
+                            `secure|Alert|{{ zv_alert_monthly }}|/mnd|Basisbeveiliging tegen inbraak`
+                            (never a literal amount — see scripts/check_pricing.py check #9).
+                            Leave
+                            `unit` empty for a non-recurring price (Vista's "Op maat" has no
+                            "/mnd"). Order = tie-break precedence, ascending (see `recommend()`
+                            in the JS — the LAST package in this list wins a tie against any
+                            earlier one, same convention as today's inzicht<zeker<beschermd).
+                            Also drives the feature-table's column order and the JS's
+                            per-instance TIER/NAMES maps (emitted as data attributes, so two
+                            matcher instances with different package vocabularies can coexist
+                            on the same page — see assets/zv-vergelijk-pakketten.js).
+                            Default: built from zv_inzicht_monthly/zv_zeker_monthly/
+                            zv_beschermd_monthly + tagline_inzicht/zeker/beschermd, i.e.
+                            today's exact Langer Thuis 3 packages.
+    recommended_pkg         which pkg_meta id gets the "Meest gekozen" badge + gold CTA.
+                            Default 'zeker'.
+    finder_key_map          'fk:pid,fk:pid,…' — custom.finder_key metafield value -> the
+                            internal package id used above. Default
+                            'aware:inzicht,aware_plus:zeker,care:beschermd' (today's mapping).
+                            Mijn Thuis passes an identity mapping
+                            ('secure:secure,guard:guard,secure_plus:secure_plus') since its
+                            internal ids are just its finder_key values verbatim.
+    feature_rows            '§'-joined comparison-table rows, each
+                            `feat|small|val1|val2|val3` (val = 'y', 'n', or literal text) in
+                            the same order as pkg_meta. Default: today's exact 8-row Langer
+                            Thuis string.
+    lead_only_pkgs          comma list of pkg_meta ids that have no cart action at all (e.g.
+                            Vista — no fixed price, no purchasable variant in the matcher's
+                            sense). Such a package's "Kies X" is always a plain link to
+                            `lead_url` (ignoring `embedded`), and — this is the important
+                            part, see recommend() — it can only ever WIN the recommendation
+                            by strictly outscoring every other package; a tie involving it
+                            excludes it and falls back to the ordinary rule among the rest.
+                            Default '' (no such package — Langer Thuis has none).
+    lead_url                href for a lead_only_pkgs package's "Kies X" AND for the advice
+                            bar's own CTA when that package is the live recommendation (see
+                            the JS's leadPkgs handling). Mijn Thuis passes '#mijn-thuis-vista'
+                            — a same-page hash the Oplossingen page's own tab deep-link
+                            handler (`applyHash()`/`focusVista()`) already resolves into
+                            "select the Mijn Thuis panel, scroll to and focus Vista's real
+                            lead form" — no second lead form is built here.
+{%- endcomment -%}
+
+{%- liquid
+  assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+  assign no = '<span class="no" aria-hidden="true">–</span>'
+  assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  assign opl = opl_url | default: '/pages/oplossingen'
+  assign tag_inzicht = tagline_inzicht | default: 'Rustig eerste inzicht'
+  assign tag_zeker = tagline_zeker | default: 'Vroeg signaleren van veranderingen'
+  assign tag_beschermd = tagline_beschermd | default: 'Snelle hulp bij een val of noodsituatie'
+  assign match_badge = match_badge | default: 'Past bij uw situatie'
+  assign recommended = recommended_pkg | default: 'zeker'
+  assign pm_coll = collections[collection]
+  if pm_coll == blank or pm_coll.products_count == 0
+    assign pm_coll = collections['langer-thuis']
+  endif
+-%}
+
+{%- comment -%} Default pkg_meta reproduces today's 3 hardcoded Langer Thuis packages exactly {%- endcomment -%}
+{%- assign pkg_meta_str = pkg_meta -%}
+{%- if pkg_meta_str == blank -%}
+  {%- capture pkg_meta_str -%}
+    inzicht|Inzicht|{{ zv_inzicht_monthly | remove: ' ' }}|/mnd|{{ tag_inzicht }}§zeker|Zeker|{{ zv_zeker_monthly | remove: ' ' }}|/mnd|{{ tag_zeker }}§beschermd|Beschermd|{{ zv_beschermd_monthly | remove: ' ' }}|/mnd|{{ tag_beschermd }}
+  {%- endcapture -%}
+{%- endif -%}
+{%- assign pkg_meta_arr = pkg_meta_str | strip | split: '§' -%}
+{%- assign lead_list = lead_only_pkgs | default: '' | split: ',' -%}
+
+{%- comment -%} per-instance TIER/NAMES for the JS, so 2 differently-vocabularied matchers can coexist on one page (see assets/zv-vergelijk-pakketten.js) {%- endcomment -%}
+{%- capture pm_tier_attr -%}
+  {%- for pm in pkg_meta_arr -%}{%- assign f = pm | split: '|' -%}{%- unless forloop.first %},{% endunless %}{{ f[0] }}:{{ forloop.index }}{%- endfor -%}
+{%- endcapture -%}
+{%- capture pm_names_attr -%}
+  {%- for pm in pkg_meta_arr -%}{%- assign f = pm | split: '|' -%}{%- unless forloop.first %},{% endunless %}{{ f[0] }}:{{ f[1] }}{%- endfor -%}
+{%- endcapture -%}
+
+{%- comment -%} package id -> real product, via custom.finder_key (same mapping as zv-checkout-overview) {%- endcomment -%}
+{%- assign fk_pairs = finder_key_map | default: 'aware:inzicht,aware_plus:zeker,care:beschermd' | split: ',' -%}
+{%- capture pm_products -%}
+  {%- assign first = true -%}
+  {
+  {%- for p in pm_coll.products -%}
+    {%- assign fk = p.metafields.custom.finder_key.value -%}
+    {%- assign pid = '' -%}
+    {%- for pair in fk_pairs -%}
+      {%- assign kv = pair | split: ':' -%}
+      {%- if kv[0] == fk -%}{%- assign pid = kv[1] -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if pid != blank -%}
+      {%- assign v = p.selected_or_first_available_variant -%}
+      {%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}
+      {%- unless first %},{% endunless -%}{%- assign first = false -%}
+      {{ pid | json }}:{"variantId":{{ v.id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
+    {%- endif -%}
+  {%- endfor -%}
+  }
+{%- endcapture -%}
+
+<div class="zv-vergelijk zv-pakket-matcher">
+  <div class="wrap">
+    {%- if scenarios.size > 0 -%}
+      <!-- PAKKET-MATCHER -->
+      <div class="pm" data-pm-root data-cart-url="{{ routes.cart_url }}" data-activation-variant-id="{{ activation_variant_id }}" data-pm-tier="{{ pm_tier_attr | strip | escape }}" data-pm-names="{{ pm_names_attr | strip | escape }}" data-pm-lead-pkgs="{{ lead_only_pkgs | escape }}" data-pm-lead-url="{{ lead_url | escape }}">
+        <script type="application/json" data-pm-products>{{ pm_products | strip }}</script>
+        <div class="pm-head">
+          <h3>{{ pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}</h3>
+          {%- if pm_sub != blank -%}<p>{{ pm_sub | escape }}</p>{%- endif -%}
+        </div>
+        <div class="pm-cards" role="group" aria-label="{{ pm_heading | default: 'Welk pakket past bij uw situatie?' | escape }}">
+          {%- for r in (1..3) -%}
+            {%- assign row_str = r | append: '' -%}
+            {%- capture row_html -%}
+              {%- for b in scenarios -%}
+                {%- assign b_row = b.settings.row | default: '1' -%}
+                {%- if b_row == row_str -%}
+                  <button type="button" class="pm-card" aria-pressed="false" data-pm-card data-pm-pkg="{{ b.settings.package }}" {{ b.shopify_attributes }}>
+                    <span class="pm-card__t">{{ b.settings.title | escape }}</span>
+                    {%- if b.settings.quote != blank -%}<span class="pm-card__q">{{ b.settings.quote | escape }}</span>{%- endif -%}
+                  </button>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            {%- if row_html contains 'pm-card' -%}<div class="pm-row">{{ row_html }}</div>{%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <div class="pm-advies" data-pm-advies hidden>
+          <span class="pm-advies__chk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <p class="pm-advies__txt"><b>{{ advies_label | default: 'Ons advies:' | escape }} <span data-pm-name></span>.</b> <span data-pm-tagline></span></p>
+          <div class="pm-advies__cta">
+            <button type="button" class="btn btn--gold" data-pm-add data-label="{{ cta_label | default: 'Voeg [pakket] toe aan winkelwagen' | escape }}" data-added="{{ cta_added | default: 'Toegevoegd ✓' | escape }}"><span data-pm-add-text></span>{{ arrow }}</button>
+            <a class="btn btn--gold" href="{{ routes.cart_url }}" data-pm-viewcart hidden>{{ cta_view_cart | default: 'Bekijk winkelwagen' | escape }}{{ arrow }}</a>
+            <a class="btn btn--gold" href="{{ lead_url | escape }}" data-pm-lead-cta hidden><span data-pm-lead-text></span>{{ arrow }}</a>
+          </div>
+          <div class="pm-advies__err" data-pm-err role="alert" hidden></div>
+        </div>
+        <p class="visually-hidden" role="status" aria-live="polite" data-pm-status></p>
+      </div>
+    {%- endif -%}
+
+    <div class="tbl-wrap">
+      <table class="cmp-tbl" data-pm-table>
+        <thead>
+          <tr>
+            <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
+            {%- for pm in pkg_meta_arr -%}
+              {%- assign f = pm | split: '|' -%}
+              {%- assign pid = f[0] -%}
+              {%- assign is_rec = false -%}
+              {%- if pid == recommended -%}{%- assign is_rec = true -%}{%- endif -%}
+              <th class="plan{% if is_rec %} rec{% endif %}" scope="col" data-pm-pkg="{{ pid }}">
+                <span class="pm-badge">{{ match_badge | escape }}</span>
+                {%- if is_rec -%}<span class="badge">Meest gekozen</span>{%- endif -%}
+                <span class="pn">{{ f[1] }}</span>
+                <span class="price">{{ f[2] }}{% if f[3] != blank %}<span>{{ f[3] }}</span>{% endif %}</span>
+              </th>
+            {%- endfor -%}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feat">Meest geschikt voor<small>Waar dit pakket het sterkst in is</small></td>
+            {%- for pm in pkg_meta_arr -%}
+              {%- assign f = pm | split: '|' -%}
+              <td class="val txt tag" data-pm-pkg="{{ f[0] }}" data-pm-tagline-for="{{ f[0] }}">{{ f[4] | escape }}</td>
+            {%- endfor -%}
+          </tr>
+          {%- comment -%} feat | small | val1 | val2 | … (one val per pkg_meta_arr entry, same order) — § splits rows, | splits fields {%- endcomment -%}
+          {%- assign rows = feature_rows | default: 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|n|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | strip | split: '§' -%}
+          {%- for row in rows -%}
+            {%- assign r = row | split: '|' -%}
+            <tr>
+              <td class="feat">{{ r[0] }}<small>{{ r[1] }}</small></td>
+              {%- for pm in pkg_meta_arr -%}
+                {%- assign f = pm | split: '|' -%}
+                {%- assign ci = forloop.index0 | plus: 2 -%}
+                {%- assign v = r[ci] -%}
+                {%- if v == 'y' -%}<td class="val txt" data-pm-pkg="{{ f[0] }}">{{ check }}</td>
+                {%- elsif v == 'n' -%}<td class="val txt" data-pm-pkg="{{ f[0] }}">{{ no }}</td>
+                {%- else -%}<td class="val txt" data-pm-pkg="{{ f[0] }}">{{ v }}</td>{%- endif -%}
+              {%- endfor -%}
+            </tr>
+          {%- endfor -%}
+          <tr class="cta">
+            <td></td>
+            {%- for pm in pkg_meta_arr -%}
+              {%- assign f = pm | split: '|' -%}
+              {%- assign pid = f[0] -%}
+              {%- assign pname = f[1] -%}
+              {%- assign is_rec = false -%}
+              {%- if pid == recommended -%}{%- assign is_rec = true -%}{%- endif -%}
+              {%- assign is_lead = false -%}
+              {%- if lead_list contains pid -%}{%- assign is_lead = true -%}{%- endif -%}
+              <td{% if is_rec %} class="rec-cell"{% endif %} data-pm-pkg="{{ pid }}">
+                {%- if is_lead -%}
+                  <a class="btn {% if is_rec %}btn--gold{% else %}btn--ghost{% endif %}" href="{{ lead_url | escape }}" data-pm-lead="{{ pid }}">Kies {{ pname }}{% if is_rec %} {{ arrow }}{% endif %}</a>
+                {%- elsif embedded -%}
+                  <button type="button" class="btn {% if is_rec %}btn--gold{% else %}btn--ghost{% endif %}" data-pm-choose="{{ pid }}">Kies {{ pname }}{% if is_rec %} {{ arrow }}{% endif %}</button>
+                {%- else -%}
+                  <a class="btn {% if is_rec %}btn--gold{% else %}btn--ghost{% endif %}" href="{{ opl }}">Kies {{ pname }}{% if is_rec %} {{ arrow }}{% endif %}</a>
+                {%- endif -%}
+              </td>
+            {%- endfor -%}
+          </tr>
+        </tbody>
+      </table>
+      {%- if embedded -%}<div class="pm-tbl-err" data-pm-tbl-err role="alert" hidden></div>{%- endif -%}
+    </div>
+  </div>
+</div>

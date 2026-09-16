@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0.0",
-  "edge_functions_version": "1.0.0",
+  "schema_version": "1.2.0",
+  "edge_functions_version": "1.2.0",
   "shopify_integration_version": "1.0.0",
-  "notes": "Gate 1 baseline. schema_version tracks migrations 000-003,005. 004_rpc and 006_reporting_views are Gate 2 and are intentionally NOT present yet."
+  "notes": "Gate 1 baseline plus 007_leads_contact_form_fields and 008_webhook_failures (schema_version now tracks 000-003,005,007,008). Second Edge Function, log-webhook-failure, added to make failed ZV_LEAD_ENDPOINT sends (Vista/camera-hardware/Onderweg) visible instead of silently swallowed. 004_rpc and 006_reporting_views are Gate 2 and are intentionally NOT present yet."
 }

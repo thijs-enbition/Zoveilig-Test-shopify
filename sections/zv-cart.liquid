@@ -21,10 +21,21 @@
   line, e.g. Langer Thuis carries "Langer Thuis" + "keuzehulp", Mijn Thuis
   carries "Mijn Thuis" + "keuzehulp", so a tag alone can't identify a
   subscription across all lines the way `type` reliably does). This
-  classification is now purely informational: it drives the "p/m" badge and
-  the "Maandbedrag" line (the recurring amount that continues via SEPA-incasso
-  each month after today) — it no longer subtracts anything from "Vandaag te
-  betalen". Header/footer come from the theme layout.
+  classification drives the "p/m" badge and the "Maandbedrag" line — it no
+  longer subtracts anything from "Vandaag te betalen". Header/footer come
+  from the theme layout.
+
+  The "p/m" price and "Maandbedrag" total are NOT read from `item.final_line_price` —
+  they come from the confirmed per-package monthly rate in the central pricing model
+  (via zv-pricing + snippets/zv-package-monthly-cents), scaled by `item.quantity`. This is
+  deliberate, not a stray literal: once the interim intro-promo mechanism is live, the
+  package product's live Shopify price represents a discounted multi-month bundle (charged
+  in full today), not one month — see zv-checkout-overview.liquid's header comment for the
+  full rationale and the known gap this leaves (no live signal left to catch the confirmed
+  monthly rate drifting from whatever Odoo actually bills). A line whose finder_key can't be
+  resolved falls back to its own live price (degraded, same convention as an unrecognized
+  package elsewhere in the theme). "Vandaag te betalen" is untouched by any of this — it
+  stays 100% live, per the paragraph above.
 
   Renders zv-cart-guard: if a subscription package ever ends up in the cart
   without the activation fee (e.g. added via the standalone Shopify product
@@ -54,6 +65,16 @@
             {%- for item in cart.items -%}
               {%- assign is_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+              {%- if is_sub -%}
+                {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
+                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
+                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
+                {%- if li_monthly_cents > 0 -%}
+                  {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
+                {%- else -%}
+                  {%- assign li_month_total_cents = item.final_line_price -%}
+                {%- endif -%}
+              {%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
@@ -83,7 +104,7 @@
                 </div>
                 <div class="ci-right">
                   {%- if is_sub -%}
-                    <div class="ci-price" style="color:var(--indigo)">{{ item.final_line_price | money }} <span>p/m</span></div>
+                    <div class="ci-price" style="color:var(--indigo)">{{ li_month_total_cents | money }} <span>p/m</span></div>
                     <span class="ci-badge">Abonnement</span>
                     <span class="ci-note">Inbegrepen bij vandaag te betalen.<br>Loopt daarna door via SEPA-incasso.</span>
                   {%- else -%}
@@ -98,14 +119,22 @@
           <aside class="csummary">
             <h2>Overzicht</h2>
             {%- assign today_cents = 0 -%}
-            {%- assign month_cents = 0 -%}
+            {%- assign true_month_cents = 0 -%}
             {%- for item in cart.items -%}
               {%- assign li_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
               {%- assign today_cents = today_cents | plus: item.final_line_price -%}
               {%- if li_sub -%}
-                {%- assign month_cents = month_cents | plus: item.final_line_price -%}
-                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ item.final_line_price | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
+                {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
+                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
+                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
+                {%- if li_monthly_cents > 0 -%}
+                  {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
+                {%- else -%}
+                  {%- assign li_month_total_cents = item.final_line_price -%}
+                {%- endif -%}
+                {%- assign true_month_cents = true_month_cents | plus: li_month_total_cents -%}
+                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ li_month_total_cents | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
               {%- else -%}
                 <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- endif -%}
@@ -117,8 +146,8 @@
               {%- endfor -%}
             {%- endif -%}
             <div class="srow total"><span>Vandaag te betalen</span><b>{{ today_cents | money }}</b></div>
-            {%- if month_cents > 0 -%}
-              <div class="s-sub">U betaalt vandaag {{ today_cents | money }}. Daarna {{ month_cents | money }} per maand via SEPA-incasso. Prijzen incl. btw.</div>
+            {%- if true_month_cents > 0 -%}
+              <div class="s-sub">U betaalt vandaag {{ today_cents | money }}. Daarna {{ true_month_cents | money }} per maand via SEPA-incasso. Prijzen incl. btw.</div>
             {%- else -%}
               <div class="s-sub">Verzend- en eventuele installatiekosten worden bij het afrekenen berekend. Prijzen incl. btw.</div>
             {%- endif -%}

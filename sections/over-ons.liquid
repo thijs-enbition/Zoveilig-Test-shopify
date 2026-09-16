@@ -12,6 +12,7 @@
   else
     assign hero_url = 'zv-overons-zaanse-huizen.jpg' | asset_url
   endif
+  assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
 -%}
 
 <div class="zv-overons">
@@ -40,10 +41,21 @@
     <div class="wrap">
       <span class="tt-label">Preferred Partner van Securitas, sinds 2007</span>
       <div class="tt-logos">
-        <span class="tt-chip lead"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="34"></span>
-        <span class="tt-chip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="30"></span>
-        <span class="tt-chip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="30"></span>
-        <span class="tt-chip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="30"></span>
+        {%- for partner in partners -%}
+          {%- if partner.logo != blank -%}
+            {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
+            {%- capture chip_class -%}tt-chip{% if forloop.first %} lead{% endif %}{%- endcapture -%}
+            {%- if partner.website != blank -%}
+              <a class="{{ chip_class }}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+              </a>
+            {%- else -%}
+              <span class="{{ chip_class }}">
+                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+              </span>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     </div>
   </section>

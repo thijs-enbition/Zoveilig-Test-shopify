@@ -8,9 +8,13 @@
   Partner logos come from the partner metaobject (active, sorted by display_order).
 {%- endcomment -%}
 
-{%- comment -%} The Oplossingen page ends at its own "De beste technologie" band (as in the
-  design pack), so the global footer is intentionally not rendered on that template. {%- endcomment -%}
-{%- unless template.suffix == 'oplossingen' -%}
+{%- comment -%}
+  Reinstated on the Oplossingen page (2026-09-11, Robi feedback audit item f). Previously
+  omitted on the assumption the page's own "De beste technologie" band was a sufficient
+  close, but that left the page with no legal links (privacy/herroepingsrecht), no secondary
+  nav, and no contact info below the partner band — a real gap, not a design feature worth
+  preserving. See docs/robi-feedback-2026-09-11-audit.md item (f).
+{%- endcomment -%}
 {%- liquid
   assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order'
 -%}
@@ -57,7 +61,7 @@
           <a href="{% render 'zv-route', key: 'faq' %}">Veelgestelde vragen</a>
           <a href="{% render 'zv-route', key: 'kc/hoe-werkt-een-meldkamer' %}">Hoe werkt de meldkamer</a>
           <a href="{% render 'zv-route', key: 'kc/leefstijlmonitoring-zonder-cameras' %}">Leefstijlmonitoring</a>
-          <a href="{% render 'zv-route', key: 'kc/privacy-en-gegevens' %}">Privacy &amp; gegevens</a>
+          <a href="{% render 'zv-route', key: 'kc/privacy-en-gegevens' %}">Privacy &amp; gegevens uitgelegd</a>
         {%- endif -%}
       </div>
 
@@ -81,9 +85,15 @@
           {%- for partner in partners -%}
             {%- if partner.logo != blank -%}
               {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
-              <span class="fp-chip{% if forloop.first %} sec{% endif %}">
-                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
-              </span>
+              {%- if partner.website != blank -%}
+                <a class="fp-chip{% if forloop.first %} sec{% endif %}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                  {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                </a>
+              {%- else -%}
+                <span class="fp-chip{% if forloop.first %} sec{% endif %}">
+                  {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                </span>
+              {%- endif -%}
             {%- endif -%}
           {%- endfor -%}
         </div>
@@ -92,7 +102,12 @@
     {%- endif -%}
 
     <div class="foot-base">
-      <div>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright }}</div>
+      <div class="foot-legal">
+        <div>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright }}</div>
+        {%- if section.settings.company_details != blank -%}
+          <div class="foot-legal-details">{{ section.settings.company_details }}{%- if section.settings.kvk_number != blank %} · KvK {{ section.settings.kvk_number }}{%- endif -%}{%- if section.settings.btw_number != blank %} · btw {{ section.settings.btw_number }}{%- endif -%}{%- if section.settings.company_email != blank %} · <a href="mailto:{{ section.settings.company_email }}">{{ section.settings.company_email }}</a>{%- endif -%}</div>
+        {%- endif -%}
+      </div>
       <div class="fb-links">
         {%- if section.settings.legal_menu != blank -%}
           {%- for link in linklists[section.settings.legal_menu].links -%}<a href="{{ link.url }}">{{ link.title }}</a>{%- endfor -%}
@@ -105,7 +120,6 @@
     </div>
   </div>
 </footer>
-{%- endunless -%}
 
 {% schema %}
 {
@@ -127,6 +141,10 @@
     { "type": "header", "content": "Partners" },
     { "type": "text", "id": "partners_note", "label": "Bijschrift", "default": "Beveiligd met bewezen partners" },
     { "type": "header", "content": "Onderregel" },
+    { "type": "text", "id": "company_details", "label": "Adres", "default": "Zo Veilig B.V., Xenonstraat 60, 1362 GG Almere" },
+    { "type": "text", "id": "kvk_number", "label": "KvK-nummer", "default": "24401026" },
+    { "type": "text", "id": "btw_number", "label": "Btw-nummer", "default": "NL817607602B01" },
+    { "type": "text", "id": "company_email", "label": "E-mailadres", "default": "klantenservice@zoveilig.nl" },
     { "type": "text", "id": "copyright", "label": "Copyright", "default": "Zo Veilig, Nederlandse meldkamer, 24/7 bewaakt" },
     { "type": "link_list", "id": "legal_menu", "label": "Juridische links (leeg = winkelbeleid)" }
   ]
