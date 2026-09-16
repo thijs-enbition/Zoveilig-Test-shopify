@@ -85,9 +85,15 @@
           {%- for partner in partners -%}
             {%- if partner.logo != blank -%}
               {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
-              <span class="fp-chip{% if forloop.first %} sec{% endif %}">
-                {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
-              </span>
+              {%- if partner.website != blank -%}
+                <a class="fp-chip{% if forloop.first %} sec{% endif %}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                  {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                </a>
+              {%- else -%}
+                <span class="fp-chip{% if forloop.first %} sec{% endif %}">
+                  {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                </span>
+              {%- endif -%}
             {%- endif -%}
           {%- endfor -%}
         </div>

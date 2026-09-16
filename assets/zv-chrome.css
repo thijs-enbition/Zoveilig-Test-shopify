@@ -91,10 +91,50 @@
 .sf-links li.active a { color: var(--indigo); }
 .sf-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
 .sf-icn { width: 22px; height: 22px; color: var(--indigo); }
-.sf-right .sf-iconlink { display: flex; color: var(--indigo); }
+.sf-right .sf-iconlink { position: relative; display: flex; color: var(--indigo); }
 .cart { position: relative; display: flex; color: var(--indigo); }
+/* 22x22 icon, 44x44 tap target. An invisible ::after extends the hit area without
+   growing the icon's own box, so .sf-right's width on mobile is unaffected — padding
+   would have widened the row and made the crowding flagged in the mobile-UX audit worse. */
+.sf-right .sf-iconlink::after,
+.sf-right .cart::after { content: ""; position: absolute; inset: -11px; }
 .cart .dot { position: absolute; top: -7px; right: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
 @media (max-width: 980px) { .sf-links { display: none; } }
+
+/* Mobile nav drawer (.sf-drawer). Hidden on desktop; shown at the same breakpoint .sf-links
+   disappears at, so there's never a moment with no way to reach the nav. Built on Dawn's
+   already-loaded <menu-drawer> custom element (assets/global.js) rather than component-
+   menu-drawer.css, which this header never links and which assumes Dawn's own
+   .header-wrapper/.section-header markup this custom header doesn't have. */
+.sf-drawer { display: none; }
+.sf-burger { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; color: var(--indigo); cursor: pointer; list-style: none; }
+.sf-burger::-webkit-details-marker { display: none; }
+.sf-burger svg { width: 22px; height: 22px; }
+.sf-burger .icon-close { display: none; }
+.sf-drawer details[open] .sf-burger .icon-hamburger { display: none; }
+.sf-drawer details[open] .sf-burger .icon-close { display: block; }
+
+.sf-drawer__backdrop { position: fixed; inset: 0; background: rgba(26, 18, 48, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 90; }
+.sf-drawer details[open] .sf-drawer__backdrop { opacity: 1; pointer-events: auto; }
+
+.sf-drawer__panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(94vw, 440px); background: var(--paper); box-shadow: -12px 0 34px -12px rgba(26, 18, 48, 0.35); z-index: 91; padding: 84px 28px 28px; display: flex; flex-direction: column; gap: 28px; overflow-y: auto; transform: translateX(100%); transition: transform 0.25s ease; }
+.sf-drawer details[open] .sf-drawer__panel { transform: translateX(0); }
+
+.sf-drawer__links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.sf-drawer__links a { display: block; padding: 13px 4px; font-size: 17px; font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.sf-drawer__links li.active a { color: var(--indigo); }
+.sf-drawer__phone { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--indigo); text-decoration: none; }
+.sf-drawer__phone svg { width: 18px; height: 18px; }
+.sf-drawer__cta { width: 100%; justify-content: center; }
+
+@media (max-width: 980px) { .sf-drawer { display: block; } }
+
+/* The CTA was the single biggest contributor to .sf-right overflowing on phones (search
+   22px + cart 22px + this button's ~119px + the 40px burger + 3x18px gaps ≈ 257px of
+   content alone, before the logo — measured against a 375px iPhone SE viewport this
+   doesn't fit). It's re-rendered inside the drawer (.sf-drawer__cta above) instead, so
+   nothing is dropped, it's just not fighting search/cart/the hamburger for header space. */
+@media (max-width: 980px) { .sf-cta-desktop { display: none; } }
 
 /* footer */
 .foot { background: var(--indigo); color: #cdc6e8; padding: clamp(48px, 5vw, 72px) 0 0; }

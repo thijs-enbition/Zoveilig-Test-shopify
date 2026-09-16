@@ -1,0 +1,6 @@
+{
+  "sections": {
+    "main": { "type": "borg", "settings": {} }
+  },
+  "order": ["main"]
+}
