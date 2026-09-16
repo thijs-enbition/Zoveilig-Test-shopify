@@ -194,6 +194,19 @@
               {%- endcomment -%}
               {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
               {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}{%- assign ltc_hw_bullets = '' -%}
+              {%- comment -%}
+                ltc_addons: per-package "Uitbreidingen toevoegen" list, replacing the old
+                b.settings.uitbreidingen shared textarea (2026-09-16, see
+                docs/package-addons-uitbreidingen-2026-09-16.md for the live Shopify
+                verification behind these handles/prices). One item per '§', each item
+                'Name|shopify-handle|billing' (billing: 'oneoff' or 'monthly'). aware/aware_plus/
+                secure are intentionally blank — the Nami PIR/Deursensor add-ons Thijs described
+                do not exist as standalone Shopify products (only zero-price package-placeholder
+                products under the Nami vendor), so no add-on checkboxes render for those three
+                tiers until real products exist. care/guard share the same confirmed list.
+              {%- endcomment -%}
+              {%- assign ltc_addons = '' -%}
+              {%- assign care_guard_addons = 'Magneetcontact (DC-23)|koop-magneetcontact-dc-23|oneoff§PIR bewegingsdetector|koop-pir-bewegingsdetector|oneoff§Afstandsbediening|koop-afstandsbediening|oneoff§Rookmelder|koop-rookmelder|oneoff§Buitencamera wifi 730|koop-730-buitencamera-wifi|oneoff§Binnencamera met SD kaart|koop-515-binnencamera|oneoff§Videodeurbel 750|koop-video-deurbel-750|oneoff' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
@@ -210,6 +223,7 @@
                   {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
                   {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
                   {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
+                  {%- assign ltc_addons = care_guard_addons -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'secure' -%}
                   {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-04.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
@@ -224,10 +238,12 @@
                   {%- assign ltc_bullets = 'Rookmelder direct gekoppeld aan de meldkamer|Beweging, deur en rook in één overzicht|Meldkamer schakelt direct de hulpdiensten in' -%}
                   {%- assign ltc_hw_bullets = 'Hub|Codepaneel|Rookmelder|PIR|Deurcontact' -%}
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
+                  {%- assign ltc_addons = care_guard_addons -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
               {%- assign ltc_hw_bullet_list = ltc_hw_bullets | split: '|' -%}
+              {%- assign ltc_addon_list = ltc_addons | split: '§' -%}
               {%- assign use_ltc = false -%}
               {%- if fk == 'aware' or fk == 'aware_plus' or fk == 'care' or fk == 'secure' or fk == 'guard' -%}
                 {%- assign use_ltc = true -%}
@@ -299,14 +315,27 @@
                               <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
                               <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra verdieping of 100 m² extra</span><span class="pcard__plus-pr">+€4/mnd</span></label>
                             </div>
-                            <div class="ltc__optgroup" data-group="addons">
-                              <p class="ltc__optgroup-h">Uitbreidingen toevoegen</p>
-                              {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
-                              {%- comment -%} Add-on prices are provisional: show the pending label, never a literal amount. {%- endcomment -%}
-                              {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
-                                <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
-                              {%- endif -%}{%- endfor -%}
-                            </div>
+                            {%- if ltc_addons != blank -%}
+                              <div class="ltc__optgroup" data-group="addons">
+                                <p class="ltc__optgroup-h">Uitbreidingen toevoegen</p>
+                                {%- comment -%}
+                                  Real, priced add-ons per package tier (see ltc_addons above).
+                                  Price comes live from the confirmed Shopify handle — 'Prijs
+                                  volgt' only shows if that product can't be resolved (e.g. not
+                                  yet published to the Online Store channel), never a guessed or
+                                  hardcoded amount.
+                                {%- endcomment -%}
+                                {%- for a in ltc_addon_list -%}
+                                  {%- assign aparts = a | split: '|' -%}
+                                  {%- assign a_name = aparts[0] -%}
+                                  {%- assign a_product = all_products[aparts[1]] -%}
+                                  {%- assign a_price_display = 'Prijs volgt' -%}
+                                  {%- if a_product.price > 0 -%}{%- assign a_price_display = a_product.price | money | prepend: '+' -%}{%- endif -%}
+                                  {%- if a_product.price > 0 and aparts[2] == 'monthly' -%}{%- assign a_price_display = a_price_display | append: '/mnd' -%}{%- endif -%}
+                                  {%- if a_name != blank -%}<label class="pcard__plus-opt"><input type="checkbox"><span>{{ a_name }}</span><span class="pcard__plus-pr">{{ a_price_display }}</span></label>{%- endif -%}
+                                {%- endfor -%}
+                              </div>
+                            {%- endif -%}
                             <div class="ltc__optgroup" data-group="terms">
                               <p class="ltc__optgroup-h">Extra diensten (optioneel)</p>
                               <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
