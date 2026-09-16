@@ -1,9 +1,22 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": "Default",
   "presets": {
     "Default": {
       "logo_width": 90,
-      "callback_endpoint": "https://zoveilig-2026-06-15-36420254.dev.odoo.com/web/hook/beac0ffd-97d8-476e-aaaf-28f8d38caf0a",
+      "callback_endpoint": "https://zoveilig.odoo.com/web/hook/1853cc7e-c159-41ef-8bfa-72376cdc246d",
+      "capture_lead_endpoint": "https://lfwkpbooieiesuvblvse.supabase.co/functions/v1/capture-lead",
+      "capture_lead_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxmd2twYm9vaWVpZXN1dmJsdnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NjI2ODYsImV4cCI6MjEwNTAzODY4Nn0.mwOnoWN2pDZ5J8nj0RfEMbnrH8HUei0C6qCKGt4twaE",
+      "webhook_failure_log_endpoint": "https://lfwkpbooieiesuvblvse.supabase.co/functions/v1/log-webhook-failure",
+      "webhook_failure_log_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxmd2twYm9vaWVpZXN1dmJsdnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NjI2ODYsImV4cCI6MjEwNTAzODY4Nn0.mwOnoWN2pDZ5J8nj0RfEMbnrH8HUei0C6qCKGt4twaE",
       "color_schemes": {
         "scheme-1": {
           "settings": {

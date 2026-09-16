@@ -31,8 +31,9 @@
 
           <div id="cn-ok" class="cn-ok" hidden>Bedankt, we hebben uw aanvraag ontvangen. Een adviseur neemt binnen één werkdag contact met u op.</div>
           <div id="cn-err" class="cn-err" hidden>Controleer even de gemarkeerde velden en probeer het opnieuw.</div>
+          <div id="cn-err-server" class="cn-err" hidden>Er ging iets mis bij het versturen. Probeer het over een moment opnieuw, of bel ons direct op <a href="tel:0881221111">088 122 11 11</a>.</div>
 
-          <form id="zv-contact-form" data-capture-lead-endpoint="{{ section.settings.capture_lead_endpoint | escape }}" data-capture-lead-key="{{ section.settings.capture_lead_anon_key | escape }}">
+          <form id="zv-contact-form" novalidate data-capture-lead-endpoint="{{ section.settings.capture_lead_endpoint | escape }}" data-capture-lead-key="{{ section.settings.capture_lead_anon_key | escape }}">
             <div class="fld-row">
               <div class="fld"><label for="c-naam">Naam</label><input id="c-naam" name="Naam" placeholder="Voor- en achternaam" required></div>
               <div class="fld"><label for="c-tel">Telefoon</label><input id="c-tel" name="Telefoon" type="tel" placeholder="06 12 34 56 78" required></div>
@@ -108,6 +109,8 @@
 .zv-contact .cn-priv a { color:var(--indigo); font-weight:800; }
 .zv-contact .cn-ok { margin-top:0; margin-bottom:18px; background:rgba(47,143,91,.1); border:1px solid rgba(47,143,91,.4); border-radius:12px; padding:16px 18px; color:#256b45; font-size:14.5px; font-weight:700; }
 .zv-contact .cn-err { margin-bottom:14px; background:rgba(197,46,47,.08); border:1px solid rgba(197,46,47,.35); border-radius:12px; padding:13px 16px; color:#9a2b2b; font-size:14px; font-weight:700; }
+.zv-contact .cn-err a { color:#9a2b2b; text-decoration:underline; }
+.zv-contact .fld--invalid input, .zv-contact .fld--invalid select, .zv-contact .fld--invalid textarea { border-color:#c52e2f; background:rgba(197,46,47,.05); }
 .zv-contact .cn-hp { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .zv-contact .btn { display:inline-flex; align-items:center; gap:9px; border:none; cursor:pointer; border-radius:12px; font:inherit; font-weight:800; text-decoration:none; }
 .zv-contact .btn svg { width:18px; height:18px; }
@@ -136,12 +139,37 @@
   if (!form) return;
   var okEl = document.getElementById('cn-ok');
   var errEl = document.getElementById('cn-err');
+  var errServerEl = document.getElementById('cn-err-server');
   var endpoint = form.getAttribute('data-capture-lead-endpoint');
   var anonKey = form.getAttribute('data-capture-lead-key');
+  var requiredFields = [
+    document.getElementById('c-naam'),
+    document.getElementById('c-tel'),
+    document.getElementById('c-mail')
+  ];
+
+  function clearInvalid() {
+    requiredFields.forEach(function (input) {
+      input.closest('.fld').classList.remove('fld--invalid');
+    });
+  }
+
+  function validate() {
+    clearInvalid();
+    var invalid = requiredFields.filter(function (input) { return !input.checkValidity(); });
+    invalid.forEach(function (input) { input.closest('.fld').classList.add('fld--invalid'); });
+    return invalid.length === 0;
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     errEl.hidden = true;
+    errServerEl.hidden = true;
+
+    if (!validate()) {
+      errEl.hidden = false;
+      return;
+    }
 
     var formData = new FormData(form);
     var payload = {};
@@ -169,12 +197,12 @@
           form.hidden = true;
           okEl.hidden = false;
         } else {
-          errEl.hidden = false;
+          errServerEl.hidden = false;
           if (submitBtn) submitBtn.disabled = false;
         }
       })
       .catch(function () {
-        errEl.hidden = false;
+        errServerEl.hidden = false;
         if (submitBtn) submitBtn.disabled = false;
       });
   });

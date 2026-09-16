@@ -1,0 +1,17 @@
+# Explicit per-function deploy config. Without this file, `supabase functions deploy` only
+# ever *disables* JWT verification when --no-verify-jwt is passed — it does not reset a
+# function back to verify_jwt = true on a later deploy that omits the flag (confirmed
+# 2026-09-15: capture-lead was accidentally deployed once with --no-verify-jwt, and a
+# following plain `deploy` left it at verify_jwt = false instead of restoring the default).
+# Declaring both here makes every future deploy idempotent regardless of past flags.
+#
+# verify_jwt = true is correct for both: each function is called with a valid Supabase
+# anon-key JWT in the Authorization header (see sections/contact-page.liquid and
+# assets/zv-lead-webhook.js) — the platform checks that JWT before the function's own code
+# (origin allowlist, honeypot, field validation) ever runs.
+
+[functions.capture-lead]
+verify_jwt = true
+
+[functions.log-webhook-failure]
+verify_jwt = true

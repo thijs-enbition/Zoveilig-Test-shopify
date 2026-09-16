@@ -31,13 +31,18 @@
 
 {%- include 'zv-pricing' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
+{%- assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order' -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 {%- comment -%}
-  Pakket-matcher, embedded under the Langer Thuis pricing cards below (not a separate
-  section) — see snippets/zv-pakket-matcher.liquid for why it's a shared snippet + static
-  assets rather than duplicated markup/JS/CSS.
+  Pakket-matcher, embedded under the Langer Thuis AND Mijn Thuis pricing cards below (not
+  separate sections) — see snippets/zv-pakket-matcher.liquid for why it's a shared snippet +
+  static assets rather than duplicated markup/JS/CSS, and for why Mijn Thuis's scenario cards
+  are a separate block type ('scenario_mijn_thuis') from Langer Thuis's ('scenario') — both
+  live in the same section.blocks list, so `where: 'type', …` is what keeps the two matchers'
+  card pools from mixing.
 {%- endcomment -%}
 {%- assign matcher_scenarios = section.blocks | where: 'type', 'scenario' -%}
+{%- assign matcher_scenarios_mt = section.blocks | where: 'type', 'scenario_mijn_thuis' -%}
 {{ 'zv-vergelijk-pakketten.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
@@ -91,10 +96,21 @@
         <div class="vhero__partners">
           <span class="vhero__pnote">Beveiligd met bewezen partners</span>
           <div class="vhero__logos">
-            <span class="lchip sec"><img src="{{ 'securitas-preferred-partner.png' | asset_url }}" alt="Securitas Preferred Partner" loading="lazy" width="150" height="30"></span>
-            <span class="lchip"><img src="{{ 'partner-nami.png' | asset_url }}" alt="NAMI" loading="lazy" width="90" height="24"></span>
-            <span class="lchip"><img src="{{ 'partner-climax.png' | asset_url }}" alt="Climax" loading="lazy" width="110" height="24"></span>
-            <span class="lchip"><img src="{{ 'partner-alarmcom.png' | asset_url }}" alt="Alarm.com" loading="lazy" width="120" height="24"></span>
+            {%- for partner in partners -%}
+              {%- if partner.logo != blank -%}
+                {%- assign logo_alt = partner.partner_name | default: partner.internal_name -%}
+                {%- capture chip_class -%}lchip{% if forloop.first %} sec{% endif %}{%- endcapture -%}
+                {%- if partner.website != blank -%}
+                  <a class="{{ chip_class }}" href="{{ partner.website }}" target="_blank" rel="noopener" title="{{ logo_alt | escape }}">
+                    {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                  </a>
+                {%- else -%}
+                  <span class="{{ chip_class }}">
+                    {{ partner.logo | image_url: height: 60 | image_tag: alt: logo_alt, loading: 'lazy', widths: '60, 120' }}
+                  </span>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
           </div>
         </div>
       </section>
@@ -125,17 +141,28 @@
             </div>
           </div>
         {%- elsif coll and coll.products.size > 0 -%}
-          <div class="pgrid" data-n="{{ coll.products.size }}">
+          <div class="pgrid" data-n="{{ coll.products.size }}" data-anchor="{{ anchor }}">
             {%- for p in coll.products -%}
               {%- assign fk = p.metafields.custom.finder_key.value -%}
-              {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}
+              {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}{%- assign term = '' -%}
               {%- case fk -%}
-                {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}
-                {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 activiteitssensoren (~100 m²), deursensor per toegang en 2 PIR · geen meldkamer' -%}
-                {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale/hub, 2 magneetcontacten, 2 PIR, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}
-                {%- when 'secure' -%}{%- assign tile = 'opl-tile-04.jpg' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}
-                {%- when 'guard' -%}{%- assign tile = 'opl-tile-05.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}
-                {%- when 'secure_plus' -%}{%- assign tile = 'opl-tile-06.jpg' -%}{%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
+                {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}
+                {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}
+                {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}
+                {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
+                {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}
+                {%- when 'secure_plus' -%}
+                  {%- comment -%}
+                    Vista, 2026-09-15: product-photo tile image removed (was
+                    assets/opl-tile-06.jpg, now deleted) — see
+                    docs/mijn-thuis-vista-images-card-height-2026-09-15.md. That image baked
+                    together the product photos, the "IN HET PAKKET" pill list, and the
+                    Meldkamer/Camera badges as one graphic; none of that has a live markup
+                    equivalent yet, so Vista's card front is intentionally sparser (sub-line
+                    + "Geen vast pakket" + lead form only) until its copy is drafted and
+                    signed off, same open item as the other Alert/Protect redesign work.
+                  {%- endcomment -%}
+                  {%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
               {%- endcase -%}
@@ -152,67 +179,221 @@
               {%- comment -%} Vista (MT-VIS / secure_plus) is callout-only (maatwerk): geen vaste prijs, geen koop-accordions, alleen de VISTA Lead callback. {%- endcomment -%}
               {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
-              <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
-                       data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
-                       data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
-                       data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
-                       data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
-                {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
-                {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
-                <div class="pcard__foot">
+              {%- comment -%}
+                Card-grid redesign (2026-09-11 Langer Thuis, extended 2026-09-14 to Mijn
+                Thuis Alert/Protect — see docs/mijn-thuis-card-redesign-research-2026-09-14.md):
+                icon/tagline/checklist copy keyed by finder_key. Inzicht/Zeker/Beschermd copy
+                was Robi-approved with PR #19. The Alert/Protect tagline text below reuses the
+                already-approved `hook` line from pricing.config.json / opl-modal-data verbatim
+                (not new marketing copy); their icons are a first engineering draft, NOT yet
+                design-signed-off — see PR description / research doc open question #3. Vista
+                (secure_plus) is intentionally not given ltc_* copy here: it stays on its own
+                lead-form branch below, never the shared card markup. This case block only
+                assembles the data — the markup below still renders it exactly as before
+                (Langer Thuis only) until the next commit switches Alert/Protect over too.
+              {%- endcomment -%}
+              {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
+              {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}{%- assign ltc_hw_bullets = '' -%}
+              {%- case fk -%}
+                {%- when 'aware' -%}
+                  {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
+                  {%- assign ltc_bullets = 'Daginzicht in het ritme|Alleen een melding bij afwijking|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiAware|3 wifi-sensorstekkers|1 deursensor|Geen meldkamer' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
+                {%- when 'aware_plus' -%}
+                  {%- assign ltc_tagline = 'Vroeg signaleren' -%}
+                  {%- assign ltc_intro = 'Alles van Inzicht, plus:' -%}
+                  {%- assign ltc_bullets = 'Dag- en nachtzicht|Bewegingsmelders voor meer zicht|Meerdere contactpersonen' -%}
+                  {%- assign ltc_hw_bullets = 'NAMI aiCare|3 wifi-sensorstekkers (~100 m²)|Deursensor per toegang|2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar)|Geen meldkamer' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 14 L49 20 V35 C49 47 32 54 32 54 C32 54 15 47 15 35 V20 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 45 C27 40 20 41.5 20 33.5 C20 28.5 27 27 32 32.5 C37 27 44 28.5 44 33.5 C44 41.5 37 40 32 45 Z" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'care' -%}
+                  {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
+                  {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
+                  {%- assign ltc_hw_bullets = 'Climax|1 centrale|2 deur-/raamsensoren|2 bewegingsmelders|Keuze uit 3 paniekknoppen en 2 rookmelders|Incl. meldkamer' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'secure' -%}
+                  {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-04.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Directe melding bij inbraak' -%}
+                  {%- assign ltc_bullets = 'Beweging en deur worden direct herkend|Zelf in- en uitschakelen met de app|Geen camera, wel een waakzaam systeem' -%}
+                  {%- assign ltc_hw_bullets = 'Alarm Pod|SensePlug|PIR|Deursensor|Codepaneel' -%}
+                  {%- assign ltc_meldkamer = 'nee' -%}{%- assign ltc_camera = 'nee' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 C24 12 19 18 19 27 V34 L14 42 H50 L45 34 V27 C45 18 40 12 32 12 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 47 A6 6 0 0 0 38 47" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="16" r="4.5" fill="var(--red)"/></svg>{%- endcapture -%}
+                {%- when 'guard' -%}
+                  {%- comment -%} Protect. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-05.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Inbraak én brand, in één systeem bewaakt' -%}
+                  {%- assign ltc_bullets = 'Rookmelder direct gekoppeld aan de meldkamer|Beweging, deur en rook in één overzicht|Meldkamer schakelt direct de hulpdiensten in' -%}
+                  {%- assign ltc_hw_bullets = 'Hub|Codepaneel|Rookmelder|PIR|Deurcontact' -%}
+                  {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
+              {%- endcase -%}
+              {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
+              {%- assign ltc_hw_bullet_list = ltc_hw_bullets | split: '|' -%}
+              {%- assign use_ltc = false -%}
+              {%- if fk == 'aware' or fk == 'aware_plus' or fk == 'care' or fk == 'secure' or fk == 'guard' -%}
+                {%- assign use_ltc = true -%}
+              {%- endif -%}
+              {%- if use_ltc -%}
+                <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
+                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
+                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
+                  {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
+                  <div class="ltc__head">
+                    <span class="ltc__icon">{{ ltc_icon }}</span>
+                    <div class="ltc__headtext"><h4 class="ltc__name">{{ short_name }}</h4><p class="ltc__tagline">{{ ltc_tagline }}</p></div>
+                  </div>
                   <div class="pcard__price">
-                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                    {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
                   </div>
-                  {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                  {%- if term != blank -%}<div class="ltc__term">Looptijd {{ term }} maanden</div>{%- endif -%}
+                  <ul class="ltc__checklist">
+                    {%- if ltc_intro != blank -%}<li class="ltc__intro">{{ ltc_intro }}</li>{%- endif -%}
+                    {%- for bullet in ltc_bullet_list -%}
+                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
+                    {%- endfor -%}
+                  </ul>
+                  <hr class="ltc__div">
                   {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
-
-                  {%- if price_known -%}
-                    <details class="pcard__plus">
-                      <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
-                    </details>
-                    <details class="pcard__plus">
-                      <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
-                      {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
-                      {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
-                        <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
-                      {%- endif -%}{%- endfor -%}
-                    </details>
-                    <details class="pcard__plus">
-                      <summary>Abonnementen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
-                      <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
-                    </details>
-                  {%- endif -%}
-
-                  <div class="pcard__cta">
-                    {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
-                      {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
-                      <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
-                        <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-                        <form class="pcard__vista-form" data-vista-form>
-                          <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
-                          <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
-                          <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
-                          <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
-                          <div class="pcard__vista-err" data-vista-err hidden></div>
-                          <button type="submit">Verstuur terugbelverzoek</button>
-                        </form>
-                        <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
-                      </div>
-                    {%- else -%}
-                      {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
-                      <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %}" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                      {%- if price_known and v.available -%}
-                        <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                      {%- endif -%}
+                  <div class="pcard__cta ltc__cta">
+                    {%- if price_known and v.available -%}
+                      <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %} ltc__buy" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                     {%- endif -%}
+                    <div class="ltc__links">
+                      {%- if price_known -%}
+                        {%- comment -%}
+                          "Wat zit erin?" = what's physically in the box (hardware
+                          description, formerly a standalone line above this row).
+                          "Uitbreidingen" (below) is the separate, optional add-ons panel —
+                          m² / uitbreidingen / extra diensten — split back out of "Wat zit
+                          erin?" so the two aren't conflated: one describes the package
+                          contents, the other lets you configure it. Same checkboxes, same
+                          pcard__plus-opt/-pr classes and readCardOptions() handler either
+                          way — only the container changed (see functional mapping doc for
+                          the original consolidation this reverses).
+                        {%- endcomment -%}
+                        <details class="ltc__watzit">
+                          <summary>Wat zit erin?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            {%- if ltc_hw_bullets != blank or ltc_meldkamer != blank or ltc_camera != blank -%}
+                              <ul class="ltc__hw">
+                                {%- for hw in ltc_hw_bullet_list -%}
+                                  <li>{{ hw }}</li>
+                                {%- endfor -%}
+                                {%- comment -%}
+                                  Meldkamer/Camera status, moved here from a front-of-card
+                                  banner (2026-09-15) — plain text lines in the same list,
+                                  not a new visual treatment. ltc_meldkamer/ltc_camera are
+                                  blank for Langer Thuis, so these render nothing there.
+                                {%- endcomment -%}
+                                {%- if ltc_meldkamer != blank -%}<li>Meldkamer: {{ ltc_meldkamer | capitalize }}</li>{%- endif -%}
+                                {%- if ltc_camera != blank -%}<li>Camera: {{ ltc_camera | capitalize }}</li>{%- endif -%}
+                              </ul>
+                            {%- endif -%}
+                          </div>
+                        </details>
+                        <details class="ltc__uitbreidingen">
+                          <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                          <div class="ltc__panel">
+                            <div class="ltc__optgroup" data-group="woning">
+                              <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra verdieping of 100 m² extra</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                            </div>
+                            <div class="ltc__optgroup" data-group="addons">
+                              <p class="ltc__optgroup-h">Uitbreidingen toevoegen</p>
+                              {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
+                              {%- comment -%} Add-on prices are provisional: show the pending label, never a literal amount. {%- endcomment -%}
+                              {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
+                                <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
+                              {%- endif -%}{%- endfor -%}
+                            </div>
+                            <div class="ltc__optgroup" data-group="terms">
+                              <p class="ltc__optgroup-h">Extra diensten (optioneel)</p>
+                              <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                            </div>
+                          </div>
+                        </details>
+                      {%- endif -%}
+                      {%- comment -%} Kept as its own separate, untouched feature alongside "Wat zit erin?" — see functional mapping doc's "Meer informatie" decision. {%- endcomment -%}
+                      <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
+                    </div>
                   </div>
-                </div>
-              </article>
+                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
+                </article>
+              {%- else -%}
+                <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
+                         data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
+                         data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
+                  {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
+                  {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
+                  <div class="pcard__foot">
+                    <div class="pcard__price">
+                      {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                    </div>
+                    {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                    {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
+
+                    {%- if price_known -%}
+                      <details class="pcard__plus" data-group="woning">
+                        <summary>Woning groter dan 100 m²?<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra etage</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                      </details>
+                      <details class="pcard__plus" data-group="addons">
+                        <summary>Uitbreidingen toevoegen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        {%- assign ub = b.settings.uitbreidingen | strip | newline_to_br | split: '<br />' -%}
+                        {%- comment -%} Add-on prices are provisional (non-Onderweg): show the pending label, never a literal amount. Confirmed prices come from Shopify (package monthly) or the central pricing config. {%- endcomment -%}
+                        {%- for u in ub -%}{%- assign parts = u | strip | split: '|' -%}{%- if parts[0] != blank -%}
+                          <label class="pcard__plus-opt"><input type="checkbox"><span>{{ parts[0] | strip }}</span><span class="pcard__plus-pr">{{ parts[1] | default: 'Prijs volgt' | strip }}</span></label>
+                        {%- endif -%}{%- endfor -%}
+                      </details>
+                      <details class="pcard__plus" data-group="terms">
+                        <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                        <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                        <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
+                      </details>
+                    {%- endif -%}
+
+                    {%- if term != blank -%}<div class="pcard__term">Looptijd: {{ term }} maanden</div>{%- endif -%}
+
+                    <div class="pcard__cta">
+                      {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
+                        {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
+                        <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
+                          <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                          <form class="pcard__vista-form" data-vista-form>
+                            <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
+                            <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
+                            <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
+                            <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
+                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
+                            <div class="pcard__vista-err" data-vista-err hidden></div>
+                            <button type="submit">Verstuur terugbelverzoek</button>
+                          </form>
+                          <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
+                        </div>
+                      {%- else -%}
+                        {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
+                        <button type="button" class="btn {% if popular %}btn--gold{% else %}btn--ghost{% endif %}" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        {%- if price_known and v.available -%}
+                          <button type="button" class="pcard__direct" data-zv-add data-variant="{{ v.id }}" data-zv-event="add_to_cart" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-sku="{{ v.sku }}" data-cta-name="in_winkelwagen" data-cta-position="{{ anchor }}_paks" data-selected-term="" data-selected-addon="">In winkelwagen<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        {%- endif -%}
+                      {%- endif -%}
+                    </div>
+                  </div>
+                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
+                </article>
+              {%- endif -%}
             {%- endfor -%}
           </div>
+          {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
+          {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
+            <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
+          {%- endif -%}
         {%- elsif request.design_mode -%}
           <p class="ph-sub" style="text-align:center;">Koppel de collectie "{{ b.settings.collection }}".</p>
         {%- endif -%}
@@ -231,11 +412,49 @@
           activation_variant_id: activation_variant_id,
           zv_inzicht_monthly: zv_inzicht_monthly,
           zv_zeker_monthly: zv_zeker_monthly,
-          zv_beschermd_monthly: zv_beschermd_monthly
+          zv_beschermd_monthly: zv_beschermd_monthly,
+          embedded: true
         -%}
       {%- endif -%}
 
       {%- if anchor == 'mijn-thuis' -%}
+        {%- comment -%}
+          Mijn Thuis pakket-matcher: same shared snippet as Langer Thuis's, generalized
+          (2026-09-15) to accept a package-line's finder keys/tier order/copy instead of
+          Langer Thuis's hardcoded inzicht/zeker/beschermd — see snippets/zv-pakket-matcher.liquid's
+          header comment for the full param list. Vista (secure_plus) has no fixed price and
+          no cart action: `lead_only_pkgs`/`lead_url` route its "Kies Vista" (and an outright
+          Vista recommendation) to '#mijn-thuis-vista' instead — the same deep-link hash this
+          page's own tab handler (applyHash()/focusVista(), below) already resolves into
+          "select the Mijn Thuis panel, scroll to and focus Vista's real lead form". Vista can
+          also only ever WIN the recommendation outright (never via a tie) — see recommend()'s
+          leadPkgs handling in assets/zv-vergelijk-pakketten.js.
+
+          Feature-row cells for Vista's sensors/rookmelder/app-besturing are 'n' (dash) rather
+          than a checkmark: no confirmed source data exists for them in pricing.config.json
+          (Vista's own `sub` only confirms hub, binnen-/buitencamera, videodeurbel, meldkamer)
+          — same three open questions already flagged in the PR #37 static table, not
+          re-guessed here. Content overall pending Robi's read-through — see PR description.
+        {%- endcomment -%}
+        {%- capture mt_pkg_meta -%}
+          secure|Alert|{{ zv_alert_monthly | remove: ' ' }}|/mnd|Basisbeveiliging tegen inbraak§guard|Protect|{{ zv_protect_monthly | remove: ' ' }}|/mnd|Inbraak én brand in één systeem§secure_plus|Vista|{{ zv_vista_monthly }}||Camerabeveiliging op maat
+        {%- endcapture -%}
+        {%- capture mt_feature_rows -%}
+          Bewegings- en deursensoren||y|y|n§Rookmelder||n|y|n§Meldkameropvolging (24/7)||n|y|y§Camera||n|Optioneel|y§Zelf in- en uitschakelen via de app||y|y|n§Contractduur||{{ zv_alert_term }} maanden|{{ zv_protect_term }} maanden|Op maat§Jaarlijks onderhoud||y|y|y
+        {%- endcapture -%}
+        {%- render 'zv-pakket-matcher',
+          scenarios: matcher_scenarios_mt,
+          collection: 'mijn-thuis',
+          activation_variant_id: activation_variant_id,
+          pkg_meta: mt_pkg_meta,
+          recommended_pkg: 'guard',
+          finder_key_map: 'secure:secure,guard:guard,secure_plus:secure_plus',
+          feature_rows: mt_feature_rows,
+          lead_only_pkgs: 'secure_plus',
+          lead_url: '#mijn-thuis-vista',
+          embedded: true
+        -%}
+
         <section class="mt-camhw">
           <h3>Benieuwd naar de camerahardware?</h3>
           <a class="mt-camhw__btn" href="/pages/camera-hardware" data-zv-event="mt_camera_hardware" data-cta-name="bekijk_camerahardware" data-cta-position="{{ anchor }}_paks">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -363,8 +582,8 @@
     "hw": {
       "hub": {"name":"NAMI Hub","kind":"Centrale","tagline":"De centrale die alle sensoren verbindt en met de meldkamer praat.","specs":[["Afmetingen","110 × 110 × 30 mm"],["Verbinding","wifi + 4G-backup"],["Voeding","USB-C adapter"],["Bereik","Hele woning"],["Privacy","Geen camera, geen microfoon"]]},
       "wifisensor": {"name":"Wi-Fi Activity Sensor","kind":"Leefstijl-sensor","tagline":"Herkent het dagritme via wifi-sensing, volledig zonder camera of geluid.","specs":[["Type","wifi sensing plug"],["Dekking","~100 m² / 1.200 ft² (met 3 sensoren)"],["Verbinding","wifi 2,4 GHz"],["Detectie","Leefpatroon-signalen"],["Privacy","Geen beeld of geluid"]]},
-      "deursensor": {"name":"Door Sensor","kind":"Magneetcontact · Thread","sku":"ZV-P004","tagline":"Meldt openen en sluiten van de voordeur, achterdeur of een raam.","specs":[["Afmetingen sensor","50,5 × 32,0 × 21,9 mm"],["Afmetingen magneet","27,0 × 12,0 × 12,4 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 4 jaar"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
-      "pir": {"name":"PIR Motion Sensor","kind":"Bewegingssensor · Thread","sku":"ZV-P001","tagline":"Ziet beweging per kamer, zodat afwijkingen in de routine opvallen.","specs":[["Afmetingen (H×B×D)","65,0 × 44,0 × 44,0 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 2 jaar"],["Detectiebereik","6 m bij 110° gezichtsveld"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
+      "deursensor": {"name":"Door Sensor","kind":"Deur-/raamsensor · Thread","sku":"ZV-P004","tagline":"Meldt openen en sluiten van de voordeur, achterdeur of een raam.","specs":[["Afmetingen sensor","50,5 × 32,0 × 21,9 mm"],["Afmetingen magneet","27,0 × 12,0 × 12,4 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 4 jaar"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
+      "pir": {"name":"Bewegingsmelder","kind":"Thread","sku":"ZV-P001","tagline":"Ziet beweging per kamer, zodat afwijkingen in de routine opvallen.","specs":[["Afmetingen (H×B×D)","65,0 × 44,0 × 44,0 mm"],["Voeding","Batterij 3VDC, 1× CR2477"],["Batterijduur","Tot 2 jaar"],["Detectiebereik","6 m bij 110° gezichtsveld"],["Protocol","IEEE 802.15.4"],["Draadloos","Thread, Bluetooth 5 (onboarding)"],["Werkomgeving","-10 °C tot +50 °C · 0% tot 90% R.H."],["Certificering","FCC, CE, MIC, UL4200A, ROHS"]]},
       "paniek": {"name":"Draagbare paniekknop","kind":"Alarmknop","sku":"ZV-P009","tagline":"Eén druk verbindt met de meldkamer, om de pols of hals te dragen.","specs":[["Afmetingen","45 × 35 × 12 mm"],["Draagwijze","Pols of hals"],["Waterdicht","IP67"],["Batterij","Tot 1 jaar"],["Bereik","Hele woning"]]},
       "rook": {"name":"Slimme rook- en brandmelder","kind":"Brandbeveiliging","sku":"ZV-P005","tagline":"Meldt rook direct bij de meldkamer én in de familie-app.","specs":[["Afmetingen","Ø 110 × 38 mm"],["Sensor","Foto-elektrisch"],["Batterij","10 jaar, verzegeld"],["Melding","Meldkamer + app"],["Norm","EN 14604"]]},
       "familieapp": {"name":"Familie-app","kind":"Dienst","tagline":"Rustig meekijken met het dagritme, samen met de familie.","specs":[["Platform","iOS + Android"],["Gebruikers","Tot 6 familieleden"],["Inzicht","Dagritme en meldingen"],["Kosten","Inbegrepen"]]},
@@ -381,12 +600,12 @@
       "deurbel2": {"name":"Videodeurbel","kind":"Camera","sku":"ZV-P016","tagline":"Zie en spreek wie er aanbelt, waar u ook bent.","specs":[["Beeld","1080p, groothoek"],["Audio","Twee-richting"],["Voeding","Bedraad of accu"],["Plaatsing","Bij de voordeur"]]}
     },
     "pkg": {
-      "aware": {"name":"Inzicht","plat":"NAMI aiAware","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer","tier":[{"id":"hub"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"aiAware biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt aiAware grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× Wifi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"]]}},
-      "aware_plus": {"name":"Zeker","plat":"NAMI aiCare","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"NAMI aiCare · 3 activiteitssensoren (~100 m²), deursensor per toegang en 2 PIR voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer","tier":[{"id":"alarmpod"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"pir","qty":2},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"aiCare bouwt voort op aiAware en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft aiCare opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde CareTech-platformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× Wifi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"],["2× PIR Motion Sensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
-      "care": {"name":"Beschermd","plat":"Climax","hook":"Complete bescherming met 24/7 meldkamer.","sub":"Climax · 1 centrale/hub, 2 magneetcontacten, 2 PIR, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer","tier":[{"id":"hub"},{"id":"pir","qty":2},{"id":"deursensor","qty":2},{"id":"rook","qty":2},{"id":"paniek"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 rookmelder","2 magneetcontacten en PIR"]}},
-      "secure": {"name":"Alert","plat":"NAMI Alarm15","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera","tier":[{"id":"alarmpod"},{"id":"senseplug"},{"id":"pir"},{"id":"deursensor"},{"id":"codepaneel"}],"plus":{"price":"+€4 p/m","items":["1 SensePlug","1 sensor"]}},
-      "guard": {"name":"Protect","plat":"Climax · incl. meldkamer","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel","tier":[{"id":"hub"},{"id":"codepaneel"},{"id":"rook"},{"id":"pir"},{"id":"deursensor"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
-      "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera","tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
+      "aware": {"name":"Inzicht","plat":"NAMI aiAware","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer","tier":[{"id":"hub"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"familieapp"}],"plus":{"price":"+€4/mnd","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"aiAware biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt aiAware grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× Wifi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"]]}},
+      "aware_plus": {"name":"Zeker","plat":"NAMI aiCare","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer","tier":[{"id":"alarmpod"},{"id":"wifisensor","qty":3},{"id":"deursensor"},{"id":"pir","qty":2},{"id":"familieapp"}],"plus":{"price":"+€4/mnd","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"aiCare bouwt voort op aiAware en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft aiCare opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde CareTech-platformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× Wifi Activity Sensors","~100 m² / 1.200 ft² dekking"],["Door Sensor","per toegangspunt"],["2× Bewegingsmelder","voor slaapkamer en badkamer, uitbreidbaar"]]}},
+      "care": {"name":"Beschermd","plat":"Climax","hook":"Complete bescherming met 24/7 meldkamer.","sub":"Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer","tier":[{"id":"hub"},{"id":"pir","qty":2},{"id":"deursensor","qty":2},{"id":"rook","qty":2},{"id":"paniek"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"price":"+€4/mnd","items":["1 rookmelder","2 deur-/raamsensoren en bewegingsmelders"]}},
+      "secure": {"name":"Alert","plat":"NAMI Alarm15","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera","tier":[{"id":"alarmpod"},{"id":"senseplug"},{"id":"pir"},{"id":"deursensor"},{"id":"codepaneel"}],"plus":{"price":"+€4/mnd","items":["1 SensePlug","1 sensor"]}},
+      "guard": {"name":"Protect","plat":"Climax · incl. meldkamer","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel","tier":[{"id":"hub"},{"id":"codepaneel"},{"id":"rook"},{"id":"pir"},{"id":"deursensor"},{"id":"meldkamer"}],"plus":{"price":"+€4/mnd","items":["1 PIR","1 deurcontact"]}},
+      "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera","tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4/mnd","items":["1 PIR","1 deurcontact"]}},
       "liogo_solo": {"name":"Paniek Meldkamer","plat":"Indigo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
       "liogo_guard": {"name":"Zorgmeldkamer","plat":"Indigo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
     }
@@ -493,6 +712,27 @@
 .pak__head .compare svg { width: 16px; height: 16px; }
 .pgrid { display: grid; gap: 20px; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); max-width: calc(var(--cols, 3) * 360px); margin-left: auto; margin-right: auto; }
 .pgrid[data-n="1"] { --cols: 1; } .pgrid[data-n="2"] { --cols: 2; } .pgrid[data-n="3"] { --cols: 3; }
+/* Mijn Thuis only, 2026-09-15, revised: the align-items:start fix from the prior
+   commit removed the dead-space gap but left the three cards at visibly uneven
+   heights (Alert/Protect/Vista are naturally 510/569/452px tall), which read as
+   broken rather than intentional. Reverted back to the grid's default
+   align-items:stretch (all three cards equal-height again, matching Protect, the
+   naturally tallest), and instead the leftover height is collapsed into an
+   explicit trailing spacer (.ltc__spacer, flex:1 1 auto, rendered only for Mijn
+   Thuis cards — see the Liquid markup below) placed after
+   all real content, so it sits below "Meer informatie" (ltc cards) or the lead
+   form (Vista) instead of between the badges and the CTA. .ltc__cta and
+   .pcard__foot keep their base margin-top:auto rule (used by Langer Thuis and
+   Veilig Onderweg respectively) — both are overridden back to a normal margin
+   only inside the Mijn Thuis grid, so neither shared class's default behavior
+   changes anywhere else. */
+.pgrid[data-anchor="mijn-thuis"] .ltc__cta { margin-top: 0; }
+.pgrid[data-anchor="mijn-thuis"] .pcard__foot { margin-top: 0; }
+/* .pcard .ltc__spacer (2 classes) outranks the base reset `div:empty{display:none}`
+   (element+pseudo-class), same fix already used for .addcart__scrim below — the
+   spacer has no children by design, so without this override the base reset hides
+   it and flex:1 1 auto never gets a chance to apply. */
+.pcard .ltc__spacer { display: block; flex: 1 1 auto; }
 .pcard { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 26px 24px 24px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(26, 18, 48, 0.04); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .pcard:hover { border-color: var(--line-2); box-shadow: 0 6px 20px -12px rgba(26, 18, 48, 0.22); }
 .pcard.pop { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 18px 44px -22px rgba(50, 36, 105, 0.45); }
@@ -518,12 +758,61 @@
 .pcard__plus-opt input { width: 17px; height: 17px; accent-color: #322469; flex: none; cursor: pointer; }
 .pcard__plus-opt span:nth-of-type(1) { flex: 1; }
 .pcard__plus-pr { font-weight: 900; color: var(--belt); }
+.pcard__plus-hint { font-size: 12px; font-weight: 600; color: var(--muted-2); margin: -2px 2px 10px; }
+.pcard__term { font-size: 12.5px; font-weight: 700; color: var(--muted-2); padding: 10px 2px; border-top: 1px solid var(--line); margin-top: 2px; }
 .pcard__cta .btn { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
 .pcard__cta .btn--ghost { border-width: 1.5px; }
 .pcard__direct { width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 7px; border: none; background: none; font-family: inherit; font-weight: 800; font-size: 13.5px; color: var(--indigo); cursor: pointer; padding: 5px 4px; transition: color 0.14s; }
 .pcard__direct svg { width: 15px; height: 15px; transition: transform 0.16s; }
 .pcard__direct:hover { color: var(--belt); }
 .pcard__direct:hover svg { transform: translateX(3px); }
+
+/* Card-grid redesign (2026-09-11 Langer Thuis, 2026-09-14 extended to Mijn Thuis
+   Alert/Protect). Reuses .pcard/.pcard__flag/.pcard__price/.pcard__plus-opt/
+   .pcard__plus-pr/.pcard__plus-hint from the shared tile-card rules above. */
+.pcard--ltc { padding-top: 24px; }
+/* Popular flag straddles the card's top border instead of sitting in flex flow (Robi
+   feedback, 2026-09-14): the base .pcard.pop .pcard__flag rule pushes .ltc__head down on
+   the popular card only, misaligning the three-card header row. Out of flow here, .ltc__head
+   is the true first flex child on every ltc card regardless of which one is popular. */
+.pcard--ltc.pop .pcard__flag { position: absolute; top: -13px; right: 16px; margin-bottom: 0; white-space: nowrap; z-index: 1; }
+.ltc__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.ltc__icon { flex: none; width: 40px; height: 40px; }
+.ltc__icon svg { width: 100%; height: 100%; }
+.ltc__headtext { min-width: 0; }
+.ltc__name { margin: 0; font-size: 18px; font-weight: 900; color: var(--ink); }
+.ltc__tagline { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+.ltc__term { font-size: 12.5px; font-weight: 700; color: var(--muted-2); margin: 4px 0 0; }
+.ltc__checklist { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.ltc__checklist li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
+.ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
+.ltc__checklist .bchk svg { width: 11px; height: 11px; }
+.ltc__intro { font-weight: 800; color: var(--indigo); }
+.ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
+.ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
+.ltc__hw li::before { content: '\2013'; position: absolute; left: 0; }
+.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
+.ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+.ltc__watzit, .ltc__uitbreidingen { text-align: center; }
+.ltc__watzit summary, .ltc__uitbreidingen summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
+.ltc__watzit summary:hover, .ltc__uitbreidingen summary:hover { color: var(--belt); }
+.ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
+.ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
+/* row is "Wat zit erin? - Uitbreidingen - Meer informatie" — each item after the first gets a leading dot. */
+.ltc__watzit + .ltc__uitbreidingen summary::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__uitbreidingen + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
+.ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
+.ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.ltc__optgroup-h { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--indigo); }
+.ltc__more { display: inline-flex; align-items: center; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer; padding: 4px 2px; transition: color 0.14s; }
+.ltc__more:hover { color: var(--belt); }
+.ltc__footnote { max-width: 760px; margin: 22px auto 0; font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.5; text-align: center; }
+.ltc__buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
+
 .pgnote { display: flex; align-items: center; gap: 12px; margin: 26px auto 0; background: var(--indigo-soft); border: 1px solid #ddd5f0; border-radius: 14px; padding: 14px 18px; max-width: 760px; }
 .pgnote .pn-ic { width: 34px; height: 34px; border-radius: 10px; background: #fff; display: grid; place-items: center; flex: none; box-shadow: inset 0 0 0 1px #ddd5f0; }
 .pgnote .pn-ic svg { width: 20px; height: 20px; color: var(--indigo); }
@@ -816,11 +1105,28 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
   tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-opl-tab'), true); }); });
 
+  /* A trailing "-vista" on the deep-link hash (e.g. #mijn-thuis-vista, used by the
+     Vergelijk pakketten page's Vista CTA) both selects the panel and scrolls/focuses
+     the Vista lead-capture form within it — same deep-link mechanism as a plain
+     #<anchor>, just with an extra step. */
+  var VISTA_SUFFIX = '-vista';
+  function focusVista() {
+    var box = page.querySelector('[data-vista]');
+    if (!box) return;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var input = box.querySelector('[data-vista-form] input');
+    if (input) input.focus({ preventScroll: true });
+  }
+  function applyHash(h, push) {
+    var wantsVista = h.slice(-VISTA_SUFFIX.length) === VISTA_SUFFIX;
+    var panelId = wantsVista ? h.slice(0, -VISTA_SUFFIX.length) : h;
+    if (panelId && panels[panelId]) show(panelId, push);
+    if (wantsVista) focusVista();
+  }
   var hash = (location.hash || '').replace('#', '');
-  if (hash && panels[hash]) show(hash, false);
+  if (hash) applyHash(hash, false);
   window.addEventListener('hashchange', function () {
-    var h = (location.hash || '').replace('#', '');
-    if (panels[h]) show(h, false);
+    applyHash((location.hash || '').replace('#', ''), false);
   });
 
   /* ---------- shared cart helper (Shopify line item properties) ---------- */
@@ -1097,19 +1403,31 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
   });
 
-  /* categorise a card's checked options into { woning, terms[], addons[] } */
+  /* categorise a card's checked options into { woning, terms[], addons[] }.
+     Every option group (.pcard__plus and .ltc__optgroup alike) carries an explicit
+     data-group attribute set in the markup — never inferred from the visible
+     <summary>/heading text. A prior version sniffed that text and broke silently when
+     "Abonnementen" was relabelled to "Extra diensten (optioneel)" (commit aac146c),
+     misfiling every option in that group as "Uitbreidingen" in /cart/add.js instead of
+     "Abonnement". data-group makes future copy edits safe by construction. */
   function readCardOptions(card) {
     var out = { woning: '', terms: [], addons: [] };
     if (!card) return out;
-    card.querySelectorAll('.pcard__plus').forEach(function (det) {
-      var head = det.querySelector('summary');
-      var label = head ? head.textContent.trim().toLowerCase() : '';
+    // Old cards (Mijn Thuis) group by sniffing the <summary> text of a .pcard__plus
+    // accordion; the redesigned Langer Thuis cards group explicitly via data-group on
+    // .ltc__optgroup (added when the three accordions were first consolidated into one
+    // "Wat zit erin?" panel — see docs/robi-feedback-redesign-mapping-2026-09-11.md — and
+    // later moved into their own sibling "Uitbreidingen" accordion). querySelectorAll is
+    // scoped to the whole card, not a specific accordion, so which <details> wraps them
+    // doesn't matter here.
+    card.querySelectorAll('.pcard__plus, .ltc__optgroup').forEach(function (det) {
+      var group = det.getAttribute('data-group');
       det.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
         if (!name) return;
-        if (label.indexOf('woning') === 0) out.woning = 'Groter dan 100 m² (+€4/mnd per etage)';
-        else if (label.indexOf('abonnement') === 0) out.terms.push(name);
+        if (group === 'woning') out.woning = 'Groter dan 100 m² (+€4/mnd per extra verdieping of per 100 m² extra woonoppervlak)';
+        else if (group === 'terms') out.terms.push(name);
         else out.addons.push(name);
       });
     });
@@ -1182,7 +1500,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     chev: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  function cardsIn(panel) { return [].slice.call(panel.querySelectorAll('.pcard--tile')); }
+  function cardsIn(panel) { return [].slice.call(panel.querySelectorAll('.pcard')); }
   function cardByFk(panel, fk) { var m = cardsIn(panel).filter(function (c) { return c.dataset.finderKey === fk; }); return m[0] || null; }
 
   function itemHtml(entry) {
@@ -1365,7 +1683,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 (function () {
   function submitLead(payload) {
     var rec = Object.assign({ ts: Date.now() }, payload);
-    if (window.ZV_LEAD_ENDPOINT) { try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(rec), keepalive: true, mode: 'no-cors' }).catch(function () {}); } catch (e) {} }
+    if (window.ZVLeadWebhook) { window.ZVLeadWebhook.send(rec, 'onderweg_coming_soon'); }
     try { var L = JSON.parse(localStorage.getItem('zv_leads') || '[]'); L.push(rec); localStorage.setItem('zv_leads', JSON.stringify(L)); } catch (e) {}
   }
   function init() {
@@ -1381,7 +1699,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
         if (!consent) { err.textContent = 'Ga akkoord met het privacybeleid om verder te gaan.'; err.hidden = false; return; }
         err.hidden = true;
-        submitLead({ lead_type: 'coming-soon-onderweg', email: email, phone: phone, consent: consent, cta_location: 'coming_soon_onderweg' });
+        submitLead({ lead_type: 'onderweg', email: email, phone: phone, consent: consent, cta_location: 'coming_soon_onderweg' });
         form.style.display = 'none'; if (done) done.hidden = false;
       });
     });
@@ -1392,9 +1710,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 (function () {
   function submitLead(payload) {
     var rec = Object.assign({ ts: Date.now() }, payload);
-    if (window.ZV_LEAD_ENDPOINT) {
-      try { window.fetch(window.ZV_LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(rec), keepalive: true, mode: 'no-cors' }).catch(function () {}); } catch (e) {}
-    }
+    if (window.ZVLeadWebhook) { window.ZVLeadWebhook.send(rec, 'vista'); }
     try { var L = JSON.parse(localStorage.getItem('zv_leads') || '[]'); L.push(rec); localStorage.setItem('zv_leads', JSON.stringify(L)); } catch (e) {}
   }
   function init() {
@@ -1406,15 +1722,17 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       if (form) form.addEventListener('submit', function (e) {
         e.preventDefault();
         var name = ((form.querySelector('[name=name]') || {}).value || '').trim();
+        var email = ((form.querySelector('[name=email]') || {}).value || '').trim();
         var phone = ((form.querySelector('[name=phone]') || {}).value || '').trim();
         var time = ((form.querySelector('[name=time]') || {}).value || '').trim();
         var consent = !!(form.querySelector('[name=consent]') || {}).checked;
         if (!name) { err.textContent = 'Vul uw naam in.'; err.hidden = false; return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Vul een geldig e-mailadres in.'; err.hidden = false; return; }
         if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
         if (!consent) { err.textContent = 'Bevestig dat wij u mogen terugbellen.'; err.hidden = false; return; }
         err.hidden = true;
         submitLead({
-          lead_type: 'vista', name: name, phone: phone, preferred_callback_time: time, consent: consent,
+          lead_type: 'vista', name: name, email: email, phone: phone, preferred_callback_time: time, consent: consent,
           item_name: box.getAttribute('data-item') || 'Mijn Thuis Vista', item_id: box.getAttribute('data-odoo') || 'MT-VIS',
           monthly_price: box.getAttribute('data-price') || '', solution_category: 'security', cta_location: 'oplossingen_vista'
         });
@@ -1516,6 +1834,25 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
           { "value": "zeker", "label": "Zeker" },
           { "value": "beschermd", "label": "Beschermd" }
         ], "default": "zeker" },
+        { "type": "select", "id": "row", "label": "Rij", "options": [
+          { "value": "1", "label": "Rij 1" },
+          { "value": "2", "label": "Rij 2" },
+          { "value": "3", "label": "Rij 3" }
+        ], "default": "1" }
+      ]
+    },
+    {
+      "type": "scenario_mijn_thuis",
+      "name": "Scenariokaart Mijn Thuis",
+      "settings": [
+        { "type": "paragraph", "content": "Voor de pakket-matcher die onder de Mijn Thuis-pakketten wordt getoond. Aparte bloktype van 'Matcher-scenariokaart' (Langer Thuis) zodat de twee kaartensets niet door elkaar lopen — zie snippets/zv-pakket-matcher.liquid." },
+        { "type": "text", "id": "title", "label": "Titel" },
+        { "type": "text", "id": "quote", "label": "Voorbeeldmelding (cursief)" },
+        { "type": "select", "id": "package", "label": "Past bij pakket", "options": [
+          { "value": "secure", "label": "Alert" },
+          { "value": "guard", "label": "Protect" },
+          { "value": "secure_plus", "label": "Vista" }
+        ], "default": "guard" },
         { "type": "select", "id": "row", "label": "Rij", "options": [
           { "value": "1", "label": "Rij 1" },
           { "value": "2", "label": "Rij 2" },

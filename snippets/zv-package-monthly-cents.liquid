@@ -1,0 +1,23 @@
+{%- comment -%}
+  finder_key -> confirmed monthly recurring price (integer cents), single place so the
+  cart/checkout pages that need a per-line "true monthly rate" (see zv-cart.liquid and
+  zv-checkout-overview.liquid) don't each carry their own copy of this mapping.
+
+  Needed because the package product's live Shopify price stops being one month's rate
+  once the interim intro-promo repricing is live (product priced as a discounted
+  multi-month bundle, see those two files' header comments) - so "the recurring monthly
+  amount" has to come from the confirmed pricing config instead of item.final_line_price.
+
+  Params: finder_key, inzicht/zeker/beschermd/alert/protect (the zv_*_monthly_cents
+  values from zv-pricing.liquid - caller passes these since `render` doesn't inherit
+  the caller's scope). Outputs the matching integer with no surrounding whitespace, or
+  nothing if finder_key is blank/unrecognized - caller should treat that as "fall back
+  to the live line price" (an unrecognized product, not a discount/promo edge case).
+{%- endcomment -%}
+{%- case finder_key -%}
+  {%- when 'aware' -%}{{ inzicht }}
+  {%- when 'aware_plus' -%}{{ zeker }}
+  {%- when 'care' -%}{{ beschermd }}
+  {%- when 'secure' -%}{{ alert }}
+  {%- when 'guard' -%}{{ protect }}
+{%- endcase -%}

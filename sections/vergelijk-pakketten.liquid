@@ -21,6 +21,8 @@
   assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   assign opl = '/pages/oplossingen'
   assign scenarios = section.blocks | where: 'type', 'scenario'
+  assign check = '<span class="yes"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+  assign no = '<span class="no" aria-hidden="true">–</span>'
 -%}
 
 <div class="zv-vergelijk">
@@ -69,7 +71,7 @@
           <h3>Woningbeveiliging tegen inbraak en brand</h3>
           <p>Een slim alarmsysteem dat inbraak, brand of onraad direct opmerkt en u meteen waarschuwt. Uit te breiden met camera en meldkameropvolging.</p>
           <div class="cmp-tiers"><span class="cmp-tier">Alert</span><span class="cmp-tier">Protect</span><span class="cmp-tier">Vista</span></div>
-          <span class="soon">Prijzen volgen binnenkort</span>
+          <span class="from">Vanaf {{ zv_alert_monthly }} /mnd</span>
           <a class="lk" href="{{ opl }}">Bekijk Mijn Thuis {{ arrow }}</a>
         </div>
         <div class="cmp-card">
@@ -89,6 +91,144 @@
           <a class="btn btn--gold" href="{% render 'zv-route', key: 'keuzehulp' %}">Doe de Keuzehulp {{ arrow }}</a>
           <a class="btn btn--ghost-light" href="{% render 'zv-route', key: 'klantenservice' %}#contact">Vraag advies</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%}
+    MIJN THUIS (Alert/Protect/Vista): page-local scenario tiles + comparison table,
+    deliberately NOT rendered through snippets/zv-pakket-matcher.liquid. That snippet is
+    hard-wired to exactly 3 cart-purchasable products matched via a collection +
+    custom.finder_key metafield, with its own scoring/add-to-cart JS shared live with
+    sections/oplossingen.liquid — Vista has no product/price/cart action (maatwerk, lead
+    form only), so it doesn't fit that model without changing shared, cross-page logic.
+    This block reuses the matcher's CSS classes (.pm-card, .cmp-tbl, …) from
+    assets/zv-vergelijk-pakketten.css for visual parity only. Content pending Robi's
+    read-through — see PR description.
+  {%- endcomment -%}
+  <section class="cmp cmp--mijnthuis">
+    <div class="wrap">
+      <div class="cmp-lead">Mijn Thuis</div>
+      <h2>Vergelijk Alert, Protect en Vista</h2>
+      <p class="sub">Woningbeveiliging tegen inbraak en brand. Vista is maatwerk met camera en meldkameropvolging.</p>
+
+      <div class="pm">
+        <div class="pm-head">
+          <h3>Herkent u dit?</h3>
+        </div>
+        <div class="pm-cards">
+          <div class="pm-row">
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Weet dat uw huis beveiligd is</span>
+              <span class="pm-card__q">Voor u vertrekt, schakelt u met één tik het systeem in.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Zie direct wat er gebeurt</span>
+              <span class="pm-card__q">02:14, bewegingsmelder in de gang geactiveerd.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Waarschuwing bij een open deur of raam</span>
+              <span class="pm-card__q">Achterdeur staat open terwijl het systeem is ingeschakeld.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Rook op tijd ontdekt</span>
+              <span class="pm-card__q">03:40 rookmelder gaat af, de meldkamer schakelt direct de hulpdiensten in.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Meldkamer grijpt in wanneer het nodig is</span>
+              <span class="pm-card__q">Alarm niet binnen 30 seconden uitgezet, de meldkamer belt direct.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Camera als extra zekerheid</span>
+              <span class="pm-card__q">Bekijk live beelden van uw voordeur, optioneel toe te voegen.</span>
+            </div>
+            <div class="pm-card pm-card--static">
+              <span class="pm-card__t">Altijd te bereiken, ook onderweg</span>
+              <span class="pm-card__q">Schakel het systeem in of uit vanaf uw telefoon, waar u ook bent.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="cmp-tbl">
+          <thead>
+            <tr>
+              <th style="min-width:220px"><span class="visually-hidden">Kenmerk</span></th>
+              <th class="plan" scope="col">
+                <span class="pn">Alert</span>
+                <span class="price">{{ zv_alert_monthly | remove: ' ' }}<span>/mnd</span></span>
+                <span class="term">Looptijd {{ zv_alert_term }} maanden</span>
+              </th>
+              <th class="plan rec" scope="col">
+                <span class="badge">Meest gekozen</span>
+                <span class="pn">Protect</span>
+                <span class="price">{{ zv_protect_monthly | remove: ' ' }}<span>/mnd</span></span>
+                <span class="term">Looptijd {{ zv_protect_term }} maanden</span>
+              </th>
+              <th class="plan" scope="col">
+                <span class="pn">Vista</span>
+                <span class="price">{{ zv_vista_monthly }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feat">Meest geschikt voor</td>
+              <td class="val txt">Basisbeveiliging tegen inbraak</td>
+              <td class="val txt">Inbraak én brand in één systeem</td>
+              <td class="val txt">Camerabeveiliging op maat</td>
+            </tr>
+            <tr>
+              <td class="feat">Bewegings- en deursensoren</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Rookmelder</td>
+              <td class="val">{{ no }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Meldkameropvolging (24/7)</td>
+              <td class="val">{{ no }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Camera</td>
+              <td class="val">{{ no }}</td>
+              <td class="val txt">Optioneel</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Zelf in- en uitschakelen via de app</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ no }}</td>
+            </tr>
+            <tr>
+              <td class="feat">Contractduur</td>
+              <td class="val txt">{{ zv_alert_term }} maanden</td>
+              <td class="val txt">{{ zv_protect_term }} maanden</td>
+              <td class="val txt">Op maat</td>
+            </tr>
+            <tr>
+              <td class="feat">Jaarlijks onderhoud</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+              <td class="val">{{ check }}</td>
+            </tr>
+            <tr class="cta">
+              <td></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}#mijn-thuis">Kies Alert</a></td>
+              <td class="rec-cell"><a class="btn btn--gold" href="{{ opl }}#mijn-thuis">Kies Protect {{ arrow }}</a></td>
+              <td><a class="btn btn--ghost" href="{{ opl }}#mijn-thuis-vista" data-cta-name="vraag_vista_aan" data-cta-position="mijn_thuis_vergelijk">Vraag Vista aan {{ arrow }}</a></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -147,7 +287,7 @@
       { "type": "scenario", "settings": { "title": "Een mogelijke val eerder signaleren", "quote": "10:41, looproute stopt onverwacht in de gang.", "package": "zeker", "row": "2" } },
       { "type": "scenario", "settings": { "title": "Zie wanneer een routine ineens verandert", "quote": "09:15, de keuken is vandaag nog niet bezocht.", "package": "zeker", "row": "2" } },
       { "type": "scenario", "settings": { "title": "Snelle hulp als iedere seconde telt", "quote": "04:40 noodknop ingedrukt, meldkamer belt contactpersonen.", "package": "beschermd", "row": "2" } },
-      { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer directe connectie met 112.", "package": "beschermd", "row": "3" } },
+      { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer schakelt direct de hulpdiensten in.", "package": "beschermd", "row": "3" } },
       { "type": "scenario", "settings": { "title": "Opvolging aan huis mogelijk", "quote": "Als extra optie is een zorgpartner aan huis mogelijk.", "package": "beschermd", "row": "3" } }
     ]
   }]

@@ -55,10 +55,17 @@
           {%- assign handle = card.system.handle -%}
           {%- comment -%} Buckets are the primary nav into the Oplossingen page, anchored per solution. {%- endcomment -%}
           {%- capture bucket_href -%}{{ routes.root_url }}/pages/oplossingen#{{ handle }}{%- endcapture -%}
-          <a class="bucket" href="{{ bucket_href | replace: '//pages', '/pages' }}"
-            data-zv-event="solution_view" data-solution-name="{{ card.heading | escape }}" data-solution-type="{{ handle }}"
-            data-cta-name="bucket_{{ handle }}" data-cta-position="homepage_buckets">
+          {%- comment -%} Veilig Onderweg isn't purchasable yet (see product data notes in CLAUDE.md) — badge it and disable its card link instead of navigating to Oplossingen. {%- endcomment -%}
+          {%- assign is_soon = false -%}{%- if handle == 'veilig-onderweg' -%}{%- assign is_soon = true -%}{%- endif -%}
+          {%- if is_soon -%}
+            <div class="bucket bucket--soon" aria-disabled="true" tabindex="-1" data-solution-type="{{ handle }}">
+          {%- else -%}
+            <a class="bucket" href="{{ bucket_href | replace: '//pages', '/pages' }}"
+              data-zv-event="solution_view" data-solution-name="{{ card.heading | escape }}" data-solution-type="{{ handle }}"
+              data-cta-name="bucket_{{ handle }}" data-cta-position="homepage_buckets">
+          {%- endif -%}
             <div class="bk-top">
+              {%- if is_soon -%}<span class="bk-soon">Binnenkort beschikbaar</span>{%- endif -%}
               <span class="bk-ic">
                 {%- if card.icon != blank -%}{{ card.icon | image_url: width: 116 | image_tag: alt: '', loading: 'lazy' }}
                 {%- elsif card.image != blank -%}{{ card.image | image_url: width: 116 | image_tag: alt: '', loading: 'lazy' }}
@@ -86,7 +93,11 @@
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             {%- endif -%}
-          </a>
+          {%- if is_soon -%}
+            </div>
+          {%- else -%}
+            </a>
+          {%- endif -%}
         {%- endfor -%}
       </div>
     </div>
@@ -116,6 +127,12 @@
 .bk-link svg { width: 17px; height: 17px; transition: transform 0.18s; }
 .bucket:hover .bk-link svg { transform: translateX(4px); }
 @media (max-width: 880px) { .bucket-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; } }
+.bucket--soon { cursor: default; }
+.bucket--soon:hover { transform: none; box-shadow: 0 12px 30px -20px rgba(26, 18, 48, 0.4), 0 2px 5px -3px rgba(26, 18, 48, 0.12); border-color: var(--line); }
+.bucket--soon:hover::before { transform: scaleX(0.34); }
+.bucket--soon .bk-link { color: var(--muted); }
+.bucket--soon .bk-link svg { opacity: 0.6; }
+.bk-soon { position: absolute; top: 16px; right: 16px; background: var(--indigo); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
 
 /* "Voor wie is dit?" info popover */
 .whoinfo { position: relative; display: inline-block; margin-top: 22px; }
