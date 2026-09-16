@@ -125,8 +125,16 @@
 .sf-drawer__links li.active a { color: var(--indigo); }
 .sf-drawer__phone { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--indigo); text-decoration: none; }
 .sf-drawer__phone svg { width: 18px; height: 18px; }
+.sf-drawer__cta { width: 100%; justify-content: center; }
 
 @media (max-width: 980px) { .sf-drawer { display: block; } }
+
+/* The CTA was the single biggest contributor to .sf-right overflowing on phones (search
+   22px + cart 22px + this button's ~119px + the 40px burger + 3x18px gaps ≈ 257px of
+   content alone, before the logo — measured against a 375px iPhone SE viewport this
+   doesn't fit). It's re-rendered inside the drawer (.sf-drawer__cta above) instead, so
+   nothing is dropped, it's just not fighting search/cart/the hamburger for header space. */
+@media (max-width: 980px) { .sf-cta-desktop { display: none; } }
 
 /* footer */
 .foot { background: var(--indigo); color: #cdc6e8; padding: clamp(48px, 5vw, 72px) 0 0; }
