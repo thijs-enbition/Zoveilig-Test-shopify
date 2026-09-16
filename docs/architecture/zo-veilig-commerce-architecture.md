@@ -426,6 +426,7 @@ Every decision above is captured as a formal ADR under [`docs/architecture/adr/`
 | ADR‑012 | Package expansion via package_components + snapshots | Accepted | 2026‑07‑29 |
 | ADR‑013 | Gated delivery (four approval gates) | Accepted | 2026‑07‑29 |
 | ADR‑014 | Deployment version registry in a private schema | Accepted | 2026‑07‑29 |
+| ADR‑015 | Odoo direct-webhook lead capture (exception to ADR-004) | Accepted | 2026‑09‑16 |
 
 ---
 
@@ -539,7 +540,7 @@ flowchart LR
 docs/
 ├── architecture/
 │   ├── zo-veilig-commerce-architecture.md   ← this document (the reference)
-│   ├── adr/                                  ← ADR-001 … ADR-014
+│   ├── adr/                                  ← ADR-001 … ADR-015
 │   ├── diagrams/                             ← erd.mmd, customer-journey.mmd, solution-architecture.mmd, roadmap.mmd
 │   └── glossary.md
 ├── operations/                              ← runbooks (Gate 2/3)

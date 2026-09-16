@@ -20,3 +20,4 @@ The summary register also lives in the
 | [012](./ADR-012-package-expansion.md) | Package expansion via package_components | Accepted |
 | [013](./ADR-013-gated-delivery.md) | Gated delivery (four gates) | Accepted |
 | [014](./ADR-014-deployment-registry-private-schema.md) | Deployment registry in a private schema | Accepted |
+| [015](./ADR-015-odoo-direct-webhook-lead-capture.md) | Odoo direct-webhook lead capture (exception to ADR-004) | Accepted |
