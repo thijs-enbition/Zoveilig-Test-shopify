@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "oplossingen": {
@@ -17,7 +26,7 @@
             "hero_cta_url": "/#keuzehulp",
             "collection": "langer-thuis",
             "pak_heading": "Kies uw ondersteuningsniveau",
-            "pak_sub": "Van een extra oogje in het zeil tot een compleet vangnet. Altijd privacy-first, zonder camera. Alle abonnementen: +€4 p/m per extra etage.",
+            "pak_sub": "Van een extra oogje in het zeil tot een compleet vangnet. Altijd privacy-first, zonder camera. Alle abonnementen: +€4 /mnd per extra verdieping of per 100 m² extra woonoppervlak.",
             "compare_label": "Niet zeker welk ondersteuningsniveau bij u past?",
             "compare_url": "/pages/vergelijk-pakketten",
             "hide_compare_cta": true,
@@ -49,7 +58,7 @@
             "hero_cta_url": "/#keuzehulp",
             "collection": "mijn-thuis",
             "pak_heading": "Kies uw beschermingsniveau",
-            "pak_sub": "Iedere woning is anders. Daarom kiest u zelf hoeveel bescherming het beste past bij uw situatie. Alle abonnementen: +€4 p/m per extra etage.",
+            "pak_sub": "Iedere woning is anders. Daarom kiest u zelf hoeveel bescherming het beste past bij uw situatie. Alle abonnementen: +€4 /mnd per extra verdieping of per 100 m² extra woonoppervlak.",
             "compare_label": "Niet zeker welk beschermingsniveau bij u past?",
             "compare_url": "/pages/vergelijk-pakketten",
             "uitbreidingen": "Extra sensoren\nExtra toegangspunten\nCamera-uitbreiding",
@@ -71,7 +80,7 @@
           "settings": {
             "anchor": "veilig-onderweg",
             "eyebrow": "Veilig Onderweg",
-            "sublabel": "Onderweg",
+            "sublabel": "Altijd beschikbaar",
             "headline": "Veilig, waar u ook bent.",
             "trust": "GPS-paniekknop voor onderweg\nAutomatische valdetectie\nSecuritas-meldkamer inbegrepen",
             "hero_asset": "opl-hero-veilig-onderweg.jpg",
@@ -103,10 +112,19 @@
         "s5": { "type": "scenario", "settings": { "title": "Een mogelijke val eerder signaleren", "quote": "10:41, looproute stopt onverwacht in de gang.", "package": "zeker", "row": "2" } },
         "s6": { "type": "scenario", "settings": { "title": "Zie wanneer een routine ineens verandert", "quote": "09:15, de keuken is vandaag nog niet bezocht.", "package": "zeker", "row": "2" } },
         "s7": { "type": "scenario", "settings": { "title": "Snelle hulp als iedere seconde telt", "quote": "04:40 noodknop ingedrukt, meldkamer belt contactpersonen.", "package": "beschermd", "row": "2" } },
-        "s8": { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer directe connectie met 112.", "package": "beschermd", "row": "3" } },
-        "s9": { "type": "scenario", "settings": { "title": "Opvolging aan huis mogelijk", "quote": "Als extra optie is een zorgpartner aan huis mogelijk.", "package": "beschermd", "row": "3" } }
+        "s8": { "type": "scenario", "settings": { "title": "Rook en brandbeveiliging", "quote": "06:38 brandalarm, meldkamer schakelt direct de hulpdiensten in.", "package": "beschermd", "row": "3" } },
+        "s9": { "type": "scenario", "settings": { "title": "Opvolging aan huis mogelijk", "quote": "Als extra optie is een zorgpartner aan huis mogelijk.", "package": "beschermd", "row": "3" } },
+        "mt1": { "type": "scenario_mijn_thuis", "settings": { "title": "Weet dat uw huis beveiligd is", "quote": "Voor u vertrekt, schakelt u met één tik het systeem in.", "package": "secure", "row": "1" } },
+        "mt2": { "type": "scenario_mijn_thuis", "settings": { "title": "Waarschuwing bij een open deur of raam", "quote": "Achterdeur staat open terwijl het systeem is ingeschakeld.", "package": "secure", "row": "1" } },
+        "mt3": { "type": "scenario_mijn_thuis", "settings": { "title": "Zie direct wat er gebeurt", "quote": "02:14, bewegingsmelder in de gang geactiveerd.", "package": "secure", "row": "1" } },
+        "mt4": { "type": "scenario_mijn_thuis", "settings": { "title": "Meldkamer grijpt in wanneer het nodig is", "quote": "Alarm niet binnen 30 seconden uitgezet, de meldkamer belt direct.", "package": "guard", "row": "2" } },
+        "mt5": { "type": "scenario_mijn_thuis", "settings": { "title": "Rook op tijd ontdekt", "quote": "03:40 rookmelder gaat af, de meldkamer schakelt direct de hulpdiensten in.", "package": "guard", "row": "2" } },
+        "mt6": { "type": "scenario_mijn_thuis", "settings": { "title": "Directe opvolging bij een mogelijke inbraak", "quote": "02:47, bewegingsmelder afgegaan — de meldkamer neemt meteen contact op.", "package": "guard", "row": "2" } },
+        "mt7": { "type": "scenario_mijn_thuis", "settings": { "title": "Camera als extra zekerheid", "quote": "Bekijk live beelden van uw voordeur, optioneel toe te voegen.", "package": "secure_plus", "row": "3" } },
+        "mt8": { "type": "scenario_mijn_thuis", "settings": { "title": "Zie direct wie er voor de deur staat", "quote": "Gemiste beltoon? De videodeurbel toont wie er om 15:20 aanbelde.", "package": "secure_plus", "row": "3" } },
+        "mt9": { "type": "scenario_mijn_thuis", "settings": { "title": "Volledig zicht op huis en erf", "quote": "Buitencamera legt vast wie er om 23:40 rond het huis liep.", "package": "secure_plus", "row": "3" } }
       },
-      "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"],
+      "block_order": ["langer_thuis", "mijn_thuis", "veilig_onderweg", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "mt1", "mt2", "mt3", "mt4", "mt5", "mt6", "mt7", "mt8", "mt9"],
       "settings": {}
     }
   },

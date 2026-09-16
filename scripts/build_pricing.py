@@ -209,7 +209,9 @@ def build():
             continue
         lines += [
             f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_monthly_cents = {p['monthlyRecurringPriceCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_monthly = '{p['promoMonthlyDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_monthly_cents = {p['promoMonthlyCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",

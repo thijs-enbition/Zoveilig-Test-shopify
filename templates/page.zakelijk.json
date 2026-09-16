@@ -1,4 +1,10 @@
 {
-  "sections": { "main": { "type": "zakelijk", "settings": {} } },
-  "order": ["main"]
+  "sections": {
+    "main": { "type": "zakelijk", "settings": {} },
+    "trust": {
+      "type": "trust-partners",
+      "settings": { "label": "Beveiligd met bewezen partners" }
+    }
+  },
+  "order": ["main", "trust"]
 }

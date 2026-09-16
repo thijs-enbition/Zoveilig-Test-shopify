@@ -17,6 +17,7 @@ repo right now**:
 | `003_order_lines_idempotency.sql` | 1 |
 | `005_versioning.sql` | 1 |
 | `007_leads_contact_form_fields.sql` | 1 — schema-only `leads` extension (subject/preferred_contact_time/message), added for the Contact page's `capture-lead` wiring |
+| `008_webhook_failures.sql` | 1 — new, isolated `webhook_failures` diagnostic table (no lead PII) for the `log-webhook-failure` Edge Function; doesn't touch `leads` or any existing table |
 | `004_rpc.sql` | 2 — **not created yet** |
 | `006_reporting_views.sql` | 2 — **not created yet** |
 
@@ -37,6 +38,19 @@ implement the broader Gate 2 recommendations still open in the reference archite
 (§12): per-IP/journey rate limiting beyond the honeypot, the full CORS allowlist story,
 or wiring from Keuzehulp/attribution capture — those remain for whenever Gate 2 is
 formally signed off.
+
+`supabase/functions/log-webhook-failure` (added 2026-09-15) is the second Edge
+Function. It exists solely so a failed `ZV_LEAD_ENDPOINT` send (Vista, camera-hardware,
+Veilig Onderweg "Binnenkort beschikbaar" — see
+`docs/lead-endpoint-diagnosis-2026-09-15.md` for the incident that motivated this)
+becomes visible in `webhook_failures` instead of disappearing into an empty
+client-side `.catch()`. Same CORS-origin-allowlist pattern as `capture-lead`; inserts
+one row and stops, no PII, no retry logic. **Only catches network-level failures
+(DNS/connection failure, our own client-side timeout, or a synchronous send
+exception)** — the storefront calls `ZV_LEAD_ENDPOINT` with `mode: 'no-cors'`, so a
+non-2xx response from that endpoint is structurally invisible to the browser and
+cannot be logged here either; closing that gap means dropping `no-cors` (needs the
+endpoint to support real CORS) — a separate decision, not made here.
 
 ## Version tracking
 
