@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
   const voorkeurstijd = str(payload.Voorkeurstijd);
   const bericht = str(payload.body);
   const bron = str(payload.Bron) || "Contactpagina";
+  const consent = payload.consent === true;
 
   const subject = SUBJECT_CODES.includes(onderwerp) ? onderwerp : null;
   const preferredContactTime = CONTACT_TIME_CODES.includes(voorkeurstijd) ? voorkeurstijd : null;
@@ -109,6 +110,8 @@ Deno.serve(async (req) => {
       subject: subject,
       preferred_contact_time: preferredContactTime,
       message: bericht || null,
+      marketing_consent: consent,
+      consent_recorded_at: consent ? new Date().toISOString() : null,
     })
     .select("id, lead_reference")
     .single();
