@@ -16,7 +16,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const SOURCE_CODES = ["vista", "camera_hardware", "onderweg_coming_soon"];
+const SOURCE_CODES = ["vista", "camera_hardware", "onderweg_coming_soon", "chatbot"];
 const ERROR_TYPE_CODES = ["network_error", "timeout", "exception"];
 
 function allowedOrigins(): string[] {
