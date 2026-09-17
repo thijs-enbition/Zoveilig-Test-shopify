@@ -4,16 +4,16 @@ Status: **Draft — design only, nothing implemented.** No theme code or Edge Fu
 written. This doc exists to align on architecture, guardrails and lead-capture wiring before
 any of that starts.
 
-> **Correction on scope, up front:** the task that produced this doc asked me to read "ADR-015
-> (webhook exception)". **ADR-015 does not exist.** `docs/architecture/adr/` only goes up to
-> ADR-004 through ADR-014 (see `docs/architecture/adr/README.md`). The thing being referred to
-> is [`docs/contact-odoo-dual-write-2026-09-16.md`](contact-odoo-dual-write-2026-09-16.md)'s
-> Step 5, "Wider note: ADR-004 deviation, not new" — an informal, undocumented-as-an-ADR
-> deviation from [ADR-004](architecture/adr/ADR-004-odoo-deferred-phase-2.md) ("Odoo deferred to
-> Phase 2"), where several forms already write to Odoo directly via `ZVLeadWebhook.send()`
-> despite ADR-004 saying Phase 1 has no Odoo dependency. This doc treats that note as the
-> "webhook exception" precedent and flags below that a real ADR-015 should probably get written
-> to formalize it — see **Open questions**.
+> **Correction on scope, up front:** the branch this doc was written on (`docs/chatbot-faq-design-2026-09-17`,
+> forked from `main`) does not contain ADR-015 — `docs/architecture/adr/` there only goes up to
+> ADR-004–ADR-014. ADR-015 does exist, but on a separate, still-unmerged branch,
+> `docs/adr-015-odoo-webhook-exception-2026-09-16` (`ADR-015-odoo-direct-webhook-lead-capture.md`,
+> Status: Accepted, dated 2026-09-16, authored by Thijs). Its decision: *"Direct client-side POSTs
+> to the Odoo Automation Rule webhook are an approved Phase 1 exception for lead-capture forms
+> specifically, layered on top of (not replacing) the Supabase capture-lead pipeline ADR-004
+> established."* This doc cites that ADR's content directly (rather than treating the exception
+> as merely informal) but flags in **Open questions** that it isn't on `main` yet, so anyone
+> reading `docs/architecture/adr/` on `main` today won't find it.
 
 ## 1. What FAQ content exists today
 
@@ -219,11 +219,12 @@ ADR-004, not something to fold in silently here — see **Open questions**.
 3. **Where does the Anthropic API key come from?** Whose Anthropic account/billing, and who
    owns rotating it if it leaks? Needs to be set as a Supabase secret on the project before the
    function can be deployed either way.
-4. **Should a real ADR-015 get written** to formalize the Odoo-direct-webhook exception
-   documented informally in `docs/contact-odoo-dual-write-2026-09-16.md` (already covering
-   Vista/Onderweg/camera-hardware/Contact), before the chatbot becomes a fifth instance of it?
-   This doc doesn't propose the ADR itself — flagging that the gap between ADR-004 and shipped
-   reality keeps growing and a chatbot lead would be one more thing it doesn't cover.
+4. **`docs/adr-015-odoo-webhook-exception-2026-09-16` should get merged to `main` before or
+   alongside the chatbot lead-capture work ships.** ADR-015 already exists and already covers
+   Vista/Onderweg/camera-hardware/Contact as approved Phase 1 exceptions to ADR-004; the
+   chatbot would be a fifth instance of the same exception, but until that branch merges,
+   `main`'s `docs/architecture/adr/` doesn't reflect that ADR-015 was accepted, and a reader
+   relying only on `main` would wrongly conclude the exception is still informal.
 5. **Is the "Uit de praktijk" metaobject FAQ pool (§1) in scope for the KB at all**, given it
    isn't git-tracked and would need an Admin API read rather than a JSON parse? Recommend
    leaving it out of v1's KB and revisiting once the Klantenservice-only bot is live.
