@@ -1,0 +1,57 @@
+{%- comment -%}
+  FAQ chatbot widget (floating launcher + panel).
+
+  Usage (from sections/zv-chatbot.liquid):
+    {% render 'zv-chatbot', endpoint: section.settings.chatbot_endpoint,
+        anon_key: section.settings.chatbot_anon_key, id: section.id %}
+
+  Pure markup only -- assets/zv-chatbot.js does all the work (conversation state,
+  calling the chatbot-faq Edge Function, firing a lead via ZVLeadWebhook.send() when the
+  function reports lead_detected). `endpoint`/`anon_key` are the Supabase project's public
+  anon key + the chatbot-faq function URL -- not a secret; the Anthropic API key and the
+  knowledge base never reach the browser. See docs/chatbot-faq-design-2026-09-17.md.
+{%- endcomment -%}
+
+<div
+  class="zv-chatbot"
+  data-zv-chatbot
+  data-endpoint="{{ endpoint }}"
+  data-anon-key="{{ anon_key }}"
+>
+  <button
+    type="button"
+    class="zv-chatbot-launcher"
+    data-zv-chatbot-toggle
+    aria-expanded="false"
+    aria-controls="zv-chatbot-panel-{{ id }}"
+  >
+    <span class="zv-chatbot-launcher-icon" aria-hidden="true">&#128172;</span>
+    <span class="zv-chatbot-launcher-label">Vraag het Zo Veilig</span>
+  </button>
+
+  <div class="zv-chatbot-panel" id="zv-chatbot-panel-{{ id }}" hidden>
+    <div class="zv-chatbot-header">
+      <span>Zo Veilig &middot; klantenservice chat</span>
+      <button type="button" class="zv-chatbot-close" data-zv-chatbot-close aria-label="Chat sluiten">&times;</button>
+    </div>
+
+    <div class="zv-chatbot-messages" data-zv-chatbot-messages role="log" aria-live="polite" aria-label="Gesprek"></div>
+
+    <p class="zv-chatbot-status" data-zv-chatbot-status role="status" aria-live="polite" hidden></p>
+
+    <form class="zv-chatbot-form" data-zv-chatbot-form novalidate>
+      <label class="zv-chatbot-input-label visually-hidden" for="zv-chatbot-input-{{ id }}">Uw vraag</label>
+      <textarea
+        id="zv-chatbot-input-{{ id }}"
+        class="zv-chatbot-input"
+        name="message"
+        rows="1"
+        required
+        placeholder="Typ hier uw vraag..."
+      ></textarea>
+      <button type="submit" class="zv-chatbot-send">Versturen</button>
+    </form>
+
+    <p class="zv-chatbot-disclaimer">Antwoorden zijn automatisch gegenereerd op basis van onze klantenservice-informatie. Twijfelt u? Bel 088 122 11 11.</p>
+  </div>
+</div>
