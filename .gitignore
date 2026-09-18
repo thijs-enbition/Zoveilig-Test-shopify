@@ -21,6 +21,9 @@ yarn-error.log*
 .shopify/
 .shopify.lock
 
+# --- Supabase CLI local state (can include a pooler connection string) ---
+supabase/.temp/
+
 # --- SECRETS: never commit store credentials or tokens ---
 .env
 .env.*
