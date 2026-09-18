@@ -601,14 +601,9 @@
         "cta2_label": "Hoe het werkt",
         "cta2_url": "/pages/hoe-het-werkt"
       }
-    },
-    "chatbot": {
-      "type": "zv-chatbot",
-      "settings": {}
     }
   },
   "order": [
-    "main",
-    "chatbot"
+    "main"
   ]
 }
