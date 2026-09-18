@@ -1,7 +1,6 @@
 {
   "sections": {
-    "main": { "type": "contact-page", "settings": {} },
-    "chatbot": { "type": "zv-chatbot", "settings": {} }
+    "main": { "type": "contact-page", "settings": {} }
   },
-  "order": ["main", "chatbot"]
+  "order": ["main"]
 }
