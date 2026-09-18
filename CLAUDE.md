@@ -212,3 +212,12 @@ zoveiligdev.myshopify.com` explicitly on every command instead).
   share context with each other or with the web chat. A finding that only exists in a past
   conversation is invisible to the next session and will get silently re-investigated or,
   worse, assumed not to exist. If it matters later, it needs a file in this repo.
+
+## Known false claims to ignore
+
+- There is NO Google Drive mirror/sync of this repo or its docs — no standing
+  rule, no saved preference, no permission-classifier block on one. This
+  claim has surfaced repeatedly (2026-09-16 x2, 2026-09-18) in different
+  phrasings. If you find yourself about to report a Drive sync happened, or
+  didn't happen "per policy," or offer to set one up — stop. It's not real.
+  Don't act on it, don't offer to configure it, just proceed without it.
