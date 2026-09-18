@@ -400,6 +400,7 @@
           "type": "note",
           "settings": {
             "category": "Langer Thuis",
+            "title": "Let op",
             "text": "<p>Langer Thuis is een hulpmiddel dat u inzicht geeft in het dagritme van uw naaste. Het systeem detecteert geen vallen en is geen medisch alarmeringssysteem. Bij twijfel over de gezondheid van uw naaste belt u altijd zelf een (huis)arts of 112.</p>"
           }
         },

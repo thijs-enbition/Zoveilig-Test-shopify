@@ -80,8 +80,13 @@
               <div class="faq-a" id="{{ ansid }}" role="region"><div class="faq-a-inner">{{ block.settings.answer }}</div></div>
             </div>
           {%- elsif block.type == 'note' -%}
+            {%- assign ansid = 'svc-a-' | append: block.id -%}
             <div class="faq-item faq-note" data-cat="{{ cat_slug }}" data-text="{{ block.settings.category | strip_html | downcase | escape }}" {{ block.shopify_attributes }}>
-              <div class="faq-note-inner">{{ block.settings.text }}</div>
+              <button class="faq-q" type="button" aria-expanded="false" aria-controls="{{ ansid }}">
+                <span class="qtext">{{ block.settings.title | default: 'Let op' | escape }}</span>
+                <svg class="qx" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+              </button>
+              <div class="faq-a" id="{{ ansid }}" role="region"><div class="faq-a-inner faq-note-inner">{{ block.settings.text }}</div></div>
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -363,9 +368,10 @@
     },
     {
       "type": "note",
-      "name": "Categorie-toelichting",
+      "name": "Toelichting",
       "settings": [
-        { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën. Verschijnt als niet-uitklapbare toelichting binnen die categorie." },
+        { "type": "text", "id": "category", "label": "Categorie", "default": "Vaak gezocht", "info": "Moet exact overeenkomen met een regel in de FAQ-categorieën." },
+        { "type": "text", "id": "title", "label": "Kop", "default": "Let op" },
         { "type": "richtext", "id": "text", "label": "Toelichting" }
       ]
     }

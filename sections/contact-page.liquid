@@ -56,6 +56,12 @@
               <option value="evening">Avond (17:00 - 20:00)</option>
             </select></div>
             <div class="fld"><label for="c-msg">Uw vraag of situatie (optioneel)</label><textarea id="c-msg" name="body" placeholder="Vertel kort waar u mee zit, dan kunnen we u gerichter helpen."></textarea></div>
+            <div class="fld fld-consent">
+              <label class="cn-consent">
+                <input type="checkbox" id="c-consent" required>
+                <span>Ik geef toestemming dat Zo Veilig contact met mij opneemt over mijn aanvraag.</span>
+              </label>
+            </div>
             <input type="hidden" name="Bron" value="Contactpagina">
             <div class="cn-hp" aria-hidden="true"><label for="c-web">Website</label><input id="c-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
             <div class="cn-submit">
@@ -104,6 +110,10 @@
 .zv-contact .fld input:focus, .zv-contact .fld select:focus, .zv-contact .fld textarea:focus { outline:none; border-color:var(--indigo); background:#fff; }
 .zv-contact .fld-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 @media(max-width:520px){ .zv-contact .fld-row { grid-template-columns:1fr; } }
+.zv-contact .fld-consent .cn-consent { display:flex; align-items:flex-start; gap:10px; margin-bottom:0; cursor:pointer; }
+.zv-contact .fld-consent .cn-consent input { width:19px; height:19px; margin-top:2px; flex:none; accent-color:var(--indigo); }
+.zv-contact .fld-consent .cn-consent span { font-size:13.5px; font-weight:600; color:var(--muted); line-height:1.5; }
+.zv-contact .fld--invalid.fld-consent .cn-consent span { color:#9a2b2b; }
 .zv-contact .cn-submit { margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .zv-contact .cn-priv { font-size:12.5px; font-weight:600; color:var(--muted); max-width:34ch; line-height:1.45; }
 .zv-contact .cn-priv a { color:var(--indigo); font-weight:800; }
@@ -142,10 +152,12 @@
   var errServerEl = document.getElementById('cn-err-server');
   var endpoint = form.getAttribute('data-capture-lead-endpoint');
   var anonKey = form.getAttribute('data-capture-lead-key');
+  var consentInput = document.getElementById('c-consent');
   var requiredFields = [
     document.getElementById('c-naam'),
     document.getElementById('c-tel'),
-    document.getElementById('c-mail')
+    document.getElementById('c-mail'),
+    consentInput
   ];
 
   function clearInvalid() {
@@ -174,11 +186,13 @@
     var formData = new FormData(form);
     var payload = {};
     formData.forEach(function (value, key) { payload[key] = value; });
+    payload.consent = !!(consentInput && consentInput.checked);
 
     // Additive Odoo CRM dual-write — fires independently, never blocks or waits on the
     // Supabase capture-lead call below. See docs/contact-odoo-dual-write-2026-09-16.md
-    // for the field-mapping rationale (including the 'any' preferred-time and consent
-    // open questions).
+    // for the field-mapping rationale (including the 'any' preferred-time open question;
+    // the consent open question there is now resolved by the required checkbox above —
+    // see docs/consent-checkboxes-2026-09-16.md).
     try {
       if (window.ZVMeasurement && window.ZVMeasurement.buildCallbackLead && window.ZVLeadWebhook) {
         var TIJD_MAP = { morning: 'ochtend', afternoon: 'middag', evening: 'avond' };
@@ -191,7 +205,8 @@
           email: payload.email || '',
           preferred_callback_time: TIJD_MAP[tijd] || tijd,
           contact_subject: payload.Onderwerp || '',
-          message: payload.body || ''
+          message: payload.body || '',
+          consent: payload.consent
         });
         window.ZVLeadWebhook.send(rec, 'contact_page');
       }
