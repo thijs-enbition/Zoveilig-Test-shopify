@@ -7,6 +7,7 @@
   Logo, phone number and the utility message are theme/section settings.
   Cart count is live from the cart object.
 {%- endcomment -%}
+{%- capture zv_header_cta_fallback -%}{% render 'zv-route', key: 'contact' %}{%- endcapture -%}
 
 <div class="util">
   <div class="wrap">
@@ -68,7 +69,7 @@
       </a>
 
       {%- if section.settings.cta_text != blank -%}
-        <a class="btn btn--gold sf-cta-desktop" href="{{ section.settings.cta_link | default: '#' }}">{{ section.settings.cta_text }}</a>
+        <a class="btn btn--gold sf-cta-desktop" href="{{ section.settings.cta_link | default: zv_header_cta_fallback }}">{{ section.settings.cta_text }}</a>
       {%- endif -%}
 
       {%- comment -%}
@@ -106,7 +107,7 @@
                   getting silently dropped: still one tap away, just not fighting search/
                   cart/the hamburger for space in the header row.
                 {%- endcomment -%}
-                <a class="btn btn--gold sf-drawer__cta" href="{{ section.settings.cta_link | default: '#' }}">{{ section.settings.cta_text }}</a>
+                <a class="btn btn--gold sf-drawer__cta" href="{{ section.settings.cta_link | default: zv_header_cta_fallback }}">{{ section.settings.cta_text }}</a>
               {%- endif -%}
               {%- if section.settings.phone != blank -%}
                 <a class="sf-drawer__phone" href="tel:{{ section.settings.phone | remove: ' ' }}">
