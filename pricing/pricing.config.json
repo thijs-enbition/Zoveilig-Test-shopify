@@ -31,6 +31,37 @@
     "sku": "ACT-INSTALL",
     "note": "Centrally configurable. Change here only, never in a page component. productHandle/sku identify the real Shopify product added to the cart alongside a package (confirmed live 2026-09-09, published to Online Store: service product, price EUR 49,00, no tracked inventory)."
   },
+  "installationOptions": {
+    "nami": {
+      "options": [
+        {
+          "id": "geen",
+          "label": "Geen installatie",
+          "amountCents": 0,
+          "display": "€ 0,00",
+          "productHandle": "geen-installatie-nami",
+          "sku": "020103"
+        },
+        {
+          "id": "telefonisch",
+          "label": "Telefonische ondersteuning",
+          "amountCents": 3500,
+          "display": "€ 35,00",
+          "productHandle": "telefonische-ondersteuning-installatie-nami",
+          "sku": "03012026"
+        },
+        {
+          "id": "huis",
+          "label": "Installatie aan huis",
+          "amountCents": 4900,
+          "display": "€ 49,00",
+          "productHandle": "installatie-nami",
+          "sku": "04012026"
+        }
+      ],
+      "note": "NAMI-platform packages (Inzicht, Zeker, Alert) let the customer choose one of these three on the Overzicht page in place of the fixed 'activation' fee above; Climax packages (Beschermd, Protect) keep using 'activation' unchanged, no choice offered, no UI change. All three confirmed live in Shopify 2026-09-21 (ACTIVE, published to Online Store, verified via Admin API against zoveiligdev.myshopify.com). PRICES PROVISIONAL: the €49,00 (huis) and €0,00 (geen) amounts are Thijs's working default, not confirmed by Odoo — expect adjustment, do not treat as final. See docs/nami-install-choice-2026-09-21.md."
+    }
+  },
   "commitment": {
     "id": "initial-commitment",
     "retired": true,
@@ -514,6 +545,12 @@
       "id": "VEILIG_ONDERWEG_PRICING",
       "severity": "medium",
       "summary": "Veilig Onderweg remains unpriced and not purchasable.",
+      "owner": "Operator"
+    },
+    {
+      "id": "NAMI_INSTALL_PRICING_PROVISIONAL",
+      "severity": "medium",
+      "summary": "installationOptions.nami option prices (Geen installatie €0,00, Telefonische ondersteuning €35,00, Installatie aan huis €49,00) are Thijs's working default as of 2026-09-21, not confirmed by Odoo. Expect adjustment before commercial launch.",
       "owner": "Operator"
     }
   ]

@@ -63,6 +63,21 @@ def build():
     # (badge, disclosure, discount rows) via zv_promo_active, without a second flag to keep in sync.
     promo_active = promo_enabled and promo_rate > 0
 
+    # NAMI installation choice (Inzicht/Zeker/Alert only; Climax keeps the fixed `activation`
+    # fee above, untouched). display is recomputed via eur(), same as activation's, rather
+    # than trusting config's hand-typed string.
+    nami_install_options = [
+        {
+            "id": o["id"],
+            "label": o["label"],
+            "amountCents": o["amountCents"],
+            "display": eur(o["amountCents"]),
+            "productHandle": o["productHandle"],
+            "sku": o["sku"],
+        }
+        for o in cfg["installationOptions"]["nami"]["options"]
+    ]
+
     out = {
         "generatedFrom": "pricing.config.json",
         "configVersion": cfg["meta"]["version"],
@@ -72,6 +87,7 @@ def build():
                        "label": cfg["labels"]["activation"],
                        "productHandle": cfg["activation"].get("productHandle"),
                        "sku": cfg["activation"].get("sku")},
+        "installationOptions": {"nami": {"options": nami_install_options}},
         "promo": {
             "enabled": promo_enabled,
             "active": promo_active,
@@ -199,7 +215,17 @@ def build():
         f"{{%- assign zv_promo_disclosure = '{out['promo']['disclosure']}' -%}}",
         f"{{%- assign zv_activation_handle = '{out['activation'].get('productHandle') or ''}' -%}}",
         f"{{%- assign zv_activation_sku = '{out['activation'].get('sku') or ''}' -%}}",
+        f"{{%- assign zv_activation_cents = {activation_cents} -%}}",
     ]
+    for o in out["installationOptions"]["nami"]["options"]:
+        oid = o["id"].replace("-", "_")
+        lines += [
+            f"{{%- assign zv_nami_install_{oid}_label = '{o['label']}' -%}}",
+            f"{{%- assign zv_nami_install_{oid}_cents = {o['amountCents']} -%}}",
+            f"{{%- assign zv_nami_install_{oid}_display = '{o['display']}' -%}}",
+            f"{{%- assign zv_nami_install_{oid}_handle = '{o['productHandle']}' -%}}",
+            f"{{%- assign zv_nami_install_{oid}_sku = '{o['sku']}' -%}}",
+        ]
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")
         if not p.get("purchasable"):
@@ -217,6 +243,7 @@ def build():
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_term = {p['termMonths']} -%}}",
             f"{{%- assign zv_{pid}_icv = '{p['indicativeContractValue']['display']}' -%}}",
+            f"{{%- assign zv_{pid}_icv_cents = {p['indicativeContractValue']['cents']} -%}}",
         ]
     SNIPPET.parent.mkdir(parents=True, exist_ok=True)
     SNIPPET.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -225,6 +252,7 @@ def build():
     print(f"wrote {GENERATED.name} and snippets/{SNIPPET.name}")
     print(f"  packages: {len(out['packages'])} ({len(priced)} purchasable)")
     print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
+    print("  nami install options: " + ", ".join(f"{o['label']} {o['display']}" for o in nami_install_options))
     for p in priced:
         print(f"  - {p['lineName']}/{p['name']}: monthly {p['monthlyDisplay']}"
               f" | promo {p['promoMonthlyDisplay']} (-{p['promoDiscountTotalDisplay']})"

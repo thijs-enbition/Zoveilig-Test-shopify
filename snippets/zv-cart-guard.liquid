@@ -1,38 +1,75 @@
 {%- comment -%}
-  Zo Veilig — cart guard. Ensures a subscription package never sits in the live
-  cart without the universal one-time "Activatie en installatie" fee
-  (pricing.config.json activation.productHandle/sku).
+  Zo Veilig — cart guard. Ensures a subscription package never sits in the live cart
+  without its platform's one-time installation fee.
 
-  The Oplossingen and Vergelijk pakketten add-to-cart flows already add the fee
-  alongside a package, but nothing stops it being removed afterwards in the
-  cart, or a package reaching the cart through an entry point that doesn't add
-  it — e.g. the standalone Shopify product page's default "Toevoegen aan
-  winkelwagen" button (Dawn's stock buy-buttons, no custom wiring).
+  Climax (pricing.config.json activation.productHandle/sku, "Activatie en installatie"):
+  UNCHANGED behaviour. The Oplossingen and Vergelijk pakketten add-to-cart flows already add
+  this fee alongside a package, but nothing stops it being removed afterwards in the cart, or
+  a package reaching the cart through an entry point that doesn't add it — e.g. the standalone
+  Shopify product page's default "Toevoegen aan winkelwagen" button (Dawn's stock buy-buttons,
+  no custom wiring). On load, if a subscription line exists with no matching activation-fee
+  line, it adds the fee and reloads — no ambiguity, one fixed fee, one correct answer. Skipped
+  when a nami-install line is already present (a nami cart in good standing must never also
+  pick up the flat climax fee).
 
-  On every page that renders this, checks the live cart on load: if a
-  subscription line exists (product.type == sub_type, the same signal
-  zv-cart.liquid/zv-checkout-overview.liquid use — tags aren't reliable here,
-  the Cart AJAX API doesn't expose them on line items at all) with no matching
-  activation-fee line, it adds the fee and reloads the page. Silent no-op if
-  the activation product can't be resolved (activation_variant_id blank) or if
-  the add fails (e.g. offline) — the caller is expected to also fail safe
-  server-side (see zv-checkout-overview.liquid's cart_needs_activation gate,
-  which blocks checkout regardless of whether this script runs or succeeds).
+  Nami (pricing.config.json installationOptions.nami.options, 3 differently-priced variants):
+  this guard must NEVER pick one of the three for the customer — unlike the climax fee, there
+  isn't one correct answer, only the customer's own choice on the Overzicht page (required
+  radio group there, see sections/zv-checkout-overview.liquid). The only nami-specific fix
+  applied here is a consistency dedupe: if more than one of the 3 nami-install variants is
+  present at once (e.g. a stale line left behind by an interrupted swap), keep the most
+  recently added and remove the rest, then reload. A cart with none of the three is left
+  alone — that is the expected, correct state until the customer chooses.
 
-  Params: activation_variant_id, sub_type
+  Known gap, not fixed here (out of the file list this change touched): the Cart AJAX API
+  doesn't expose a line item's product.metafields (custom.finder_key) the way server-side
+  Liquid does, so this script has no reliable way to tell whether an activation-less
+  subscription line is nami or climax platform by itself. In practice this rarely matters —
+  every current add-to-cart flow (Oplossingen, Vergelijk pakketten) still adds the climax fee
+  unconditionally alongside every package today, nami included, which is itself a separate
+  pre-existing gap outside this file (see docs/nami-install-choice-2026-09-21.md) — but a nami
+  subscription reaching cart with truly no fee line at all (e.g. via the standalone product
+  page, which does no fee wiring either way) would still get the climax fee added by the branch
+  above, same as before this change. Flagged, not silently patched with a guessed fix.
+
+  Silent no-op throughout if a variant id can't be resolved, or if a fetch fails (e.g.
+  offline) — the caller also fails safe server-side (see zv-checkout-overview.liquid's
+  cart_needs_activation gate, which blocks checkout regardless of whether this script runs).
+
+  Params: activation_variant_id, sub_type, nami_geen_variant_id, nami_telefonisch_variant_id,
+  nami_huis_variant_id
 {%- endcomment -%}
-{%- if activation_variant_id != blank -%}
+{%- if activation_variant_id != blank or nami_geen_variant_id != blank or nami_telefonisch_variant_id != blank or nami_huis_variant_id != blank -%}
 <script>
 (function () {
   if (window.__zvCartGuardRan) return;
   window.__zvCartGuardRan = true;
   var ACTIVATION_ID = {{ activation_variant_id | json }};
   var SUB_TYPE = {{ sub_type | json }};
+  var NAMI_IDS = [{{ nami_geen_variant_id | json }}, {{ nami_telefonisch_variant_id | json }}, {{ nami_huis_variant_id | json }}]
+    .filter(function (id) { return id != null; })
+    .map(String);
+
   window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
     var items = (cart && cart.items) || [];
     var hasSub = items.some(function (it) { return it.product_type === SUB_TYPE; });
     var hasActivation = items.some(function (it) { return String(it.variant_id) === String(ACTIVATION_ID); });
-    if (hasSub && !hasActivation) {
+    var namiLines = items.filter(function (it) { return NAMI_IDS.indexOf(String(it.variant_id)) !== -1; });
+
+    if (namiLines.length > 1) {
+      var keepId = String(namiLines[namiLines.length - 1].variant_id);
+      var updates = {};
+      namiLines.forEach(function (it) {
+        var vid = String(it.variant_id);
+        if (vid !== keepId) updates[vid] = 0;
+      });
+      return window.fetch('/cart/update.js', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates: updates })
+      }).then(function (r) { if (r.ok) window.location.reload(); });
+    }
+
+    if (hasSub && !hasActivation && namiLines.length === 0) {
       return window.fetch('/cart/add.js', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: [{ id: ACTIVATION_ID, quantity: 1 }] })

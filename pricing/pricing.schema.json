@@ -149,6 +149,36 @@
       "description": "Contract length. Conflicts across approved sources, so it is Unresolved by design.",
       "$ref": "#/$defs/Unresolved"
     },
+    "installationOptions": {
+      "description": "Per-platform customer-facing installation choices. NAMI packages (Inzicht, Zeker, Alert) offer 'nami.options' as a choice on the Overzicht page; Climax packages keep the single fixed 'activation' fee above and are not represented here.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nami": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "note": { "type": "string" },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "label", "amountCents", "display", "productHandle", "sku"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+                  "label": { "type": "string" },
+                  "amountCents": { "type": "integer", "minimum": 0 },
+                  "display": { "type": "string" },
+                  "productHandle": { "type": "string" },
+                  "sku": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "paymentMethods": {
       "type": "object",
       "additionalProperties": false,

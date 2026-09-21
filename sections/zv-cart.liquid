@@ -47,7 +47,10 @@
 {%- assign sub_type = section.settings.sub_type | default: 'Beveiligingsabonnement' -%}
 {%- assign sub_tag = section.settings.sub_tag | default: 'abonnement' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type -%}
+{%- assign nami_install_geen_variant_id = all_products[zv_nami_install_geen_handle].selected_or_first_available_variant.id -%}
+{%- assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id -%}
+{%- assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
