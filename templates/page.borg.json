@@ -1,6 +1,96 @@
 {
   "sections": {
-    "main": { "type": "borg", "settings": {} }
+    "main": {
+      "type": "borg",
+      "blocks": {
+        "cert1": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Bewegingssensor",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/Bewegingssensor_certificaat-3.pdf?v=1790009122"
+          }
+        },
+        "cert2": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Rookmelder",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/Rookmelder_certificaat-2.pdf?v=1790009122"
+          }
+        },
+        "cert3": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Magneetcontact",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/DC-23-_VESTA-019_EN_certificaat-2.pdf?v=1790009121"
+          }
+        },
+        "cert4": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Centrale",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/HPGWL-3_Panel-2.pdf?v=1790009122"
+          }
+        },
+        "cert5": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Huisdierpir (IRP-9)",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/VST-862P_172330855AA02_final-type_5_Huisdierpir-2.pdf?v=1790009121"
+          }
+        },
+        "cert6": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Paniekknop",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/Paniekknop_certificaat-2.pdf?v=1790009122"
+          }
+        },
+        "cert7": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Codebedienpaneel",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/KP_23-_codebedienpaneel_certificaat-2.pdf?v=1790009121"
+          }
+        },
+        "cert8": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Huisdierpir (VST-862P)",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/Huisdierpir_certificaat-2.pdf?v=1790009121"
+          }
+        },
+        "cert9": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Fotopir",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/852_Pro-2.pdf?v=1790009121"
+          }
+        },
+        "cert10": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Koolmonoxidemelder",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/CO8_testing_report-2.pdf?v=1790009123"
+          }
+        },
+        "cert11": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Buitensirene",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/BX-32_Buitensirene-2.pdf?v=1790009121"
+          }
+        },
+        "cert12": {
+          "type": "certificaat",
+          "settings": {
+            "label": "Buitenpir",
+            "pdf_url": "https://cdn.shopify.com/s/files/1/0947/8334/0925/files/EIR-32_202350111AA00_final-type_5_buitenpir-2.pdf?v=1790009157"
+          }
+        }
+      },
+      "block_order": ["cert1", "cert2", "cert3", "cert4", "cert5", "cert6", "cert7", "cert8", "cert9", "cert10", "cert11", "cert12"],
+      "settings": {}
+    }
   },
   "order": ["main"]
 }
