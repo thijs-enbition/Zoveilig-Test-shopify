@@ -15,6 +15,36 @@
     "productHandle": "activatie-en-installatie",
     "sku": "ACT-INSTALL"
   },
+  "installationOptions": {
+    "nami": {
+      "options": [
+        {
+          "id": "geen",
+          "label": "Geen installatie",
+          "amountCents": 0,
+          "display": "€ 0,00",
+          "productHandle": "geen-installatie-nami",
+          "sku": "020103"
+        },
+        {
+          "id": "telefonisch",
+          "label": "Telefonische ondersteuning",
+          "amountCents": 3500,
+          "display": "€ 35,00",
+          "productHandle": "telefonische-ondersteuning-installatie-nami",
+          "sku": "03012026"
+        },
+        {
+          "id": "huis",
+          "label": "Installatie aan huis",
+          "amountCents": 4900,
+          "display": "€ 49,00",
+          "productHandle": "installatie-nami",
+          "sku": "04012026"
+        }
+      ]
+    }
+  },
   "promo": {
     "enabled": true,
     "active": true,
@@ -425,6 +455,12 @@
       "id": "VEILIG_ONDERWEG_PRICING",
       "severity": "medium",
       "summary": "Veilig Onderweg remains unpriced and not purchasable.",
+      "owner": "Operator"
+    },
+    {
+      "id": "NAMI_INSTALL_PRICING_PROVISIONAL",
+      "severity": "medium",
+      "summary": "installationOptions.nami option prices (Geen installatie €0,00, Telefonische ondersteuning €35,00, Installatie aan huis €49,00) are Thijs's working default as of 2026-09-21, not confirmed by Odoo. Expect adjustment before commercial launch.",
       "owner": "Operator"
     }
   ]
