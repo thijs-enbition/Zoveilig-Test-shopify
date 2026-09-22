@@ -22,14 +22,14 @@
   },
   "activation": {
     "id": "activation-installation",
-    "amountCents": 4900,
-    "display": "€ 49,00",
+    "amountCents": 9900,
+    "display": "€ 99,00",
     "label": "Eenmalige activatie en installatie",
     "billing": "oneoff",
     "collectedBy": "shopify",
     "productHandle": "activatie-en-installatie",
     "sku": "ACT-INSTALL",
-    "note": "Centrally configurable. Change here only, never in a page component. productHandle/sku identify the real Shopify product added to the cart alongside a package (confirmed live 2026-09-09, published to Online Store: service product, price EUR 49,00, no tracked inventory)."
+    "note": "Centrally configurable. Change here only, never in a page component. productHandle/sku identify the real Shopify product added to the cart alongside a package (confirmed live 2026-09-09, published to Online Store: service product, no tracked inventory). PRICE: €99,00 - Thijs repriced the Shopify product directly on 2026-09-22 and confirmed it's correct, to align this fixed Climax/default installation fee with Nami's 'Installatie aan huis' price; this config was updated to match the same day. Superseded EUR 49,00."
   },
   "installationOptions": {
     "nami": {
