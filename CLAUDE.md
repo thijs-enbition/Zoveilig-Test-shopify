@@ -151,6 +151,25 @@ Odoo after the order; Shopify never sees it again. Consequence: once this repric
 multi-month bundle price labelled as monthly, which is exactly the bug this section's
 `item.final_line_price`-based "per maand" displays used to have.
 
+**Update 2026-09-22 — a real "Eerste 3 maanden" Shopify Discount is live, found by accident,
+not yet reconciled with the above:** while validating an unrelated pricing fix, a real Shopify
+Discount named "Eerste 3 maanden" (50% off, `value_type: percentage`, line-item scoped) was
+observed actively discounting package line items in a live cart — confirmed on both a Climax
+package (Langer Thuis Beschermd) and a Nami package (Langer Thuis Zeker), discount object
+`created_at: 2026-09-22T07:50:12Z`. This does **not** match the repricing plan described just
+above (that plan reprices the *list price* to the bundle total first; this discount instead
+applies 50% off the *current* catalog price directly) and it is **not** gated by the theme's
+own `zv_promo_live` setting, which was off at the time — `zv-checkout-overview.liquid`'s own
+"Daarna per maand" breakdown correctly showed no promo rows (`zv_promo_active` false), while
+`item.final_line_price` / "Vandaag te betalen" already silently reflected the 50% cut, same as
+any other real Shopify discount always has (see "Vandaag te betalen" above — it's always the
+live cart total, discounts included, by design). Not investigated further or touched — flagging
+because it means the live storefront and the theme's own promo display can currently disagree
+about whether a discount is active, and because it wasn't set up through anything this repo's
+history describes. Needs Thijs to confirm whether this discount is intentional, and if so,
+whether `zv_promo_live` should be turned on to match, or whether the discount should be
+reverted until the interim repricing plan above actually ships.
+
 **Fix**: `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` now source every
 "per maand" figure from the confirmed monthly rate (`zv_{pkg}_monthly_cents` /
 `zv_{pkg}_promo_monthly_cents`, emitted by `build_pricing.py`) via the shared
