@@ -15,7 +15,7 @@
         "chip_1": {
           "type": "chip",
           "settings": {
-            "label": "Langer thuis wonen",
+            "label": "Langer thuis",
             "link": "/blogs/kenniscentrum/langer-thuis-wonen"
           }
         },
@@ -29,7 +29,7 @@
         "chip_3": {
           "type": "chip",
           "settings": {
-            "label": "Voor mantelzorgers",
+            "label": "Mantelzorg",
             "link": "#mantelzorgers"
           }
         }
@@ -41,9 +41,9 @@
       ],
       "settings": {
         "eyebrow": "Zo Veilig Kenniscentrum",
-        "heading": "Alles over veilig, gerust en langer thuis wonen.",
-        "sub": "Alles wat u wilt weten over beveiliging of langer zelfstandig thuis wonen. Onafhankelijke kennis, praktische tips en slimme oplossingen.",
-        "chips_label": "Populair:"
+        "heading": "Alles over veilig en langer thuis wonen.",
+        "sub": "Onafhankelijke kennis, praktische tips en slimme oplossingen voor beveiliging en langer zelfstandig thuis wonen.",
+        "chips_label": "Populaire onderwerpen:"
       }
     },
     "kc_hub": {
@@ -54,11 +54,11 @@
       "type": "kc-cta-band",
       "settings": {
         "eyebrow": "Van kennis naar de juiste oplossing",
-        "heading": "Weet u genoeg? Bekijk de pakketten die hierbij passen.",
-        "text": "Onze gidsen helpen u kiezen. Onze pakketten maken het waar, met een vertrouwd gezicht dat met u meedenkt.",
+        "heading": "Klaar om de juiste oplossing te kiezen?",
+        "text": "Onze gidsen helpen u kiezen. Bekijk de pakketten of plan een vertrouwd adviesgesprek.",
         "primary_label": "Bekijk pakketten",
         "primary_link": "/pages/oplossingen",
-        "secondary_label": "Gratis adviesgesprek",
+        "secondary_label": "Plan adviesgesprek",
         "secondary_link": "/pages/contact"
       }
     }
