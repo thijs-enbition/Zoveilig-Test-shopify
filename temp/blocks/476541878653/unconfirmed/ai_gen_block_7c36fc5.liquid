@@ -1,6 +1,307 @@
+{% doc %}
+  @prompt
+    Create an image and text block where the image and the text sit side by side and the image automatically stretches to exactly match the height of the text beside it, with no gaps or cropping oddities. Let me pick the image, write a heading and body text, choose which side the image is on, and set the spacing between them. On mobile, stack the image above the text at a sensible height.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-image-text-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: {{ block.settings.column_gap }}px;
+    align-items: stretch;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__media,
+  .ai-image-text-{{ ai_gen_id }}__content {
+    min-width: 0;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__media {
+    display: flex;
+    min-height: 100%;
+    overflow: hidden;
+    background: #dfd9c9;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 320px;
+    color: #322469;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__placeholder svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 260px;
+    max-height: 260px;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: {{ block.settings.content_padding }}px;
+    background: {{ block.settings.content_background }};
+    color: {{ block.settings.content_text_color }};
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__heading {
+    margin: 0 0 16px;
+    color: inherit;
+    font-family: {{ block.settings.heading_font.family }};
+    font-size: {{ block.settings.heading_size }}px;
+    line-height: 1.15;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__body {
+    color: inherit;
+    font-size: {{ block.settings.body_size }}px;
+    line-height: 1.55;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__body p {
+    margin: 0 0 12px;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}--image-right .ai-image-text-{{ ai_gen_id }}__media {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ai-image-text-{{ ai_gen_id }}--image-right .ai-image-text-{{ ai_gen_id }}__content {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-image-text-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-image-text-{{ ai_gen_id }}__grid,
+    .ai-image-text-{{ ai_gen_id }}--image-right .ai-image-text-{{ ai_gen_id }}__grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .ai-image-text-{{ ai_gen_id }}__media,
+    .ai-image-text-{{ ai_gen_id }}--image-right .ai-image-text-{{ ai_gen_id }}__media {
+      order: 1;
+      min-height: 0;
+    }
+
+    .ai-image-text-{{ ai_gen_id }}__media img {
+      height: {{ block.settings.mobile_image_height }}px;
+      min-height: {{ block.settings.mobile_image_height }}px;
+    }
+
+    .ai-image-text-{{ ai_gen_id }}__placeholder {
+      min-height: {{ block.settings.mobile_image_height }}px;
+    }
+
+    .ai-image-text-{{ ai_gen_id }}__content,
+    .ai-image-text-{{ ai_gen_id }}--image-right .ai-image-text-{{ ai_gen_id }}__content {
+      order: 2;
+      padding: {{ block.settings.mobile_content_padding }}px;
+    }
+  }
+{% endstyle %}
+
+<div
+  class="ai-image-text-{{ ai_gen_id }}{% if block.settings.image_position == 'right' %} ai-image-text-{{ ai_gen_id }}--image-right{% endif %}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-image-text-{{ ai_gen_id }}__grid">
+    <div class="ai-image-text-{{ ai_gen_id }}__media">
+      {% if block.settings.image %}
+        <img
+          src="{{ block.settings.image | image_url: width: 1600 }}"
+          alt="{{ block.settings.image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.image.width }}"
+          height="{{ block.settings.image.height }}"
+        >
+      {% else %}
+        <div class="ai-image-text-{{ ai_gen_id }}__placeholder">
+          {{ 'image' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="ai-image-text-{{ ai_gen_id }}__content">
+      {% if block.settings.heading != blank %}
+        <h2 class="ai-image-text-{{ ai_gen_id }}__heading">{{ block.settings.heading | escape }}</h2>
+      {% endif %}
+      {% if block.settings.body != blank %}
+        <div class="ai-image-text-{{ ai_gen_id }}__body">{{ block.settings.body }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "Image and text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Discover what matters"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text",
+      "default": "<p>Add supporting text here to explain your message clearly.</p>"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Space between",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Content padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding",
+      "label": "Mobile padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_height",
+      "label": "Mobile image height",
+      "min": 180,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "titillium_web_n6"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Body size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 17
+    },
+    {
+      "type": "color",
+      "id": "content_background",
+      "label": "Content background",
+      "default": "#dfd9c9"
+    },
+    {
+      "type": "color",
+      "id": "content_text_color",
+      "label": "Content text",
+      "default": "#322469"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image and text"
+    }
+  ],
+  "tag": null,
+  "class": "image-text-block"
+}
 {% endschema %}
