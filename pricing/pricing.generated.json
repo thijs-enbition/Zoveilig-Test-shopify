@@ -96,7 +96,7 @@
       "sub": "NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer",
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
-      "termMonths": 36,
+      "termMonths": 12,
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
@@ -110,9 +110,9 @@
       "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 78727,
-        "display": "€ 787,27",
-        "recurringMonthsBilled": 36,
+        "cents": 30847,
+        "display": "€ 308,47",
+        "recurringMonthsBilled": 12,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
@@ -128,7 +128,7 @@
       "sub": "NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer",
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
-      "termMonths": 36,
+      "termMonths": 12,
       "monthlyRecurringPriceCents": 2495,
       "monthlyDisplay": "€ 24,95",
       "promoMonths": 3,
@@ -142,9 +142,9 @@
       "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 95977,
-        "display": "€ 959,77",
-        "recurringMonthsBilled": 36,
+        "cents": 36097,
+        "display": "€ 360,97",
+        "recurringMonthsBilled": 12,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },

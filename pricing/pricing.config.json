@@ -122,7 +122,7 @@
         "months": 12,
         "enabled": true,
         "requiresApproval": false,
-        "note": "Enabled 2026-08-17 for Mijn Thuis Alert."
+        "note": "Enabled 2026-08-17 for Mijn Thuis Alert. Also enabled 2026-09-22 for Langer Thuis Inzicht and Zeker (source-of-truth spreadsheet 'Zo Veilig pakketten Odoo v2', sheet '1. Pakketten'); Langer Thuis Beschermd stays at 36 months."
       },
       {
         "months": 24,
@@ -157,7 +157,7 @@
             "display": "€19,95",
             "per": "/mnd"
           },
-          "termMonths": 36
+          "termMonths": 12
         },
         {
           "id": "zeker",
@@ -172,7 +172,7 @@
             "display": "€24,95",
             "per": "/mnd"
           },
-          "termMonths": 36
+          "termMonths": 12
         },
         {
           "id": "beschermd",
