@@ -1347,16 +1347,18 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(p['Pakket'] || it.product_title || '');
     var pkg = p['Pakket'] || it.product_title || 'item';
     var woningOn = !!p['Woning'];
+    var isActivation = String(it.variant_id) === String(activationVariantId);
     return '<li class="addcart__item">' +
       '<div class="addcart__item-head"><div class="addcart__info">' +
         '<span class="addcart__name">' + full + '</span>' +
       '</div><div class="addcart__pricewrap">' +
-        '<span class="addcart__price">' + money(it.price) + '<span class="per">/mnd</span></span>' +
+        '<span class="addcart__price">' + money(it.price) + (isActivation ? '' : '<span class="per">/mnd</span>') + '</span>' +
         '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
       '</div></div>' +
+      (isActivation ? '' :
       '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(it.key) + '"' + (woningOn ? ' checked' : '') +
         ' aria-label="Woning groter dan 100 m² voor ' + esc(pkg) + '">' +
-        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>' +
+        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>') +
     '</li>';
   }
 
