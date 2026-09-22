@@ -114,7 +114,7 @@
         {%- else -%}
           {%- if shop.privacy_policy != blank -%}<a href="{{ shop.privacy_policy.url }}">Privacy</a>{%- endif -%}
           {%- if shop.terms_of_service != blank -%}<a href="{{ shop.terms_of_service.url }}">Voorwaarden</a>{%- endif -%}
-          {%- if shop.refund_policy != blank -%}<a href="{{ shop.refund_policy.url }}">Retourneren</a>{%- endif -%}
+          <a href="{% render 'zv-route', key: 'herroepingsrecht' %}">Retourneren</a>
         {%- endif -%}
       </div>
     </div>
