@@ -85,7 +85,16 @@
 @media(max-width:880px){ .zv-borg .borg-intro .wrap{ grid-template-columns:1fr; gap:32px; padding:44px 20px; } }
 .zv-borg .intro-media-fallback { display:flex; align-items:center; justify-content:center; aspect-ratio:1/1; max-width:320px; margin:0 auto; border-radius:24px; background:var(--paper); border:1px solid var(--line); color:var(--blue); }
 .zv-borg .intro-media-fallback svg { width:35%; height:35%; }
-.zv-borg .intro-media img { width:100%; display:block; border-radius:24px; }
+.zv-borg .intro-media {
+  display:flex; align-items:center; justify-content:center;
+  aspect-ratio:1/1; max-width:320px; margin:0 auto;
+  padding:28px; border-radius:24px;
+  background:var(--paper); border:1px solid var(--line);
+}
+.zv-borg .intro-media img {
+  width:100%; height:100%; object-fit:contain;
+  border-radius:0; display:block;
+}
 .zv-borg .borg-ctas { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
 .zv-borg .borg-ctas .btn:not(.btn--wide) { flex:1 1 220px; }
 .zv-borg .borg-ctas .btn--wide { flex:1 1 100%; }
