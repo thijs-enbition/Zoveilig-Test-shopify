@@ -67,7 +67,9 @@ for p in priced:
           f"status={p.get('pricingStatus')} cents={p['monthlyRecurringPriceCents']}")
 
 print("\n2. Activation price consistency")
-check(activation == 4900, "activation is EUR 49,00", f"got {activation}")
+# Repriced 2026-09-22 (Thijs, confirmed live): EUR 49,00 -> EUR 99,00, to align this fixed
+# Climax/default installation fee with Nami's "Installatie aan huis" price.
+check(activation == 9900, "activation is EUR 99,00", f"got {activation}")
 check(len({p["activationPriceCents"] for p in priced}) == 1,
       "one activation value across all packages")
 check(all(p["activationPriceCents"] == activation for p in priced),

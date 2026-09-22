@@ -9,8 +9,8 @@
     "note": "Currency-safe. All money is integer cents. Never float. Banker's rounding is explicitly rejected: 1.5 x 2495 = 3742.5 must round to 3743, not 3742."
   },
   "activation": {
-    "amountCents": 4900,
-    "display": "€ 49,00",
+    "amountCents": 9900,
+    "display": "€ 99,00",
     "label": "Eenmalige activatie en installatie",
     "productHandle": "activatie-en-installatie",
     "sku": "ACT-INSTALL"
@@ -104,14 +104,14 @@
       "promoMonthlyDisplay": "€ 9,98",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 4900,
-      "initialPaymentDueTodayDisplay": "€ 49,00",
+      "activationPriceCents": 9900,
+      "activationDisplay": "€ 99,00",
+      "initialPaymentDueTodayCents": 9900,
+      "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 73727,
-        "display": "€ 737,27",
+        "cents": 78727,
+        "display": "€ 787,27",
         "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -136,14 +136,14 @@
       "promoMonthlyDisplay": "€ 12,48",
       "promoDiscountTotalCents": 3743,
       "promoDiscountTotalDisplay": "€ 37,43",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 4900,
-      "initialPaymentDueTodayDisplay": "€ 49,00",
+      "activationPriceCents": 9900,
+      "activationDisplay": "€ 99,00",
+      "initialPaymentDueTodayCents": 9900,
+      "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 90977,
-        "display": "€ 909,77",
+        "cents": 95977,
+        "display": "€ 959,77",
         "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -168,14 +168,14 @@
       "promoMonthlyDisplay": "€ 19,98",
       "promoDiscountTotalCents": 5993,
       "promoDiscountTotalDisplay": "€ 59,93",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 4900,
-      "initialPaymentDueTodayDisplay": "€ 49,00",
+      "activationPriceCents": 9900,
+      "activationDisplay": "€ 99,00",
+      "initialPaymentDueTodayCents": 9900,
+      "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 142727,
-        "display": "€ 1.427,27",
+        "cents": 147727,
+        "display": "€ 1.477,27",
         "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -200,14 +200,14 @@
       "promoMonthlyDisplay": "€ 9,98",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 4900,
-      "initialPaymentDueTodayDisplay": "€ 49,00",
+      "activationPriceCents": 9900,
+      "activationDisplay": "€ 99,00",
+      "initialPaymentDueTodayCents": 9900,
+      "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 25847,
-        "display": "€ 258,47",
+        "cents": 30847,
+        "display": "€ 308,47",
         "recurringMonthsBilled": 12,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -232,14 +232,14 @@
       "promoMonthlyDisplay": "€ 17,48",
       "promoDiscountTotalCents": 5243,
       "promoDiscountTotalDisplay": "€ 52,43",
-      "activationPriceCents": 4900,
-      "activationDisplay": "€ 49,00",
-      "initialPaymentDueTodayCents": 4900,
-      "initialPaymentDueTodayDisplay": "€ 49,00",
+      "activationPriceCents": 9900,
+      "activationDisplay": "€ 99,00",
+      "initialPaymentDueTodayCents": 9900,
+      "initialPaymentDueTodayDisplay": "€ 99,00",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 125477,
-        "display": "€ 1.254,77",
+        "cents": 130477,
+        "display": "€ 1.304,77",
         "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
