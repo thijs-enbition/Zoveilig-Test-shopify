@@ -643,42 +643,6 @@
 
   <div class="pb-scrim" id="opl-modal" role="presentation" hidden></div>
   <div class="addcart" id="opl-cart" role="dialog" aria-label="Winkelwagen" aria-modal="true" hidden></div>
-
-  {%- comment -%}
-    Shared cart add-ons (identical for every cart) — cloned into the drawer by JS.
-    Prices render via the money filter (0 and 400 cents = pricing.config extra-etage/alarmcom-domotica),
-    so no literal amount lives in this source and the pricing-integrity check stays green.
-    Toggling a checkbox writes a Shopify cart ATTRIBUTE (data-zv-addon = attribute key); no invented variants.
-  {%- endcomment -%}
-  <template id="opl-cart-addons-tpl">
-    <div class="addcart__sec-h">Uitbreidingen toevoegen</div>
-    <label class="addcart__addon">
-      <input type="checkbox" data-zv-addon="Uitbreiding: Huisdier-upgrade" aria-label="Huisdier-upgrade toevoegen">
-      <span class="addcart__addon-body"><span class="addcart__addon-t">Huisdier-upgrade</span><span class="addcart__addon-d">Huisdiervriendelijke detectie, immuun voor uw huisdier.</span></span>
-      <span class="addcart__addon-price">{{ 0 | money }}</span>
-    </label>
-    <label class="addcart__addon">
-      <input type="checkbox" data-zv-addon="Uitbreiding: Extra sensoren" aria-label="Extra sensoren toevoegen">
-      <span class="addcart__addon-body"><span class="addcart__addon-t">Extra sensoren</span><span class="addcart__addon-d">Meer dekking voor grotere woningen en extra etages.</span></span>
-      <span class="addcart__addon-price">{{ 0 | money }}</span>
-    </label>
-    <label class="addcart__addon">
-      <input type="checkbox" data-zv-addon="Uitbreiding: Extra toegangspunten" aria-label="Extra toegangspunten toevoegen">
-      <span class="addcart__addon-body"><span class="addcart__addon-t">Extra toegangspunten</span><span class="addcart__addon-d">Beveilig extra deuren en ramen.</span></span>
-      <span class="addcart__addon-price">{{ 0 | money }}</span>
-    </label>
-    <div class="addcart__sec-h">Abonnementen toevoegen</div>
-    <label class="addcart__addon">
-      <input type="checkbox" data-zv-addon="Abonnement: Domotica" aria-label="Domotica toevoegen">
-      <span class="addcart__addon-body"><span class="addcart__addon-t">Domotica</span><span class="addcart__addon-d">Slimme bediening en automatisering.</span></span>
-      <span class="addcart__addon-price">+{{ 400 | money }}/mnd</span>
-    </label>
-    <label class="addcart__addon">
-      <input type="checkbox" data-zv-addon="Abonnement: Ontzorgpakket" aria-label="Ontzorgpakket toevoegen">
-      <span class="addcart__addon-body"><span class="addcart__addon-t">Ontzorgpakket</span><span class="addcart__addon-d">Onderhoud en batterijservice.</span></span>
-      <span class="addcart__addon-price">Prijs volgt</span>
-    </label>
-  </template>
 </div>
 {%- elsif request.design_mode -%}
   <div style="padding:60px;text-align:center;color:#6f6786;">Oplossingen: voeg "Oplossing" blokken toe.</div>
@@ -1042,14 +1006,15 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin: 20px 0; text-align: center; }
 .addcart__err { color: var(--red-deep); font-size: 12.5px; font-weight: 700; margin-top: 8px; }
 
-.addcart__sec-h { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 26px 0 12px; }
-.addcart__addon { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 13px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
-.addcart__addon:hover { border-color: var(--line-2); }
-.addcart__addon input { width: 18px; height: 18px; accent-color: var(--indigo); flex: none; cursor: pointer; margin-top: 1px; }
-.addcart__addon-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.addcart__addon-t { display: block; font-size: 14px; font-weight: 800; color: var(--indigo); }
-.addcart__addon-d { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.4; }
-.addcart__addon-price { font-size: 13px; font-weight: 900; color: var(--belt); flex: none; white-space: nowrap; }
+/* Cart-drawer clones of a package card's own Uitbreidingen/Extra-diensten option
+   groups (see hydrateLineOptions()) — .ltc__optgroup/.pcard__plus keep their card
+   styling (header, option rows), these rules only add the drawer's own edge padding
+   (cards get it for free from the ancestor .pcard's own padding) and neutralise the
+   tile-card fallback's <summary> accordion chrome, which has no <details> parent here
+   so it can't actually expand/collapse. */
+.addcart__lineopts .ltc__optgroup, .addcart__lineopts .pcard__plus { padding: 12px 18px; margin: 0; border-top: 1px solid var(--line); }
+.addcart__lineopts .pcard__plus summary { cursor: default; pointer-events: none; }
+.addcart__lineopts .pcard__plus summary svg { display: none; }
 
 .pcard__price .amt { transition: color 0.35s ease; }
 .pcard__price .amt.is-updated { color: var(--belt); }
@@ -1060,7 +1025,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .addcart__go { display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 900; font-size: 15px; color: var(--ink); background: var(--gold); border-radius: 12px; padding: 14px; text-decoration: none; box-shadow: 0 2px 0 var(--belt); transition: transform 0.14s, box-shadow 0.14s; }
 .addcart__go svg { width: 17px; height: 17px; }
 .addcart__go:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--belt), 0 12px 24px -12px rgba(180, 126, 10, 0.7); }
-.addcart__x:focus-visible, .addcart__rm:focus-visible, .addcart__cont:focus-visible, .addcart__go:focus-visible, .addcart__opt input:focus-visible, .addcart__addon input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+.addcart__x:focus-visible, .addcart__rm:focus-visible, .addcart__cont:focus-visible, .addcart__go:focus-visible, .addcart__opt input:focus-visible, .addcart__lineopts input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 @media (max-width: 860px) { .addcart__panel { width: 100vw; } }
 @media (max-width: 560px) { .addcart__head { padding: 22px 20px; min-height: 84px; } .addcart__scroll { padding: 20px 20px 36px; } .addcart__foot { padding: 16px 20px 20px; } }
 .pcard__direct[aria-busy="true"], .pb-buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
@@ -1341,6 +1306,21 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       .catch(function () { cartWriting = false; if (revert) revert(); showCartError(); });
   }
 
+  /* Package cards stay in the DOM (just [hidden]) regardless of which catnav tab is
+     active, so this map is built once and stays valid for every renderCart() call —
+     the cart drawer's Uitbreidingen/Extra-diensten options are cloned live from here
+     (see hydrateLineOptions()) instead of a static, package-agnostic template, so a
+     package's real add-ons/pricing can never drift from what its own card shows. */
+  var cardsBySku = {};
+  // .pcard[data-package-sku], not just [data-package-sku] — that attribute is also
+  // repeated on the card's own buttons (In winkelwagen / Meer informatie) for their
+  // own analytics hooks, and a later match in DOM order would silently overwrite the
+  // real card here with one of those buttons (no addons/terms markup on either).
+  page.querySelectorAll('.pcard[data-package-sku]').forEach(function (c) {
+    var sku = c.getAttribute('data-package-sku');
+    if (sku) cardsBySku[sku] = c;
+  });
+
   function cartRowHtml(it) {
     var p = it.properties || {};
     // Full label = "Oplossing · Pakket" (e.g. "Langer Thuis · Zeker"), from the line's own properties.
@@ -1358,8 +1338,46 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       (isActivation ? '' :
       '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(it.key) + '"' + (woningOn ? ' checked' : '') +
         ' aria-label="Woning groter dan 100 m² voor ' + esc(pkg) + '">' +
-        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>') +
+        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>' +
+      '<div class="addcart__lineopts" data-cart-line="' + esc(it.key) + '" data-cart-sku="' + esc(p['SKU'] || '') + '"></div>') +
     '</li>';
+  }
+
+  /* Populate each line's .addcart__lineopts placeholder with a live clone of that
+     package's own [data-group="addons"]/[data-group="terms"] blocks (skipped
+     entirely — no header, no placeholder — if the card has neither, e.g. Inzicht/
+     Zeker/Alert have no addons group at all), re-checking whichever options the
+     line's own Uitbreidingen/Abonnement properties already record. Runs after
+     cartEl.innerHTML is set, same convention as the cart-attribute reflect step
+     this replaced. */
+  function hydrateLineOptions(items) {
+    cartEl.querySelectorAll('[data-cart-line]').forEach(function (target) {
+      var key = target.getAttribute('data-cart-line');
+      var sku = target.getAttribute('data-cart-sku');
+      var card = sku && cardsBySku[sku];
+      if (!card) return;
+      var line = null;
+      for (var i = 0; i < items.length; i++) { if (items[i].key === key) { line = items[i]; break; } }
+      if (!line) return;
+      var lp = line.properties || {};
+      var checkedAddons = (lp['Uitbreidingen'] || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      var checkedTerms = (lp['Abonnement'] || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      ['addons', 'terms'].forEach(function (group) {
+        var src = card.querySelector('[data-group="' + group + '"]');
+        if (!src) return;
+        var wrap = document.createElement('div');
+        wrap.className = src.className;
+        wrap.setAttribute('data-cart-group', group);
+        wrap.innerHTML = src.innerHTML;
+        var names = group === 'addons' ? checkedAddons : checkedTerms;
+        wrap.querySelectorAll('.pcard__plus-opt input').forEach(function (inp) {
+          var span = inp.closest('.pcard__plus-opt').querySelector('span');
+          var name = span ? span.textContent.trim() : '';
+          inp.checked = !!(name && names.indexOf(name) !== -1);
+        });
+        target.appendChild(wrap);
+      });
+    });
   }
 
   function renderCart(cart, preserveScroll) {
@@ -1367,17 +1385,14 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (preserveScroll) { var old = cartEl.querySelector('.addcart__scroll'); if (old) prev = old.scrollTop; }
     cartState = cart;
     var items = (cart && cart.items) || [];
-    var attrs = (cart && cart.attributes) || {};
     var list = items.map(cartRowHtml).join('');
-    var tpl = document.getElementById('opl-cart-addons-tpl');
-    var addons = '<div class="addcart__addons">' + (tpl ? tpl.innerHTML : '') + '</div>';
     var n = items.length;   // number of line items (== cards shown), per spec
     var count = n + (n === 1 ? ' item in winkelwagen' : ' items in winkelwagen');
     var body = items.length
       ? '<div class="addcart__count">' + count + '</div>' +
         '<ul class="addcart__list">' + list + '</ul>' +
-        '<p class="addcart__note">Sommige prijzen bevestigen we bij het afronden.</p>' + addons
-      : '<p class="addcart__empty">Uw winkelwagen is leeg.</p>' + addons;
+        '<p class="addcart__note">Sommige prijzen bevestigen we bij het afronden.</p>'
+      : '<p class="addcart__empty">Uw winkelwagen is leeg.</p>';
     cartEl.innerHTML =
       '<div class="addcart__scrim" data-cart-close></div>' +
       '<aside class="addcart__panel" role="document" aria-label="Winkelwagen">' +
@@ -1389,8 +1404,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
           '<button type="button" class="addcart__cont" data-cart-close>Verder winkelen</button>' +
           '<a class="addcart__go" href="' + esc(overzichtUrl) + '" data-zv-event="begin_checkout" data-cta-name="naar_afrekenen" data-cta-position="cart_drawer">Naar afrekenen' + CART_ARROW + '</a>' +
         '</footer></aside>';
-    // Reflect shared add-on state from the Shopify cart attributes.
-    cartEl.querySelectorAll('[data-zv-addon]').forEach(function (inp) { inp.checked = !!attrs[inp.getAttribute('data-zv-addon')]; });
+    hydrateLineOptions(items);
     if (preserveScroll) { var sc = cartEl.querySelector('.addcart__scroll'); if (sc) sc.scrollTop = prev; }
   }
 
@@ -1438,7 +1452,10 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
   });
 
-  /* Delegated change handler: per-item Woning (line-item property) + shared add-ons (cart attributes). */
+  /* Delegated change handler: per-item Woning + per-item Uitbreidingen/Abonnement
+     (all three are line-item properties on that one cart line, never a shared cart
+     attribute — a second package line in the same cart must never see another
+     line's options). */
   cartEl.addEventListener('change', function (e) {
     var woning = e.target.closest('[data-zv-line-woning]');
     if (woning) {
@@ -1453,12 +1470,31 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       cartWrite('/cart/change.js', { id: key, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
       return;
     }
-    var addon = e.target.closest('[data-zv-addon]');
-    if (addon) {
-      var akey = addon.getAttribute('data-zv-addon'), aon = addon.checked, a = {};
-      a[akey] = aon ? 'Ja' : '';
-      addon.disabled = true;
-      cartWrite('/cart/update.js', { attributes: a }, function () { addon.checked = !aon; addon.disabled = false; });
+    var lineOpt = e.target.closest('.addcart__lineopts .pcard__plus-opt input');
+    if (lineOpt) {
+      var wrap = e.target.closest('[data-cart-line]');
+      var lkey = wrap.getAttribute('data-cart-line'), lon = lineOpt.checked;
+      var lline = null, litems = (cartState && cartState.items) || [];
+      for (var j = 0; j < litems.length; j++) { if (litems[j].key === lkey) { lline = litems[j]; break; } }
+      if (!lline) { lineOpt.checked = !lon; return; }
+      var lprops = {}, llp = lline.properties || {};
+      for (var lk in llp) { if (llp.hasOwnProperty(lk)) lprops[lk] = llp[lk]; }
+      // Same property keys readCardOptions() uses at add-to-cart, so a cart-drawer
+      // edit stays consistent with what an initial add-to-cart would have sent.
+      ['addons', 'terms'].forEach(function (group) {
+        var groupEl = wrap.querySelector('[data-cart-group="' + group + '"]');
+        var names = [];
+        if (groupEl) {
+          groupEl.querySelectorAll('.pcard__plus-opt input:checked').forEach(function (inp) {
+            var span = inp.closest('.pcard__plus-opt').querySelector('span');
+            if (span) names.push(span.textContent.trim());
+          });
+        }
+        var propKey = group === 'addons' ? 'Uitbreidingen' : 'Abonnement';
+        if (names.length) lprops[propKey] = names.join(', '); else delete lprops[propKey];
+      });
+      lineOpt.disabled = true;
+      cartWrite('/cart/change.js', { id: lkey, properties: lprops }, function () { lineOpt.checked = !lon; lineOpt.disabled = false; });
     }
   });
 
