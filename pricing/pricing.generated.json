@@ -37,8 +37,8 @@
         {
           "id": "huis",
           "label": "Installatie aan huis",
-          "amountCents": 4900,
-          "display": "€ 49,00",
+          "amountCents": 9900,
+          "display": "€ 99,00",
           "productHandle": "installatie-nami",
           "sku": "04012026"
         }
@@ -460,7 +460,7 @@
     {
       "id": "NAMI_INSTALL_PRICING_PROVISIONAL",
       "severity": "medium",
-      "summary": "installationOptions.nami option prices (Geen installatie €0,00, Telefonische ondersteuning €35,00, Installatie aan huis €49,00) are Thijs's working default as of 2026-09-21, not confirmed by Odoo. Expect adjustment before commercial launch.",
+      "summary": "installationOptions.nami option prices: Geen installatie (€0,00) and Telefonische ondersteuning (€35,00) remain Thijs's working default as of 2026-09-21, not confirmed by Odoo — expect adjustment before commercial launch. Installatie aan huis (€99,00) is no longer provisional in that sense: Thijs repriced the Shopify product directly and confirmed it correct on 2026-09-22 — still not necessarily Odoo-confirmed, but no longer a placeholder guess.",
       "owner": "Operator"
     }
   ]
