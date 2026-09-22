@@ -126,30 +126,6 @@
     },
     "17900870332b6a1058": {
       "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_7c36fc5_qfQWQU": {
-          "type": "ai_gen_block_7c36fc5",
-          "settings": {
-            "heading": "Discover what matters",
-            "body": "<p>Add supporting text here to explain your message clearly.</p>",
-            "image_position": "left",
-            "desktop_width_percent": 100,
-            "column_gap": 24,
-            "content_padding": 40,
-            "mobile_content_padding": 24,
-            "mobile_image_height": 280,
-            "heading_font": "titillium_web_n6",
-            "heading_size": 36,
-            "body_size": 17,
-            "content_background": "#dfd9c9",
-            "content_text_color": "#322469"
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_7c36fc5_qfQWQU"
-      ],
       "settings": {}
     }
   },
