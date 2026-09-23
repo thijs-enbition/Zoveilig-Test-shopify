@@ -233,7 +233,7 @@
             {%- endfor -%}
           </tr>
           {%- comment -%} feat | small | val1 | val2 | … (one val per pkg_meta_arr entry, same order) — § splits rows, | splits fields {%- endcomment -%}
-          {%- assign rows = feature_rows | default: 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|n|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | strip | split: '§' -%}
+          {%- assign rows = feature_rows | default: 'Discrete sensoren|Beweging en routine, geen camera|y|y|y§App voor familie|Meldingen delen met mantelzorgers|y|y|y§Melding bij afwijking|Alleen als er iets verandert|Dag|y|y§Dag- en nachtinzicht|24-uurs patroonherkenning|y|y|y§Meerdere contactpersonen|Familie samen op de hoogte|n|y|y§Meldkameropvolging|Nederlandse meldkamer, 24/7|n|n|y§Alarmknop met opvolging|Directe hulp bij nood|n|n|y§Jaarlijks onderhoud|Systeem blijft betrouwbaar|y|y|y' | strip | split: '§' -%}
           {%- for row in rows -%}
             {%- assign r = row | split: '|' -%}
             <tr>
