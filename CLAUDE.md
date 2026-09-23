@@ -112,7 +112,10 @@ collection.products`. Every such surface (`sections/oplossingen.liquid`,
 on 2026-09-23 and no longer read `zv_package_order_fks`, so the ordering described above
 is not live behavior; the build/check side (`scripts/build_pricing.py` and
 `scripts/check_pricing.py` emitting and checking `packageOrder` and
-`zv_package_order_fks`) was kept on purpose.
+`zv_package_order_fks`) was kept on purpose. The revert was because PR #95 rendered 0 package
+cards on live: it built the ordered list with `collection.products | slice: …` + `concat`, which
+returns nothing because `collection.products` is a paginated drop, not a plain array (see
+`bd57117`). A re-do must not build the list that way.
 
 `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` both classify a line item
 as a subscription via `item.product.type == sub_type or item.product.tags contains sub_tag`
@@ -227,9 +230,13 @@ check it.
 ## Shopify store
 
 The test store is **`zoveiligdev.myshopify.com`** (admin: `admin.shopify.com/store/zoveiligdev`).
-The live/synced theme on it is named "Zoveilig-Test-shopify/main" (a theme *name*, matching the
-GitHub repo name — **not** the store's domain; `zoveilig-test-shopify.myshopify.com` does not
-exist and returns a 404). Always pass `--store zoveiligdev.myshopify.com` on every `shopify
+The live theme on it is `#188704719229`, named "Zoveilig-Test-shopify/main" (a theme *name*,
+matching the GitHub repo and branch — **not** the store's domain; `zoveilig-test-shopify.myshopify.com`
+does not exist and returns a 404). It is the published theme **and** the theme Shopify's GitHub
+integration connects to this repo's `main` branch, so **merging a PR to `main` deploys it live
+immediately**. No separate or scoped `shopify theme push` to the live theme is needed to ship a
+merged change; theme-editor edits on it come back to `main` as "Update from Shopify for theme
+Zoveilig-Test-shopify/main" commits. Always pass `--store zoveiligdev.myshopify.com` on every `shopify
 theme` CLI command, or `--environment zoveiligdev` to read it from `shopify.theme.toml` at the
 repo root. Never guess the store handle from the repo or theme name again — a wrong guess gets
 silently cached as this project's default store in `~/Library/Preferences/shopify-cli-theme-conf-
@@ -256,7 +263,8 @@ zoveiligdev.myshopify.com` explicitly on every command instead).
   validator, not just `shopify theme check`** — e.g. `shopify theme push --unpublished
   --theme "<throwaway-name>" --only <changed files>` against a disposable unpublished
   theme, then delete it. `origin main` is connected to Shopify's GitHub sync for the live
-  test theme, so a rejected file there is a live regression, not just a failed CI check.
+  theme (`#188704719229`), so a merge to `main` is a live deploy and a rejected file there is a
+  live regression, not just a failed CI check.
 - **If the Shopify CLI prompts for an interactive login (a `User verification code` /
   `activate-with-code` device-code flow), stop and wait.** Print the link and the code,
   tell the user you're waiting, and do not kill the process, work around it, or push
