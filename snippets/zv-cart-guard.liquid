@@ -26,6 +26,9 @@
   4. The Climax installation line in a cart with no Climax package is removed: CL003 must
      never be charged for a NAMI package.
 
+  The same rules are exposed as window.zvCartGuard.planFix(cart), which returns the one fix
+  or null. Overzicht's checkout button runs it on a fresh /cart.js before it navigates.
+
   NAMI packages: this guard must NEVER pick one of the three NAMI install options for the
   customer — there isn't one correct answer, only the customer's own choice on Overzicht
   (required radio group, see sections/zv-checkout-overview.liquid). A NAMI cart with none of
@@ -67,7 +70,11 @@
     }).then(function (r) { if (r.ok) window.location.reload(); });
   }
 
-  window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+  // The rules below, as a pure function of a /cart.js response: returns the ONE fix to
+  // apply as { url, body }, or null when the cart is in shape. Exposed as
+  // window.zvCartGuard.planFix so Overzicht's checkout button can re-check a fresh cart
+  // on click with these same rules instead of a copy of them.
+  function planFix(cart) {
     var items = (cart && cart.items) || [];
     var isPkg = function (it) {
       return it.product_type === SUB_TYPE && (NAMI_PKG_HANDLES.indexOf(it.handle) !== -1 || CLIMAX_PKG_HANDLES.indexOf(it.handle) !== -1);
@@ -86,7 +93,7 @@
         var vid = String(it.variant_id);
         if (vid !== keepId) namiUpdates[vid] = 0;
       });
-      return post('/cart/update.js', { updates: namiUpdates });
+      return { url: '/cart/update.js', body: { updates: namiUpdates } };
     }
 
     // 2. Quantities, keyed by line key so each line is set on its own.
@@ -101,19 +108,32 @@
     namiLines.concat(activationLines).forEach(function (it) {
       if (it.quantity !== 1 && qtyUpdates[it.key] == null) qtyUpdates[it.key] = 1;
     });
-    if (Object.keys(qtyUpdates).length) return post('/cart/update.js', { updates: qtyUpdates });
+    if (Object.keys(qtyUpdates).length) return { url: '/cart/update.js', body: { updates: qtyUpdates } };
 
     // 3. A Climax package needs the one fixed Climax installation line.
+    //    update.js with an absolute quantity of 1 (it adds the variant when it's missing),
+    //    never add.js: add.js increments, so two overlapping guard runs (a fast /cart ->
+    //    Overzicht click, or two tabs) would each add 1 and stack CL003 to quantity 2.
     if (hasClimaxPkg && ACTIVATION_ID != null && !activationLines.length) {
-      return post('/cart/add.js', { items: [{ id: ACTIVATION_ID, quantity: 1 }] });
+      var setActivation = {};
+      setActivation[ACTIVATION_ID] = 1;
+      return { url: '/cart/update.js', body: { updates: setActivation } };
     }
 
     // 4. The Climax installation line never stays in a cart without a Climax package.
     if (!hasClimaxPkg && activationLines.length) {
       var rm = {};
       activationLines.forEach(function (it) { rm[it.key] = 0; });
-      return post('/cart/update.js', { updates: rm });
+      return { url: '/cart/update.js', body: { updates: rm } };
     }
+    return null;
+  }
+
+  window.zvCartGuard = { planFix: planFix };
+
+  window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+    var fix = planFix(cart);
+    if (fix) return post(fix.url, fix.body);
   }).catch(function () { /* fail safe: server-side gate (Overzicht) still blocks checkout */ });
 })();
 </script>
