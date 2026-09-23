@@ -450,7 +450,7 @@
                             <p class="pcard__vista-note">Iedere woning en situatie is anders. Daarom begint goede camerabeveiliging met persoonlijk advies. Samen bepalen we waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is – niet meer en niet minder.</p>
                             <button type="submit">Plan een vrijblijvend adviesgesprek</button>
                           </form>
-                          <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
+                          <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij nemen contact met u op voor een vrijblijvend adviesgesprek over Vista.</div>
                         </div>
                       {%- else -%}
                         {%- comment -%} Matches the design: a BUTTON that opens the detail drawer — never an <a href="/products/…"> (which would navigate). {%- endcomment -%}
@@ -786,7 +786,7 @@
 .pcard--tile { padding-top: 14px; }
 /* Vista (2026-09-23): the tile article now opens with the same .ltc__head as Alert/Protect,
    so give it their top padding, or its header sits 10px higher in the Mijn Thuis row. */
-.pcard--tile.pcard--vista { padding-top: 24px; }
+.pcard--tile.pcard--vista { padding-top: 24px; scroll-margin-top: 132px; }
 /* ...and after its .ltc__div the form starts right away (ltc cards: 18px after the divider),
    instead of the tile's extra 16px .pcard__cta margin on top of the divider's own 18px. */
 .pcard--vista .pcard__cta { margin-top: 0; }
@@ -1164,7 +1164,10 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   function focusVista() {
     var box = page.querySelector('[data-vista]');
     if (!box) return;
-    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Scroll to the top of the Vista card, not the form: the card's title, tagline and
+    // bullets sit above the form and would be off-screen (2026-09-23, Thijs).
+    var card = box.closest('.pcard') || box;
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     var input = box.querySelector('[data-vista-form] input');
     if (input) input.focus({ preventScroll: true });
   }
@@ -1906,7 +1909,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         if (!name) { err.textContent = 'Vul uw naam in.'; err.hidden = false; return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Vul een geldig e-mailadres in.'; err.hidden = false; return; }
         if (!phone) { err.textContent = 'Vul uw telefoonnummer in.'; err.hidden = false; return; }
-        if (!consent) { err.textContent = 'Bevestig dat wij u mogen terugbellen.'; err.hidden = false; return; }
+        if (!consent) { err.textContent = 'Geef toestemming dat wij contact met u opnemen.'; err.hidden = false; return; }
         err.hidden = true;
         submitLead({
           lead_type: 'vista', name: name, email: email, phone: phone, preferred_callback_time: time, consent: consent,
