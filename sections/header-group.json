@@ -21,7 +21,7 @@
         "menu": "main-menu",
         "show_search": true,
         "cta_text": "Zakelijk",
-        "cta_link": "shopify://pages/klantenservice-veelgestelde-vragen"
+        "cta_link": "shopify://pages/zakelijk"
       }
     }
   },
