@@ -11,6 +11,12 @@
     - Kenniscentrum articles → Shopify blog: /blogs/kenniscentrum/<slug>
     - Service route spelling → /pages/klantenservice (prototype typo fixed)
     - Package deep-links → /pages/oplossingen?pakket=<finder_key>
+
+  Exception: 'oplossingen/mantelzorgdashboard' outputs a bare fragment,
+  '#mantelzorgdashboard', not a path. Its only caller is the Inzicht bullet in
+  sections/oplossingen.liquid, which sits in the same tab panel as the target, and a
+  bare fragment stays a same-document scroll even with ?pakket= or UTM params in the
+  URL. It only works on /pages/oplossingen, so don't use that key from other pages.
 {%- endcomment -%}
 {%- liquid
   assign kc_blog = '/blogs/kenniscentrum/'
@@ -53,6 +59,8 @@
       echo '/pages/gids-bedankt'
     when 'binnenkort'
       echo '/pages/binnenkort'
+    when 'oplossingen/mantelzorgdashboard'
+      echo '#mantelzorgdashboard'
     when 'pakketten'
       echo '/pages/oplossingen'
     when 'vergelijk-pakketten'
