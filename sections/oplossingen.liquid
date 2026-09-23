@@ -445,9 +445,10 @@
                             <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
                             <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
                             <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
-                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig mij terugbelt over Vista.</span></label>
+                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig contact met mij opneemt over Vista.</span></label>
                             <div class="pcard__vista-err" data-vista-err hidden></div>
-                            <button type="submit">Verstuur terugbelverzoek</button>
+                            <p class="pcard__vista-note">Iedere woning en situatie is anders. Daarom begint goede camerabeveiliging met persoonlijk advies. Samen bepalen we waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is – niet meer en niet minder.</p>
+                            <button type="submit">Plan een vrijblijvend adviesgesprek</button>
                           </form>
                           <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij bellen u terug over Vista.</div>
                         </div>
@@ -1112,6 +1113,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
 .pcard__vista-consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:#5b5374;line-height:1.4;cursor:pointer;}
 .pcard__vista-consent input{width:16px;height:16px;flex:none;margin-top:1px;accent-color:#322469;}
+.pcard__vista-note{margin:2px 0 0;font-size:12.5px;font-weight:600;color:#5b5374;line-height:1.45;}
 .pcard__vista-form button{width:100%;font-family:inherit;font-size:14.5px;font-weight:800;color:#fff;background:#322469;border:none;border-radius:6px;padding:13px 18px;cursor:pointer;}
 .pcard__vista-err{font-size:12px;font-weight:700;color:#e24b4a;}
 .pcard__vista-done{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:#2f8f5b;padding:6px 2px;}
