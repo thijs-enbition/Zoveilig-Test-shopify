@@ -140,8 +140,11 @@ its own package cards and links here via `zv-route` key `vergelijk-pakketten`.
 - Each card is a `scenario` block; its `package` setting (inzicht/zeker/beschermd) is the scoring
   mapping and is editable in the theme editor. **The shipped mapping is a placeholder and still
   needs product sign-off (Robi/Robert)** — it was guessed from the card wording, not confirmed.
-- Scoring is pure client-side (`{% javascript %}` in the section): most selected cards per package
-  wins; ties go to the higher tier (beschermd > zeker > inzicht); zero selected → nothing highlighted.
+- Scoring is pure client-side (`recommend()` in `assets/zv-vergelijk-pakketten.js`): each card's
+  `package` is the lowest tier that has that scenario, and the advice is the highest of those tiers
+  among the selected cards, i.e. the smallest package that covers all of them (inzicht < zeker <
+  beschermd). A `lead_only_pkgs` package (Mijn Thuis Vista) wins only with strictly more selected
+  cards than every other package; otherwise it is excluded. Zero selected → nothing highlighted.
 - The advice bar's add-to-cart resolves package → real product through the same
   `custom.finder_key` metafield mapping the Overzicht page uses (`aware`→inzicht, `aware_plus`→zeker,
   `care`→beschermd) on the section's `collection` setting (default `langer-thuis`). No variant ids in
