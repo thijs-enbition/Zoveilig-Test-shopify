@@ -22,11 +22,13 @@
   Deferred to a separate milestone (by design): a custom slide-in cart drawer (we navigate to
   /cart instead), and the GTM/GA4/Consent wiring (only data-* hooks are emitted here).
 
-  ACTIVATION FEE: every add-to-cart here also adds the universal one-time "Activatie en
-  installatie" product (pricing.config.json activation.productHandle/sku, confirmed live in
-  Shopify 2026-09-09 — never a hardcoded variant id) alongside the package, deduped in JS
-  against the live cart so it's only ever added once regardless of how many packages/add-ons
-  a customer adds. See the shared addToCart() function below.
+  INSTALLATION FEE: adding a CLIMAX package (Beschermd, Protect) here also adds the one-time
+  Climax installation product (pricing.config.json activation.productHandle/sku — "Climax
+  Instalatie", CL003 — never a hardcoded variant id) alongside it, deduped in JS against the
+  live cart so it's only ever added once. A NAMI package (Inzicht, Zeker, Alert) never gets
+  it: its installation is the customer's own choice of the 3 installationOptions.nami
+  products on Overzicht. The platform comes from each package's installGroup in the pricing
+  config. See the shared addToCart() function below.
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
@@ -1217,12 +1219,12 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
      so a stale server-rendered count (e.g. left over from a cart emptied elsewhere) is corrected. */
   window.fetch('/cart.js').then(function (r) { return r.json(); }).then(updateCartCount).catch(function () {});
 
-  /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
+  /* One-time Climax installation variant (see pricing.config.json
      activation.productHandle/sku), resolved server-side into a data attribute — never
-     a hardcoded id here. Adds it alongside a package on every add-to-cart, but only
-     once: checks the live cart first so adding a second package or add-on later never
-     charges the fee twice. Returns a Promise<string|null> (the variant id to add, or
-     null if it's missing from the page or already in the cart). */
+     a hardcoded id here. Added alongside a CLIMAX package only (never a NAMI one), and
+     only once: checks the live cart first so adding a second package or add-on later
+     never charges the fee twice. Returns a Promise<string|null> (the variant id to add,
+     or null if it's missing from the page or already in the cart). */
   var activationVariantId = page.dataset.activationVariantId || null;
   /* Every checkout entry point on this page must land on the Overzicht
      read-only review step (same as the main /cart page), never straight on
@@ -1244,20 +1246,21 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
      month. Keyed by finder_key so it works regardless of which call site adds the package. A
      finder_key with no confirmed monthly rate (e.g. an unrecognized/pending package) falls
      back to the live line price further down, same convention used elsewhere in the theme. */
-  var PKG_MONTHLY_CENTS = (function () {
+  /* Same finder_key-keyed lookup also carries each package's installGroup ('nami' or
+     'climax'), which decides whether add-to-cart adds the Climax installation line. */
+  var PKG_BY_FK = (function () {
     var FK_TO_ID = { aware: 'inzicht', aware_plus: 'zeker', care: 'beschermd', secure: 'alert', guard: 'protect' };
     var byId = {};
     try {
       var el = document.getElementById('zv-pricing-config');
       var cfg = el && JSON.parse(el.textContent || '{}');
       (cfg && cfg.packages || []).forEach(function (p) {
-        if (p && p.id && p.monthlyRecurringPriceCents) byId[p.id] = p.monthlyRecurringPriceCents;
+        if (p && p.id && p.monthlyRecurringPriceCents) byId[p.id] = { monthlyCents: p.monthlyRecurringPriceCents, installGroup: p.installGroup };
       });
     } catch (e) { /* leave byId empty; callers fall back to the live line price */ }
     var byFk = {};
     Object.keys(FK_TO_ID).forEach(function (fk) {
-      var cents = byId[FK_TO_ID[fk]];
-      if (cents) byFk[fk] = cents;
+      if (byId[FK_TO_ID[fk]]) byFk[fk] = byId[FK_TO_ID[fk]];
     });
     return byFk;
   })();
@@ -1273,7 +1276,8 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var label = '';
     if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
     var errEl = btn && btn.parentNode && btn.parentNode.querySelector('.pcard__err'); if (errEl) errEl.remove();
-    return activationLineToAdd().then(function (activationId) {
+    var isClimax = (PKG_BY_FK[finderKey] || {}).installGroup === 'climax';
+    return (isClimax ? activationLineToAdd() : Promise.resolve(null)).then(function (activationId) {
       var items = [{ id: promoVariantId, quantity: 1, properties: properties || {} }];
       if (activationId) items.push({ id: activationId, quantity: 1 });
       return window.fetch('/cart/add.js', {
@@ -1289,7 +1293,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         // promo line's own sku, so add_to_cart keeps identifying the package itself.
         var line = (res && res.items && res.items[0]) || res;
         var ZV = window.ZVMeasurement;
-        var staticCents = PKG_MONTHLY_CENTS[finderKey];
+        var staticCents = (PKG_BY_FK[finderKey] || {}).monthlyCents;
         var itemPrice = staticCents ? (staticCents / 100) : ((line && line.price) ? line.price / 100 : undefined);
         if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (properties && properties['SKU']) || (line && line.sku), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: itemPrice, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
         if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }

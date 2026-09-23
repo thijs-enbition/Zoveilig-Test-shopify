@@ -12,8 +12,8 @@
     "amountCents": 9900,
     "display": "€ 99,00",
     "label": "Eenmalige activatie en installatie",
-    "productHandle": "activatie-en-installatie",
-    "sku": "ACT-INSTALL"
+    "productHandle": "climax-instalatie",
+    "sku": "CL003"
   },
   "installationOptions": {
     "nami": {

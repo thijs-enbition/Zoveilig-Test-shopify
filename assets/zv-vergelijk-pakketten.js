@@ -60,11 +60,23 @@
     var leadPkgs = (root.getAttribute('data-pm-lead-pkgs') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var leadUrl = root.getAttribute('data-pm-lead-url') || '';
 
-    /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
-       activation.productHandle/sku) — deduped against the live cart so it's only ever
-       added once, same as the Oplossingen page. */
-    function activationLineToAdd(cart) {
-      if (!activationVariantId) return null;
+    /* package product handle -> installGroup ('nami' | 'climax'), from the pricing config
+       JSON island the zv-pricing include renders on every page that uses this matcher. */
+    var installGroupByHandle = {};
+    try {
+      var pricingEl = document.getElementById('zv-pricing-config');
+      var pricingCfg = pricingEl && JSON.parse(pricingEl.textContent || '{}');
+      (pricingCfg && pricingCfg.packages || []).forEach(function (p) {
+        if (p && p.productHandle) installGroupByHandle[p.productHandle] = p.installGroup;
+      });
+    } catch (e) { installGroupByHandle = {}; }
+
+    /* One-time Climax installation variant (see pricing.config.json
+       activation.productHandle/sku) — added for a CLIMAX package only, never a NAMI one
+       (NAMI installation is the customer's choice on Overzicht), and deduped against the
+       live cart so it's only ever added once, same as the Oplossingen page. */
+    function activationLineToAdd(cart, prod) {
+      if (!activationVariantId || !prod || installGroupByHandle[prod.handle] !== 'climax') return null;
       var already = (cart && cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
       return already ? null : activationVariantId;
     }
@@ -209,7 +221,7 @@
         .then(function (r) { return r.json(); })
         .then(function (cart) {
           var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
-          var activationId = activationLineToAdd(cart);
+          var activationId = activationLineToAdd(cart, prod);
           if (line) {
             var changePromise = window.fetch('/cart/change.js', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
