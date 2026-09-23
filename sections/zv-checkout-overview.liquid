@@ -597,9 +597,18 @@
       return !!(guard && guard.planFix(cart));
     }
 
-    checkbox.addEventListener('change', function () {
+    // The browser can restore a ticked checkbox on reload or Back (bfcache) without firing
+    // 'change', and a bfcache restore also brings back a button the click disabled. So the
+    // button state is synced on load and on every pageshow, not only on change.
+    function syncButton() {
       btn.disabled = needsActivation || !checkbox.checked;
       btn.setAttribute('aria-disabled', btn.disabled ? 'true' : 'false');
+    }
+    syncButton();
+    window.addEventListener('pageshow', syncButton);
+
+    checkbox.addEventListener('change', function () {
+      syncButton();
       if (checkbox.checked && err) err.hidden = true;
     });
 
