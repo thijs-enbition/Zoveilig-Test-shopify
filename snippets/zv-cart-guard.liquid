@@ -1,152 +1,118 @@
 {%- comment -%}
-  Zo Veilig — cart guard. Ensures a package never sits in the live cart without its
-  platform's one-time installation fee. A package is recognized by its own prepaid
-  "Eerste 3 maanden" promo line (see Platform detection below), not by a
-  subscription-type product — the plain package product is never added to cart under the
-  prepaid line-item model (CLAUDE.md, Pricing pipeline).
+  Zo Veilig — cart guard. Keeps the live cart in the one shape a package purchase may
+  have (CLAUDE.md, Pricing pipeline):
 
-  Climax (pricing.config.json activation.productHandle/sku, "Activatie en installatie"):
-  UNCHANGED behaviour. The Oplossingen and Vergelijk pakketten add-to-cart flows already add
-  this fee alongside a package, but nothing stops it being removed afterwards in the cart, or
-  a package reaching the cart through an entry point that doesn't add it — e.g. the standalone
-  Shopify product page's default "Toevoegen aan winkelwagen" button (Dawn's stock buy-buttons,
-  no custom wiring). On load, if a subscription line exists with no matching activation-fee
-  line, it adds the fee and reloads — no ambiguity, one fixed fee, one correct answer. Skipped
-  when a nami-install line is already present (a nami cart in good standing must never also
-  pick up the flat climax fee).
+      the real package product at quantity pkg_qty (the 3 prepaid months; Shopify's
+      automatic "Eerste 3 maanden" discount takes 50% off that line by itself)
+    + exactly one installation line at quantity 1 (never discounted)
 
-  Nami (pricing.config.json installationOptions.nami.options, 3 differently-priced variants):
-  this guard must NEVER pick one of the three for the customer — unlike the climax fee, there
-  isn't one correct answer, only the customer's own choice on the Overzicht page (required
-  radio group there, see sections/zv-checkout-overview.liquid). The only nami-specific fix
-  applied here is a consistency dedupe: if more than one of the 3 nami-install variants is
-  present at once (e.g. a stale line left behind by an interrupted swap), keep the most
-  recently added and remove the rest, then reload. A cart with none of the three is left
-  alone — that is the expected, correct state until the customer chooses.
+  A package line is a line whose product_type is `sub_type` and whose handle is one of the
+  5 purchasable package handles from pricing.config.json. The Cart AJAX API doesn't expose
+  product metafields (custom.finder_key) the way server-side Liquid does, but it does expose
+  the handle, and the handle also says which installation model the package uses: Inzicht,
+  Zeker and Alert are NAMI, Beschermd and Protect are Climax.
 
-  Platform detection (2026-09-22): under the prepaid line-item model the plain package
-  product is never added to cart, so "is there a package here, and which platform is it"
-  is now answered by the package's own "Eerste 3 maanden" promo line instead of a
-  subscription-type line. That is strictly more reliable than what this script could do
-  before: the promo variant ids are resolved server-side per platform, so unlike the old
-  product_type check, a mixed cart's climax fee and nami choice are each evaluated on
-  their own — no guessing from the Cart AJAX API, which still doesn't expose a line
-  item's product.metafields (custom.finder_key) the way server-side Liquid does.
+  Runs on load of /cart and /cart?view=overzicht and applies at most ONE fix per load, then
+  reloads, so each fix is re-checked against the real cart:
 
-  Stray package line (2026-09-23): a subscription-type product should never reach the cart
-  — the product page no longer renders a buy form for one (sections/main-product.liquid) —
-  but if one arrives by any other route, it is swapped for that package's promo line rather
-  than left to be charged. Its monthly price would otherwise be collected today, with no
-  installation fee and nothing for Overzicht to identify the package by.
+  1. More than one of the 3 NAMI install variants at once (e.g. a stale line left behind
+     by an interrupted swap): keep the most recently added, remove the rest.
+  2. Quantities. A package line at any quantity other than pkg_qty is set to pkg_qty; a
+     second line for the same package (e.g. added from two pages with different line
+     properties) is removed, since two lines would be 6 prepaid months; an installation
+     line at any quantity other than 1 is set to 1.
+  3. A Climax package without the Climax installation line (CL003) gets it added — one
+     fixed fee, one correct answer, safe to add on the customer's behalf.
+  4. The Climax installation line in a cart with no Climax package is removed: CL003 must
+     never be charged for a NAMI package.
 
-  The mapping is keyed on the line's product `handle`, not `custom.finder_key`: the Cart
-  AJAX API doesn't expose product metafields the way server-side Liquid does, but it does
-  expose the handle, and pricing.config.json carries each package's productHandle next to
-  its promoProduct. Vista has no promo product, so a Vista line is left alone (it isn't
-  purchasable anyway). After the swap the cart re-enters the normal flow: the reload runs
-  this guard again, which then adds the climax activation fee if that's what's missing, or
-  leaves a nami cart for the customer's own install choice on Overzicht.
+  NAMI packages: this guard must NEVER pick one of the three NAMI install options for the
+  customer — there isn't one correct answer, only the customer's own choice on Overzicht
+  (required radio group, see sections/zv-checkout-overview.liquid). A NAMI cart with none of
+  the three is left alone; that's the expected state until the customer chooses.
+
+  A package line that arrives WITHOUT the 50% discount (e.g. the Shopify discount was
+  deactivated) is not something this script can fix. Overzicht blocks checkout for it
+  server-side instead (`cart_pkg_undiscounted` in zv-checkout-overview.liquid), so a customer
+  can never pay 3 full months.
 
   Silent no-op throughout if a variant id can't be resolved, or if a fetch fails (e.g.
-  offline) — the caller also fails safe server-side (see zv-checkout-overview.liquid's
-  cart_needs_activation gate, which blocks checkout regardless of whether this script runs).
+  offline) — Overzicht also fails safe server-side (its checkout gate blocks regardless of
+  whether this script runs).
 
-  Params: activation_variant_id, sub_type, nami_geen_variant_id, nami_telefonisch_variant_id,
-  nami_huis_variant_id, promo_inzicht_variant_id, promo_zeker_variant_id,
-  promo_beschermd_variant_id, promo_alert_variant_id, promo_protect_variant_id, and the
-  matching package product handles inzicht_handle, zeker_handle, beschermd_handle,
-  alert_handle, protect_handle (passed explicitly because `render` doesn't inherit the
-  caller's scope, same reason the variant ids are).
+  Params: activation_variant_id (Climax installation, CL003), sub_type,
+  nami_geen_variant_id, nami_telefonisch_variant_id, nami_huis_variant_id, pkg_qty
+  (zv_promo_package_qty), and the package product handles inzicht_handle, zeker_handle,
+  alert_handle (NAMI) and beschermd_handle, protect_handle (Climax) — passed explicitly
+  because `render` doesn't inherit the caller's scope.
 {%- endcomment -%}
-{%- capture zv_guard_pkg_map -%}
-  {
-    {{ inzicht_handle | json }}: {{ promo_inzicht_variant_id | json }},
-    {{ zeker_handle | json }}: {{ promo_zeker_variant_id | json }},
-    {{ beschermd_handle | json }}: {{ promo_beschermd_variant_id | json }},
-    {{ alert_handle | json }}: {{ promo_alert_variant_id | json }},
-    {{ protect_handle | json }}: {{ promo_protect_variant_id | json }}
-  }
-{%- endcapture -%}
-{%- if activation_variant_id != blank or nami_geen_variant_id != blank or nami_telefonisch_variant_id != blank or nami_huis_variant_id != blank -%}
+{%- if pkg_qty > 0 -%}
 <script>
 (function () {
   if (window.__zvCartGuardRan) return;
   window.__zvCartGuardRan = true;
   var ACTIVATION_ID = {{ activation_variant_id | json }};
   var SUB_TYPE = {{ sub_type | json }};
+  var PKG_QTY = {{ pkg_qty | json }};
   var NAMI_IDS = [{{ nami_geen_variant_id | json }}, {{ nami_telefonisch_variant_id | json }}, {{ nami_huis_variant_id | json }}]
     .filter(function (id) { return id != null; })
     .map(String);
-  // Promo line ids, split by which installation model their package uses.
-  var PROMO_NAMI_IDS = [{{ promo_inzicht_variant_id | json }}, {{ promo_zeker_variant_id | json }}, {{ promo_alert_variant_id | json }}]
-    .filter(function (id) { return id != null; })
-    .map(String);
-  var PROMO_CLIMAX_IDS = [{{ promo_beschermd_variant_id | json }}, {{ promo_protect_variant_id | json }}]
-    .filter(function (id) { return id != null; })
-    .map(String);
-  // package product handle -> that package's promo variant id (see comment above).
-  var PKG_HANDLE_TO_PROMO = {{ zv_guard_pkg_map }};
+  var NAMI_PKG_HANDLES = [{{ inzicht_handle | json }}, {{ zeker_handle | json }}, {{ alert_handle | json }}].filter(Boolean);
+  var CLIMAX_PKG_HANDLES = [{{ beschermd_handle | json }}, {{ protect_handle | json }}].filter(Boolean);
+
+  function post(url, body) {
+    return window.fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) { if (r.ok) window.location.reload(); });
+  }
 
   window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
     var items = (cart && cart.items) || [];
-    var hasSub = items.some(function (it) { return it.product_type === SUB_TYPE; });
-    var hasActivation = items.some(function (it) { return String(it.variant_id) === String(ACTIVATION_ID); });
+    var isPkg = function (it) {
+      return it.product_type === SUB_TYPE && (NAMI_PKG_HANDLES.indexOf(it.handle) !== -1 || CLIMAX_PKG_HANDLES.indexOf(it.handle) !== -1);
+    };
+    var isActivation = function (it) { return ACTIVATION_ID != null && String(it.variant_id) === String(ACTIVATION_ID); };
     var namiLines = items.filter(function (it) { return NAMI_IDS.indexOf(String(it.variant_id)) !== -1; });
-    var hasPromoNami = items.some(function (it) { return PROMO_NAMI_IDS.indexOf(String(it.variant_id)) !== -1; });
-    var hasPromoClimax = items.some(function (it) { return PROMO_CLIMAX_IDS.indexOf(String(it.variant_id)) !== -1; });
+    var pkgLines = items.filter(isPkg);
+    var hasClimaxPkg = pkgLines.some(function (it) { return CLIMAX_PKG_HANDLES.indexOf(it.handle) !== -1; });
+    var activationLines = items.filter(isActivation);
 
+    // 1. Duplicate NAMI install lines: keep the most recently added.
     if (namiLines.length > 1) {
       var keepId = String(namiLines[namiLines.length - 1].variant_id);
-      var updates = {};
+      var namiUpdates = {};
       namiLines.forEach(function (it) {
         var vid = String(it.variant_id);
-        if (vid !== keepId) updates[vid] = 0;
+        if (vid !== keepId) namiUpdates[vid] = 0;
       });
-      return window.fetch('/cart/update.js', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates: updates })
-      }).then(function (r) { if (r.ok) window.location.reload(); });
+      return post('/cart/update.js', { updates: namiUpdates });
     }
 
-    // A climax package needs the one fixed activation fee - one correct answer, safe to
-    // add. A nami package's install choice is never picked on the customer's behalf; the
-    // required radio group on Overzicht is the only place that gets set.
-    if (hasPromoClimax && !hasActivation) {
-      return window.fetch('/cart/add.js', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: [{ id: ACTIVATION_ID, quantity: 1 }] })
-      }).then(function (r) { if (r.ok) window.location.reload(); });
-    }
-
-    // A stray package line is swapped for that package's promo line (see comment above),
-    // before any fee handling - the reload re-runs this guard, which then sorts the fee out.
-    var strays = items.filter(function (it) {
-      return it.product_type === SUB_TYPE && PKG_HANDLE_TO_PROMO[it.handle];
+    // 2. Quantities, keyed by line key so each line is set on its own.
+    var qtyUpdates = {};
+    var seenPkgVariants = {};
+    pkgLines.forEach(function (it) {
+      var vid = String(it.variant_id);
+      if (seenPkgVariants[vid]) { qtyUpdates[it.key] = 0; return; }
+      seenPkgVariants[vid] = true;
+      if (it.quantity !== PKG_QTY) qtyUpdates[it.key] = PKG_QTY;
     });
-    if (strays.length) {
-      var removals = {};
-      var additions = [];
-      strays.forEach(function (it) {
-        removals[String(it.variant_id)] = 0;
-        var promoId = PKG_HANDLE_TO_PROMO[it.handle];
-        var already = items.some(function (o) { return String(o.variant_id) === String(promoId); });
-        if (!already && additions.every(function (a) { return String(a.id) !== String(promoId); })) {
-          additions.push({ id: promoId, quantity: 1 });
-        }
-      });
-      return window.fetch('/cart/update.js', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates: removals })
-      })
-        .then(function (r) {
-          if (!r.ok) throw new Error(r.status);
-          if (!additions.length) return r;
-          return window.fetch('/cart/add.js', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: additions })
-          });
-        })
-        .then(function (r) { if (r.ok) window.location.reload(); });
+    namiLines.concat(activationLines).forEach(function (it) {
+      if (it.quantity !== 1 && qtyUpdates[it.key] == null) qtyUpdates[it.key] = 1;
+    });
+    if (Object.keys(qtyUpdates).length) return post('/cart/update.js', { updates: qtyUpdates });
+
+    // 3. A Climax package needs the one fixed Climax installation line.
+    if (hasClimaxPkg && ACTIVATION_ID != null && !activationLines.length) {
+      return post('/cart/add.js', { items: [{ id: ACTIVATION_ID, quantity: 1 }] });
+    }
+
+    // 4. The Climax installation line never stays in a cart without a Climax package.
+    if (!hasClimaxPkg && activationLines.length) {
+      var rm = {};
+      activationLines.forEach(function (it) { rm[it.key] = 0; });
+      return post('/cart/update.js', { updates: rm });
     }
   }).catch(function () { /* fail safe: server-side gate (Overzicht) still blocks checkout */ });
 })();

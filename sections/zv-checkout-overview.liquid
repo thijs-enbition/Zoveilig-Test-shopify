@@ -4,47 +4,37 @@
   Rendered via templates/cart.overzicht.json against the live {{ cart }} — no separate data
   source, so it always reflects exactly what will be charged.
 
-  WHAT SHOPIFY COLLECTS (prepaid line-item model, confirmed 2026-09-22 against kosten.xlsx):
-  the cart holds exactly two kinds of line for a package purchase — the chosen installation
-  option at its full price, and that package's own prepaid "Eerste 3 maanden" product. The
-  plain package product is NEVER added to the cart, so its monthly price is never charged
-  here; the monthly recurring rate is billed by Odoo over SEPA, entirely outside this repo.
-  So today's total is, by construction:
+  WHAT SHOPIFY COLLECTS (2026-09-23 model, CLAUDE.md Pricing pipeline): a package purchase
+  is exactly two lines — the chosen installation product (qty 1, full price, never
+  discounted) and the real package product at quantity zv_promo_package_qty (3: the first
+  3 months, prepaid). Shopify's automatic "Eerste 3 maanden" discount (50%, scoped to the
+  package products only) takes 50% off the package line by itself; nothing in this theme
+  computes that discount. The monthly rate from month 4 is billed by Odoo over SEPA.
 
-      vandaag = installatie_kosten (never discounted, at any tier) + promoDiscountTotalCents
-
-  The promo line is a separate, always-positive charge, never a discount applied to the
-  installation fee or to anything else — there is therefore no negative-value case to cap,
-  including for "Geen installatie" and "Telefonische ondersteuning".
-
-  PRICING: "Vandaag te betalen" and every row of its breakdown are read live from {{ cart }},
-  each row straight off the line item it describes, so the itemized list can never drift from
-  what Shopify actually charges. The recurring "per maand" figure is the confirmed
-  per-package monthly rate from the central pricing model (via the `zv-pricing` include and
-  `zv-package-monthly-cents`), never read off a line price — Shopify never sees the monthly
-  rate at all under this model, so there is nothing live to read it from.
+  PRICING: "Vandaag te betalen" and every row of its breakdown are read live from {{ cart }}
+  (item.final_line_price, i.e. after Shopify's discount allocation), each row straight off
+  the line item it describes, so the itemized list always adds up to what Shopify charges —
+  never recomputed here. "Daarna … /mnd" is the package line's UNIT price before the
+  discount (item.original_price), never unit x 3.
 
   PACKAGE IDENTITY: package-specific commercial terms (installation group, contract duration,
-  indicative contract value) are matched to the cart's promo line through its
-  `custom.finder_key` product metafield — the same metafield and values the package products
-  carry, deliberately mirrored onto the promo products so they can serve as the cart-side
-  identity anchor now that no subscription-type line is ever present. If no package can be
-  identified (e.g. a cart with only accessories), or if the cart holds more than one distinct
-  package's promo line, the commercial-terms rows are hidden rather than showing one
-  package's numbers as if they applied to both. Never a literal price or duration here
-  regardless — CI check #10 in scripts/check_pricing.py enforces that.
+  indicative contract value, the breakdown label) are matched to the cart's package line —
+  product type `sub_type` — through its `custom.finder_key` product metafield. If no package
+  can be identified (e.g. a cart with only accessories), or if the cart holds more than one
+  distinct package, the commercial-terms rows are hidden rather than showing one package's
+  numbers as if they applied to both. Never a literal price or duration here regardless —
+  CI check #10 in scripts/check_pricing.py enforces that.
 
-  KNOWN GAP (unchanged): pricing.config.json's monthlyRecurringPrice is the sole source for
-  "the ongoing monthly rate", with no live signal left in Shopify to cross-check it against.
-  If it ever drifts from what Odoo is actually configured to bill monthly, nothing here would
-  catch it. That stays a manually-verified sync point between this repo and Odoo.
-
-  INSTALLATION FEE ENFORCEMENT: a package must never reach checkout without its installation
-  line. Enforced twice: client-side, zv-cart-guard auto-adds the fixed activation fee for a
-  climax package and reloads if it's missing (it never picks a nami option on the customer's
-  behalf — that's the required radio group below); server-side, `cart_needs_activation` blocks
-  the checkout button outright as a fail-safe if the client-side fix hasn't run or failed
-  (offline, JS disabled).
+  CHECKOUT GATE: the checkout button is disabled server-side, whatever zv-cart-guard does:
+  - cart_needs_activation: a package without its installation line (Climax: the fixed CL003
+    line, which zv-cart-guard adds; NAMI: one of the 3 options, which only the customer picks
+    in the required radio group below);
+  - cart_needs_fix: a package line at a quantity other than zv_promo_package_qty, a second
+    line for the same package, or the Climax installation line in a cart with no Climax
+    package — zv-cart-guard corrects all of these and reloads;
+  - cart_pkg_undiscounted: a package line that carries no discount at all (e.g. the Shopify
+    discount was deactivated). The guard can't fix that, and a customer must never pay 3
+    full months, so checkout stays blocked with a contact message instead.
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
@@ -56,23 +46,20 @@
   assign nami_install_geen_variant_id = all_products[zv_nami_install_geen_handle].selected_or_first_available_variant.id
   assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id
   assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id
-  assign promo_inzicht_variant_id = all_products[zv_inzicht_promo_handle].selected_or_first_available_variant.id
-  assign promo_zeker_variant_id = all_products[zv_zeker_promo_handle].selected_or_first_available_variant.id
-  assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id
-  assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id
-  assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id
   assign today_cents = 0
   assign true_month_cents = 0
   assign install_line_item = nil
-  assign promo_line_item = nil
-  assign promo_item_fk = blank
-  assign distinct_promo_fks = ''
-  assign has_climax_promo = false
-  assign has_nami_promo = false
+  assign pkg_line_item = nil
+  assign pkg_item_fk = blank
+  assign distinct_pkg_fks = ''
+  assign has_climax_pkg = false
+  assign has_nami_pkg = false
   assign has_activation_line = false
   assign has_nami_install_line = false
   assign selected_nami_install_id = nil
   assign selected_nami_install_cents = 0
+  assign cart_needs_fix = false
+  assign cart_pkg_undiscounted = false
   for item in cart.items
     if activation_variant_id != blank and item.variant_id == activation_variant_id
       assign has_activation_line = true
@@ -97,45 +84,42 @@
       assign install_line_item = item
     endif
 
-    assign item_promo_fk = blank
-    if promo_inzicht_variant_id != blank and item.variant_id == promo_inzicht_variant_id
-      assign item_promo_fk = 'aware'
-    endif
-    if promo_zeker_variant_id != blank and item.variant_id == promo_zeker_variant_id
-      assign item_promo_fk = 'aware_plus'
-    endif
-    if promo_beschermd_variant_id != blank and item.variant_id == promo_beschermd_variant_id
-      assign item_promo_fk = 'care'
-    endif
-    if promo_alert_variant_id != blank and item.variant_id == promo_alert_variant_id
-      assign item_promo_fk = 'secure'
-    endif
-    if promo_protect_variant_id != blank and item.variant_id == promo_protect_variant_id
-      assign item_promo_fk = 'guard'
-    endif
-
     assign today_cents = today_cents | plus: item.final_line_price
 
-    if item_promo_fk != blank
-      if item_promo_fk == 'aware' or item_promo_fk == 'aware_plus' or item_promo_fk == 'secure'
-        assign has_nami_promo = true
+    comment
+      A package line: product type sub_type plus one of the 5 purchasable finder_keys.
+    endcomment
+    assign item_pkg_fk = blank
+    if item.product.type == sub_type or item.product.tags contains sub_tag
+      assign item_fk = item.product.metafields.custom.finder_key.value
+      if item_fk == 'aware' or item_fk == 'aware_plus' or item_fk == 'secure' or item_fk == 'care' or item_fk == 'guard'
+        assign item_pkg_fk = item_fk
+      endif
+    endif
+
+    if item_pkg_fk != blank
+      if item_pkg_fk == 'aware' or item_pkg_fk == 'aware_plus' or item_pkg_fk == 'secure'
+        assign has_nami_pkg = true
       else
-        assign has_climax_promo = true
+        assign has_climax_pkg = true
       endif
-      if promo_line_item == nil
-        assign promo_line_item = item
-        assign promo_item_fk = item_promo_fk
+      if pkg_line_item == nil
+        assign pkg_line_item = item
+        assign pkg_item_fk = item_pkg_fk
       endif
-      capture li_monthly_cents_raw
-        render 'zv-package-monthly-cents', finder_key: item_promo_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents
-      endcapture
-      assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0
-      assign li_month_total_cents = li_monthly_cents | times: item.quantity
-      assign true_month_cents = true_month_cents | plus: li_month_total_cents
-      assign fk_token = item_promo_fk | append: '|'
-      unless distinct_promo_fks contains fk_token
-        assign distinct_promo_fks = distinct_promo_fks | append: fk_token
-      endunless
+      if item.quantity != zv_promo_package_qty
+        assign cart_needs_fix = true
+      endif
+      if item.final_line_price >= item.original_line_price
+        assign cart_pkg_undiscounted = true
+      endif
+      assign true_month_cents = true_month_cents | plus: item.original_price
+      assign fk_token = item_pkg_fk | append: '|'
+      if distinct_pkg_fks contains fk_token
+        assign cart_needs_fix = true
+      else
+        assign distinct_pkg_fks = distinct_pkg_fks | append: fk_token
+      endif
     endif
   endfor
   for d in cart.cart_level_discount_applications
@@ -143,45 +127,46 @@
   endfor
 
   comment
-    Package identity no longer comes from a subscription-type product in cart - under
-    the 2026-09-22 prepaid-line-item model, the plain package product is never added to
-    cart at all (see CLAUDE.md Pricing pipeline). Each package's own "Eerste 3 maanden"
-    promo product (custom.finder_key, same values as the retired package-product
-    metafield) is the sole cart-side identity anchor instead. A climax-platform promo
-    line still needs the single universal activation fee, unchanged (activation_variant_id
-    / ACT-INSTALL, no ambiguity). A nami-platform promo line needs one of the 3
-    installationOptions.nami variants instead - never the flat activation fee, and never
+    A climax package needs the single Climax installation line (activation_variant_id /
+    climax-instalatie, CL003, no ambiguity). A nami package needs one of the 3
+    installationOptions.nami variants instead - never the Climax line, and never
     auto-picked on the customer's behalf (see zv-cart-guard.liquid). A cart can need
     either or both independently if it somehow holds both platforms at once - this check
     is intentionally independent of the "exactly one recognized package" gate below,
     which only controls the commercial-terms display, not this safety gate.
   endcomment
   assign cart_needs_activation = false
-  if has_climax_promo and has_activation_line == false
+  if has_climax_pkg and has_activation_line == false
     assign cart_needs_activation = true
   endif
-  if has_nami_promo and has_nami_install_line == false
+  if has_nami_pkg and has_nami_install_line == false
     assign cart_needs_activation = true
+  endif
+  if has_activation_line and has_climax_pkg == false
+    assign cart_needs_fix = true
+  endif
+  assign cart_checkout_blocked = false
+  if cart_needs_activation or cart_needs_fix or cart_pkg_undiscounted
+    assign cart_checkout_blocked = true
   endif
 -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, promo_inzicht_variant_id: promo_inzicht_variant_id, promo_zeker_variant_id: promo_zeker_variant_id, promo_beschermd_variant_id: promo_beschermd_variant_id, promo_alert_variant_id: promo_alert_variant_id, promo_protect_variant_id: promo_protect_variant_id, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, pkg_qty: zv_promo_package_qty, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
 {%- liquid
 
   comment
     Commercial-terms rows (installation, contract duration, ICV) only apply when the
-    cart holds exactly one recognized package's promo line. A cart holding two different
-    packages' promo lines (e.g. Langer Thuis Inzicht + Mijn Thuis Alert) has two
-    different contract terms and ICVs at once; showing either one alone would be
-    confidently wrong, not just incomplete, so both fall back to the live-totals-only
-    view instead. The per-package "Daarna per maand" sum above is unaffected by this -
-    it stays correct across multiple packages, being just a sum of each recognized
-    line's own confirmed rate.
+    cart holds exactly one recognized package. A cart holding two different packages
+    (e.g. Langer Thuis Inzicht + Mijn Thuis Alert) has two different contract terms and
+    ICVs at once; showing either one alone would be confidently wrong, not just
+    incomplete, so both fall back to the live-totals-only view instead. The "Daarna"
+    sum above is unaffected by this - it stays correct across multiple packages, being
+    just a sum of each package line's own unit price.
   endcomment
-  assign distinct_promo_fk_count = distinct_promo_fks | split: '|' | size
+  assign distinct_pkg_fk_count = distinct_pkg_fks | split: '|' | size
   assign pkg_available = false
   assign pkg_install_group = 'climax'
-  if promo_line_item != nil and distinct_promo_fk_count == 1
-    case promo_item_fk
+  if pkg_line_item != nil and distinct_pkg_fk_count == 1
+    case pkg_item_fk
       when 'aware'
         assign pkg_available = true
         assign pkg_install_group = 'nami'
@@ -251,7 +236,7 @@
   {%- capture consent_html -%}{{ consent_prefix }} <a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a>, {{ privacy_html }} {{ consent_suffix }}{%- endcapture -%}
 {%- endif -%}
 
-<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}{% if cart_needs_activation %} data-needs-activation{% endif %}>
+<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}{% if cart_checkout_blocked %} data-needs-activation{% endif %}>
   <section class="ovbar">
     <div class="wrap">
       <div class="ovbar-top">
@@ -284,33 +269,37 @@
                 {%- for item in cart.items -%}
                   {%- assign is_sub = false -%}
                   {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+                  {%- comment -%} Package and installation lines show their pricing.config.json name (package via finder_key, installation via handle), never the Shopify product title. {%- endcomment -%}
+                  {%- assign item_name = item.product.title -%}
                   {%- if is_sub -%}
-                    {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
-                    {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
-                    {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
-                    {%- if li_monthly_cents > 0 -%}
-                      {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
-                    {%- else -%}
-                      {%- assign li_month_total_cents = item.final_line_price -%}
-                    {%- endif -%}
+                    {%- capture cfg_name -%}{%- render 'zv-package-name', finder_key: item.product.metafields.custom.finder_key.value, names: zv_package_names_by_fk -%}{%- endcapture -%}
+                  {%- else -%}
+                    {%- capture cfg_name -%}{%- render 'zv-install-name', handle: item.product.handle, names: zv_install_names_by_handle -%}{%- endcapture -%}
                   {%- endif -%}
+                  {%- assign cfg_name = cfg_name | strip -%}
+                  {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
                   <div class="ovitem">
                     <div class="ovi-thumb">
                       {%- if item.image -%}
-                        <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item.product.title | escape }}" width="88" height="88" loading="lazy">
+                        <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item_name | escape }}" width="88" height="88" loading="lazy">
                       {%- else -%}
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4-9-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8M12 12v8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
                       {%- endif -%}
                     </div>
                     <div>
                       {%- if item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
-                      <div class="ovi-name">{{ item.product.title | escape }}</div>
+                      <div class="ovi-name">{{ item_name | escape }}</div>
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
-                      <div class="ovi-meta">Aantal: {{ item.quantity }}</div>
+                      {%- if is_sub -%}
+                        <div class="ovi-meta">Eerste {{ item.quantity }} maanden vooruit, {{ zv_promo_badge }}</div>
+                      {%- else -%}
+                        <div class="ovi-meta">Aantal: {{ item.quantity }}</div>
+                      {%- endif -%}
                     </div>
                     <div class="ovi-right">
+                      {%- comment -%} A package line's monthly figure is its UNIT price before the discount, never unit x quantity. {%- endcomment -%}
                       {%- if is_sub -%}
-                        <div class="ovi-price">{{ li_month_total_cents | money }} <span>p/m</span></div>
+                        <div class="ovi-price">{{ item.original_price | money }} <span>p/m</span></div>
                       {%- else -%}
                         <div class="ovi-price">{{ item.final_line_price | money }}</div>
                       {%- endif -%}
@@ -369,14 +358,14 @@
 
               {%- comment -%}
                 Itemized, never a single collapsed number: every row is read straight off
-                the live cart line it describes, so the breakdown can't drift from what
-                Shopify actually charges. The installation row is whichever install option
-                is really in the cart (the fixed activation fee for climax, one of the 3
-                nami options for nami) at its full price - installation is never
-                discounted, at any tier. The promo row is the package's own prepaid
-                "Eerste 3 maanden" product: a separate, always-positive charge, never a
-                discount applied to anything else. Their sum is today_cents, which stays
-                the live cart total exactly as before.
+                the live cart line it describes (item.final_line_price, after Shopify's own
+                discount allocation), so the breakdown always equals what Shopify charges -
+                nothing is recomputed here. The installation row is whichever install option
+                is really in the cart (the Climax line for climax, one of the 3 nami options
+                for nami) at its full price - installation is never discounted. The package
+                row is the package line itself: quantity 3, with Shopify's automatic 50%
+                "Eerste 3 maanden" discount already taken off. Their sum is today_cents.
+                "Daarna" is each package line's unit price before the discount.
               {%- endcomment -%}
               <div class="ovblock">
                 <span class="ovblock-eb">{{ zv_label_breakdown_intro }}</span>
@@ -384,14 +373,23 @@
                 <dl class="ovdl ovbreakdown">
                   {%- comment -%}
                     One row per live cart line, so the rows always add up to the total below
-                    - including the rare cart holding two packages' promo lines at once,
-                    where naming a single promo row would silently under-report what is
-                    being charged. An unrecognized line falls back to its own product
-                    title, same degraded-but-honest convention used elsewhere.
+                    - including the rare cart holding two packages at once. An unrecognized
+                    line falls back to its own product title, same degraded-but-honest
+                    convention used elsewhere.
                   {%- endcomment -%}
                   {%- for item in cart.items -%}
                     {%- liquid
                       assign row_label = item.product.title | escape
+                      assign row_pkg_name = blank
+                      if item.product.type == sub_type or item.product.tags contains sub_tag
+                        assign row_fk = item.product.metafields.custom.finder_key.value
+                        if row_fk == 'aware' or row_fk == 'aware_plus' or row_fk == 'care' or row_fk == 'secure' or row_fk == 'guard'
+                          capture row_pkg_name
+                            render 'zv-package-name', finder_key: row_fk, names: zv_package_names_by_fk
+                          endcapture
+                          assign row_pkg_name = row_pkg_name | strip
+                        endif
+                      endif
                       if activation_variant_id != blank and item.variant_id == activation_variant_id
                         assign row_label = zv_label_activation
                       elsif nami_install_geen_variant_id != blank and item.variant_id == nami_install_geen_variant_id
@@ -400,22 +398,18 @@
                         assign row_label = zv_nami_install_telefonisch_label
                       elsif nami_install_huis_variant_id != blank and item.variant_id == nami_install_huis_variant_id
                         assign row_label = zv_nami_install_huis_label
-                      elsif item.variant_id == promo_inzicht_variant_id or item.variant_id == promo_zeker_variant_id or item.variant_id == promo_beschermd_variant_id or item.variant_id == promo_alert_variant_id or item.variant_id == promo_protect_variant_id
-                        assign row_label = zv_label_commitment
+                      elsif row_pkg_name != blank
+                        assign row_label = row_pkg_name | append: ' × ' | append: item.quantity | append: ' — ' | append: zv_label_commitment
                       endif
                     -%}
                     <div><dt>{{ row_label }}</dt><dd>{{ item.final_line_price | money }}</dd></div>
                   {%- endfor -%}
                   <div class="ovbreakdown-total"><dt>{{ zv_label_due_today }}</dt><dd class="strong">{{ today_cents | money }}</dd></div>
+                  {%- if true_month_cents > 0 -%}
+                    <div><dt>Daarna</dt><dd>{{ true_month_cents | money }}/mnd</dd></div>
+                  {%- endif -%}
                 </dl>
               </div>
-
-              {%- if true_month_cents > 0 -%}
-                <div class="ovblock">
-                  <span class="ovblock-eb">{{ zv_label_monthly_after }} · via SEPA-incasso</span>
-                  <p>{{ true_month_cents | money }} per maand.</p>
-                </div>
-              {%- endif -%}
 
               {%- if pkg_available -%}
                 <div class="ovblock">
@@ -424,7 +418,7 @@
                 </div>
               {%- endif -%}
 
-              {%- if promo_line_item != nil and section.settings.before_explainer != blank -%}<p class="ovcost-note">{{ section.settings.before_explainer | escape }}</p>{%- endif -%}
+              {%- if pkg_line_item != nil and section.settings.before_explainer != blank -%}<p class="ovcost-note">{{ section.settings.before_explainer | escape }}</p>{%- endif -%}
 
               <dl class="ovdl">
                 <div><dt>Maandelijkse betaling</dt><dd>SEPA-incasso</dd></div>
@@ -466,8 +460,12 @@
             </div>
 
             <div class="ovcard ovconsent">
-              {%- if cart_needs_activation -%}
+              {%- if cart_pkg_undiscounted -%}
+                <div class="ovconsent-err" data-ov-needs-activation role="alert">Er ging iets mis met uw bestelling. Neem contact op via 088 122 11 11.</div>
+              {%- elsif cart_needs_activation -%}
                 <div class="ovconsent-err" data-ov-needs-activation role="alert">Er ontbreekt een onderdeel van uw bestelling (activatie en installatie). We herstellen dit automatisch — ververs de pagina als dit blijft staan.</div>
+              {%- elsif cart_needs_fix -%}
+                <div class="ovconsent-err" data-ov-needs-activation role="alert">We werken uw bestelling bij. Ververs de pagina als dit blijft staan.</div>
               {%- endif -%}
               <label class="ovcheck">
                 <input type="checkbox" id="ovAvConsent">
@@ -503,12 +501,11 @@
     var err = root.querySelector('[data-ov-err]');
     if (!checkbox || !btn) return;
 
-    // Fail-safe: while the cart is missing the activation fee (climax) or a chosen nami
-    // install variant, the checkout button stays disabled no matter what the consent
-    // checkbox does. zv-cart-guard (rendered above) tries to fix the climax case and
-    // reload; cart_needs_activation covers the nami case too (see the section's Liquid) -
-    // this just makes sure checkout can't proceed in the meantime, or if that fails
-    // (offline, JS disabled elsewhere).
+    // Fail-safe: while the section's Liquid sees a cart that may not go to checkout
+    // (cart_checkout_blocked: a missing installation line, a package quantity or stray
+    // Climax line zv-cart-guard is still fixing, or a package line without its 50%
+    // discount), the checkout button stays disabled no matter what the consent checkbox
+    // does - in the meantime, or if the guard's fix fails (offline, JS disabled elsewhere).
     var needsActivation = root.hasAttribute('data-needs-activation');
 
     // Nami installation choice: swap the cart's install-fee line to match the selected
@@ -714,15 +711,15 @@
     { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U kunt dit hieronder nog wijzigen." },
     { "type": "text", "id": "pkg_card_heading", "label": "Kop · pakketkaart", "default": "Uw pakket en configuratie" },
     { "type": "text", "id": "pkg_card_link_label", "label": "Link · pakketkaart", "default": "Wijzig in winkelwagen" },
-    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De korting van de eerste 3 maanden rekent u vandaag ineens af, naast de installatiekosten. Uw maandbedrag zelf verandert niet. Alle bedragen zijn inclusief btw (21%)." },
+    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De eerste 3 maanden van uw pakket betaalt u vandaag vooruit, met 50% korting, samen met de eventuele installatiekosten. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%)." },
     { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
     { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
-    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eenmalige kosten voor activatie en installatie plus de vooruitbetaalde korting voor de eerste 3 maanden, via de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eventuele installatiekosten en de eerste 3 maanden van uw pakket vooruit, met 50% korting, via onze beveiligde betaalomgeving." },
     { "type": "text", "id": "consent_prefix", "label": "Akkoordtekst · voor de link", "default": "Ik ga akkoord met de", "info": "Gevolgd door een vaste link naar de Algemene Voorwaarden." },
     { "type": "text", "id": "consent_middle", "label": "Akkoordtekst · na de link (met pakket)", "default": ", de contractduur van", "info": "Gevolgd door de contractduur van het pakket, in maanden." },
     { "type": "text", "id": "consent_suffix", "label": "Akkoordtekst · slot", "default": "en de betaalplicht." },
     { "type": "text", "id": "checkout_button_label", "label": "Knoptekst · afrekenen", "default": "Verder naar veilig afrekenen" },
-    { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in onze beveiligde betaalomgeving." },
     { "type": "text", "id": "continue_shopping_label", "label": "Knoptekst · verder winkelen", "default": "← Verder winkelen" }
   ]
 }
