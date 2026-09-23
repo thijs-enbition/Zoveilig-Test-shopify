@@ -1,0 +1,23 @@
+{%- comment -%}
+  finder_key -> the variant id of that package's prepaid "Eerste 3 maanden" promo product
+  (pricing.config.json packages[].promoProduct), single place so every add-to-cart surface
+  resolves it the same way instead of carrying its own copy of the mapping.
+
+  Under the prepaid line-item model the plain package product is never added to the cart;
+  its promo line is what goes in instead, and that line is also the cart-side package
+  identity anchor the cart/Overzicht pages read (see CLAUDE.md Pricing pipeline). Same
+  shape and conventions as zv-package-monthly-cents.liquid.
+
+  Params: finder_key, inzicht/zeker/beschermd/alert/protect (the resolved variant ids -
+  caller passes these since `render` doesn't inherit the caller's scope; each is resolved
+  from all_products[zv_<pkg>_promo_handle], never a hardcoded id). Outputs the matching
+  variant id with no surrounding whitespace, or nothing if finder_key is blank or has no
+  promo product (e.g. Vista, Veilig Onderweg - unpriced, not purchasable).
+{%- endcomment -%}
+{%- case finder_key -%}
+  {%- when 'aware' -%}{{ inzicht }}
+  {%- when 'aware_plus' -%}{{ zeker }}
+  {%- when 'care' -%}{{ beschermd }}
+  {%- when 'secure' -%}{{ alert }}
+  {%- when 'guard' -%}{{ protect }}
+{%- endcase -%}

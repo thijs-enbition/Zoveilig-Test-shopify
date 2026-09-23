@@ -478,13 +478,38 @@
               {%- when 'variant_picker' -%}
                 {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
               {%- when 'buy_buttons' -%}
-                {%- render 'buy-buttons',
-                  block: block,
-                  product: product,
-                  product_form_id: product_form_id,
-                  section_id: section.id,
-                  show_pickup_availability: true
-                -%}
+                {%- comment -%}
+                  A package, and its prepaid "Eerste 3 maanden" line, are never bought from
+                  their own product page: a package purchase has to go through Oplossingen,
+                  which adds the promo line together with an installation choice (see
+                  CLAUDE.md, Pricing pipeline). Buying the package product directly would
+                  charge its monthly rate today with no installation fee and no promo line,
+                  and Overzicht would have nothing to identify the package by. Both kinds of
+                  product carry custom.finder_key and nothing else in the catalog does, so
+                  that single test covers both. The products stay published — the theme's
+                  all_products[...] lookups depend on it — they just can't be bought here.
+                {%- endcomment -%}
+                {%- assign zv_finder_key = product.metafields.custom.finder_key.value -%}
+                {%- if zv_finder_key != blank -%}
+                  <div class="product-form">
+                    <div class="product-form__buttons">
+                      <a
+                        href="{% render 'zv-route', key: 'pakket', pakket: zv_finder_key %}"
+                        class="product-form__submit button button--full-width button--primary"
+                      >
+                        Kies uw pakket
+                      </a>
+                    </div>
+                  </div>
+                {%- else -%}
+                  {%- render 'buy-buttons',
+                    block: block,
+                    product: product,
+                    product_form_id: product_form_id,
+                    section_id: section.id,
+                    show_pickup_availability: true
+                  -%}
+                {%- endif -%}
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">

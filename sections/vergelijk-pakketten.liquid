@@ -17,6 +17,16 @@
 <script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
+{%- comment -%}
+  Prepaid "Eerste 3 maanden" promo products (pricing.config.json packages[].promoProduct),
+  resolved by handle like the activation fee above. Add-to-cart adds a package's promo line
+  in place of the plain package product — see CLAUDE.md Pricing pipeline.
+{%- endcomment -%}
+{%- assign promo_inzicht_variant_id = all_products[zv_inzicht_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_zeker_variant_id = all_products[zv_zeker_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id -%}
 {%- liquid
   assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   assign opl = '/pages/oplossingen'
@@ -57,6 +67,11 @@
       tagline_zeker: section.settings.tagline_zeker,
       tagline_beschermd: section.settings.tagline_beschermd,
       activation_variant_id: activation_variant_id,
+      promo_inzicht_variant_id: promo_inzicht_variant_id,
+      promo_zeker_variant_id: promo_zeker_variant_id,
+      promo_beschermd_variant_id: promo_beschermd_variant_id,
+      promo_alert_variant_id: promo_alert_variant_id,
+      promo_protect_variant_id: promo_protect_variant_id,
       zv_inzicht_monthly: zv_inzicht_monthly,
       zv_zeker_monthly: zv_zeker_monthly,
       zv_beschermd_monthly: zv_beschermd_monthly,

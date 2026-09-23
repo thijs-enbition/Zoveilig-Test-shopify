@@ -5,14 +5,15 @@ Zo Veilig pricing checks (v3 intro-promo model). Exits non-zero on failure to ga
 Covers:
   1 monthly price consistency (single source of truth)
   2 activation price consistency
-  3 today's payment (activation only) + intro promo maths
-  4 contract duration
-  5 indicative contract value (activation + monthly*term - promo)
-  6 add-on prices
-  7 analytics purchase value
-  8 no retired or superseded value appears in a theme file
-  9 no theme file carries an independent price or duration
- 10 commercial pricing status
+  3 today's payment (install choice) + intro promo maths
+  4 due today per install option (install + promo add-on), all 8 combinations
+  5 contract duration
+  6 indicative contract value (activation + monthly*term - promo)
+  7 add-on prices
+  8 analytics purchase value
+  9 no retired or superseded value appears in a theme file
+ 10 no theme file carries an independent price or duration
+ 11 commercial pricing status
 
 Run:  python3 scripts/check_pricing.py
 """
@@ -75,27 +76,32 @@ check(len({p["activationPriceCents"] for p in priced}) == 1,
 check(all(p["activationPriceCents"] == activation for p in priced),
       "every package uses the central activation value")
 
-print("\n3. Today's payment (activation only) + intro promo")
+print("\n3. Today's payment (install choice) + intro promo")
 cfg_promo_enabled = bool(cfg["promo"].get("enabled", True))
+promo_active = bool(cfg["promo"].get("enabled")) and promo_rate > 0
 for p in priced:
     m = p["monthlyRecurringPriceCents"]
-    exp_promo_monthly = half_up(Decimal(m) * (Decimal(1) - promo_rate)) if cfg_promo_enabled else m
     exp_promo_disc = half_up(Decimal(promo_months) * Decimal(m) * promo_rate) if cfg_promo_enabled else 0
-    check(p["initialPaymentDueTodayCents"] == activation,
-          f"{p['name']} due today = activation only",
-          f"got {p['initialPaymentDueTodayCents']} expected {activation}")
-    check(p["promoMonthlyCents"] == exp_promo_monthly,
-          f"{p['name']} promo monthly = monthly x (1 - rate) (half-up)",
-          f"got {p['promoMonthlyCents']} expected {exp_promo_monthly}")
     check(p["promoDiscountTotalCents"] == exp_promo_disc,
           f"{p['name']} promo discount = months x monthly x rate (half-up)",
           f"got {p['promoDiscountTotalCents']} expected {exp_promo_disc}")
+    # promoWas is the undiscounted worth of the prepaid period - the struck-through
+    # figure on the actie page. A 3-month total, never a monthly rate.
+    exp_promo_was = m * promo_months if cfg_promo_enabled else 0
+    check(p["promoWasCents"] == exp_promo_was,
+          f"{p['name']} promo was = monthly x months",
+          f"got {p['promoWasCents']} expected {exp_promo_was}")
+    if promo_active:
+        check(p["promoDiscountTotalCents"] > 0,
+              f"{p['name']} promo add-on is a positive charge, never a discount on installation")
+        check(p["promoWasCents"] > p["promoDiscountTotalCents"],
+              f"{p['name']} promo was exceeds what's actually charged",
+              f"was={p['promoWasCents']} charged={p['promoDiscountTotalCents']}")
 check(half_up(Decimal("3742.5")) == 3743,
       "rounding is half-up, not banker's", "1.5 x 2495 must give 3743")
 check(cfg["rounding"]["method"] == "ROUND_HALF_UP", "config declares ROUND_HALF_UP")
 check(cfg["commitment"].get("retired") is True,
       "the 1.5x commitment is marked retired (superseded by promo)")
-promo_active = bool(cfg["promo"].get("enabled")) and promo_rate > 0
 check(gen["promo"]["active"] == promo_active,
       "generated promo.active matches enabled AND rate > 0",
       f"got {gen['promo']['active']} expected {promo_active}")
@@ -104,10 +110,50 @@ if not promo_active:
         check(p["promoDiscountTotalCents"] == 0,
               f"{p['name']} promo discount is 0 while promo is inactive",
               f"got {p['promoDiscountTotalCents']}")
-        check(p["promoMonthlyCents"] == p["monthlyRecurringPriceCents"],
-              f"{p['name']} promo monthly equals full monthly while promo is inactive")
 
-print("\n4. Contract duration")
+for p in priced:
+    check("promoMonthlyCents" not in p,
+          f"{p['name']} carries no retired promoMonthly figure",
+          "the discounted-monthly-rate concept is retired; nothing may render it")
+
+print("\n4. Due today per install option (install + promo add-on)")
+# The 8 combinations confirmed against kosten.xlsx (Thijs, 2026-09-22): installation is
+# NEVER discounted, at any tier; the promo is a separate, always-positive add-on.
+# due_today = install_option_cents + promoDiscountTotalCents. No negative-value case
+# exists (Geen installatie / Telefonisch never need capping), so none is checked for.
+EXPECTED_DUE_TODAY_CENTS = {
+    "inzicht": {"geen": 2993, "telefonisch": 6493, "huis": 12893},
+    "zeker": {"geen": 3743, "telefonisch": 7243, "huis": 13643},
+    "beschermd": {"huis": 15893},
+    "alert": {"geen": 2993, "telefonisch": 6493, "huis": 12893},
+    "protect": {"huis": 15143},
+}
+by_id = {p["id"]: p for p in priced}
+for pkg_id, expected_options in EXPECTED_DUE_TODAY_CENTS.items():
+    p = by_id[pkg_id]
+    due_today = p.get("dueToday", {})
+    check(set(due_today.keys()) == set(expected_options.keys()),
+          f"{p['name']} offers exactly the expected install options",
+          f"got {sorted(due_today.keys())} expected {sorted(expected_options.keys())}")
+    for opt_id, exp_cents in expected_options.items():
+        got = due_today.get(opt_id, {}).get("amountCents")
+        check(got == exp_cents,
+              f"{p['name']} dueToday.{opt_id} = install + promo add-on",
+              f"got {got} expected {exp_cents}")
+    if p["installGroup"] == "nami":
+        for opt_id, exp_cents in expected_options.items():
+            install_cents = next(o["amountCents"] for o in gen["installationOptions"]["nami"]["options"] if o["id"] == opt_id)
+            check(due_today[opt_id]["amountCents"] == install_cents + p["promoDiscountTotalCents"],
+                  f"{p['name']} dueToday.{opt_id} = install_option.amountCents + promoDiscountTotalCents")
+    else:
+        check(due_today["huis"]["amountCents"] == activation + p["promoDiscountTotalCents"],
+              f"{p['name']} dueToday.huis = activation + promoDiscountTotalCents")
+    check(p["promoProduct"]["productHandle"] not in (None, ""),
+          f"{p['name']} has a promo product handle configured")
+    check(p["promoProduct"]["sku"] not in (None, ""),
+          f"{p['name']} has a promo product SKU configured")
+
+print("\n5. Contract duration")
 check(cfg["contract"]["defaultTermMonths"] == 36, "default term is 36 months")
 enabled = [o["months"] for o in cfg["contract"]["options"] if o["enabled"]]
 check(set(enabled) == {12, 36}, "12 and 36 are commercially enabled", f"enabled={enabled}")
@@ -117,7 +163,7 @@ for p in priced:
     check(p["termMonths"] in enabled,
           f"{p['name']} term is commercially enabled", f"got {p['termMonths']}")
 
-print("\n5. Indicative contract value")
+print("\n6. Indicative contract value")
 for p in priced:
     m = p["monthlyRecurringPriceCents"]
     icv = p["indicativeContractValue"]
@@ -127,7 +173,7 @@ for p in priced:
           f"got {icv['cents']} expected {exp_icv}")
     check(icv["cents"] > 0, f"{p['name']} ICV positive")
 
-print("\n6. Add-on prices")
+print("\n7. Add-on prices")
 addons = {a["id"]: a for a in gen["addons"]}
 check(addons["alarmcom-domotica"]["priceCents"] == 400,
       "Domotica is EUR 4,00", f"got {addons['alarmcom-domotica']['priceCents']}")
@@ -142,12 +188,15 @@ check(bundles["camera-deurbel"]["priceWasCents"] == 1990
 for bid in ("volledig-gerust", "zorg-opvolging"):
     check(bundles[bid]["priceWasCents"] is None, f"{bid} has no unverified was-price")
 
-print("\n7. Analytics purchase value")
+print("\n8. Analytics purchase value")
 ta = cfg["tracking"]["momentA"]
 check(ta["valueSource"] == "initialPaymentDueToday", "Moment A value is initialPaymentDueToday")
 for p in priced:
-    check(p["initialPaymentDueTodayCents"] == activation,
-          f"{p['name']} Moment A equals what Shopify collects (activation)")
+    # initialPaymentDueTodayCents is the default/fallback figure (huis, i.e. before any
+    # cheaper NAMI option is chosen) - matches dueToday.huis exactly, which always equals
+    # activation + promo (NAMI's 'huis' option is priced identically to activation, 9900).
+    check(p["initialPaymentDueTodayCents"] == activation + p["promoDiscountTotalCents"],
+          f"{p['name']} Moment A default (huis) equals activation + promo add-on")
 for param in ("monthlyRecurringPrice", "indicativeContractValue"):
     check(param in ta["extraParams"], f"Moment A sends {param} as a separate parameter")
 check(cfg["tracking"]["momentB"]["valueSource"] == "indicativeContractValue",
@@ -155,7 +204,7 @@ check(cfg["tracking"]["momentB"]["valueSource"] == "indicativeContractValue",
 check(cfg["tracking"]["momentB"]["status"] == "BLOCKED_PENDING_ODOO",
       "Moment B marked blocked until Odoo confirms")
 
-print("\n8. Retired and superseded values absent from theme")
+print("\n9. Retired and superseded values absent from theme")
 scan_files = [p for d in THEME_DIRS for p in (ROOT / d).rglob("*")
               if p.is_file() and p.suffix in {".liquid", ".json", ".css", ".js"}
               and "zv-pricing.liquid" not in p.name]
@@ -172,7 +221,7 @@ for label, pat in retired_patterns.items():
             if re.search(pat, f.read_text(encoding="utf-8", errors="ignore"))]
     check(not hits, f"'{label}' absent from theme", f"found in {hits}")
 
-print("\n9. No independent prices or durations in theme")
+print("\n10. No independent prices or durations in theme")
 # Guards the pricing SURFACES (cards, cart, checkout, configurator) against
 # hardcoded money/terms that should come from zv-pricing.liquid. Purely editorial
 # content templates legitimately mention durations in prose (contract pause periods,
@@ -196,7 +245,7 @@ for f in scan_files:
 if not independent:
     check(True, "no pricing surface carries an independent price or duration")
 
-print("\n10. Commercial pricing status (confirmed vs provisional)")
+print("\n11. Commercial pricing status (confirmed vs provisional)")
 KNOWN_STATUSES = {"CURRENT_WORKING", "PRICE_PENDING", "COMMERCIALLY_CONFIRMED"}
 for p in gen["packages"]:
     st = p.get("pricingStatus")
