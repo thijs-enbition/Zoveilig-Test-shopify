@@ -47,9 +47,11 @@
                             (never a literal amount — see scripts/check_pricing.py check #9).
                             Leave
                             `unit` empty for a non-recurring price (Vista's "Op maat" has no
-                            "/mnd"). Order = tie-break precedence, ascending (see `recommend()`
-                            in the JS — the LAST package in this list wins a tie against any
-                            earlier one, same convention as today's inzicht<zeker<beschermd).
+                            "/mnd"). Order = tier, ascending (see `recommend()` in the JS: a
+                            scenario's `package` is the lowest tier that has it, and the
+                            advice is the highest of those tiers among the selected cards,
+                            i.e. the smallest package that covers all of them — same
+                            convention as today's inzicht<zeker<beschermd).
                             Also drives the feature-table's column order and the JS's
                             per-instance TIER/NAMES maps (emitted as data attributes, so two
                             matcher instances with different package vocabularies can coexist
@@ -74,8 +76,9 @@
                             sense). Such a package's "Kies X" is always a plain link to
                             `lead_url` (ignoring `embedded`), and — this is the important
                             part, see recommend() — it can only ever WIN the recommendation
-                            by strictly outscoring every other package; a tie involving it
-                            excludes it and falls back to the ordinary rule among the rest.
+                            when more of its cards are selected than of any other package; a
+                            tie involving it excludes it and falls back to the ordinary
+                            highest-selected-tier rule among the rest.
                             Default '' (no such package — Langer Thuis has none).
     lead_url                href for a lead_only_pkgs package's "Kies X" AND for the advice
                             bar's own CTA when that package is the live recommendation (see

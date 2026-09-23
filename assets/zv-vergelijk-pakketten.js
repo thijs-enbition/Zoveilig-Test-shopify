@@ -10,8 +10,9 @@
    Generalization added two per-instance concepts, both read from [data-pm-root] attributes
    the Liquid snippet emits (defaults reproduce the original Langer Thuis-only behavior when
    a caller doesn't emit them, so nothing here changed for that call site):
-     data-pm-tier / data-pm-names  "id:value,id:value,…" — tie-break precedence (higher wins
-                                    a tie) and display-name maps, in place of the old hardcoded
+     data-pm-tier / data-pm-names  "id:value,id:value,…" — tier order (the recommendation is
+                                    the highest tier among the selected cards, see recommend())
+                                    and display-name maps, in place of the old hardcoded
                                     { inzicht: 1, zeker: 2, beschermd: 3 } / … NAMES object.
      data-pm-lead-pkgs / -lead-url a comma list of package ids that have no cart action (e.g.
                                     Mijn Thuis's Vista — no fixed price, no purchasable variant
@@ -89,25 +90,35 @@
       return td ? td.textContent.trim() : '';
     }
 
+    /* Recommends the smallest package that covers ALL selected scenarios. A card's
+       data-pm-pkg is the LOWEST tier that has that scenario (see the scenario blocks'
+       `package` setting), so the answer is the highest of those minimum tiers among the
+       selected cards (TIER order, e.g. inzicht < zeker < beschermd). A card whose package
+       is blank or not in TIER is ignored; a selection of only such cards counts as empty.
+       Returns null when nothing (known) is selected. */
     function recommend() {
       var score = {};
-      cards.forEach(function (c) { score[c.getAttribute('data-pm-pkg')] = 0; });
+      cards.forEach(function (c) {
+        var p = c.getAttribute('data-pm-pkg');
+        if (TIER.hasOwnProperty(p)) score[p] = 0;
+      });
       var any = false;
       cards.forEach(function (c) {
-        if (c.getAttribute('aria-pressed') === 'true') {
-          score[c.getAttribute('data-pm-pkg')] += 1;
+        var p = c.getAttribute('data-pm-pkg');
+        if (c.getAttribute('aria-pressed') === 'true' && score.hasOwnProperty(p)) {
+          score[p] += 1;
           any = true;
         }
       });
       if (!any) return null;
 
       /* A leadPkgs package (no cart action — see the file header) may only win by an
-         outright majority: strictly higher than every other scored package. If it doesn't
-         clear that bar it's removed from consideration entirely for this call — a tie
-         involving it never lets it win — and the remaining packages fall back to the
-         ordinary highest-score/higher-tier-wins-a-tie rule below. leadPkgs is empty for
-         Langer Thuis, so this is a no-op there: `outright` stays null and `eligible`
-         is every scored package, same as before generalization. */
+         outright majority: strictly more selected cards than every other package. If it
+         doesn't clear that bar it's removed from consideration entirely for this call — a
+         tie involving it never lets it win — and the remaining packages fall back to the
+         highest-selected-tier rule below. This is the only place the per-package card
+         count still matters. leadPkgs is empty for Langer Thuis, so this is a no-op there:
+         `outright` stays null and `eligible` is every known package. */
       var ids = Object.keys(score);
       var outright = null;
       leadPkgs.forEach(function (lp) {
@@ -120,8 +131,14 @@
       var eligible = ids.filter(function (p) { return leadPkgs.indexOf(p) === -1; });
       var best = null;
       eligible.forEach(function (p) {
-        if (best === null || score[p] > score[best] || (score[p] === score[best] && TIER[p] > TIER[best])) best = p;
+        if (score[p] > 0 && (best === null || TIER[p] > TIER[best])) best = p;
       });
+      /* Only reachable if every selected card belongs to a leadPkgs package that didn't
+         win outright (not possible with one lead package): keep the old all-zero-tie
+         result, the highest-tier eligible package. */
+      if (best === null) {
+        eligible.forEach(function (p) { if (best === null || TIER[p] > TIER[best]) best = p; });
+      }
       return best;
     }
 
