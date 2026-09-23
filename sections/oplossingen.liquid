@@ -143,27 +143,8 @@
             </div>
           </div>
         {%- elsif coll and coll.products.size > 0 -%}
-          {%- comment -%}
-            Card order comes from pricing.config.json's packages[] (zv_package_order_fks,
-            emitted by build_pricing.py), never the collection's own manual sort. Odoo's
-            product sync appends a new/replacement product to the END of a collection
-            (confirmed 2026-09-23: it did this to Inzicht and Alert), which would otherwise
-            silently reorder these cards. A product whose finder_key isn't in that list
-            (an archived -oud- product, anything unexpected) is skipped; data-n below
-            counts only the cards that actually render.
-          {%- endcomment -%}
-          {%- assign opl_order_fks = zv_package_order_fks | split: '|' -%}
-          {%- assign opl_ordered_products = '' | split: ',' -%}
-          {%- for opl_want_fk in opl_order_fks -%}
-            {%- for opl_cp in coll.products -%}
-              {%- if opl_cp.metafields.custom.finder_key.value == opl_want_fk -%}
-                {%- assign opl_match = coll.products | slice: forloop.index0, 1 -%}
-                {%- assign opl_ordered_products = opl_ordered_products | concat: opl_match -%}
-              {%- endif -%}
-            {%- endfor -%}
-          {%- endfor -%}
-          <div class="pgrid" data-n="{{ opl_ordered_products.size }}" data-anchor="{{ anchor }}">
-            {%- for p in opl_ordered_products -%}
+          <div class="pgrid" data-n="{{ coll.products.size }}" data-anchor="{{ anchor }}">
+            {%- for p in coll.products -%}
               {%- assign fk = p.metafields.custom.finder_key.value -%}
               {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}{%- assign term = '' -%}
               {%- case fk -%}
@@ -464,7 +445,6 @@
           scenarios: matcher_scenarios,
           activation_variant_id: activation_variant_id,
           package_names: zv_package_names_by_fk,
-          package_order_fks: zv_package_order_fks,
           zv_inzicht_monthly: zv_inzicht_monthly,
           zv_zeker_monthly: zv_zeker_monthly,
           zv_beschermd_monthly: zv_beschermd_monthly,
@@ -502,7 +482,6 @@
           collection: 'mijn-thuis',
           activation_variant_id: activation_variant_id,
           package_names: zv_package_names_by_fk,
-          package_order_fks: zv_package_order_fks,
           pkg_meta: mt_pkg_meta,
           recommended_pkg: 'guard',
           finder_key_map: 'secure:secure,guard:guard,secure_plus:secure_plus',
