@@ -100,6 +100,16 @@ sold products**: `custom.finder_key` on all 5 packages (`aware` / `aware_plus` /
 `secure` / `guard`) and `inventoryItem.tracked == false` on every package and installation
 product. Fixing either is a product change — flag it to Thijs, never make it from here.
 
+**Package order is set by pricing.config.json, never by collection order — Odoo swaps
+append new products to the end of collections.** Confirmed 2026-09-23: the Inzicht/Alert
+swap above appended the new products to the end of `langer-thuis`/`mijn-thuis`, which
+would have silently reordered any card grid that just looped `for p in
+collection.products`. Every such surface (`sections/oplossingen.liquid`,
+`snippets/zv-pakket-matcher.liquid`, `sections/finder-preview.liquid`) instead orders by
+`zv_package_order_fks` (from `zv-pricing`, derived from `pricing.config.json`'s
+`lines[].packages[]`) and skips any product whose `custom.finder_key` isn't in it. See
+`docs/package-order-config-2026-09-23.md`.
+
 `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` both classify a line item
 as a subscription via `item.product.type == sub_type or item.product.tags contains sub_tag`
 (`sub_type` setting, default `Beveiligingsabonnement`, is the real signal; `sub_tag`, default
