@@ -1,0 +1,20 @@
+{%- comment -%}
+  finder_key -> the package's name from pricing.config.json (Inzicht, Zeker, Beschermd,
+  Alert, Protect, …). The theme shows package names from the config, never the Shopify
+  product title: Odoo's product sync renames products (2026-09-23: "Nami Langer Thuis
+  Zeker") and can do it again. One place, so every surface — Oplossingen cards, the
+  pakket-matcher and its comparison table, the cart drawer, /cart and Overzicht — maps the
+  same way.
+
+  Params: finder_key (the product's custom.finder_key), names (zv_package_names_by_fk from
+  zv-pricing, 'fk:Name|fk:Name|…' — passed in because `render` doesn't inherit the caller's
+  scope). Outputs the name with no surrounding whitespace, or nothing if finder_key is blank
+  or unknown — the caller then falls back to whatever it showed before.
+{%- endcomment -%}
+{%- if finder_key != blank -%}
+  {%- assign zv_pn_pairs = names | split: '|' -%}
+  {%- for zv_pn_pair in zv_pn_pairs -%}
+    {%- assign zv_pn_kv = zv_pn_pair | split: ':' -%}
+    {%- if zv_pn_kv[0] == finder_key -%}{{ zv_pn_kv[1] }}{%- break -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}

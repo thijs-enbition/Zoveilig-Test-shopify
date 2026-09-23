@@ -1,0 +1,20 @@
+{%- comment -%}
+  installation product handle -> its label from pricing.config.json (Geen installatie,
+  Telefonische ondersteuning, Installatie aan huis, and the Climax installation's
+  labels.activation). Same pattern as snippets/zv-package-name.liquid: the theme shows
+  config names, never the Shopify product title (Odoo renames products, e.g. "Nami Geen
+  Instalatie"). Used by /cart and Overzicht; the cart drawer and GA4 use the same names via
+  snippets/zv-item-names.liquid.
+
+  Params: handle (the line's product handle), names (zv_install_names_by_handle from
+  zv-pricing, 'handle:Label|handle:Label|…' — passed in because `render` doesn't inherit the
+  caller's scope). Outputs the label with no surrounding whitespace, or nothing if the handle
+  isn't an installation product — the caller then keeps whatever it showed before.
+{%- endcomment -%}
+{%- if handle != blank -%}
+  {%- assign zv_in_pairs = names | split: '|' -%}
+  {%- for zv_in_pair in zv_in_pairs -%}
+    {%- assign zv_in_kv = zv_in_pair | split: ':' -%}
+    {%- if zv_in_kv[0] == handle -%}{{ zv_in_kv[1] }}{%- break -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
