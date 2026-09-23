@@ -187,10 +187,17 @@ items         DiscountProducts, scoped to 6 PACKAGE products:
 ```
 
 Useful detail the brief didn't have: it is scoped to the **package products only** — not the
-installation products, and not the new promo products. So it cannot double-discount the new
-line items. It still needs disabling, because a package product reaching checkout by any route
-(the standalone product page still sells them) would get 50% off its monthly price, which is
-exactly the behaviour this change replaces.
+installation products, and not the new promo products. So it could not have double-discounted
+the new line items. It still needed disabling, because a package product reaching checkout by
+any route (the standalone product page still sells them) would get 50% off its monthly price,
+which is exactly the behaviour this change replaces.
+
+**Disabled 2026-09-23**, with Thijs's go-ahead in-session. An automatic discount has no status
+field to flip — `status` is derived from `startsAt`/`endsAt` — so it was expired by setting
+`endsAt` to `2026-09-23T07:01:00Z` via `discountAutomaticBasicUpdate`. It now reports
+`status: EXPIRED`, with `asyncUsageCount` still 3 (the orders it already applied to are
+untouched). **To reverse:** set `endsAt` back to `null` on the same discount id; nothing else
+about it was changed.
 
 ## Not done / follow-ups
 
