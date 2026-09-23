@@ -270,8 +270,33 @@
                   {%- if term != blank -%}<div class="ltc__term">Looptijd {{ term }} maanden</div>{%- endif -%}
                   <ul class="ltc__checklist">
                     {%- if ltc_intro != blank -%}<li class="ltc__intro">{{ ltc_intro }}</li>{%- endif -%}
+                    {%- comment -%}
+                      Bullet link marker (2026-09-23): a bullet may contain ONE marker
+                      [tekst](route-key), e.g. 'Nederlandse [meldkamer](kc/hoe-werkt-een-meldkamer) 24/7'.
+                      It renders as a link whose href is only ever the zv-route output for
+                      route-key, so no raw URL or HTML can get in; an unknown key gets
+                      zv-route's usual fallback, like any other zv-route call. The link text
+                      and the text around it are escaped. A bullet without a marker, or one
+                      that does not parse as exactly one marker, renders as escaped plain
+                      text. The text sits in its own span because the li is a flex row: bare
+                      text next to an a element would become separate flex columns.
+                    {%- endcomment -%}
                     {%- for bullet in ltc_bullet_list -%}
-                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
+                      {%- liquid
+                        assign bl_link = false
+                        assign bl_parts = bullet | split: ']('
+                        if bl_parts.size == 2 and bl_parts[1] contains ')'
+                          assign bl_pre = bl_parts[0] | split: '['
+                          assign bl_key = bl_parts[1] | split: ')' | first
+                          if bl_pre.size == 2 and bl_pre[1] != blank and bl_key != blank
+                            assign bl_link = true
+                            assign bl_post = bl_parts[1] | remove_first: bl_key | remove_first: ')'
+                          endif
+                        endif
+                      -%}
+                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>
+                        {%- if bl_link -%}{{ bl_pre[0] | escape }}<a href="{% render 'zv-route', key: bl_key %}">{{ bl_pre[1] | escape }}</a>{{ bl_post | escape }}{%- else -%}{{ bullet | escape }}{%- endif -%}
+                      </span></li>
                     {%- endfor -%}
                   </ul>
                   <hr class="ltc__div">
@@ -787,6 +812,7 @@
 .ltc__checklist li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
+.ltc__checklist a { color: var(--indigo); text-decoration: underline; text-underline-offset: 2px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
