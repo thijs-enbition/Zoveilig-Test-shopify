@@ -29,6 +29,10 @@
                             of linking to opl_url — see assets/zv-vergelijk-pakketten.js's
                             addPackageToCart(). Ignored for a package listed in
                             `lead_only_pkgs` (see below), which is always a plain link.
+    package_names           zv_package_names_by_fk from zv-pricing. Package display names
+                            (products JSON, default pkg_meta) come from it via finder_key,
+                            never the product title. Optional only for backward
+                            compatibility; every caller passes it.
     zv_inzicht_monthly / zv_zeker_monthly / zv_beschermd_monthly, tagline_inzicht /
     tagline_zeker / tagline_beschermd
                             optional. Only used to build the DEFAULT `pkg_meta` (below) when
@@ -98,11 +102,21 @@
   endif
 -%}
 
-{%- comment -%} Default pkg_meta reproduces today's 3 hardcoded Langer Thuis packages exactly {%- endcomment -%}
+{%- comment -%}
+  Default pkg_meta: today's 3 Langer Thuis packages. Their display names come from
+  pricing.config.json via `package_names` (see snippets/zv-package-name.liquid), never the
+  product title; the literal names are only a fallback for a caller that doesn't pass it.
+{%- endcomment -%}
+{%- capture name_inzicht -%}{%- render 'zv-package-name', finder_key: 'aware', names: package_names -%}{%- endcapture -%}
+{%- capture name_zeker -%}{%- render 'zv-package-name', finder_key: 'aware_plus', names: package_names -%}{%- endcapture -%}
+{%- capture name_beschermd -%}{%- render 'zv-package-name', finder_key: 'care', names: package_names -%}{%- endcapture -%}
+{%- assign name_inzicht = name_inzicht | strip | default: 'Inzicht' -%}
+{%- assign name_zeker = name_zeker | strip | default: 'Zeker' -%}
+{%- assign name_beschermd = name_beschermd | strip | default: 'Beschermd' -%}
 {%- assign pkg_meta_str = pkg_meta -%}
 {%- if pkg_meta_str == blank -%}
   {%- capture pkg_meta_str -%}
-    inzicht|Inzicht|{{ zv_inzicht_monthly | remove: ' ' }}|/mnd|{{ tag_inzicht }}§zeker|Zeker|{{ zv_zeker_monthly | remove: ' ' }}|/mnd|{{ tag_zeker }}§beschermd|Beschermd|{{ zv_beschermd_monthly | remove: ' ' }}|/mnd|{{ tag_beschermd }}
+    inzicht|{{ name_inzicht }}|{{ zv_inzicht_monthly | remove: ' ' }}|/mnd|{{ tag_inzicht }}§zeker|{{ name_zeker }}|{{ zv_zeker_monthly | remove: ' ' }}|/mnd|{{ tag_zeker }}§beschermd|{{ name_beschermd }}|{{ zv_beschermd_monthly | remove: ' ' }}|/mnd|{{ tag_beschermd }}
   {%- endcapture -%}
 {%- endif -%}
 {%- assign pkg_meta_arr = pkg_meta_str | strip | split: '§' -%}
@@ -130,17 +144,17 @@
     {%- endfor -%}
     {%- if pid != blank -%}
       {%- assign v = p.selected_or_first_available_variant -%}
-      {%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}
+      {%- capture short_name -%}{%- render 'zv-package-name', finder_key: fk, names: package_names -%}{%- endcapture -%}
+      {%- assign short_name = short_name | strip -%}
+      {%- if short_name == blank -%}{%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}{%- endif -%}
       {%- comment -%}
-        promoVariantId is what add-to-cart actually adds: the package's prepaid "Eerste 3
-        maanden" line. variantId stays the package product's own variant, kept for
-        reference/analytics only - the package product itself never enters the cart under
-        this model (see CLAUDE.md Pricing pipeline).
+        variantId is what add-to-cart adds: the real package product, at the promo quantity
+        (the 3 prepaid months, see assets/zv-vergelijk-pakketten.js). handle maps it to its
+        installGroup in the pricing config, which decides whether the Climax installation
+        line is added too (see CLAUDE.md Pricing pipeline).
       {%- endcomment -%}
-      {%- capture pm_promo_variant_id -%}{%- render 'zv-package-promo-variant', finder_key: fk, inzicht: promo_inzicht_variant_id, zeker: promo_zeker_variant_id, beschermd: promo_beschermd_variant_id, alert: promo_alert_variant_id, protect: promo_protect_variant_id -%}{%- endcapture -%}
-      {%- assign pm_promo_variant_id = pm_promo_variant_id | strip -%}
       {%- unless first %},{% endunless -%}{%- assign first = false -%}
-      {{ pid | json }}:{"variantId":{{ v.id | json }},"promoVariantId":{{ pm_promo_variant_id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
+      {{ pid | json }}:{"variantId":{{ v.id | json }},"handle":{{ p.handle | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
     {%- endif -%}
   {%- endfor -%}
   }
