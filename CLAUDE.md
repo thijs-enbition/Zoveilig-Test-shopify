@@ -108,7 +108,11 @@ collection.products`. Every such surface (`sections/oplossingen.liquid`,
 `snippets/zv-pakket-matcher.liquid`, `sections/finder-preview.liquid`) instead orders by
 `zv_package_order_fks` (from `zv-pricing`, derived from `pricing.config.json`'s
 `lines[].packages[]`) and skips any product whose `custom.finder_key` isn't in it. See
-`docs/package-order-config-2026-09-23.md`.
+`docs/package-order-config-2026-09-23.md`. Those three consumers were reverted in PR #96
+on 2026-09-23 and no longer read `zv_package_order_fks`, so the ordering described above
+is not live behavior; the build/check side (`scripts/build_pricing.py` and
+`scripts/check_pricing.py` emitting and checking `packageOrder` and
+`zv_package_order_fks`) was kept on purpose.
 
 `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` both classify a line item
 as a subscription via `item.product.type == sub_type or item.product.tags contains sub_tag`
