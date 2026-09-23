@@ -36,6 +36,9 @@
   - cart_pkg_undiscounted: a package line that carries no discount at all (e.g. the Shopify
     discount was deactivated). The guard can't fix that, and a customer must never pay 3
     full months, so checkout stays blocked with a contact message instead.
+  The gate reflects the cart at render time, so on click the button also re-reads /cart.js
+  and reloads this page instead of navigating to /checkout when the cart no longer matches
+  data-cart-sig or zv-cart-guard's rules (window.zvCartGuard.planFix) find a fix.
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
@@ -248,7 +251,7 @@
   {%- capture consent_html -%}{{ consent_prefix }} <a href="{{ av_url }}" target="_blank" rel="noopener">Algemene Voorwaarden</a>, {{ privacy_html }} {{ consent_suffix }}{%- endcapture -%}
 {%- endif -%}
 
-<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}{% if cart_checkout_blocked %} data-needs-activation{% endif %}>
+<div class="zv-overzicht" data-zv-overzicht{% if cart.item_count == 0 %} data-cart-empty{% endif %}{% if cart_checkout_blocked %} data-needs-activation{% endif %} data-cart-sig="{% for item in cart.items %}{{ item.key | escape }}:{{ item.quantity }},{% endfor %}">
   <section class="ovbar">
     <div class="wrap">
       <div class="ovbar-top">
@@ -577,6 +580,23 @@
       });
     }
 
+    // Re-check on click, right before leaving for Shopify's checkout. This page and its
+    // server-side gate show the cart as it was at render time; another tab, the drawer or a
+    // restored (bfcache) page can have changed it since. Fetch /cart.js again: if its lines
+    // differ from the ones rendered here (data-cart-sig, line key:quantity) or the cart
+    // guard's own rules (window.zvCartGuard.planFix) find something to fix, reload Overzicht
+    // so the guard and the gate run on the real cart, instead of navigating. Without the
+    // guard (it renders nothing when zv_promo_package_qty is 0) only the signature is checked.
+    function sigOf(parts) { return parts.filter(Boolean).sort().join(','); }
+    var renderedSig = sigOf((root.getAttribute('data-cart-sig') || '').split(','));
+    function freshCartNeedsReload(cart) {
+      var items = (cart && cart.items) || [];
+      var sig = sigOf(items.map(function (it) { return it.key + ':' + it.quantity; }));
+      if (sig !== renderedSig) return true;
+      var guard = window.zvCartGuard;
+      return !!(guard && guard.planFix(cart));
+    }
+
     checkbox.addEventListener('change', function () {
       btn.disabled = needsActivation || !checkbox.checked;
       btn.setAttribute('aria-disabled', btn.disabled ? 'true' : 'false');
@@ -588,18 +608,23 @@
       btn.disabled = true;
       btn.setAttribute('aria-disabled', 'true');
       if (err) err.hidden = true;
-      window.fetch('/cart/update.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          attributes: {
-            av_akkoord: 'ja',
-            av_akkoord_tijdstip: new Date().toISOString()
-          }
-        })
-      })
+      window.fetch('/cart.js', { cache: 'no-store' })
         .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
-        .then(function () { window.location.href = '/checkout'; })
+        .then(function (cart) {
+          if (freshCartNeedsReload(cart)) { window.location.reload(); return; }
+          return window.fetch('/cart/update.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              attributes: {
+                av_akkoord: 'ja',
+                av_akkoord_tijdstip: new Date().toISOString()
+              }
+            })
+          })
+            .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+            .then(function () { window.location.href = '/checkout'; });
+        })
         .catch(function () {
           if (err) { err.hidden = false; err.textContent = 'Er ging iets mis. Probeer het opnieuw.'; }
           btn.disabled = false;
