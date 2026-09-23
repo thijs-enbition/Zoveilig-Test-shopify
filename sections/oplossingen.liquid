@@ -33,18 +33,6 @@
 
 {%- include 'zv-pricing' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
-{%- comment -%}
-  Prepaid "Eerste 3 maanden" promo products, one per package (pricing.config.json
-  packages[].promoProduct) — resolved by handle, never a hardcoded variant id, same
-  pattern as the activation fee above. Add-to-cart adds a package's promo line in place
-  of the plain package product, which is never added to the cart under this model; see
-  CLAUDE.md Pricing pipeline and the shared addToCart() below.
-{%- endcomment -%}
-{%- assign promo_inzicht_variant_id = all_products[zv_inzicht_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_zeker_variant_id = all_products[zv_zeker_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id -%}
 {%- assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order' -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 {%- comment -%}
@@ -193,8 +181,6 @@
               {%- comment -%} Vista (MT-VIS / secure_plus) is callout-only (maatwerk): geen vaste prijs, geen koop-accordions, alleen de VISTA Lead callback. {%- endcomment -%}
               {%- assign is_vista = false -%}{%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}{%- assign is_vista = true -%}{%- assign price_known = false -%}{%- endif -%}
               {%- assign short_name = p.title | remove_first: b.settings.eyebrow | strip -%}
-              {%- capture promo_variant_id -%}{%- render 'zv-package-promo-variant', finder_key: fk, inzicht: promo_inzicht_variant_id, zeker: promo_zeker_variant_id, beschermd: promo_beschermd_variant_id, alert: promo_alert_variant_id, protect: promo_protect_variant_id -%}{%- endcapture -%}
-              {%- assign promo_variant_id = promo_variant_id | strip -%}
               {%- comment -%}
                 Card-grid redesign (2026-09-11 Langer Thuis, extended 2026-09-14 to Mijn
                 Thuis Alert/Protect — see docs/mijn-thuis-card-redesign-research-2026-09-14.md):
@@ -268,7 +254,7 @@
                 <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
-                         data-finder-key="{{ fk }}" data-promo-variant-id="{{ promo_variant_id }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
                          data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
                   {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
                   <div class="ltc__head">
@@ -371,7 +357,7 @@
                 <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
-                         data-finder-key="{{ fk }}" data-promo-variant-id="{{ promo_variant_id }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
+                         data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
                          data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
                   {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
                   {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
@@ -455,11 +441,6 @@
         {%- render 'zv-pakket-matcher',
           scenarios: matcher_scenarios,
           activation_variant_id: activation_variant_id,
-          promo_inzicht_variant_id: promo_inzicht_variant_id,
-          promo_zeker_variant_id: promo_zeker_variant_id,
-          promo_beschermd_variant_id: promo_beschermd_variant_id,
-          promo_alert_variant_id: promo_alert_variant_id,
-          promo_protect_variant_id: promo_protect_variant_id,
           zv_inzicht_monthly: zv_inzicht_monthly,
           zv_zeker_monthly: zv_zeker_monthly,
           zv_beschermd_monthly: zv_beschermd_monthly,
@@ -496,11 +477,6 @@
           scenarios: matcher_scenarios_mt,
           collection: 'mijn-thuis',
           activation_variant_id: activation_variant_id,
-          promo_inzicht_variant_id: promo_inzicht_variant_id,
-          promo_zeker_variant_id: promo_zeker_variant_id,
-          promo_beschermd_variant_id: promo_beschermd_variant_id,
-          promo_alert_variant_id: promo_alert_variant_id,
-          promo_protect_variant_id: promo_protect_variant_id,
           pkg_meta: mt_pkg_meta,
           recommended_pkg: 'guard',
           finder_key_map: 'secure:secure,guard:guard,secure_plus:secure_plus',
@@ -1222,38 +1198,33 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   /* One-time Climax installation variant (see pricing.config.json
      activation.productHandle/sku), resolved server-side into a data attribute — never
      a hardcoded id here. Added alongside a CLIMAX package only (never a NAMI one), and
-     only once: checks the live cart first so adding a second package or add-on later
-     never charges the fee twice. Returns a Promise<string|null> (the variant id to add,
-     or null if it's missing from the page or already in the cart). */
+     only once: addToCart() checks the live cart first so adding a second package or
+     add-on later never charges the fee twice. */
   var activationVariantId = page.dataset.activationVariantId || null;
   /* Every checkout entry point on this page must land on the Overzicht
      read-only review step (same as the main /cart page), never straight on
      Shopify's own /checkout — Overzicht is where av_akkoord consent is
      captured, so skipping it is a compliance gap, not just a UX shortcut. */
   var overzichtUrl = (page.dataset.cartUrl || '/cart') + '?view=overzicht';
-  function activationLineToAdd() {
-    if (!activationVariantId) return Promise.resolve(null);
-    return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
-      var already = (cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
-      return already ? null : activationVariantId;
-    }).catch(function () { return null; });
-  }
 
   /* GA4 add_to_cart must report the confirmed recurring monthly rate (pricing.config.json,
      read from the #zv-pricing-config JSON script tag the zv-pricing snippet already renders
-     near the top of this section), never the live /cart/add.js line price — once the intro
-     promo is live that live price is a discounted multi-month bundle charged today, not one
-     month. Keyed by finder_key so it works regardless of which call site adds the package. A
-     finder_key with no confirmed monthly rate (e.g. an unrecognized/pending package) falls
-     back to the live line price further down, same convention used elsewhere in the theme. */
-  /* Same finder_key-keyed lookup also carries each package's installGroup ('nami' or
-     'climax'), which decides whether add-to-cart adds the Climax installation line. */
+     near the top of this section), never the live /cart/add.js line price — the package
+     line holds 3 prepaid months at 50%, not one month. Keyed by finder_key so it works
+     regardless of which call site adds the package. A finder_key with no confirmed monthly
+     rate (e.g. an unrecognized/pending package) falls back to the live line price further
+     down, same convention used elsewhere in the theme. The same lookup also carries each
+     package's installGroup ('nami' or 'climax'), which decides whether add-to-cart adds the
+     Climax installation line. PKG_QTY is promo.packageCartQuantity: the package line's
+     quantity, one unit per prepaid month. */
+  var PKG_QTY = 0;
   var PKG_BY_FK = (function () {
     var FK_TO_ID = { aware: 'inzicht', aware_plus: 'zeker', care: 'beschermd', secure: 'alert', guard: 'protect' };
     var byId = {};
     try {
       var el = document.getElementById('zv-pricing-config');
       var cfg = el && JSON.parse(el.textContent || '{}');
+      PKG_QTY = (cfg && cfg.promo && cfg.promo.packageCartQuantity) || 0;
       (cfg && cfg.packages || []).forEach(function (p) {
         if (p && p.id && p.monthlyRecurringPriceCents) byId[p.id] = { monthlyCents: p.monthlyRecurringPriceCents, installGroup: p.installGroup };
       });
@@ -1265,21 +1236,25 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     return byFk;
   })();
 
-  /* What goes in the cart is the package's prepaid "Eerste 3 maanden" promo line, never
-     the plain package product — the monthly rate is billed by Odoo over SEPA and Shopify
-     only ever collects today's amount (installation + promo add-on). The promo variant id
-     is resolved server-side per card (data-promo-variant-id), so a package whose promo
-     product is missing fails closed rather than silently falling back to charging the
-     package's own monthly price today. See CLAUDE.md Pricing pipeline. */
-  function addToCart(promoVariantId, properties, mode, btn, finderKey) {
-    if (!promoVariantId || (btn && btn.dataset.busy === '1')) return;
+  /* A package goes in the cart as the real package product at quantity PKG_QTY (the 3
+     prepaid months); Shopify's automatic "Eerste 3 maanden" discount takes 50% off that
+     line by itself. A CLIMAX package also gets the Climax installation line (qty 1); a
+     NAMI package never does, its installation is chosen on Overzicht. A package that is
+     already in the cart is not added again (that would make it 6 months) — only a missing
+     installation line is. No PKG_QTY (pricing config missing) fails closed: nothing is
+     added. See CLAUDE.md Pricing pipeline. */
+  function addToCart(variantId, properties, mode, btn, finderKey) {
+    if (!variantId || !PKG_QTY || (btn && btn.dataset.busy === '1')) return;
     var label = '';
     if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
     var errEl = btn && btn.parentNode && btn.parentNode.querySelector('.pcard__err'); if (errEl) errEl.remove();
     var isClimax = (PKG_BY_FK[finderKey] || {}).installGroup === 'climax';
-    return (isClimax ? activationLineToAdd() : Promise.resolve(null)).then(function (activationId) {
-      var items = [{ id: promoVariantId, quantity: 1, properties: properties || {} }];
-      if (activationId) items.push({ id: activationId, quantity: 1 });
+    return window.fetch('/cart.js').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (cart) {
+      var inCart = function (id) { return (cart.items || []).some(function (it) { return String(it.variant_id) === String(id); }); };
+      var items = [];
+      if (!inCart(variantId)) items.push({ id: variantId, quantity: PKG_QTY, properties: properties || {} });
+      if (isClimax && activationVariantId && !inCart(activationVariantId)) items.push({ id: activationVariantId, quantity: 1 });
+      if (!items.length) return { ok: true, json: function () { return { items: [] }; } };
       return window.fetch('/cart/add.js', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: items })
@@ -1288,9 +1263,8 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (res) {
         // /cart/add.js always responds { items: [...] } for an items-array POST (one entry
-        // per line added, promo line first) — find that line for analytics, not the
-        // activation-fee line. item_id stays the PACKAGE sku (from properties), not the
-        // promo line's own sku, so add_to_cart keeps identifying the package itself.
+        // per line added, package line first) — find that line for analytics, not the
+        // installation line. item_id is the package SKU (from properties).
         var line = (res && res.items && res.items[0]) || res;
         var ZV = window.ZVMeasurement;
         var staticCents = (PKG_BY_FK[finderKey] || {}).monthlyCents;
@@ -1363,11 +1337,14 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var pkg = p['Pakket'] || it.product_title || 'item';
     var woningOn = !!p['Woning'];
     var isActivation = String(it.variant_id) === String(activationVariantId);
+    // A package line holds the 3 prepaid months (quantity 3); its "/mnd" figure is the
+    // line's UNIT price before the discount — the plain monthly rate — never unit x 3.
+    var shown = isActivation ? it.final_line_price : (it.original_price != null ? it.original_price : it.price);
     return '<li class="addcart__item">' +
       '<div class="addcart__item-head"><div class="addcart__info">' +
         '<span class="addcart__name">' + full + '</span>' +
       '</div><div class="addcart__pricewrap">' +
-        '<span class="addcart__price">' + money(it.price) + (isActivation ? '' : '<span class="per">/mnd</span>') + '</span>' +
+        '<span class="addcart__price">' + money(shown) + (isActivation ? '' : '<span class="per">/mnd</span>') + '</span>' +
         '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
       '</div></div>' +
       (isActivation ? '' :
@@ -1592,7 +1569,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     if (o.woning) props['Woning'] = o.woning;
     if (o.terms.length) props['Abonnement'] = o.terms.join(', ');
     if (o.addons.length) props['Uitbreidingen'] = o.addons.join(', ');
-    addToCart(d.promoVariantId, props, 'drawer', btn, d.finderKey);
+    addToCart(d.variantId, props, 'drawer', btn, d.finderKey);
   });
 
   /* ============================================================
@@ -1778,9 +1755,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         'Bron': 'Oplossingen'
       };
       if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
-      // The card's resolved promo line, not the button's own data-variant (the package
-      // product) — see addToCart() for why the package product never enters the cart.
-      var variant = d.promoVariantId;
+      var variant = actor.getAttribute('data-variant');
       closeModal();   // design closes the detail modal, then shows the cart confirmation
       addToCart(variant, props, buy ? 'checkout' : 'drawer', null, fk);
     }

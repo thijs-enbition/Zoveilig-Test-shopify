@@ -6,7 +6,7 @@
     "decidedOn": "2026-08-17",
     "decidedBy": "Operator commercial decision, 2026-08-17 (intro promo model)",
     "principle": "This file holds INPUTS only. Every derived value (promo monthly, promo discount, amount due today, indicative contract value) is computed once by build_pricing.py and emitted to pricing.generated.json plus snippets/zv-pricing.liquid. No page, cart, configurator, confirmation or analytics event may compute or hardcode a price or duration independently.",
-    "supersedes": "pricing.config.json v2.0.0 (1.5x 'eerste vooruitbetaling' commitment model). The commitment prepayment is retired. Today's payment is the chosen installation option plus a prepaid 'Eerste 3 maanden' line (50% of 3 monthly periods), both collected by Shopify at checkout; the monthly rate is never modified and is billed by Odoo from month 4. This resolves the v2 ODOO_COMMITMENT_TREATMENT blocker."
+    "supersedes": "pricing.config.json v2.0.0 (1.5x 'eerste vooruitbetaling' commitment model). The commitment prepayment is retired. Today's payment is the chosen installation option plus the first 3 months of the package itself, prepaid: the real package product is added to the cart at quantity promo.months (3) and Shopify's automatic 'Eerste 3 maanden' discount takes promo.ratePercent (50%) off that line. Both are collected by Shopify at checkout; the monthly rate is never modified and is billed by Odoo from month 4 (see unresolved ODOO_PROMO_DISCOUNT). This resolves the v2 ODOO_COMMITMENT_TREATMENT blocker."
   },
   "currency": "EUR",
   "rounding": {
@@ -40,7 +40,7 @@
           "amountCents": 0,
           "display": "€ 0,00",
           "productHandle": "geen-installatie-nami",
-          "sku": "020103"
+          "sku": "N0006"
         },
         {
           "id": "telefonisch",
@@ -48,7 +48,7 @@
           "amountCents": 3500,
           "display": "€ 35,00",
           "productHandle": "telefonische-ondersteuning-installatie-nami",
-          "sku": "03012026"
+          "sku": "N0005"
         },
         {
           "id": "huis",
@@ -56,10 +56,10 @@
           "amountCents": 9900,
           "display": "€ 99,00",
           "productHandle": "installatie-nami",
-          "sku": "04012026"
+          "sku": "N0004"
         }
       ],
-      "note": "NAMI-platform packages (Inzicht, Zeker, Alert) let the customer choose one of these three on the Overzicht page in place of the fixed 'activation' fee above; Climax packages (Beschermd, Protect) keep using 'activation' unchanged, no choice offered, no UI change. All three confirmed live in Shopify 2026-09-21 (ACTIVE, published to Online Store, verified via Admin API against zoveiligdev.myshopify.com). PRICES: huis (Installatie aan huis) is €99,00 — Thijs repriced the Shopify product directly on 2026-09-22 and confirmed it's correct, not an accident; this config was updated to match the same day. geen (€0,00) and telefonisch (€35,00) remain Thijs's working default, not confirmed by Odoo — expect adjustment, do not treat as final. See docs/nami-install-choice-2026-09-21.md."
+      "note": "NAMI-platform packages (Inzicht, Zeker, Alert) let the customer choose one of these three on the Overzicht page in place of the fixed 'activation' fee above; Climax packages (Beschermd, Protect) keep using 'activation' unchanged, no choice offered, no UI change. All three confirmed live in Shopify 2026-09-21 (ACTIVE, published to Online Store, verified via Admin API against zoveiligdev.myshopify.com). PRICES: huis (Installatie aan huis) is €99,00 — Thijs repriced the Shopify product directly on 2026-09-22 and confirmed it's correct, not an accident; this config was updated to match the same day. geen (€0,00) and telefonisch (€35,00) remain Thijs's working default, not confirmed by Odoo — expect adjustment, do not treat as final. See docs/nami-install-choice-2026-09-21.md. SKUs (2026-09-23, verified via Admin API): now N0006 (geen), N0005 (telefonisch), N0004 (huis), were 020103 / 03012026 / 04012026; handles unchanged. The old telefonisch product is archived as telefonische-ondersteuning-installatie-nami-oud-03012026."
     }
   },
   "commitment": {
@@ -103,17 +103,17 @@
   "promo": {
     "id": "intro-3-months-50",
     "enabled": true,
-    "enabledNote": "This flag means 'the promo mechanism is a confirmed, computed part of the pricing model' — it's what makes build_pricing.py compute promoMonthly/promoDiscountTotal at all, using the rate/months below. It's NOT the day-to-day on/off switch: whether the promo is actually LIVE on the storefront right now is controlled entirely by the Shopify theme setting `zv_promo_live` (Zo Veilig · Introductiekorting, in config/settings_schema.json), a checkbox Thijs can flip from the theme editor with no code change or redeploy. The 5 promo products exist in Shopify as of 2026-09-22 (see packages[].promoProduct); this setting now only gates the actie page's promo-specific display, since the prepaid line is added to the cart regardless. Only set `enabled` to false here if the promo concept itself is retired for good, not for a temporary pause.",
+    "enabledNote": "This flag means 'the promo mechanism is a confirmed, computed part of the pricing model' — it's what makes build_pricing.py compute promoDiscountTotal/promoWas/dueToday at all, using the rate/months below. It is NOT an on/off switch for the storefront: since 2026-09-23 the only switch is the Shopify automatic discount 'Eerste 3 maanden' itself (Shopify admin, Discounts). The theme setting zv_promo_live that used to gate the actie page was removed the same day. If the discount is ever deactivated, the Overzicht page blocks checkout for any package line that arrives undiscounted (see zv-checkout-overview.liquid), so a customer can never pay 3 full months. Only set `enabled` to false here if the promo concept itself is retired for good.",
     "months": 3,
     "ratePercent": 50,
     "basis": "monthlyRecurringPrice",
-    "collectedVia": "shopify-checkout-prepaid",
+    "collectedVia": "shopify-automatic-discount-on-package-line",
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
     "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%).",
-    "note": "SUPERSEDED 2026-09-22 (kosten.xlsx + Thijs, confirmed against real orders #1014/#1019): this promo is NOT a reduction applied to SEPA instalments. It is collected today, in Shopify, as a separate positive one-time line item (see each package's promoProduct) priced at promoDiscountTotalCents, alongside the chosen installation option (never discounted). The monthly recurring price is never modified anywhere in this flow. 'disclosure' above was rewritten 2026-09-23 (Thijs) to describe this model and is the approved customer-facing wording; the itemized Overzicht breakdown (labels.breakdownIntro/commitment/monthlyAfter) is the other customer-facing explanation. The 'discounted monthly instalment' figure (promoMonthlyCents) that v3 first modelled this as was removed from the generated output on 2026-09-23, once the last consumer was gone; check_pricing.py asserts it stays gone.",
-    "labelCommitmentRepurposed": "labels.commitment was 'Eerste vooruitbetaling' (retired v2 1.5x prepayment label, confirmed unused anywhere in the theme). Repurposed 2026-09-22 as the promo line item's breakdown-row label ('Eerste 3 maanden korting (50%)')."
+    "note": "MODEL (2026-09-23, Thijs): a package purchase is the chosen installation product (qty 1, never discounted) plus the real package product at quantity `months` (3). Shopify's automatic discount 'Eerste 3 maanden' (amount off products, 50%, no end date, does not combine, scope exactly N0001/N0002/N0003/LT-BES/MT-PRO/MT-VIS — nothing to build, never modified from this repo) takes `ratePercent` off that line by itself. The Overzicht breakdown reads that line's real final_line_price. promoDiscountTotalCents is what those 3 prepaid months cost (months x monthly x rate, half-up); Shopify's own rounding of the half-cent cases is recorded in docs/prepay-qty3-2026-09-23.md. The monthly recurring price is never modified anywhere in this flow. SUPERSEDES the 2026-09-22 prepaid PROMO product model (separate per-package promo products), abandoned 2026-09-23: those products were deleted from Shopify because every new Shopify product becomes a stub product in Odoo. 'disclosure' above is the approved customer-facing wording (Thijs, 2026-09-23).",
+    "labelCommitmentNote": "labels.commitment is the breakdown-row suffix for the package line on Overzicht, rendered as '<pakket> × <months> — <labels.commitment>', e.g. 'Zeker × 3 — eerste 3 maanden (50% korting)'. Originally the retired v2 'Eerste vooruitbetaling' label."
   },
   "contract": {
     "defaultTermMonths": 36,
@@ -148,7 +148,7 @@
       "packages": [
         {
           "id": "inzicht",
-          "sku": "LT-INZ",
+          "sku": "N0001",
           "name": "Inzicht",
           "platform": "NAMI aiAware",
           "hook": "Weet dat de dag normaal en veilig is begonnen.",
@@ -160,12 +160,11 @@
           },
           "termMonths": 12,
           "installGroup": "nami",
-          "productHandle": "langer-thuis-inzicht",
-          "promoProduct": { "productHandle": "eerste-3-maanden-inzicht", "sku": "PROMO-INZ" }
+          "productHandle": "langer-thuis-inzicht"
         },
         {
           "id": "zeker",
-          "sku": "LT-ZEK",
+          "sku": "N0002",
           "name": "Zeker",
           "platform": "NAMI aiCare",
           "badge": "Meest gekozen",
@@ -178,8 +177,7 @@
           },
           "termMonths": 12,
           "installGroup": "nami",
-          "productHandle": "langer-thuis-zeker",
-          "promoProduct": { "productHandle": "eerste-3-maanden-zeker", "sku": "PROMO-ZEK" }
+          "productHandle": "langer-thuis-zeker"
         },
         {
           "id": "beschermd",
@@ -195,8 +193,7 @@
           },
           "termMonths": 36,
           "installGroup": "climax",
-          "productHandle": "langer-thuis-beschermd",
-          "promoProduct": { "productHandle": "eerste-3-maanden-beschermd", "sku": "PROMO-BES" }
+          "productHandle": "langer-thuis-beschermd"
         }
       ]
     },
@@ -205,24 +202,24 @@
       "displayName": "Mijn Thuis",
       "cat": "security",
       "pricingStatus": "CURRENT_WORKING",
-      "note": "Price levels intentionally match Langer Thuis for the current build.",
+      "note": "Prices confirmed by Thijs 2026-09-23: Alert €24,95/mnd (was €19,95), Protect €37,95/mnd (was €34,95), matching the live Shopify products. They no longer mirror the Langer Thuis price levels.",
       "packages": [
         {
           "id": "alert",
+          "sku": "N0003",
           "name": "Alert",
           "platform": "NAMI Alarm15",
           "platformMappingConfidence": "inferred_from_price_level",
           "hook": "Slim alarm dat u zelf in de gaten houdt.",
           "sub": "NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera",
           "monthlyRecurringPrice": {
-            "amountCents": 1995,
-            "display": "€19,95",
+            "amountCents": 2495,
+            "display": "€24,95",
             "per": "/mnd"
           },
           "termMonths": 12,
           "installGroup": "nami",
-          "productHandle": "mijn-thuis-alert",
-          "promoProduct": { "productHandle": "eerste-3-maanden-alert", "sku": "PROMO-ALE" }
+          "productHandle": "mijn-thuis-alert"
         },
         {
           "id": "protect",
@@ -233,14 +230,13 @@
           "hook": "Alarm met 24/7 meldkamer die meekijkt.",
           "sub": "Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel",
           "monthlyRecurringPrice": {
-            "amountCents": 3495,
-            "display": "€34,95",
+            "amountCents": 3795,
+            "display": "€37,95",
             "per": "/mnd"
           },
           "termMonths": 36,
           "installGroup": "climax",
-          "productHandle": "mijn-thuis-protect",
-          "promoProduct": { "productHandle": "eerste-3-maanden-protect", "sku": "PROMO-PRO" }
+          "productHandle": "mijn-thuis-protect"
         },
         {
           "id": "vista",
@@ -466,7 +462,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the prepaid \"Eerste 3 maanden\" line, i.e. the live cart total. Installation is never discounted; the promo is a separate positive line, not a reduction. The monthly recurring rate is never collected by Shopify and must never be added to this value.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the package line (quantity 3, after the automatic 50% 'Eerste 3 maanden' discount), i.e. the live cart total. Installation is never discounted. The ongoing monthly rate from month 4 is billed by Odoo, never collected by Shopify, and must never be added to this value.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -477,13 +473,13 @@
     "momentB": {
       "event": "contract_signed_offline",
       "valueSource": "indicativeContractValue",
-      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms the intro promo is applied to the first 3 SEPA instalments.",
+      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms ODOO_PROMO_DISCOUNT (one contract at the plain monthly rate, SEPA from month 4).",
       "status": "BLOCKED_PENDING_ODOO"
     }
   },
   "labels": {
     "activation": "Eenmalige activatie en installatie",
-    "commitment": "Eerste 3 maanden korting (50%)",
+    "commitment": "eerste 3 maanden (50% korting)",
     "monthlyAfter": "Daarna per maand",
     "dueToday": "Vandaag te betalen",
     "indicativeContractValue": "Indicatieve totale contractwaarde, inclusief eenmalige kosten",
@@ -544,8 +540,9 @@
     {
       "id": "ODOO_PROMO_DISCOUNT",
       "severity": "high",
-      "summary": "Odoo SEPA collection must start at month 4 at the full monthly rate; months 1-3 are prepaid via Shopify. Owner: Odoo administrator (outside this repo).",
+      "summary": "PRE-LIVE-PUSH CHECK (Thijs, with Alex, Odoo side). A package is sold as ONE Shopify order line: the package product at quantity 3 (e.g. N0002 x 3), 50% off, which prepays months 1-3. Odoo must turn that line into (1) exactly ONE contract at the plain monthly rate (e.g. €24,95/mnd) — not a contract at quantity 3 (€74,85/mnd) and not three contracts — and (2) start SEPA collection at month 4, not month 1, so months 1-3 are not charged twice. Neither is confirmed yet. Out of scope for this repo; does not block the theme branch or its validation.",
       "blocks": [
+        "Live push of the qty-3 theme change",
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],

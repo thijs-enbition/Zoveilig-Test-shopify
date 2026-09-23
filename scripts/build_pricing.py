@@ -9,11 +9,13 @@ Reads pricing.config.json (INPUTS only) and derives every money value once:
     dueToday[option]        = install_option + promoDiscountTotal    (per install option)
     indicativeContractValue = activation + monthly*term - promoDiscountTotal
 
-What Shopify collects today is the chosen installation option (never discounted) plus a
-prepaid "Eerste 3 maanden" line worth promoDiscountTotal - a separate positive charge,
-not a reduction. The monthly rate is never modified here and is billed by Odoo from
-month 4. The 1.5x 'eerste vooruitbetaling' commitment is RETIRED (v2), and so is the
-'discounted monthly instalment' figure that v3 first modelled the promo as.
+What Shopify collects today is the chosen installation option (never discounted) plus
+the real package product at quantity promo.months (3), which Shopify's automatic
+"Eerste 3 maanden" discount takes promo.ratePercent (50%) off - so that line costs
+promoDiscountTotal (2026-09-23 model, no separate promo products). The monthly rate is
+never modified here and is billed by Odoo from month 4. The 1.5x 'eerste
+vooruitbetaling' commitment is RETIRED (v2), and so is the 'discounted monthly
+instalment' figure that v3 first modelled the promo as.
 
 Emits:
     pricing.generated.json          machine-readable, for checks / JS / dataLayer
@@ -98,6 +100,8 @@ def build():
             "cardBadge": promo["cardBadge"],
             "timelineLabel": promo["timelineLabel"],
             "disclosure": promo["disclosure"],
+            # The package line's cart quantity: one unit per prepaid month.
+            "packageCartQuantity": promo_months,
         },
         "contract": {"defaultTermMonths": default_term, "enabledTerms": enabled_terms},
         "labels": cfg["labels"],
@@ -141,9 +145,9 @@ def build():
             promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
             icv = activation_cents + (monthly * term) - promo_discount_total
 
-            # dueToday (2026-09-22 model, kosten.xlsx + Thijs): installation is NEVER
-            # discounted; the promo is a separate, always-positive, one-time add-on
-            # collected today alongside it. due_today = install_option_cents +
+            # dueToday (kosten.xlsx + Thijs): installation is NEVER discounted; the
+            # package line (qty promo.months, 50% off via Shopify's automatic discount)
+            # is collected today alongside it. due_today = install_option_cents +
             # promo_discount_total, per available install option. NAMI packages offer
             # 3 install options (installationOptions.nami.options); Climax packages
             # keep the single fixed activation fee, emitted under the same 'huis' key
@@ -166,8 +170,6 @@ def build():
             # always starts a package out with the flat activation-equivalent fee).
             due_today_default_cents = due_today["huis"]["amountCents"]
 
-            promo_product_cfg = pkg.get("promoProduct") or {}
-
             # What the prepaid promo period is worth at the undiscounted monthly rate -
             # the "was" figure next to promoDiscountTotal on the actie page. It is a
             # 3-month total, never a monthly figure, so it must never be shown with /mnd.
@@ -179,6 +181,7 @@ def build():
                 "termMonths": term,
                 "installGroup": install_group,
                 "productHandle": pkg.get("productHandle"),
+                "sku": pkg.get("sku"),
                 "monthlyRecurringPriceCents": monthly,
                 "monthlyDisplay": eur(monthly),
                 "promoMonths": promo_months if promo_enabled else 0,
@@ -186,10 +189,6 @@ def build():
                 "promoWasDisplay": eur(promo_was),
                 "promoDiscountTotalCents": promo_discount_total,
                 "promoDiscountTotalDisplay": eur(promo_discount_total),
-                "promoProduct": {
-                    "productHandle": promo_product_cfg.get("productHandle"),
-                    "sku": promo_product_cfg.get("sku"),
-                },
                 "activationPriceCents": activation_cents,
                 "activationDisplay": eur(activation_cents),
                 "dueToday": due_today,
@@ -247,6 +246,7 @@ def build():
         "</script>",
         "",
         f"{{%- assign zv_promo_months = {out['promo']['months']} -%}}",
+        f"{{%- assign zv_promo_package_qty = {out['promo']['packageCartQuantity']} -%}}",
         f"{{%- assign zv_promo_active = {str(promo_active).lower()} -%}}",
         f"{{%- assign zv_promo_badge = '{out['promo']['cardBadge']}' -%}}",
         f"{{%- assign zv_promo_timeline = '{out['promo']['timelineLabel']}' -%}}",
@@ -277,6 +277,7 @@ def build():
                 lines.append(f"{{%- assign zv_{pid}_cta = '{p['ctaLabel']}' -%}}")
             continue
         lines += [
+            f"{{%- assign zv_{pid}_name = '{p['name']}' -%}}",
             f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_monthly_cents = {p['monthlyRecurringPriceCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
@@ -284,8 +285,6 @@ def build():
             f"{{%- assign zv_{pid}_promo_was = '{p['promoWasDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_promo_was_cents = {p['promoWasCents']} -%}}",
             f"{{%- assign zv_{pid}_handle = '{p.get('productHandle') or ''}' -%}}",
-            f"{{%- assign zv_{pid}_promo_handle = '{p['promoProduct'].get('productHandle') or ''}' -%}}",
-            f"{{%- assign zv_{pid}_promo_sku = '{p['promoProduct'].get('sku') or ''}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today_cents = {p['initialPaymentDueTodayCents']} -%}}",
@@ -310,7 +309,7 @@ def build():
     for p in priced:
         due_today_breakdown = ", ".join(f"{oid}={opt['display']}" for oid, opt in p["dueToday"].items())
         print(f"  - {p['lineName']}/{p['name']} ({p['installGroup']}): monthly {p['monthlyDisplay']}"
-              f" | promo add-on +{p['promoDiscountTotalDisplay']}"
+              f" | package x{out['promo']['packageCartQuantity']} today {p['promoDiscountTotalDisplay']} (was {p['promoWasDisplay']})"
               f" | due today [{due_today_breakdown}]"
               f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']}")
 

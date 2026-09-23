@@ -5,8 +5,9 @@ Zo Veilig pricing checks (v3 intro-promo model). Exits non-zero on failure to ga
 Covers:
   1 monthly price consistency (single source of truth)
   2 activation price consistency
-  3 today's payment (install choice) + intro promo maths
-  4 due today per install option (install + promo add-on), all 8 combinations
+  3 today's payment (install choice) + intro promo maths, promoWas per package
+  4 due today per install option (install + package x3 at 50%), all 11 combinations,
+    plus the live Shopify SKUs/handles the theme resolves (2026-09-23)
   5 contract duration
   6 indicative contract value (activation + monthly*term - promo)
   7 add-on prices
@@ -93,7 +94,7 @@ for p in priced:
           f"got {p['promoWasCents']} expected {exp_promo_was}")
     if promo_active:
         check(p["promoDiscountTotalCents"] > 0,
-              f"{p['name']} promo add-on is a positive charge, never a discount on installation")
+              f"{p['name']} prepaid 3 months cost a positive amount today")
         check(p["promoWasCents"] > p["promoDiscountTotalCents"],
               f"{p['name']} promo was exceeds what's actually charged",
               f"was={p['promoWasCents']} charged={p['promoDiscountTotalCents']}")
@@ -115,19 +116,35 @@ for p in priced:
     check("promoMonthlyCents" not in p,
           f"{p['name']} carries no retired promoMonthly figure",
           "the discounted-monthly-rate concept is retired; nothing may render it")
+    check("promoProduct" not in p,
+          f"{p['name']} carries no promoProduct fields",
+          "the separate PROMO-* products are retired (2026-09-23); never create products")
 
-print("\n4. Due today per install option (install + promo add-on)")
-# The 8 combinations confirmed against kosten.xlsx (Thijs, 2026-09-22): installation is
-# NEVER discounted, at any tier; the promo is a separate, always-positive add-on.
-# due_today = install_option_cents + promoDiscountTotalCents. No negative-value case
-# exists (Geen installatie / Telefonisch never need capping), so none is checked for.
+# The struck-through "was" figure on the actie page: 3 x the confirmed monthly rate
+# (Alert 24,95 and Protect 37,95 confirmed by Thijs 2026-09-23).
+EXPECTED_PROMO_WAS_CENTS = {"inzicht": 5985, "zeker": 7485, "alert": 7485,
+                            "beschermd": 11985, "protect": 11385}
+for pkg_id, exp in EXPECTED_PROMO_WAS_CENTS.items():
+    got = next((p["promoWasCents"] for p in priced if p["id"] == pkg_id), None)
+    check(got == exp, f"{pkg_id} promoWasCents = {exp}", f"got {got}")
+check(gen["promo"]["packageCartQuantity"] == promo_months,
+      "package goes in the cart at quantity promo.months",
+      f"got {gen['promo'].get('packageCartQuantity')} expected {promo_months}")
+
+print("\n4. Due today per install option (install + package x3 at 50%)")
+# The 11 "Vandaag te betalen" combinations (Thijs, 2026-09-23): installation is NEVER
+# discounted, at any tier; the package line (qty 3) gets Shopify's automatic 50%.
+# due_today = install_option_cents + promoDiscountTotalCents. These are the config's
+# half-up figures; what Shopify actually charges for the half-cent cases is measured
+# in real carts and recorded in docs/prepay-qty3-2026-09-23.md, never edited in here.
 EXPECTED_DUE_TODAY_CENTS = {
     "inzicht": {"geen": 2993, "telefonisch": 6493, "huis": 12893},
     "zeker": {"geen": 3743, "telefonisch": 7243, "huis": 13643},
+    "alert": {"geen": 3743, "telefonisch": 7243, "huis": 13643},
     "beschermd": {"huis": 15893},
-    "alert": {"geen": 2993, "telefonisch": 6493, "huis": 12893},
-    "protect": {"huis": 15143},
+    "protect": {"huis": 15593},
 }
+check(sum(len(v) for v in EXPECTED_DUE_TODAY_CENTS.values()) == 11, "all 11 combinations are asserted")
 by_id = {p["id"]: p for p in priced}
 for pkg_id, expected_options in EXPECTED_DUE_TODAY_CENTS.items():
     p = by_id[pkg_id]
@@ -148,10 +165,27 @@ for pkg_id, expected_options in EXPECTED_DUE_TODAY_CENTS.items():
     else:
         check(due_today["huis"]["amountCents"] == activation + p["promoDiscountTotalCents"],
               f"{p['name']} dueToday.huis = activation + promoDiscountTotalCents")
-    check(p["promoProduct"]["productHandle"] not in (None, ""),
-          f"{p['name']} has a promo product handle configured")
-    check(p["promoProduct"]["sku"] not in (None, ""),
-          f"{p['name']} has a promo product SKU configured")
+
+# The only products sold on this site (verified live via Admin API, 2026-09-23). The
+# theme resolves them by handle; SKUs are what Odoo and GA4 see. Never create products.
+EXPECTED_PACKAGE_PRODUCTS = {
+    "inzicht": ("langer-thuis-inzicht", "N0001"), "zeker": ("langer-thuis-zeker", "N0002"),
+    "alert": ("mijn-thuis-alert", "N0003"), "beschermd": ("langer-thuis-beschermd", "LT-BES"),
+    "protect": ("mijn-thuis-protect", None),  # MT-PRO in Shopify; no sku field in config (unchanged)
+}
+for pkg_id, (handle, sku) in EXPECTED_PACKAGE_PRODUCTS.items():
+    p = by_id[pkg_id]
+    check(p["productHandle"] == handle, f"{p['name']} product handle is {handle}", f"got {p['productHandle']}")
+    check(p.get("sku") == sku, f"{p['name']} SKU is {sku}", f"got {p.get('sku')}")
+EXPECTED_NAMI_INSTALL = {"geen": ("geen-installatie-nami", "N0006"),
+                         "telefonisch": ("telefonische-ondersteuning-installatie-nami", "N0005"),
+                         "huis": ("installatie-nami", "N0004")}
+for o in gen["installationOptions"]["nami"]["options"]:
+    check((o["productHandle"], o["sku"]) == EXPECTED_NAMI_INSTALL.get(o["id"]),
+          f"nami install {o['id']} is {EXPECTED_NAMI_INSTALL.get(o['id'])}", f"got {(o['productHandle'], o['sku'])}")
+check((gen["activation"]["productHandle"], gen["activation"]["sku"]) == ("climax-instalatie", "CL003"),
+      "Climax installation is climax-instalatie / CL003",
+      f"got {(gen['activation']['productHandle'], gen['activation']['sku'])}")
 
 print("\n5. Contract duration")
 check(cfg["contract"]["defaultTermMonths"] == 36, "default term is 36 months")
@@ -215,6 +249,10 @@ retired_patterns = {
     "Domotica 4,95": r"€\s*4,95",
     "Pakketactivatie label": r"Pakketactivatie",
     "Totaal over looptijd label": r"Totaal over looptijd",
+    # Retired 2026-09-23: the separate prepaid promo products (deleted from Shopify).
+    "PROMO-* product SKU": r"PROMO-",
+    "eerste-3-maanden-* product handle": r"eerste-3-maanden-",
+    "zv_promo_live theme setting": r"zv_promo_live",
 }
 for label, pat in retired_patterns.items():
     hits = [f.name for f in scan_files

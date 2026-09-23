@@ -24,7 +24,7 @@
           "amountCents": 0,
           "display": "€ 0,00",
           "productHandle": "geen-installatie-nami",
-          "sku": "020103"
+          "sku": "N0006"
         },
         {
           "id": "telefonisch",
@@ -32,7 +32,7 @@
           "amountCents": 3500,
           "display": "€ 35,00",
           "productHandle": "telefonische-ondersteuning-installatie-nami",
-          "sku": "03012026"
+          "sku": "N0005"
         },
         {
           "id": "huis",
@@ -40,7 +40,7 @@
           "amountCents": 9900,
           "display": "€ 99,00",
           "productHandle": "installatie-nami",
-          "sku": "04012026"
+          "sku": "N0004"
         }
       ]
     }
@@ -53,7 +53,8 @@
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%)."
+    "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%).",
+    "packageCartQuantity": 3
   },
   "contract": {
     "defaultTermMonths": 36,
@@ -64,7 +65,7 @@
   },
   "labels": {
     "activation": "Eenmalige activatie en installatie",
-    "commitment": "Eerste 3 maanden korting (50%)",
+    "commitment": "eerste 3 maanden (50% korting)",
     "monthlyAfter": "Daarna per maand",
     "dueToday": "Vandaag te betalen",
     "indicativeContractValue": "Indicatieve totale contractwaarde, inclusief eenmalige kosten",
@@ -99,6 +100,7 @@
       "termMonths": 12,
       "installGroup": "nami",
       "productHandle": "langer-thuis-inzicht",
+      "sku": "N0001",
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
@@ -106,10 +108,6 @@
       "promoWasDisplay": "€ 59,85",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
-      "promoProduct": {
-        "productHandle": "eerste-3-maanden-inzicht",
-        "sku": "PROMO-INZ"
-      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
@@ -151,6 +149,7 @@
       "termMonths": 12,
       "installGroup": "nami",
       "productHandle": "langer-thuis-zeker",
+      "sku": "N0002",
       "monthlyRecurringPriceCents": 2495,
       "monthlyDisplay": "€ 24,95",
       "promoMonths": 3,
@@ -158,10 +157,6 @@
       "promoWasDisplay": "€ 74,85",
       "promoDiscountTotalCents": 3743,
       "promoDiscountTotalDisplay": "€ 37,43",
-      "promoProduct": {
-        "productHandle": "eerste-3-maanden-zeker",
-        "sku": "PROMO-ZEK"
-      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
@@ -203,6 +198,7 @@
       "termMonths": 36,
       "installGroup": "climax",
       "productHandle": "langer-thuis-beschermd",
+      "sku": "LT-BES",
       "monthlyRecurringPriceCents": 3995,
       "monthlyDisplay": "€ 39,95",
       "promoMonths": 3,
@@ -210,10 +206,6 @@
       "promoWasDisplay": "€ 119,85",
       "promoDiscountTotalCents": 5993,
       "promoDiscountTotalDisplay": "€ 59,93",
-      "promoProduct": {
-        "productHandle": "eerste-3-maanden-beschermd",
-        "sku": "PROMO-BES"
-      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
@@ -247,39 +239,36 @@
       "termMonths": 12,
       "installGroup": "nami",
       "productHandle": "mijn-thuis-alert",
-      "monthlyRecurringPriceCents": 1995,
-      "monthlyDisplay": "€ 19,95",
+      "sku": "N0003",
+      "monthlyRecurringPriceCents": 2495,
+      "monthlyDisplay": "€ 24,95",
       "promoMonths": 3,
-      "promoWasCents": 5985,
-      "promoWasDisplay": "€ 59,85",
-      "promoDiscountTotalCents": 2993,
-      "promoDiscountTotalDisplay": "€ 29,93",
-      "promoProduct": {
-        "productHandle": "eerste-3-maanden-alert",
-        "sku": "PROMO-ALE"
-      },
+      "promoWasCents": 7485,
+      "promoWasDisplay": "€ 74,85",
+      "promoDiscountTotalCents": 3743,
+      "promoDiscountTotalDisplay": "€ 37,43",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "geen": {
-          "amountCents": 2993,
-          "display": "€ 29,93"
+          "amountCents": 3743,
+          "display": "€ 37,43"
         },
         "telefonisch": {
-          "amountCents": 6493,
-          "display": "€ 64,93"
+          "amountCents": 7243,
+          "display": "€ 72,43"
         },
         "huis": {
-          "amountCents": 12893,
-          "display": "€ 128,93"
+          "amountCents": 13643,
+          "display": "€ 136,43"
         }
       },
-      "initialPaymentDueTodayCents": 12893,
-      "initialPaymentDueTodayDisplay": "€ 128,93",
+      "initialPaymentDueTodayCents": 13643,
+      "initialPaymentDueTodayDisplay": "€ 136,43",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 30847,
-        "display": "€ 308,47",
+        "cents": 36097,
+        "display": "€ 360,97",
         "recurringMonthsBilled": 12,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -299,31 +288,28 @@
       "termMonths": 36,
       "installGroup": "climax",
       "productHandle": "mijn-thuis-protect",
-      "monthlyRecurringPriceCents": 3495,
-      "monthlyDisplay": "€ 34,95",
+      "sku": null,
+      "monthlyRecurringPriceCents": 3795,
+      "monthlyDisplay": "€ 37,95",
       "promoMonths": 3,
-      "promoWasCents": 10485,
-      "promoWasDisplay": "€ 104,85",
-      "promoDiscountTotalCents": 5243,
-      "promoDiscountTotalDisplay": "€ 52,43",
-      "promoProduct": {
-        "productHandle": "eerste-3-maanden-protect",
-        "sku": "PROMO-PRO"
-      },
+      "promoWasCents": 11385,
+      "promoWasDisplay": "€ 113,85",
+      "promoDiscountTotalCents": 5693,
+      "promoDiscountTotalDisplay": "€ 56,93",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "huis": {
-          "amountCents": 15143,
-          "display": "€ 151,43"
+          "amountCents": 15593,
+          "display": "€ 155,93"
         }
       },
-      "initialPaymentDueTodayCents": 15143,
-      "initialPaymentDueTodayDisplay": "€ 151,43",
+      "initialPaymentDueTodayCents": 15593,
+      "initialPaymentDueTodayDisplay": "€ 155,93",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 130477,
-        "display": "€ 1.304,77",
+        "cents": 140827,
+        "display": "€ 1.408,27",
         "recurringMonthsBilled": 36,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
@@ -503,7 +489,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the prepaid \"Eerste 3 maanden\" line, i.e. the live cart total. Installation is never discounted; the promo is a separate positive line, not a reduction. The monthly recurring rate is never collected by Shopify and must never be added to this value.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the package line (quantity 3, after the automatic 50% 'Eerste 3 maanden' discount), i.e. the live cart total. Installation is never discounted. The ongoing monthly rate from month 4 is billed by Odoo, never collected by Shopify, and must never be added to this value.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -514,7 +500,7 @@
     "momentB": {
       "event": "contract_signed_offline",
       "valueSource": "indicativeContractValue",
-      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms the intro promo is applied to the first 3 SEPA instalments.",
+      "rule": "Uploaded from Odoo at pipeline stage Contract Signed. Blocked until Odoo confirms ODOO_PROMO_DISCOUNT (one contract at the plain monthly rate, SEPA from month 4).",
       "status": "BLOCKED_PENDING_ODOO"
     }
   },
@@ -522,8 +508,9 @@
     {
       "id": "ODOO_PROMO_DISCOUNT",
       "severity": "high",
-      "summary": "Odoo SEPA collection must start at month 4 at the full monthly rate; months 1-3 are prepaid via Shopify. Owner: Odoo administrator (outside this repo).",
+      "summary": "PRE-LIVE-PUSH CHECK (Thijs, with Alex, Odoo side). A package is sold as ONE Shopify order line: the package product at quantity 3 (e.g. N0002 x 3), 50% off, which prepays months 1-3. Odoo must turn that line into (1) exactly ONE contract at the plain monthly rate (e.g. €24,95/mnd) — not a contract at quantity 3 (€74,85/mnd) and not three contracts — and (2) start SEPA collection at month 4, not month 1, so months 1-3 are not charged twice. Neither is confirmed yet. Out of scope for this repo; does not block the theme branch or its validation.",
       "blocks": [
+        "Live push of the qty-3 theme change",
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],

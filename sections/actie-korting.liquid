@@ -6,26 +6,20 @@
   discount rate itself come from the zv-pricing include, never a literal here (CI
   check #9 in scripts/check_pricing.py enforces that).
 
-  Whether the promo is actually live right now is controlled by the Shopify theme
-  setting `zv_promo_live` (Zo Veilig · Introductiekorting) — a checkbox Thijs can flip
-  from the theme editor, no code change or redeploy needed. `zv_promo_active` (from
-  zv-pricing, i.e. pricing.config.json `promo.enabled`/`ratePercent`) confirms the
-  mechanism itself is valid; both must be true for the discount to show. While either
-  is off, the whole page degrades to a plain package overview: no discount badge, no
-  struck-through "was" price, no disclosure text. It stays live rather than being
-  unpublished so the URL keeps working; turning the setting on brings the discount
-  framing straight back with no further changes here.
+  The only on/off switch for the promo is the Shopify automatic discount "Eerste 3
+  maanden" itself (2026-09-23; the theme setting that used to gate this page is gone).
+  `zv_promo_active` (from zv-pricing, i.e. pricing.config.json `promo.enabled`/
+  `ratePercent`) only confirms the mechanism is part of the pricing model; while it is
+  off, the page degrades to a plain package overview: no discount badge, no
+  struck-through "was" price, no disclosure text. Each card shows the one-time figure
+  for the first 3 months (now/was: promoDiscountTotal struck against promoWas, eenmalig
+  vandaag) and then the plain monthly rate — never a discounted monthly rate.
 
   Cards link out to the existing, tested purchase flow on /pages/oplossingen (deep-linked
   per package via zv-route's "pakket" key) rather than re-implementing add-to-cart, so this
   stays a lightweight top-of-funnel page.
 {%- endcomment -%}
 
-{%- assign zv_promo_mechanism_active = zv_promo_active -%}
-{%- assign zv_promo_active = false -%}
-{%- if zv_promo_mechanism_active and settings.zv_promo_live -%}
-  {%- assign zv_promo_active = true -%}
-{%- endif -%}
 {%- liquid
   assign arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 -%}

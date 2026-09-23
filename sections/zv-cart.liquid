@@ -25,22 +25,19 @@
   longer subtracts anything from "Vandaag te betalen". Header/footer come
   from the theme layout.
 
-  The "p/m" price and "Maandbedrag" total are NOT read from `item.final_line_price` —
-  they come from the confirmed per-package monthly rate in the central pricing model
-  (via zv-pricing + snippets/zv-package-monthly-cents), scaled by `item.quantity`. This is
-  deliberate, not a stray literal: once the interim intro-promo mechanism is live, the
-  package product's live Shopify price represents a discounted multi-month bundle (charged
-  in full today), not one month — see zv-checkout-overview.liquid's header comment for the
-  full rationale and the known gap this leaves (no live signal left to catch the confirmed
-  monthly rate drifting from whatever Odoo actually bills). A line whose finder_key can't be
-  resolved falls back to its own live price (degraded, same convention as an unrecognized
-  package elsewhere in the theme). "Vandaag te betalen" is untouched by any of this — it
-  stays 100% live, per the paragraph above.
+  Package lines (2026-09-23 model, CLAUDE.md Pricing pipeline): a package sits in the cart as
+  the real package product at quantity zv_promo_package_qty (the 3 prepaid months), with
+  Shopify's automatic "Eerste 3 maanden" discount taking 50% off that line. Its "p/m" figure
+  is the line's UNIT price before the discount (item.original_price) — the plain monthly
+  rate, never unit x 3 — and its summary row is the line's real final_line_price, so the
+  summary rows add up to "Vandaag te betalen". Package and installation lines have no +/−
+  quantity controls: the package's quantity is the prepaid period, not something the
+  customer picks, and zv-cart-guard resets any other quantity (package to 3, installation
+  to 1) and reloads.
 
-  Renders zv-cart-guard: if a subscription package ever ends up in the cart
-  without the activation fee (e.g. added via the standalone Shopify product
-  page, which doesn't wire the fee in), it's added automatically and the
-  page reloads. See snippets/zv-cart-guard.liquid.
+  Renders zv-cart-guard: keeps the package line at quantity 3, adds the Climax installation
+  line to a Climax package that lacks it, and removes it from a cart without one. See
+  snippets/zv-cart-guard.liquid.
 {%- endcomment -%}
 
 {%- include 'zv-pricing' -%}
@@ -50,12 +47,7 @@
 {%- assign nami_install_geen_variant_id = all_products[zv_nami_install_geen_handle].selected_or_first_available_variant.id -%}
 {%- assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id -%}
 {%- assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_inzicht_variant_id = all_products[zv_inzicht_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_zeker_variant_id = all_products[zv_zeker_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id -%}
-{%- assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, promo_inzicht_variant_id: promo_inzicht_variant_id, promo_zeker_variant_id: promo_zeker_variant_id, promo_beschermd_variant_id: promo_beschermd_variant_id, promo_alert_variant_id: promo_alert_variant_id, promo_protect_variant_id: promo_protect_variant_id, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, pkg_qty: zv_promo_package_qty, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
@@ -73,16 +65,8 @@
             {%- for item in cart.items -%}
               {%- assign is_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
-              {%- if is_sub -%}
-                {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
-                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
-                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
-                {%- if li_monthly_cents > 0 -%}
-                  {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
-                {%- else -%}
-                  {%- assign li_month_total_cents = item.final_line_price -%}
-                {%- endif -%}
-              {%- endif -%}
+              {%- assign is_install = false -%}
+              {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign is_install = true -%}{%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
@@ -102,19 +86,21 @@
                     </div>
                   {%- endif -%}
                   <div class="ci-actions">
+                    {%- unless is_sub or is_install -%}
                     <div class="qty">
                       <a href="{{ routes.cart_change_url }}?id={{ item.key }}&quantity={{ item.quantity | minus: 1 }}" aria-label="Aantal verlagen" class="qbtn">−</a>
                       <span>{{ item.quantity }}</span>
                       <a href="{{ routes.cart_change_url }}?id={{ item.key }}&quantity={{ item.quantity | plus: 1 }}" aria-label="Aantal verhogen" class="qbtn">+</a>
                     </div>
+                    {%- endunless -%}
                     <a class="ci-remove" href="{{ routes.cart_change_url }}?id={{ item.key }}&quantity=0"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verwijderen</a>
                   </div>
                 </div>
                 <div class="ci-right">
                   {%- if is_sub -%}
-                    <div class="ci-price" style="color:var(--indigo)">{{ li_month_total_cents | money }} <span>p/m</span></div>
+                    <div class="ci-price" style="color:var(--indigo)">{{ item.original_price | money }} <span>p/m</span></div>
                     <span class="ci-badge">Abonnement</span>
-                    <span class="ci-note">Inbegrepen bij vandaag te betalen.<br>Loopt daarna door via SEPA-incasso.</span>
+                    <span class="ci-note">Eerste {{ item.quantity }} maanden vandaag: {{ item.final_line_price | money }} ({{ zv_promo_badge }}).<br>Loopt daarna door via SEPA-incasso.</span>
                   {%- else -%}
                     <div class="ci-price">{{ item.final_line_price | money }}</div>
                     {%- if item.original_line_price > item.final_line_price -%}<span class="ci-note">Korting toegepast</span>{%- endif -%}
@@ -133,36 +119,23 @@
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
               {%- assign today_cents = today_cents | plus: item.final_line_price -%}
               {%- comment -%}
-                The recurring rate comes from the package's own "Eerste 3 maanden" promo
-                line, which is the cart-side package identity anchor under the prepaid
-                line-item model (the plain package product is never added to cart - see
-                CLAUDE.md Pricing pipeline). The promo line itself is a one-time charge,
-                so it renders as a flat price like any other fee line; only the "daarna
-                per maand" summary below is derived from it.
+                Every row is the line's real final_line_price, so the rows add up to
+                "Vandaag te betalen". A package row is labelled "<pakket> × 3 — eerste 3
+                maanden (50% korting)"; "Daarna" sums the package lines' unit prices.
               {%- endcomment -%}
-              {%- assign li_promo_fk = blank -%}
-              {%- if promo_inzicht_variant_id != blank and item.variant_id == promo_inzicht_variant_id -%}{%- assign li_promo_fk = 'aware' -%}{%- endif -%}
-              {%- if promo_zeker_variant_id != blank and item.variant_id == promo_zeker_variant_id -%}{%- assign li_promo_fk = 'aware_plus' -%}{%- endif -%}
-              {%- if promo_beschermd_variant_id != blank and item.variant_id == promo_beschermd_variant_id -%}{%- assign li_promo_fk = 'care' -%}{%- endif -%}
-              {%- if promo_alert_variant_id != blank and item.variant_id == promo_alert_variant_id -%}{%- assign li_promo_fk = 'secure' -%}{%- endif -%}
-              {%- if promo_protect_variant_id != blank and item.variant_id == promo_protect_variant_id -%}{%- assign li_promo_fk = 'guard' -%}{%- endif -%}
-              {%- if li_promo_fk != blank -%}
-                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: li_promo_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
-                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
-                {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
-                {%- assign true_month_cents = true_month_cents | plus: li_month_total_cents -%}
-              {%- endif -%}
+              {%- assign row_pkg_name = blank -%}
               {%- if li_sub -%}
-                {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
-                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
-                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
-                {%- if li_monthly_cents > 0 -%}
-                  {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
-                {%- else -%}
-                  {%- assign li_month_total_cents = item.final_line_price -%}
-                {%- endif -%}
-                {%- assign true_month_cents = true_month_cents | plus: li_month_total_cents -%}
-                <div class="srow"><span>{{ item.product.title | escape }}<br><span class="s-sub">Maandelijks · via SEPA-incasso</span></span><b>{{ li_month_total_cents | money }}<span style="font-size:12px;color:var(--muted)"> p/m</span></b></div>
+                {%- case item.product.metafields.custom.finder_key.value -%}
+                  {%- when 'aware' -%}{%- assign row_pkg_name = zv_inzicht_name -%}
+                  {%- when 'aware_plus' -%}{%- assign row_pkg_name = zv_zeker_name -%}
+                  {%- when 'care' -%}{%- assign row_pkg_name = zv_beschermd_name -%}
+                  {%- when 'secure' -%}{%- assign row_pkg_name = zv_alert_name -%}
+                  {%- when 'guard' -%}{%- assign row_pkg_name = zv_protect_name -%}
+                {%- endcase -%}
+              {%- endif -%}
+              {%- if row_pkg_name != blank -%}
+                {%- assign true_month_cents = true_month_cents | plus: item.original_price -%}
+                <div class="srow"><span>{{ row_pkg_name }} × {{ item.quantity }} — {{ zv_label_commitment }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- else -%}
                 <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- endif -%}
