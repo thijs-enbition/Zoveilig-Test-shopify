@@ -4,10 +4,16 @@ Zo Veilig pricing builder (v3 intro-promo model).
 
 Reads pricing.config.json (INPUTS only) and derives every money value once:
 
-    promoDiscountTotal      = promo.months * monthly * promo.rate    [half-up]
+    promoDiscountTotal      = promo.months * half_up(monthly * promo.rate)   [per unit]
     promoWas                = promo.months * monthly                 (undiscounted worth)
     dueToday[option]        = install_option + promoDiscountTotal    (per install option)
-    indicativeContractValue = activation + monthly*term - promoDiscountTotal
+    indicativeContractValue = activation + promoDiscountTotal + monthly * (term - promo.months)
+
+promoDiscountTotal is what the package line costs today. It is rounded PER UNIT, then
+multiplied by promo.months, because that is how Shopify applies the automatic discount:
+each unit of the package line is priced on its own (e.g. 2495 x 50% = 1247.5 -> 1248 per
+unit, x 3 = 3744), not the line as a whole (7485 x 50% = 3742.5 -> 3743). Measured in real
+carts, 2026-09-23; see docs/prepay-qty3-2026-09-23.md.
 
 What Shopify collects today is the chosen installation option (never discounted) plus
 the real package product at quantity promo.months (3), which Shopify's automatic
@@ -118,6 +124,9 @@ def build():
             row = {
                 "id": pkg["id"],
                 "name": pkg["name"],
+                # custom.finder_key of the Shopify product: how the theme maps a product or
+                # cart line to this package, and so to its name (never the product title).
+                "finderKey": pkg.get("finderKey"),
                 "lineId": line["id"],
                 "lineName": line["displayName"],
                 "cat": line["cat"],
@@ -142,8 +151,11 @@ def build():
             monthly = price["amountCents"]
             term = pkg.get("termMonths", default_term)
 
-            promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
-            icv = activation_cents + (monthly * term) - promo_discount_total
+            # Per unit, then x months - Shopify's own rounding of the package line (see
+            # module docstring). The ICV counts those prepaid months once, at what they
+            # cost, plus the remaining months at the plain rate.
+            promo_discount_total = promo_months * cents_half_up(Decimal(monthly) * promo_rate) if promo_enabled else 0
+            icv = activation_cents + promo_discount_total + monthly * (term - (promo_months if promo_enabled else 0))
 
             # dueToday (kosten.xlsx + Thijs): installation is NEVER discounted; the
             # package line (qty promo.months, 50% off via Shopify's automatic discount)
@@ -198,7 +210,7 @@ def build():
                     "status": "CURRENT_WORKING",
                     "cents": icv,
                     "display": eur(icv),
-                    "recurringMonthsBilled": term,
+                    "recurringMonthsBilled": term - (promo_months if promo_enabled else 0),
                     "label": cfg["labels"]["indicativeContractValue"],
                 },
             })
@@ -259,6 +271,10 @@ def build():
         f"{{%- assign zv_label_due_today = '{cfg['labels']['dueToday']}' -%}}",
         f"{{%- assign zv_label_monthly_after = '{cfg['labels']['monthlyAfter']}' -%}}",
         f"{{%- assign zv_label_breakdown_intro = '{cfg['labels']['breakdownIntro']}' -%}}",
+        # finder_key -> package name, for snippets/zv-package-name.liquid. The theme shows
+        # these names, never the Shopify product title (Odoo renames products).
+        "{%- assign zv_package_names_by_fk = '" + "|".join(
+            f"{p['finderKey']}:{p['name']}" for p in out["packages"] if p.get("finderKey")) + "' -%}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")
@@ -272,6 +288,7 @@ def build():
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")
         if not p.get("purchasable"):
+            lines.append(f"{{%- assign zv_{pid}_name = '{p['name']}' -%}}")
             lines.append(f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}")
             if p.get("ctaLabel"):
                 lines.append(f"{{%- assign zv_{pid}_cta = '{p['ctaLabel']}' -%}}")

@@ -112,7 +112,7 @@
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
     "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%).",
-    "note": "MODEL (2026-09-23, Thijs): a package purchase is the chosen installation product (qty 1, never discounted) plus the real package product at quantity `months` (3). Shopify's automatic discount 'Eerste 3 maanden' (amount off products, 50%, no end date, does not combine, scope exactly N0001/N0002/N0003/LT-BES/MT-PRO/MT-VIS — nothing to build, never modified from this repo) takes `ratePercent` off that line by itself. The Overzicht breakdown reads that line's real final_line_price. promoDiscountTotalCents is what those 3 prepaid months cost (months x monthly x rate, half-up); Shopify's own rounding of the half-cent cases is recorded in docs/prepay-qty3-2026-09-23.md. The monthly recurring price is never modified anywhere in this flow. SUPERSEDES the 2026-09-22 prepaid PROMO product model (separate per-package promo products), abandoned 2026-09-23: those products were deleted from Shopify because every new Shopify product becomes a stub product in Odoo. 'disclosure' above is the approved customer-facing wording (Thijs, 2026-09-23).",
+    "note": "MODEL (2026-09-23, Thijs): a package purchase is the chosen installation product (qty 1, never discounted) plus the real package product at quantity `months` (3). Shopify's automatic discount 'Eerste 3 maanden' (amount off products, 50%, no end date, does not combine, scope exactly N0001/N0002/N0003/LT-BES/MT-PRO/MT-VIS — nothing to build, never modified from this repo) takes `ratePercent` off that line by itself. The Overzicht breakdown reads that line's real final_line_price. promoDiscountTotalCents is what those 3 prepaid months cost, rounded PER UNIT like Shopify: months x half_up(monthly x rate), e.g. 3 x 1248 = 3744 for Zeker, not half_up(3 x 2495 x 50%) = 3743 (decided by Thijs 2026-09-23 after measuring real carts; see docs/prepay-qty3-2026-09-23.md). indicativeContractValue uses the same figure: activation + promoDiscountTotal + monthly x (term - months). The monthly recurring price is never modified anywhere in this flow. SUPERSEDES the 2026-09-22 prepaid PROMO product model (separate per-package promo products), abandoned 2026-09-23: those products were deleted from Shopify because every new Shopify product becomes a stub product in Odoo. 'disclosure' above is the approved customer-facing wording (Thijs, 2026-09-23).",
     "labelCommitmentNote": "labels.commitment is the breakdown-row suffix for the package line on Overzicht, rendered as '<pakket> × <months> — <labels.commitment>', e.g. 'Zeker × 3 — eerste 3 maanden (50% korting)'. Originally the retired v2 'Eerste vooruitbetaling' label."
   },
   "contract": {
@@ -150,6 +150,7 @@
           "id": "inzicht",
           "sku": "N0001",
           "name": "Inzicht",
+          "finderKey": "aware",
           "platform": "NAMI aiAware",
           "hook": "Weet dat de dag normaal en veilig is begonnen.",
           "sub": "NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer",
@@ -166,6 +167,7 @@
           "id": "zeker",
           "sku": "N0002",
           "name": "Zeker",
+          "finderKey": "aware_plus",
           "platform": "NAMI aiCare",
           "badge": "Meest gekozen",
           "hook": "Zie subtiele veranderingen vóór het misgaat.",
@@ -183,6 +185,7 @@
           "id": "beschermd",
           "sku": "LT-BES",
           "name": "Beschermd",
+          "finderKey": "care",
           "platform": "Climax",
           "hook": "Complete bescherming met 24/7 meldkamer.",
           "sub": "Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer",
@@ -208,6 +211,7 @@
           "id": "alert",
           "sku": "N0003",
           "name": "Alert",
+          "finderKey": "secure",
           "platform": "NAMI Alarm15",
           "platformMappingConfidence": "inferred_from_price_level",
           "hook": "Slim alarm dat u zelf in de gaten houdt.",
@@ -224,6 +228,7 @@
         {
           "id": "protect",
           "name": "Protect",
+          "finderKey": "guard",
           "badge": "Meest gekozen",
           "platform": "Climax",
           "platformMappingConfidence": "inferred_from_price_level",
@@ -241,6 +246,7 @@
         {
           "id": "vista",
           "name": "Vista",
+          "finderKey": "secure_plus",
           "platform": "Alarm.com",
           "platformMappingConfidence": "inferred_from_price_level",
           "hook": "Complete beveiliging met meldkamer én camera.",
@@ -264,6 +270,7 @@
         {
           "id": "vo-sos",
           "name": "Paniek Meldkamer",
+          "finderKey": "liogo_solo",
           "platform": "LioGo",
           "hook": "Eén druk verbindt u met de meldkamer.",
           "sub": "Prijs en specificaties volgen",
@@ -276,6 +283,7 @@
         {
           "id": "vo-zorg",
           "name": "Zorgmeldkamer",
+          "finderKey": "liogo_guard",
           "platform": "LioGo",
           "hook": "24/7 zorgprofessionals regelen opvolging.",
           "sub": "Prijs en specificaties volgen",

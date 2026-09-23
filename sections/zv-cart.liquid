@@ -65,19 +65,26 @@
             {%- for item in cart.items -%}
               {%- assign is_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+              {%- comment -%} A package line shows its pricing.config.json name (via finder_key), never the Shopify product title. {%- endcomment -%}
+              {%- assign item_name = item.product.title -%}
+              {%- if is_sub -%}
+                {%- capture cfg_name -%}{%- render 'zv-package-name', finder_key: item.product.metafields.custom.finder_key.value, names: zv_package_names_by_fk -%}{%- endcapture -%}
+                {%- assign cfg_name = cfg_name | strip -%}
+                {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
+              {%- endif -%}
               {%- assign is_install = false -%}
               {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign is_install = true -%}{%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
-                    <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item.product.title | escape }}" width="88" height="88" loading="lazy">
+                    <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item_name | escape }}" width="88" height="88" loading="lazy">
                   {%- else -%}
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4-9-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8M12 12v8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
                   {%- endif -%}
                 </div>
                 <div>
                   {%- if item.product.type != blank -%}<span class="ci-line">{{ item.product.type | escape }}</span>{%- endif -%}
-                  <div class="ci-name"><a href="{{ item.url }}">{{ item.product.title | escape }}</a></div>
+                  <div class="ci-name"><a href="{{ item.url }}">{{ item_name | escape }}</a></div>
                   {%- unless item.variant.title contains 'Default' -%}<div class="ci-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                   {%- if item.selling_plan_allocation -%}<div class="ci-meta">{{ item.selling_plan_allocation.selling_plan.name | escape }}</div>{%- endif -%}
                   {%- if item.properties.size > 0 -%}
@@ -125,13 +132,11 @@
               {%- endcomment -%}
               {%- assign row_pkg_name = blank -%}
               {%- if li_sub -%}
-                {%- case item.product.metafields.custom.finder_key.value -%}
-                  {%- when 'aware' -%}{%- assign row_pkg_name = zv_inzicht_name -%}
-                  {%- when 'aware_plus' -%}{%- assign row_pkg_name = zv_zeker_name -%}
-                  {%- when 'care' -%}{%- assign row_pkg_name = zv_beschermd_name -%}
-                  {%- when 'secure' -%}{%- assign row_pkg_name = zv_alert_name -%}
-                  {%- when 'guard' -%}{%- assign row_pkg_name = zv_protect_name -%}
-                {%- endcase -%}
+                {%- assign row_fk = item.product.metafields.custom.finder_key.value -%}
+                {%- if row_fk == 'aware' or row_fk == 'aware_plus' or row_fk == 'care' or row_fk == 'secure' or row_fk == 'guard' -%}
+                  {%- capture row_pkg_name -%}{%- render 'zv-package-name', finder_key: row_fk, names: zv_package_names_by_fk -%}{%- endcapture -%}
+                  {%- assign row_pkg_name = row_pkg_name | strip -%}
+                {%- endif -%}
               {%- endif -%}
               {%- if row_pkg_name != blank -%}
                 {%- assign true_month_cents = true_month_cents | plus: item.original_price -%}

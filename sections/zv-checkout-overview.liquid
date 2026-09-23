@@ -269,17 +269,24 @@
                 {%- for item in cart.items -%}
                   {%- assign is_sub = false -%}
                   {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
+                  {%- comment -%} A package line shows its pricing.config.json name (via finder_key), never the Shopify product title. {%- endcomment -%}
+                  {%- assign item_name = item.product.title -%}
+                  {%- if is_sub -%}
+                    {%- capture cfg_name -%}{%- render 'zv-package-name', finder_key: item.product.metafields.custom.finder_key.value, names: zv_package_names_by_fk -%}{%- endcapture -%}
+                    {%- assign cfg_name = cfg_name | strip -%}
+                    {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
+                  {%- endif -%}
                   <div class="ovitem">
                     <div class="ovi-thumb">
                       {%- if item.image -%}
-                        <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item.product.title | escape }}" width="88" height="88" loading="lazy">
+                        <img src="{{ item.image | image_url: width: 176 }}" alt="{{ item_name | escape }}" width="88" height="88" loading="lazy">
                       {%- else -%}
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4-9-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8M12 12v8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
                       {%- endif -%}
                     </div>
                     <div>
                       {%- if item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
-                      <div class="ovi-name">{{ item.product.title | escape }}</div>
+                      <div class="ovi-name">{{ item_name | escape }}</div>
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                       {%- if is_sub -%}
                         <div class="ovi-meta">Eerste {{ item.quantity }} maanden vooruit, {{ zv_promo_badge }}</div>
@@ -373,18 +380,13 @@
                       assign row_label = item.product.title | escape
                       assign row_pkg_name = blank
                       if item.product.type == sub_type or item.product.tags contains sub_tag
-                        case item.product.metafields.custom.finder_key.value
-                          when 'aware'
-                            assign row_pkg_name = zv_inzicht_name
-                          when 'aware_plus'
-                            assign row_pkg_name = zv_zeker_name
-                          when 'care'
-                            assign row_pkg_name = zv_beschermd_name
-                          when 'secure'
-                            assign row_pkg_name = zv_alert_name
-                          when 'guard'
-                            assign row_pkg_name = zv_protect_name
-                        endcase
+                        assign row_fk = item.product.metafields.custom.finder_key.value
+                        if row_fk == 'aware' or row_fk == 'aware_plus' or row_fk == 'care' or row_fk == 'secure' or row_fk == 'guard'
+                          capture row_pkg_name
+                            render 'zv-package-name', finder_key: row_fk, names: zv_package_names_by_fk
+                          endcapture
+                          assign row_pkg_name = row_pkg_name | strip
+                        endif
                       endif
                       if activation_variant_id != blank and item.variant_id == activation_variant_id
                         assign row_label = zv_label_activation
@@ -707,10 +709,10 @@
     { "type": "textarea", "id": "subheading", "label": "Subtitel", "default": "Controleer uw keuze voordat u veilig afrekent. U kunt dit hieronder nog wijzigen." },
     { "type": "text", "id": "pkg_card_heading", "label": "Kop · pakketkaart", "default": "Uw pakket en configuratie" },
     { "type": "text", "id": "pkg_card_link_label", "label": "Link · pakketkaart", "default": "Wijzig in winkelwagen" },
-    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De korting van de eerste 3 maanden rekent u vandaag ineens af, naast de installatiekosten. Uw maandbedrag zelf verandert niet. Alle bedragen zijn inclusief btw (21%)." },
+    { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De eerste 3 maanden van uw pakket betaalt u vandaag vooruit, met 50% korting, samen met de eventuele installatiekosten. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%)." },
     { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
     { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
-    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eenmalige kosten voor activatie en installatie plus de vooruitbetaalde korting voor de eerste 3 maanden, via de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eventuele installatiekosten en de eerste 3 maanden van uw pakket vooruit, met 50% korting, via de beveiligde Shopify-checkout." },
     { "type": "text", "id": "consent_prefix", "label": "Akkoordtekst · voor de link", "default": "Ik ga akkoord met de", "info": "Gevolgd door een vaste link naar de Algemene Voorwaarden." },
     { "type": "text", "id": "consent_middle", "label": "Akkoordtekst · na de link (met pakket)", "default": ", de contractduur van", "info": "Gevolgd door de contractduur van het pakket, in maanden." },
     { "type": "text", "id": "consent_suffix", "label": "Akkoordtekst · slot", "default": "en de betaalplicht." },

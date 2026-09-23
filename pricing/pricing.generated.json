@@ -88,6 +88,7 @@
     {
       "id": "inzicht",
       "name": "Inzicht",
+      "finderKey": "aware",
       "lineId": "langer-thuis",
       "lineName": "Langer Thuis",
       "cat": "living",
@@ -106,37 +107,38 @@
       "promoMonths": 3,
       "promoWasCents": 5985,
       "promoWasDisplay": "€ 59,85",
-      "promoDiscountTotalCents": 2993,
-      "promoDiscountTotalDisplay": "€ 29,93",
+      "promoDiscountTotalCents": 2994,
+      "promoDiscountTotalDisplay": "€ 29,94",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "geen": {
-          "amountCents": 2993,
-          "display": "€ 29,93"
+          "amountCents": 2994,
+          "display": "€ 29,94"
         },
         "telefonisch": {
-          "amountCents": 6493,
-          "display": "€ 64,93"
+          "amountCents": 6494,
+          "display": "€ 64,94"
         },
         "huis": {
-          "amountCents": 12893,
-          "display": "€ 128,93"
+          "amountCents": 12894,
+          "display": "€ 128,94"
         }
       },
-      "initialPaymentDueTodayCents": 12893,
-      "initialPaymentDueTodayDisplay": "€ 128,93",
+      "initialPaymentDueTodayCents": 12894,
+      "initialPaymentDueTodayDisplay": "€ 128,94",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 30847,
-        "display": "€ 308,47",
-        "recurringMonthsBilled": 12,
+        "cents": 30849,
+        "display": "€ 308,49",
+        "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
     {
       "id": "zeker",
       "name": "Zeker",
+      "finderKey": "aware_plus",
       "lineId": "langer-thuis",
       "lineName": "Langer Thuis",
       "cat": "living",
@@ -155,37 +157,38 @@
       "promoMonths": 3,
       "promoWasCents": 7485,
       "promoWasDisplay": "€ 74,85",
-      "promoDiscountTotalCents": 3743,
-      "promoDiscountTotalDisplay": "€ 37,43",
+      "promoDiscountTotalCents": 3744,
+      "promoDiscountTotalDisplay": "€ 37,44",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "geen": {
-          "amountCents": 3743,
-          "display": "€ 37,43"
+          "amountCents": 3744,
+          "display": "€ 37,44"
         },
         "telefonisch": {
-          "amountCents": 7243,
-          "display": "€ 72,43"
+          "amountCents": 7244,
+          "display": "€ 72,44"
         },
         "huis": {
-          "amountCents": 13643,
-          "display": "€ 136,43"
+          "amountCents": 13644,
+          "display": "€ 136,44"
         }
       },
-      "initialPaymentDueTodayCents": 13643,
-      "initialPaymentDueTodayDisplay": "€ 136,43",
+      "initialPaymentDueTodayCents": 13644,
+      "initialPaymentDueTodayDisplay": "€ 136,44",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 36097,
-        "display": "€ 360,97",
-        "recurringMonthsBilled": 12,
+        "cents": 36099,
+        "display": "€ 360,99",
+        "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
     {
       "id": "beschermd",
       "name": "Beschermd",
+      "finderKey": "care",
       "lineId": "langer-thuis",
       "lineName": "Langer Thuis",
       "cat": "living",
@@ -204,29 +207,30 @@
       "promoMonths": 3,
       "promoWasCents": 11985,
       "promoWasDisplay": "€ 119,85",
-      "promoDiscountTotalCents": 5993,
-      "promoDiscountTotalDisplay": "€ 59,93",
+      "promoDiscountTotalCents": 5994,
+      "promoDiscountTotalDisplay": "€ 59,94",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "huis": {
-          "amountCents": 15893,
-          "display": "€ 158,93"
+          "amountCents": 15894,
+          "display": "€ 158,94"
         }
       },
-      "initialPaymentDueTodayCents": 15893,
-      "initialPaymentDueTodayDisplay": "€ 158,93",
+      "initialPaymentDueTodayCents": 15894,
+      "initialPaymentDueTodayDisplay": "€ 158,94",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 147727,
-        "display": "€ 1.477,27",
-        "recurringMonthsBilled": 36,
+        "cents": 147729,
+        "display": "€ 1.477,29",
+        "recurringMonthsBilled": 33,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
     {
       "id": "alert",
       "name": "Alert",
+      "finderKey": "secure",
       "lineId": "mijn-thuis",
       "lineName": "Mijn Thuis",
       "cat": "security",
@@ -245,37 +249,38 @@
       "promoMonths": 3,
       "promoWasCents": 7485,
       "promoWasDisplay": "€ 74,85",
-      "promoDiscountTotalCents": 3743,
-      "promoDiscountTotalDisplay": "€ 37,43",
+      "promoDiscountTotalCents": 3744,
+      "promoDiscountTotalDisplay": "€ 37,44",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "geen": {
-          "amountCents": 3743,
-          "display": "€ 37,43"
+          "amountCents": 3744,
+          "display": "€ 37,44"
         },
         "telefonisch": {
-          "amountCents": 7243,
-          "display": "€ 72,43"
+          "amountCents": 7244,
+          "display": "€ 72,44"
         },
         "huis": {
-          "amountCents": 13643,
-          "display": "€ 136,43"
+          "amountCents": 13644,
+          "display": "€ 136,44"
         }
       },
-      "initialPaymentDueTodayCents": 13643,
-      "initialPaymentDueTodayDisplay": "€ 136,43",
+      "initialPaymentDueTodayCents": 13644,
+      "initialPaymentDueTodayDisplay": "€ 136,44",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 36097,
-        "display": "€ 360,97",
-        "recurringMonthsBilled": 12,
+        "cents": 36099,
+        "display": "€ 360,99",
+        "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
     {
       "id": "protect",
       "name": "Protect",
+      "finderKey": "guard",
       "lineId": "mijn-thuis",
       "lineName": "Mijn Thuis",
       "cat": "security",
@@ -294,29 +299,30 @@
       "promoMonths": 3,
       "promoWasCents": 11385,
       "promoWasDisplay": "€ 113,85",
-      "promoDiscountTotalCents": 5693,
-      "promoDiscountTotalDisplay": "€ 56,93",
+      "promoDiscountTotalCents": 5694,
+      "promoDiscountTotalDisplay": "€ 56,94",
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
       "dueToday": {
         "huis": {
-          "amountCents": 15593,
-          "display": "€ 155,93"
+          "amountCents": 15594,
+          "display": "€ 155,94"
         }
       },
-      "initialPaymentDueTodayCents": 15593,
-      "initialPaymentDueTodayDisplay": "€ 155,93",
+      "initialPaymentDueTodayCents": 15594,
+      "initialPaymentDueTodayDisplay": "€ 155,94",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
-        "cents": 140827,
-        "display": "€ 1.408,27",
-        "recurringMonthsBilled": 36,
+        "cents": 140829,
+        "display": "€ 1.408,29",
+        "recurringMonthsBilled": 33,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       }
     },
     {
       "id": "vista",
       "name": "Vista",
+      "finderKey": "secure_plus",
       "lineId": "mijn-thuis",
       "lineName": "Mijn Thuis",
       "cat": "security",
@@ -333,6 +339,7 @@
     {
       "id": "vo-sos",
       "name": "Paniek Meldkamer",
+      "finderKey": "liogo_solo",
       "lineId": "veilig-onderweg",
       "lineName": "Veilig Onderweg",
       "cat": "persoonlijk",
@@ -349,6 +356,7 @@
     {
       "id": "vo-zorg",
       "name": "Zorgmeldkamer",
+      "finderKey": "liogo_guard",
       "lineId": "veilig-onderweg",
       "lineName": "Veilig Onderweg",
       "cat": "persoonlijk",
