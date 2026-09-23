@@ -202,17 +202,17 @@
               {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}{%- assign ltc_hw_bullets = '' -%}
               {%- comment -%}
                 ltc_addons: per-package "Uitbreidingen toevoegen" list, replacing the old
-                b.settings.uitbreidingen shared textarea (2026-09-16, see
-                docs/package-addons-uitbreidingen-2026-09-16.md for the live Shopify
-                verification behind these handles/prices). One item per '§', each item
-                'Name|shopify-handle|billing' (billing: 'oneoff' or 'monthly'). aware/aware_plus/
-                secure are intentionally blank — the Nami PIR/Deursensor add-ons Thijs described
-                do not exist as standalone Shopify products (only zero-price package-placeholder
-                products under the Nami vendor), so no add-on checkboxes render for those three
-                tiers until real products exist. care/guard share the same confirmed list.
+                b.settings.uitbreidingen shared textarea (2026-09-16). One item per '§', each
+                item 'Name|shopify-handle|billing' (billing: 'oneoff' or 'monthly'). It is
+                blank for all five packages, so no "Uitbreidingen toevoegen" group renders on
+                any card (or in the cart drawer, which clones that group). Beschermd/Protect
+                (care/guard) used to share a list of seven one-off koop-* hardware add-ons;
+                those Shopify products were deleted on purpose, so the list was removed
+                2026-09-23 (docs/pakket-wijzigingen-2026-09-23.md). aware/aware_plus/secure
+                never had a list. To give a package add-ons again, assign ltc_addons in its
+                'when' branch below; the rendering loop further down is kept for that.
               {%- endcomment -%}
               {%- assign ltc_addons = '' -%}
-              {%- assign care_guard_addons = 'Magneetcontact (DC-23)|koop-magneetcontact-dc-23|oneoff§PIR bewegingsdetector|koop-pir-bewegingsdetector|oneoff§Afstandsbediening|koop-afstandsbediening|oneoff§Rookmelder|koop-rookmelder|oneoff§Buitencamera wifi 730|koop-730-buitencamera-wifi|oneoff§Binnencamera met SD kaart|koop-515-binnencamera|oneoff§Videodeurbel 750|koop-video-deurbel-750|oneoff' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rust, weet dat het goed gaat' -%}
@@ -230,7 +230,6 @@
                   {%- assign ltc_intro = 'Alles van Zeker, plus:' -%}
                   {%- assign ltc_bullets = 'Nederlandse [meldkamer](kc/hoe-werkt-een-meldkamer) 24/7|Alarmknop met opvolging|Rookmelders met doormelding naar de meldkamer' -%}
                   {%- assign ltc_hw_bullets = '1x centrale|1x codebedienpaneel|2x deur/raamsensor|2x locatiesensor|2x rookmelder|3x paniekknop naar keuze|Incl. meldkamer' -%}
-                  {%- assign ltc_addons = care_guard_addons -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'secure' -%}
                   {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Bullets and "Wat zit erin?" replaced 2026-09-23 per docs/pakket-wijzigingen-2026-09-23.md §5; tagline unchanged. {%- endcomment -%}
@@ -245,7 +244,6 @@
                   {%- assign ltc_bullets = '24/7 aangesloten op een professionele meldkamer|Directe bescherming tegen inbraak|Bescherming tegen brand en rook|Hulp wordt ingeschakeld wanneer dat nodig is|Overal bedienen via de app|Altijd professionele alarmopvolging als extra vangnet|Uitbreidbaar met surveillance, CO- en waterdetectie' -%}
                   {%- assign ltc_hw_bullets = '1x centrale|1x codebedienpaneel|1x rookmelder|1x fotobewegingsmelder|2x deur/raamsensor' -%}
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
-                  {%- assign ltc_addons = care_guard_addons -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
@@ -1402,9 +1400,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   }
 
   /* Populate each line's .addcart__lineopts placeholder with a live clone of that
-     package's own [data-group="addons"]/[data-group="terms"] blocks (skipped
-     entirely — no header, no placeholder — if the card has neither, e.g. Inzicht/
-     Zeker/Alert have no addons group at all), re-checking whichever options the
+     package's own [data-group="addons"]/[data-group="terms"] blocks (each skipped
+     entirely — no header, no placeholder — if the card lacks it; today none of the
+     five packages has an addons group, see ltc_addons), re-checking whichever options the
      line's own Uitbreidingen/Abonnement properties already record. Runs after
      cartEl.innerHTML is set, same convention as the cart-attribute reflect step
      this replaced. */
