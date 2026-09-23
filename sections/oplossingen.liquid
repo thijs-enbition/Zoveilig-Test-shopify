@@ -1523,7 +1523,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       for (var k in lp) { if (lp.hasOwnProperty(k)) props[k] = lp[k]; }
       if (on) props['Woning'] = 'Groter dan 100 m²'; else delete props['Woning'];
       woning.disabled = true;
-      cartWrite('/cart/change.js', { id: key, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
+      cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
       return;
     }
     var lineOpt = e.target.closest('.addcart__lineopts .pcard__plus-opt input');
@@ -1550,7 +1550,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         if (names.length) lprops[propKey] = names.join(', '); else delete lprops[propKey];
       });
       lineOpt.disabled = true;
-      cartWrite('/cart/change.js', { id: lkey, properties: lprops }, function () { lineOpt.checked = !lon; lineOpt.disabled = false; });
+      cartWrite('/cart/change.js', { id: lkey, quantity: lline.quantity, properties: lprops }, function () { lineOpt.checked = !lon; lineOpt.disabled = false; });
     }
   });
 
