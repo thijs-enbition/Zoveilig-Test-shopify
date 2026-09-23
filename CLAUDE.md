@@ -9,8 +9,11 @@ Winkelwagen → Overzicht → Shopify checkout.
 - `/cart?view=overzicht` — `templates/cart.overzicht.json` → `sections/zv-checkout-overview.liquid`.
   Read-only final review of the live `{{ cart }}` (package, pricing breakdown, AV consent).
   Empty cart redirects (client-side) back to `/cart`.
-- On "Verder naar veilig afrekenen", the page POSTs to `/cart/update.js` with two cart
-  `attributes` (so they land on the order), then navigates to `/checkout`:
+- On "Verder naar veilig afrekenen", the page first re-reads `/cart.js`. If the cart differs
+  from the one the page was rendered with (`data-cart-sig`, line key:quantity) or the cart
+  guard's rules (`window.zvCartGuard.planFix`) find a fix, it reloads Overzicht instead of
+  going on. Otherwise it POSTs to `/cart/update.js` with two cart `attributes` (so they land on
+  the order), then navigates to `/checkout`:
   - `av_akkoord` — `"ja"` once the Algemene Voorwaarden checkbox is ticked.
   - `av_akkoord_tijdstip` — ISO 8601 timestamp of that click.
 
@@ -59,6 +62,14 @@ after the fact or a package reaching the cart through an unexpected route:
   - `cart_pkg_undiscounted`: a package line carries no discount at all. The guard can't fix
     that, so checkout stays blocked with a contact message. A customer must never pay 3 full
     months.
+
+**Known limitation: both checks run in the theme, so any route to Shopify checkout that skips
+Overzicht bypasses them.** A cart permalink (`/cart/<variant>:<qty>`) and typing or bookmarking
+`/checkout` directly go straight to Shopify's checkout: no guard, no gate, no `av_akkoord`. The
+other sales channels where N0001 (Inzicht), N0003 (Alert) and the installation products (CL003,
+N0004/N0005/N0006) are published (Shop, Point of Sale, Google & YouTube, Inbox; Admin API,
+2026-09-23) don't run this theme either. A real server-side block needs a Shopify checkout
+(cart/checkout validation) function, which is a separate decision; the theme can't close this.
 
 The standalone product page doesn't render a buy form for a package (`sections/main-product.liquid`).
 Its Dynamic Checkout buttons (Shop Pay etc., `show_dynamic_checkout` in `templates/product.json`)
