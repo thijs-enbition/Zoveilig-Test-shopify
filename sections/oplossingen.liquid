@@ -216,7 +216,7 @@
               {%- case fk -%}
                 {%- when 'aware' -%}
                   {%- assign ltc_tagline = 'Rust, weet dat het goed gaat' -%}
-                  {%- assign ltc_bullets = 'Daginzicht in het leefritme van uw dierbare|Mogelijkheid tot een melding bij de eerste beweging van de dag|En/of een melding bij afwijking van het normale patroon|Automatische nachtverlichting bij beweging|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- assign ltc_bullets = 'Daginzicht in het leefritme van uw dierbare|Mogelijkheid tot een melding bij de eerste beweging van de dag|En/of een melding bij afwijking van het normale patroon|Automatische nachtverlichting bij beweging|[Familie-app voor mantelzorgers](oplossingen/mantelzorgdashboard)|Geen camera of microfoon' -%}
                   {%- assign ltc_hw_bullets = '3x activiteiten sensor|1x deur/raamsensor|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
                 {%- when 'aware_plus' -%}
@@ -473,6 +473,9 @@
           zv_beschermd_monthly: zv_beschermd_monthly,
           embedded: true
         -%}
+        {%- comment -%} Mantelzorgdashboard (§12): block type 'mantelzorgdashboard', see snippets/zv-mantelzorgdashboard.liquid. {%- endcomment -%}
+        {%- assign mzd_block = section.blocks | where: 'type', 'mantelzorgdashboard' | first -%}
+        {%- if mzd_block -%}{%- render 'zv-mantelzorgdashboard', block: mzd_block -%}{%- endif -%}
       {%- endif -%}
 
       {%- if anchor == 'mijn-thuis' -%}
@@ -2023,6 +2026,35 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
           { "value": "2", "label": "Rij 2" },
           { "value": "3", "label": "Rij 3" }
         ], "default": "1" }
+      ]
+    },
+    {
+      "type": "mantelzorgdashboard",
+      "name": "Mantelzorgdashboard",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Wordt getoond op het Langer Thuis-tabblad, direct onder de pakket-matcher. Anker: #mantelzorgdashboard — zie snippets/zv-mantelzorgdashboard.liquid." },
+        { "type": "text", "id": "heading", "label": "Kop", "default": "Het mantelzorgdashboard" },
+        { "type": "textarea", "id": "intro", "label": "Intro", "default": "Via de Familie-app ziet u als mantelzorger in één oogopslag hoe het gaat. Het dashboard is gebouwd op het Wellness-platform van Alarm.com." },
+        { "type": "header", "content": "Onderdeel 1" },
+        { "type": "text", "id": "item_1_title", "label": "1 · Titel", "default": "Dashboard" },
+        { "type": "textarea", "id": "item_1_text", "label": "1 · Tekst", "default": "Activiteitsniveau van vandaag afgezet tegen het persoonlijke gemiddelde, met kleurcodering: groen is routine, geel is opvallend, rood is ongebruikelijk." },
+        { "type": "text", "id": "item_1_note", "label": "1 · Notitie (klein, optioneel)" },
+        { "type": "header", "content": "Onderdeel 2" },
+        { "type": "text", "id": "item_2_title", "label": "2 · Titel", "default": "Activity Detail" },
+        { "type": "textarea", "id": "item_2_text", "label": "2 · Tekst", "default": "Weekgrafiek van het activiteitsniveau." },
+        { "type": "text", "id": "item_2_note", "label": "2 · Notitie (klein, optioneel)" },
+        { "type": "header", "content": "Onderdeel 3" },
+        { "type": "text", "id": "item_3_title", "label": "3 · Titel", "default": "Sensor Summary" },
+        { "type": "textarea", "id": "item_3_text", "label": "3 · Tekst", "default": "Dagoverzicht per ruimte over 24 uur." },
+        { "type": "text", "id": "item_3_note", "label": "3 · Notitie (klein, optioneel)", "default": "Bij Inzicht en Beschermd." },
+        { "type": "header", "content": "Onderdeel 4" },
+        { "type": "text", "id": "item_4_title", "label": "4 · Titel", "default": "Behaviors and Trends" },
+        { "type": "textarea", "id": "item_4_text", "label": "4 · Tekst", "default": "Vergelijkt gedrag per categorie (keukenbezoeken, in- en uitgaan, activiteitsniveau) met een opgebouwd persoonlijk profiel." },
+        { "type": "text", "id": "item_4_note", "label": "4 · Notitie (klein, optioneel)" },
+        { "type": "header", "content": "Afsluiting en afbeelding" },
+        { "type": "textarea", "id": "closing", "label": "Slotregel (benadrukt)", "default": "Dit is een lerend gedragsprofiel. Van het grootste belang voor mantelzorgers." },
+        { "type": "image_picker", "id": "image", "label": "Afbeelding (optioneel)", "info": "Alleen een officieel Alarm.com-beeld (dealer- of marketingmateriaal) uit Shopify Files. Leeg: geen afbeeldingskolom, de tekst krijgt de volle breedte. Alt-tekst komt uit het bestand, anders de kop." }
       ]
     }
   ],

@@ -1,0 +1,39 @@
+/* Mantelzorgdashboard block on /pages/oplossingen (Langer Thuis tab), rendered by
+   snippets/zv-mantelzorgdashboard.liquid. Colour tokens come from zv-chrome.css :root.
+   Width and side gutter match the embedded pakket-matcher directly above it
+   (.zv-vergelijk .wrap: max 1080px, 0 clamp(20px,3.6vw,52px)); the card border, radius and
+   shadow match its table card (.tbl-wrap); type sizes follow the neighbouring .pak/.why
+   rules; the two-column-to-one switch uses the page's 820px breakpoint (.why__grid).
+   .opl-page resets margin/padding on h3/h4/p/ul/li, so every margin here is explicit, and
+   headings set their own colour so Dawn's heading colour cannot leak in. */
+.opl-page .mzd { max-width: 1080px; margin: clamp(40px, 4.4vw, 64px) auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); scroll-margin-top: 132px; }
+.opl-page .mzd__card { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(24px, 3.2vw, 44px); align-items: center; background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 3.2vw, 44px); box-shadow: 0 24px 54px -46px rgba(26, 18, 48, 0.5); }
+.opl-page .mzd--noimg .mzd__card { grid-template-columns: minmax(0, 1fr); }
+
+.opl-page .mzd__h { font-size: clamp(24px, 2.6vw, 32px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; color: var(--indigo); text-wrap: balance; }
+.opl-page .mzd__intro { margin-top: 12px; max-width: 68ch; font-size: 15.5px; line-height: 1.6; color: var(--muted); }
+
+.opl-page .mzd__list { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px 32px; }
+.opl-page .mzd__item { padding-left: 16px; border-left: 3px solid var(--gold); }
+.opl-page .mzd__t { font-size: 16px; font-weight: 800; line-height: 1.3; letter-spacing: 0; color: var(--indigo); }
+.opl-page .mzd__x { margin-top: 4px; font-size: 15px; line-height: 1.55; color: #4a4458; }
+.opl-page .mzd__note { margin-top: 6px; font-size: 12.5px; font-weight: 700; line-height: 1.4; color: var(--muted-2); }
+
+.opl-page .mzd__closing { margin-top: 24px; padding: 14px 18px; border-radius: 12px; background: var(--indigo-soft); font-size: 16px; line-height: 1.45; color: var(--indigo); }
+.opl-page .mzd__closing strong { font-weight: 900; }
+
+/* Image column: only in the DOM when an image is picked. The frame keeps a tall (portrait)
+   app screenshot from stretching the card: the image is capped in height and letterboxed
+   inside the white frame instead of being cropped. */
+.opl-page .mzd__media { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: clamp(10px, 1.2vw, 14px); }
+.opl-page .mzd__img { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; border-radius: 8px; }
+
+/* Without an image the text spans the whole card, so the four items sit in two columns. */
+@media (min-width: 821px) {
+  .opl-page .mzd--noimg .mzd__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Mobile: one column; the image comes after the text in the DOM, so it lands under it. */
+@media (max-width: 820px) {
+  .opl-page .mzd__card { grid-template-columns: minmax(0, 1fr); }
+}

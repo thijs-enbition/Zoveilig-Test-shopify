@@ -1,0 +1,62 @@
+{%- comment -%}
+  Mantelzorgdashboard (Alarm.com Wellness) — docs/pakket-wijzigingen-2026-09-23.md §12.
+
+  Rendered only by sections/oplossingen.liquid, inside the Langer Thuis tab panel
+  (#panel-langer-thuis), directly under the Langer Thuis pakket-matcher and before
+  "Waarom Zo Veilig". Because it sits inside that panel, the tab JS hides it together
+  with the rest of the panel when another tab is active; it has no JS of its own.
+
+  Param:
+    block   the oplossingen section block of type 'mantelzorgdashboard' (limit 1, so
+            id="mantelzorgdashboard" is unique on the page).
+
+  Every text is a block setting, and the spec copy is both the schema default and the
+  value stored in templates/page.oplossingen.json. No `| default:` fallbacks on the texts:
+  blanking a field in the theme editor hides that element instead of bringing the spec
+  copy back.
+
+  Image: image_picker `image`, to be filled with an official Alarm.com asset uploaded to
+  Shopify Files. While it is empty the image column is not rendered at all (no
+  placeholder) and the `mzd--noimg` modifier lets the text take the full card width.
+  Alt text: the file's own alt text, else the heading.
+
+  Deep link: the Inzicht bullet "Familie-app voor mantelzorgers" links here through the
+  zv-route key 'oplossingen/mantelzorgdashboard', which outputs the bare fragment
+  '#mantelzorgdashboard'.
+
+  Styles: assets/zv-mantelzorgdashboard.css (loaded below; colour tokens from zv-chrome.css).
+{%- endcomment -%}
+{%- liquid
+  assign s = block.settings
+  assign mzd_img = s.image
+  assign mzd_alt = mzd_img.alt | default: s.heading
+-%}
+{{ 'zv-mantelzorgdashboard.css' | asset_url | stylesheet_tag }}
+<section class="mzd{% if mzd_img == blank %} mzd--noimg{% endif %}" id="mantelzorgdashboard" data-section-name="mantelzorgdashboard"{% if s.heading != blank %} aria-labelledby="mzd-heading"{% endif %} {{ block.shopify_attributes }}>
+  <div class="mzd__card">
+    <div class="mzd__copy">
+      {%- if s.heading != blank -%}<h3 class="mzd__h" id="mzd-heading">{{ s.heading | escape }}</h3>{%- endif -%}
+      {%- if s.intro != blank -%}<p class="mzd__intro">{{ s.intro | escape }}</p>{%- endif -%}
+      <ul class="mzd__list">
+        {%- for i in (1..4) -%}
+          {%- assign k_t = 'item_' | append: i | append: '_title' -%}
+          {%- assign k_x = 'item_' | append: i | append: '_text' -%}
+          {%- assign k_n = 'item_' | append: i | append: '_note' -%}
+          {%- if s[k_t] != blank or s[k_x] != blank -%}
+            <li class="mzd__item">
+              {%- if s[k_t] != blank -%}<h4 class="mzd__t">{{ s[k_t] | escape }}</h4>{%- endif -%}
+              {%- if s[k_x] != blank -%}<p class="mzd__x">{{ s[k_x] | escape }}</p>{%- endif -%}
+              {%- if s[k_n] != blank -%}<p class="mzd__note">{{ s[k_n] | escape }}</p>{%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+      {%- if s.closing != blank -%}<p class="mzd__closing"><strong>{{ s.closing | escape }}</strong></p>{%- endif -%}
+    </div>
+    {%- if mzd_img != blank -%}
+      <div class="mzd__media">
+        {{ mzd_img | image_url: width: 1080 | image_tag: alt: mzd_alt, loading: 'lazy', widths: '360, 540, 720, 900, 1080', sizes: '(min-width: 1100px) 360px, (min-width: 821px) 36vw, calc(100vw - 100px)', class: 'mzd__img' }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
