@@ -157,14 +157,11 @@
                   {%- comment -%}
                     Vista, 2026-09-15: product-photo tile image removed (was
                     assets/opl-tile-06.jpg, now deleted) — see
-                    docs/mijn-thuis-vista-images-card-height-2026-09-15.md. That image baked
-                    together the product photos, the "IN HET PAKKET" pill list, and the
-                    Meldkamer/Camera badges as one graphic; none of that has a live markup
-                    equivalent yet, so Vista's card front is intentionally sparser (sub-line
-                    + "Geen vast pakket" + lead form only) until its copy is drafted and
-                    signed off, same open item as the other Alert/Protect redesign work.
+                    docs/mijn-thuis-vista-images-card-height-2026-09-15.md.
+                    2026-09-23 (docs/pakket-wijzigingen-2026-09-23.md §10): the sub-line and the
+                    "Geen vast pakket" price area are gone; the card front is now title, tagline,
+                    icon and bullets (second case block below) above the lead form. No tile, no sub.
                   {%- endcomment -%}
-                  {%- assign sub = 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' -%}
                 {%- when 'liogo_solo' -%}{%- assign tile = 'opl-tile-10.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
                 {%- when 'liogo_guard' -%}{%- assign tile = 'opl-tile-11.jpg' -%}{%- assign sub = 'Prijs en specificaties volgen' -%}
               {%- endcase -%}
@@ -408,10 +405,13 @@
                     <hr class="ltc__div">
                   {%- endif -%}
                   <div class="pcard__foot">
-                    <div class="pcard__price">
-                      {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
-                    </div>
-                    {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                    {%- comment -%} No price area or sub-line on Vista (spec §10). Its lead payload's monthly_price still comes from [data-vista]@data-price below, not from here. {%- endcomment -%}
+                    {%- unless is_vista -%}
+                      <div class="pcard__price">
+                        {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
+                      </div>
+                      {%- if sub != blank -%}<div class="pcard__sub">{{ sub }}</div>{%- endif -%}
+                    {%- endunless -%}
                     {%- comment -%} SKU intentionally not shown to customers {%- endcomment -%}
 
                     {%- if price_known -%}
@@ -440,7 +440,6 @@
                       {%- if v.sku == 'MT-VIS' or fk == 'secure_plus' -%}
                         {%- comment -%} Vista is callout-only (maatwerk): no self-checkout, no detail drawer. Conversion is a VISTA Lead callback -> window.ZV_LEAD_ENDPOINT (Odoo CRM). {%- endcomment -%}
                         <div class="pcard__vista" data-vista data-odoo="{{ v.sku | default: 'MT-VIS' }}" data-item="{{ p.title | default: 'Mijn Thuis Vista' | escape }}" data-price="{% if price_known %}{{ p.price | money }}{% else %}Geen vast pakket{% endif %}">
-                          <a class="pcard__vista-more" href="/pages/camera-hardware" data-zv-event="vista_camera_hardware" data-cta-name="bekijk_camerahardware">Bekijk de camerahardware<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                           <form class="pcard__vista-form" data-vista-form>
                             <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
                             <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
@@ -1108,10 +1107,6 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .cs-done-ic svg{width:20px;height:20px;flex:none;}
 /* Vista: callout-only VISTA Lead callback form (1:1 with Brand 3 pages.jsx) */
 .pcard__vista{display:flex;flex-direction:column;gap:10px;}
-.pcard__vista-more{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:800;color:#322469;text-decoration:none;padding:6px 4px;}
-.pcard__vista-more svg{width:15px;height:15px;transition:transform .15s;}
-.pcard__vista-more:hover{color:#9c6c08;}
-.pcard__vista-more:hover svg{transform:translateX(3px);}
 .pcard__vista-form{display:flex;flex-direction:column;gap:9px;}
 .pcard__vista-form input{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a1230;border:1.5px solid #e8e0cd;border-radius:6px;padding:11px 12px;background:#fff;}
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
