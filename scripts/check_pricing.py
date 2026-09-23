@@ -81,22 +81,22 @@ cfg_promo_enabled = bool(cfg["promo"].get("enabled", True))
 promo_active = bool(cfg["promo"].get("enabled")) and promo_rate > 0
 for p in priced:
     m = p["monthlyRecurringPriceCents"]
-    exp_promo_monthly = half_up(Decimal(m) * (Decimal(1) - promo_rate)) if cfg_promo_enabled else m
     exp_promo_disc = half_up(Decimal(promo_months) * Decimal(m) * promo_rate) if cfg_promo_enabled else 0
-    # promoMonthlyCents/promoMonthlyDisplay are retained derived math (monthly x
-    # (1 - rate)) but describe the RETIRED "discounted SEPA instalment" model
-    # (superseded 2026-09-22, see pricing.config.json promo.note) - they must never be
-    # rendered anywhere; check #10 below guards that no theme file carries an
-    # independent price, and the promo add-on itself is verified via dueToday (#4).
-    check(p["promoMonthlyCents"] == exp_promo_monthly,
-          f"{p['name']} promo monthly = monthly x (1 - rate) (half-up) [retained math, not rendered]",
-          f"got {p['promoMonthlyCents']} expected {exp_promo_monthly}")
     check(p["promoDiscountTotalCents"] == exp_promo_disc,
           f"{p['name']} promo discount = months x monthly x rate (half-up)",
           f"got {p['promoDiscountTotalCents']} expected {exp_promo_disc}")
+    # promoWas is the undiscounted worth of the prepaid period - the struck-through
+    # figure on the actie page. A 3-month total, never a monthly rate.
+    exp_promo_was = m * promo_months if cfg_promo_enabled else 0
+    check(p["promoWasCents"] == exp_promo_was,
+          f"{p['name']} promo was = monthly x months",
+          f"got {p['promoWasCents']} expected {exp_promo_was}")
     if promo_active:
         check(p["promoDiscountTotalCents"] > 0,
               f"{p['name']} promo add-on is a positive charge, never a discount on installation")
+        check(p["promoWasCents"] > p["promoDiscountTotalCents"],
+              f"{p['name']} promo was exceeds what's actually charged",
+              f"was={p['promoWasCents']} charged={p['promoDiscountTotalCents']}")
 check(half_up(Decimal("3742.5")) == 3743,
       "rounding is half-up, not banker's", "1.5 x 2495 must give 3743")
 check(cfg["rounding"]["method"] == "ROUND_HALF_UP", "config declares ROUND_HALF_UP")
@@ -110,8 +110,11 @@ if not promo_active:
         check(p["promoDiscountTotalCents"] == 0,
               f"{p['name']} promo discount is 0 while promo is inactive",
               f"got {p['promoDiscountTotalCents']}")
-        check(p["promoMonthlyCents"] == p["monthlyRecurringPriceCents"],
-              f"{p['name']} promo monthly equals full monthly while promo is inactive")
+
+for p in priced:
+    check("promoMonthlyCents" not in p,
+          f"{p['name']} carries no retired promoMonthly figure",
+          "the discounted-monthly-rate concept is retired; nothing may render it")
 
 print("\n4. Due today per install option (install + promo add-on)")
 # The 8 combinations confirmed against kosten.xlsx (Thijs, 2026-09-22): installation is

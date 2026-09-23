@@ -53,7 +53,7 @@
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "Indicatief. De korting van de eerste 3 maanden (50% van het maandbedrag) wordt vandaag als apart bedrag verrekend, bovenop de installatiekosten. Uw maandbedrag zelf blijft ongewijzigd. Alle bedragen zijn inclusief btw (21%)."
+    "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%)."
   },
   "contract": {
     "defaultTermMonths": 36,
@@ -98,11 +98,12 @@
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
       "installGroup": "nami",
+      "productHandle": "langer-thuis-inzicht",
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
-      "promoMonthlyCents": 998,
-      "promoMonthlyDisplay": "€ 9,98",
+      "promoWasCents": 5985,
+      "promoWasDisplay": "€ 59,85",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
       "promoProduct": {
@@ -149,11 +150,12 @@
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
       "installGroup": "nami",
+      "productHandle": "langer-thuis-zeker",
       "monthlyRecurringPriceCents": 2495,
       "monthlyDisplay": "€ 24,95",
       "promoMonths": 3,
-      "promoMonthlyCents": 1248,
-      "promoMonthlyDisplay": "€ 12,48",
+      "promoWasCents": 7485,
+      "promoWasDisplay": "€ 74,85",
       "promoDiscountTotalCents": 3743,
       "promoDiscountTotalDisplay": "€ 37,43",
       "promoProduct": {
@@ -200,11 +202,12 @@
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 36,
       "installGroup": "climax",
+      "productHandle": "langer-thuis-beschermd",
       "monthlyRecurringPriceCents": 3995,
       "monthlyDisplay": "€ 39,95",
       "promoMonths": 3,
-      "promoMonthlyCents": 1998,
-      "promoMonthlyDisplay": "€ 19,98",
+      "promoWasCents": 11985,
+      "promoWasDisplay": "€ 119,85",
       "promoDiscountTotalCents": 5993,
       "promoDiscountTotalDisplay": "€ 59,93",
       "promoProduct": {
@@ -243,11 +246,12 @@
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
       "installGroup": "nami",
+      "productHandle": "mijn-thuis-alert",
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
-      "promoMonthlyCents": 998,
-      "promoMonthlyDisplay": "€ 9,98",
+      "promoWasCents": 5985,
+      "promoWasDisplay": "€ 59,85",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
       "promoProduct": {
@@ -294,11 +298,12 @@
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 36,
       "installGroup": "climax",
+      "productHandle": "mijn-thuis-protect",
       "monthlyRecurringPriceCents": 3495,
       "monthlyDisplay": "€ 34,95",
       "promoMonths": 3,
-      "promoMonthlyCents": 1748,
-      "promoMonthlyDisplay": "€ 17,48",
+      "promoWasCents": 10485,
+      "promoWasDisplay": "€ 104,85",
       "promoDiscountTotalCents": 5243,
       "promoDiscountTotalDisplay": "€ 52,43",
       "promoProduct": {
@@ -498,7 +503,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is the activation only. The 1.5x prepayment is retired; the intro promo is applied to the SEPA monthly, not collected today.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the prepaid \"Eerste 3 maanden\" line, i.e. the live cart total. Installation is never discounted; the promo is a separate positive line, not a reduction. The monthly recurring rate is never collected by Shopify and must never be added to this value.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -517,12 +522,12 @@
     {
       "id": "ODOO_PROMO_DISCOUNT",
       "severity": "high",
-      "summary": "Odoo Subscriptions must apply the intro promo (50% off the first 3 monthly SEPA instalments) on the recurring invoices. The theme only displays it. If Odoo does not apply it, the displayed discount and the actual billing diverge.",
+      "summary": "Odoo SEPA collection must start at month 4 at the full monthly rate; months 1-3 are prepaid via Shopify. Owner: Odoo administrator (outside this repo).",
       "blocks": [
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],
-      "owner": "Odoo administrator"
+      "owner": "Odoo administrator (outside this repo)"
     },
     {
       "id": "MIJN_THUIS_PLATFORM_MAPPING",

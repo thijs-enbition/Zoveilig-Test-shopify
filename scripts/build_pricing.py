@@ -4,15 +4,16 @@ Zo Veilig pricing builder (v3 intro-promo model).
 
 Reads pricing.config.json (INPUTS only) and derives every money value once:
 
-    promoMonthly           = monthly * (1 - promo.rate)              [half-up]
     promoDiscountTotal      = promo.months * monthly * promo.rate    [half-up]
-    initialPaymentDueToday  = activation            (activation ONLY)
+    promoWas                = promo.months * monthly                 (undiscounted worth)
+    dueToday[option]        = install_option + promoDiscountTotal    (per install option)
     indicativeContractValue = activation + monthly*term - promoDiscountTotal
 
-The 1.5x 'eerste vooruitbetaling' commitment is RETIRED (was v2). Today's payment is
-the activation only; the intro promo (50% off the first 3 monthly SEPA instalments)
-replaces the prepayment. Odoo applies the promo to the recurring invoices; the theme
-only displays it.
+What Shopify collects today is the chosen installation option (never discounted) plus a
+prepaid "Eerste 3 maanden" line worth promoDiscountTotal - a separate positive charge,
+not a reduction. The monthly rate is never modified here and is billed by Odoo from
+month 4. The 1.5x 'eerste vooruitbetaling' commitment is RETIRED (v2), and so is the
+'discounted monthly instalment' figure that v3 first modelled the promo as.
 
 Emits:
     pricing.generated.json          machine-readable, for checks / JS / dataLayer
@@ -137,7 +138,6 @@ def build():
             monthly = price["amountCents"]
             term = pkg.get("termMonths", default_term)
 
-            promo_monthly = cents_half_up(Decimal(monthly) * (Decimal(1) - promo_rate)) if promo_enabled else monthly
             promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
             icv = activation_cents + (monthly * term) - promo_discount_total
 
@@ -168,16 +168,22 @@ def build():
 
             promo_product_cfg = pkg.get("promoProduct") or {}
 
+            # What the prepaid promo period is worth at the undiscounted monthly rate -
+            # the "was" figure next to promoDiscountTotal on the actie page. It is a
+            # 3-month total, never a monthly figure, so it must never be shown with /mnd.
+            promo_was = monthly * promo_months if promo_enabled else 0
+
             row.update({
                 "purchasable": True,
                 "pricingStatus": "CURRENT_WORKING",
                 "termMonths": term,
                 "installGroup": install_group,
+                "productHandle": pkg.get("productHandle"),
                 "monthlyRecurringPriceCents": monthly,
                 "monthlyDisplay": eur(monthly),
                 "promoMonths": promo_months if promo_enabled else 0,
-                "promoMonthlyCents": promo_monthly,
-                "promoMonthlyDisplay": eur(promo_monthly),
+                "promoWasCents": promo_was,
+                "promoWasDisplay": eur(promo_was),
                 "promoDiscountTotalCents": promo_discount_total,
                 "promoDiscountTotalDisplay": eur(promo_discount_total),
                 "promoProduct": {
@@ -273,9 +279,11 @@ def build():
         lines += [
             f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_monthly_cents = {p['monthlyRecurringPriceCents']} -%}}",
-            f"{{%- assign zv_{pid}_promo_monthly = '{p['promoMonthlyDisplay']}' -%}}",
-            f"{{%- assign zv_{pid}_promo_monthly_cents = {p['promoMonthlyCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_discount_cents = {p['promoDiscountTotalCents']} -%}}",
+            f"{{%- assign zv_{pid}_promo_was = '{p['promoWasDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_was_cents = {p['promoWasCents']} -%}}",
+            f"{{%- assign zv_{pid}_handle = '{p.get('productHandle') or ''}' -%}}",
             f"{{%- assign zv_{pid}_promo_handle = '{p['promoProduct'].get('productHandle') or ''}' -%}}",
             f"{{%- assign zv_{pid}_promo_sku = '{p['promoProduct'].get('sku') or ''}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",

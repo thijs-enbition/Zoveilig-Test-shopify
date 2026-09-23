@@ -1,19 +1,30 @@
 {%- comment -%}
   Package card for sections/actie-korting.liquid.
-  Params: name, hook, popular ("Meest gekozen" or blank), monthly, promo_monthly
-  (blank when the package has no fixed price yet), promo_badge, fk (finder_key,
-  for the /pages/oplossingen?pakket=<fk> deep link).
+
+  The promo is a prepaid one-time charge, not a reduced monthly rate (see CLAUDE.md,
+  Pricing pipeline), so the card shows what the first 3 months cost today - struck
+  through at their undiscounted worth - and the unchanged monthly rate that follows.
+  The discounted figure must never carry a "/mnd" suffix: it is a 3-month total.
+
+  Params: name, hook, popular ("Meest gekozen" or blank), monthly, promo_now
+  (promoDiscountTotal - what the 3 prepaid months actually cost) and promo_was
+  (monthly x 3, the struck-through figure); both blank when the package has no fixed
+  price yet or the promo isn't running. promo_badge, fk (finder_key, for the
+  /pages/oplossingen?pakket=<fk> deep link).
 {%- endcomment -%}
 <article class="acard{% if popular != blank %} pop{% endif %}">
   {%- if popular != blank -%}<span class="acard__flag">{{ popular }}</span>{%- endif -%}
   <h3>{{ name }}</h3>
   <p class="acard__hook">{{ hook }}</p>
 
-  {%- if promo_monthly != blank -%}
+  {%- if promo_now != blank -%}
     <div class="acard__price">
-      <span class="now">{{ promo_monthly }}</span><span class="per">/mnd</span>
-      <span class="was">{{ monthly }}</span>
+      <span class="acard__period">Eerste 3 maanden:</span>
+      <span class="was">{{ promo_was }}</span>
+      <span class="now">{{ promo_now }}</span>
+      <span class="acard__once">eenmalig vandaag</span>
     </div>
+    <div class="acard__after">Daarna {{ monthly }}<span class="per">/mnd</span></div>
     <span class="acard__badge">{{ promo_badge }}</span>
   {%- else -%}
     <div class="acard__price"><span class="now">{{ monthly }}</span></div>

@@ -81,7 +81,7 @@ hardcoded variant id, same as every other fee product.
 
 ## Pricing pipeline changes
 
-`pricing.config.json` gained two fields per purchasable package:
+`pricing.config.json` gained three fields per purchasable package:
 
 - **`installGroup`** (`nami` / `climax`) — centralizes a classification that previously existed
   only as a hardcoded `case fk` block in `zv-checkout-overview.liquid`. `build_pricing.py` needs
@@ -89,6 +89,9 @@ hardcoded variant id, same as every other fee product.
   block still carries its own copy; deduplicating that is a follow-up, not done here.)
 - **`promoProduct.productHandle` / `.sku`** — same handle/sku-in-config convention as
   `activation` and `installationOptions.nami.options[]`.
+- **`productHandle`** (the package's own Shopify handle, added 2026-09-23) — the cart guard
+  needs it to recognize a stray package line. The Cart AJAX API exposes a line's `handle`
+  but not its metafields, so handle is the only usable key there.
 
 `build_pricing.py` now emits per package a **`dueToday` map, one entry per available install
 option** (`install_option_cents + promoDiscountTotalCents`), plus flattened Liquid assigns
@@ -101,10 +104,14 @@ and 7) described the retired model and were replaced; `initialPaymentDueTodayCen
 default/fallback figure (the `huis` option, i.e. before a cheaper nami option is chosen) and
 equals `activation + promoDiscountTotalCents` for every package.
 
-**`promoMonthlyCents` / `promoMonthlyDisplay` are now vestigial.** They compute
-`monthly × (1 − rate)` — the *retired* "discounted SEPA instalment" idea. The maths is still
-correct and still checked, but nothing renders it and nothing should: the monthly rate is never
-modified. Flagged in `pricing.config.json`'s `promo.note`.
+**`promoWasCents` / `promoWasDisplay`** (added 2026-09-23) are `monthly × promo.months` —
+what the prepaid period is worth undiscounted, i.e. the struck-through figure on the actie
+page. A 3-month total, never a monthly rate, so it must never be rendered with "/mnd".
+
+**`promoMonthlyCents` / `promoMonthlyDisplay` were removed** on 2026-09-23. They computed
+`monthly × (1 − rate)` — the *retired* "discounted SEPA instalment" idea. Once the actie card
+stopped using them, nothing consumed them, so they are gone from the generated output and
+`check_pricing.py` now asserts they stay gone.
 
 `labels.commitment` was `"Eerste vooruitbetaling"` — dead text from the v2 1.5× prepayment model
 retired in v3.0.0, confirmed unused anywhere in the theme. It now holds the promo row's label,
@@ -199,20 +206,86 @@ field to flip — `status` is derived from `startsAt`/`endsAt` — so it was exp
 untouched). **To reverse:** set `endsAt` back to `null` on the same discount id; nothing else
 about it was changed.
 
+## Copy changes for review
+
+Every customer-visible string this branch changed, before and after. All of it is Dutch
+copy on the Overzicht page, the actie page and the package product pages.
+
+**`promo.disclosure`** (rendered on the actie page under the cards, as `zv_promo_disclosure`)
+
+- before: "Indicatief. De eerste 3 maanden ontvangt u 50% korting op het maandbedrag,
+  verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)."
+- after: "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw
+  bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn
+  inclusief btw (21%)." *(wording supplied verbatim by Thijs, 2026-09-23)*
+
+**`labels.commitment`** (the promo row's label in the Overzicht breakdown)
+
+- before: "Eerste vooruitbetaling" *(dead v2 prepayment label, rendered nowhere)*
+- after: "Eerste 3 maanden korting (50%)"
+
+**`before_explainer`** section-setting default (Overzicht, under the cost card)
+
+- before: "De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw
+  maandtermijnen. Alle bedragen zijn inclusief btw (21%)."
+- after: "De korting van de eerste 3 maanden rekent u vandaag ineens af, naast de
+  installatiekosten. Uw maandbedrag zelf verandert niet. Alle bedragen zijn inclusief btw
+  (21%)."
+
+**`due_today_text`** section-setting default (Overzicht, under "Opbouw van dit bedrag")
+
+- before: "Vandaag betaalt u de eenmalige kosten voor activatie en installatie via de
+  beveiligde Shopify-checkout."
+- after: "Vandaag betaalt u de eenmalige kosten voor activatie en installatie plus de
+  vooruitbetaalde korting voor de eerste 3 maanden, via de beveiligde Shopify-checkout."
+
+**Overzicht cost card** — the collapsed total and the two-tier monthly block were replaced
+by the itemized list (see above). The "Maand 1 t/m 3 / Maand 4 t/m N" rows are gone.
+
+**Actie page card** (`snippets/zv-actie-card.liquid`)
+
+- before: `€ 12,48 /mnd` with `€ 24,95` struck through — a discounted *monthly* rate.
+- after, as rendered and verified:
+  ```
+  Eerste 3 maanden:  €74,85  €37,43  eenmalig vandaag
+  Daarna €24,95/mnd
+  ```
+  The discounted figure carries no "/mnd": it is a 3-month total. Per package the struck
+  figure is €59,85 (Inzicht/Alert), €74,85 (Zeker), €119,85 (Beschermd), €104,85
+  (Protect). Vista is unchanged ("Op maat", no promo block).
+
+**Package + promo product pages** (`sections/main-product.liquid`) — the add-to-cart form
+is replaced by a single CTA reading **"Kies uw pakket"**, linking to
+`/pages/oplossingen?pakket=<finder_key>`.
+
+Two strings were reviewed and deliberately left alone: the actie page hero ("De eerste
+maanden betaalt u nog maar de helft, daarna gewoon het vaste maandbedrag") is still
+accurate under this model, and the static "Onze monteur neemt na uw bestelling contact op"
+line under the Overzicht cost card remains the pre-existing copy flagged in
+`docs/nami-install-choice-2026-09-21.md`.
+
 ## Not done / follow-ups
 
-1. **The package products are still individually purchasable on the storefront.** Under the new
-   model, buying one directly (e.g. `/products/langer-thuis-zeker`) charges the monthly price
-   today with no install fee and no promo line, and Overzicht can't identify the package. The
-   cart guard's legacy branch still adds the flat activation fee in that case — no worse than
-   before, but not a correct prepaid cart either. Fixing it properly is a catalog decision
-   (unpublish the package products, or give them a template that can't add to cart), and
-   unpublishing would break the `all_products[...]` metafield lookups the matcher and cards
-   rely on — so it needs Thijs, not a guess here.
-2. **`sections/actie-korting.liquid` + `snippets/zv-actie-card.liquid`** still render a now/was
-   monthly price pair (`promo_monthly` vs `monthly`) — the same "discounted monthly rate" idea
-   the confirmed model retires. Only the shared `zv_promo_disclosure` text was corrected. The
-   page's own price cards need a product decision about what they should show now.
+Items 1 and 2 below were resolved on 2026-09-23 (Thijs's decisions); kept here with their
+outcome so the history reads straight.
+
+1. ~~The package products are still individually purchasable on the storefront.~~
+   **Closed 2026-09-23.** The products stay published (the `all_products[...]` lookups
+   depend on it), but `sections/main-product.liquid` no longer renders a buy form for any
+   product carrying `custom.finder_key` — packages and promo products alike — showing a
+   "Kies uw pakket" CTA to `/pages/oplossingen?pakket=<finder_key>` instead. The cart guard
+   now also swaps a stray package line for that package's promo line rather than letting it
+   be charged. The 5 promo products additionally carry `seo.hidden = 1` and belong to no
+   collection, so they don't surface in search or collection listings.
+2. ~~`actie-korting.liquid` + `zv-actie-card.liquid` still render a now/was monthly pair.~~
+   **Closed 2026-09-23.** The cards now show the prepaid 3-month total against its
+   undiscounted worth, plus the unchanged monthly rate underneath (see "Copy changes for
+   review"). `promoMonthlyCents`/`promoMonthlyDisplay` were removed from the generated
+   output once this was the last consumer; `check_pricing.py` asserts they stay gone.
+   Note the actie template has **no Shopify page pointing at it** — `page.actie.json`
+   exists but no page uses the `actie` suffix, so the page is not reachable on the
+   storefront. It was validated by creating a temporary page and deleting it afterwards.
+   Someone needs to create the real page when the campaign goes live.
 3. **`pricing/pricing.schema.json` is stale** — it still describes the v2 shape (`tiers`,
    `contractTerm`) and doesn't validate the current v3 config. Nothing runs it. Left alone
    rather than half-patched.
@@ -223,3 +296,8 @@ about it was changed.
    uses `data-zv-add`), already flagged in `docs/analytics-tracking-status-2026-09-11.md`. It
    was not updated for the promo model — if it were ever wired up, it would add a package
    product with no fee and no promo line. Worth deleting.
+6. **Shop Pay's installments form remains on package product pages.** With the buy form
+   gone, Dawn still renders the `payment_terms` messaging form (`<form action="/cart/add"
+   class="installment">`) from the price block. It has no submit control and can't add to
+   cart, but it is the one `/cart/add` form left on those pages. Harmless as far as tested;
+   worth removing for tidiness if the price block is ever touched.

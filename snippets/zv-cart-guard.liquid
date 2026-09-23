@@ -33,14 +33,19 @@
   their own — no guessing from the Cart AJAX API, which still doesn't expose a line
   item's product.metafields (custom.finder_key) the way server-side Liquid does.
 
-  Legacy fallback, deliberately kept: a bare subscription-type line with no fee line at
-  all (reachable only through the standalone Shopify product page, which does no fee
-  wiring either way) still gets the flat climax fee added, exactly as before this change.
-  That path shouldn't happen under the new model — nothing in the theme adds a package
-  product to the cart any more — but leaving the branch in keeps that entry point no
-  worse off than it is today. It does NOT produce a correct prepaid cart (no promo line,
-  so Overzicht can't identify the package): see docs/prepay-promo-lineitems-2026-09-22.md,
-  where this is flagged as a follow-up for the catalog itself, not patched with a guess here.
+  Stray package line (2026-09-23): a subscription-type product should never reach the cart
+  — the product page no longer renders a buy form for one (sections/main-product.liquid) —
+  but if one arrives by any other route, it is swapped for that package's promo line rather
+  than left to be charged. Its monthly price would otherwise be collected today, with no
+  installation fee and nothing for Overzicht to identify the package by.
+
+  The mapping is keyed on the line's product `handle`, not `custom.finder_key`: the Cart
+  AJAX API doesn't expose product metafields the way server-side Liquid does, but it does
+  expose the handle, and pricing.config.json carries each package's productHandle next to
+  its promoProduct. Vista has no promo product, so a Vista line is left alone (it isn't
+  purchasable anyway). After the swap the cart re-enters the normal flow: the reload runs
+  this guard again, which then adds the climax activation fee if that's what's missing, or
+  leaves a nami cart for the customer's own install choice on Overzicht.
 
   Silent no-op throughout if a variant id can't be resolved, or if a fetch fails (e.g.
   offline) — the caller also fails safe server-side (see zv-checkout-overview.liquid's
@@ -48,8 +53,20 @@
 
   Params: activation_variant_id, sub_type, nami_geen_variant_id, nami_telefonisch_variant_id,
   nami_huis_variant_id, promo_inzicht_variant_id, promo_zeker_variant_id,
-  promo_beschermd_variant_id, promo_alert_variant_id, promo_protect_variant_id
+  promo_beschermd_variant_id, promo_alert_variant_id, promo_protect_variant_id, and the
+  matching package product handles inzicht_handle, zeker_handle, beschermd_handle,
+  alert_handle, protect_handle (passed explicitly because `render` doesn't inherit the
+  caller's scope, same reason the variant ids are).
 {%- endcomment -%}
+{%- capture zv_guard_pkg_map -%}
+  {
+    {{ inzicht_handle | json }}: {{ promo_inzicht_variant_id | json }},
+    {{ zeker_handle | json }}: {{ promo_zeker_variant_id | json }},
+    {{ beschermd_handle | json }}: {{ promo_beschermd_variant_id | json }},
+    {{ alert_handle | json }}: {{ promo_alert_variant_id | json }},
+    {{ protect_handle | json }}: {{ promo_protect_variant_id | json }}
+  }
+{%- endcapture -%}
 {%- if activation_variant_id != blank or nami_geen_variant_id != blank or nami_telefonisch_variant_id != blank or nami_huis_variant_id != blank -%}
 <script>
 (function () {
@@ -67,6 +84,8 @@
   var PROMO_CLIMAX_IDS = [{{ promo_beschermd_variant_id | json }}, {{ promo_protect_variant_id | json }}]
     .filter(function (id) { return id != null; })
     .map(String);
+  // package product handle -> that package's promo variant id (see comment above).
+  var PKG_HANDLE_TO_PROMO = {{ zv_guard_pkg_map }};
 
   window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
     var items = (cart && cart.items) || [];
@@ -99,12 +118,35 @@
       }).then(function (r) { if (r.ok) window.location.reload(); });
     }
 
-    // Legacy: bare subscription line, no promo line, no fee of either kind (see comment above).
-    if (hasSub && !hasPromoNami && !hasPromoClimax && !hasActivation && namiLines.length === 0) {
-      return window.fetch('/cart/add.js', {
+    // A stray package line is swapped for that package's promo line (see comment above),
+    // before any fee handling - the reload re-runs this guard, which then sorts the fee out.
+    var strays = items.filter(function (it) {
+      return it.product_type === SUB_TYPE && PKG_HANDLE_TO_PROMO[it.handle];
+    });
+    if (strays.length) {
+      var removals = {};
+      var additions = [];
+      strays.forEach(function (it) {
+        removals[String(it.variant_id)] = 0;
+        var promoId = PKG_HANDLE_TO_PROMO[it.handle];
+        var already = items.some(function (o) { return String(o.variant_id) === String(promoId); });
+        if (!already && additions.every(function (a) { return String(a.id) !== String(promoId); })) {
+          additions.push({ id: promoId, quantity: 1 });
+        }
+      });
+      return window.fetch('/cart/update.js', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: [{ id: ACTIVATION_ID, quantity: 1 }] })
-      }).then(function (r) { if (r.ok) window.location.reload(); });
+        body: JSON.stringify({ updates: removals })
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          if (!additions.length) return r;
+          return window.fetch('/cart/add.js', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: additions })
+          });
+        })
+        .then(function (r) { if (r.ok) window.location.reload(); });
     }
   }).catch(function () { /* fail safe: server-side gate (Overzicht) still blocks checkout */ });
 })();

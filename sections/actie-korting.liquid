@@ -67,12 +67,12 @@
         {%- for id in lt_ids -%}
           {%- assign i = forloop.index0 -%}
           {%- case id -%}
-            {%- when 'inzicht' -%}{%- assign monthly = zv_inzicht_monthly -%}{%- assign promo_monthly = zv_inzicht_promo_monthly -%}
-            {%- when 'zeker' -%}{%- assign monthly = zv_zeker_monthly -%}{%- assign promo_monthly = zv_zeker_promo_monthly -%}
-            {%- when 'beschermd' -%}{%- assign monthly = zv_beschermd_monthly -%}{%- assign promo_monthly = zv_beschermd_promo_monthly -%}
+            {%- when 'inzicht' -%}{%- assign monthly = zv_inzicht_monthly -%}{%- assign promo_now = zv_inzicht_promo_discount -%}{%- assign promo_was = zv_inzicht_promo_was -%}
+            {%- when 'zeker' -%}{%- assign monthly = zv_zeker_monthly -%}{%- assign promo_now = zv_zeker_promo_discount -%}{%- assign promo_was = zv_zeker_promo_was -%}
+            {%- when 'beschermd' -%}{%- assign monthly = zv_beschermd_monthly -%}{%- assign promo_now = zv_beschermd_promo_discount -%}{%- assign promo_was = zv_beschermd_promo_was -%}
           {%- endcase -%}
-          {%- unless zv_promo_active -%}{%- assign promo_monthly = blank -%}{%- endunless -%}
-          {%- render 'zv-actie-card', name: lt_names[i], hook: lt_hooks[i], popular: lt_popular[i], monthly: monthly, promo_monthly: promo_monthly, promo_badge: zv_promo_badge, fk: lt_fks[i] -%}
+          {%- unless zv_promo_active -%}{%- assign promo_now = blank -%}{%- assign promo_was = blank -%}{%- endunless -%}
+          {%- render 'zv-actie-card', name: lt_names[i], hook: lt_hooks[i], popular: lt_popular[i], monthly: monthly, promo_now: promo_now, promo_was: promo_was, promo_badge: zv_promo_badge, fk: lt_fks[i] -%}
         {%- endfor -%}
       </div>
     </div>
@@ -96,12 +96,12 @@
         {%- for id in mt_ids -%}
           {%- assign i = forloop.index0 -%}
           {%- case id -%}
-            {%- when 'alert' -%}{%- assign monthly = zv_alert_monthly -%}{%- assign promo_monthly = zv_alert_promo_monthly -%}
-            {%- when 'protect' -%}{%- assign monthly = zv_protect_monthly -%}{%- assign promo_monthly = zv_protect_promo_monthly -%}
-            {%- when 'vista' -%}{%- assign monthly = zv_vista_monthly -%}{%- assign promo_monthly = blank -%}
+            {%- when 'alert' -%}{%- assign monthly = zv_alert_monthly -%}{%- assign promo_now = zv_alert_promo_discount -%}{%- assign promo_was = zv_alert_promo_was -%}
+            {%- when 'protect' -%}{%- assign monthly = zv_protect_monthly -%}{%- assign promo_now = zv_protect_promo_discount -%}{%- assign promo_was = zv_protect_promo_was -%}
+            {%- when 'vista' -%}{%- assign monthly = zv_vista_monthly -%}{%- assign promo_now = blank -%}{%- assign promo_was = blank -%}
           {%- endcase -%}
-          {%- unless zv_promo_active -%}{%- assign promo_monthly = blank -%}{%- endunless -%}
-          {%- render 'zv-actie-card', name: mt_names[i], hook: mt_hooks[i], popular: mt_popular[i], monthly: monthly, promo_monthly: promo_monthly, promo_badge: zv_promo_badge, fk: mt_fks[i] -%}
+          {%- unless zv_promo_active -%}{%- assign promo_now = blank -%}{%- assign promo_was = blank -%}{%- endunless -%}
+          {%- render 'zv-actie-card', name: mt_names[i], hook: mt_hooks[i], popular: mt_popular[i], monthly: monthly, promo_now: promo_now, promo_was: promo_was, promo_badge: zv_promo_badge, fk: mt_fks[i] -%}
         {%- endfor -%}
       </div>
 
@@ -172,6 +172,10 @@
 .zv-actie .acard__price .now { font-size:27px; font-weight:900; color:var(--ink); letter-spacing:-.01em; }
 .zv-actie .acard__price .per { font-size:13px; font-weight:700; color:var(--muted); }
 .zv-actie .acard__price .was { font-size:14px; font-weight:700; color:var(--muted-2); text-decoration:line-through; }
+.zv-actie .acard__period { flex-basis:100%; font-size:11.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--belt, var(--muted)); }
+.zv-actie .acard__once { font-size:12.5px; font-weight:700; color:var(--muted); }
+.zv-actie .acard__after { margin-top:6px; font-size:14.5px; font-weight:700; color:#5b5374; }
+.zv-actie .acard__after .per { font-size:13px; font-weight:700; color:var(--muted); }
 .zv-actie .acard__badge { display:inline-block; align-self:flex-start; margin-top:8px; font-size:11.5px; font-weight:800; color:#fff; background:var(--danger); border-radius:999px; padding:4px 11px; }
 .zv-actie .acard .btn--ghost { background:transparent; color:var(--indigo); border:1.6px solid var(--line-2); margin-top:20px; }
 .zv-actie .acard .btn--ghost:hover { border-color:var(--indigo); }

@@ -6,7 +6,7 @@
     "decidedOn": "2026-08-17",
     "decidedBy": "Operator commercial decision, 2026-08-17 (intro promo model)",
     "principle": "This file holds INPUTS only. Every derived value (promo monthly, promo discount, amount due today, indicative contract value) is computed once by build_pricing.py and emitted to pricing.generated.json plus snippets/zv-pricing.liquid. No page, cart, configurator, confirmation or analytics event may compute or hardcode a price or duration independently.",
-    "supersedes": "pricing.config.json v2.0.0 (1.5x 'eerste vooruitbetaling' commitment model). The commitment prepayment is retired; today's payment is the activation only, and an intro promo of 50% off the first 3 monthly SEPA instalments replaces it. This resolves the v2 ODOO_COMMITMENT_TREATMENT blocker."
+    "supersedes": "pricing.config.json v2.0.0 (1.5x 'eerste vooruitbetaling' commitment model). The commitment prepayment is retired. Today's payment is the chosen installation option plus a prepaid 'Eerste 3 maanden' line (50% of 3 monthly periods), both collected by Shopify at checkout; the monthly rate is never modified and is billed by Odoo from month 4. This resolves the v2 ODOO_COMMITMENT_TREATMENT blocker."
   },
   "currency": "EUR",
   "rounding": {
@@ -103,16 +103,16 @@
   "promo": {
     "id": "intro-3-months-50",
     "enabled": true,
-    "enabledNote": "This flag means 'the promo mechanism is a confirmed, computed part of the pricing model' — it's what makes build_pricing.py compute promoMonthly/promoDiscountTotal at all, using the rate/months below. It's NOT the day-to-day on/off switch: whether the promo is actually LIVE on the storefront right now is controlled entirely by the Shopify theme setting `zv_promo_live` (Zo Veilig · Introductiekorting, in config/settings_schema.json), a checkbox Thijs can flip from the theme editor with no code change or redeploy. Its default is off, matching today's state (the promo product doesn't exist in Shopify yet); flipping it to on in Shopify admin shows the already-computed 50%/3-months figures immediately. Only set `enabled` to false here if the promo concept itself is retired for good, not for a temporary pause.",
+    "enabledNote": "This flag means 'the promo mechanism is a confirmed, computed part of the pricing model' — it's what makes build_pricing.py compute promoMonthly/promoDiscountTotal at all, using the rate/months below. It's NOT the day-to-day on/off switch: whether the promo is actually LIVE on the storefront right now is controlled entirely by the Shopify theme setting `zv_promo_live` (Zo Veilig · Introductiekorting, in config/settings_schema.json), a checkbox Thijs can flip from the theme editor with no code change or redeploy. The 5 promo products exist in Shopify as of 2026-09-22 (see packages[].promoProduct); this setting now only gates the actie page's promo-specific display, since the prepaid line is added to the cart regardless. Only set `enabled` to false here if the promo concept itself is retired for good, not for a temporary pause.",
     "months": 3,
     "ratePercent": 50,
     "basis": "monthlyRecurringPrice",
-    "collectedVia": "sepa-monthly",
+    "collectedVia": "shopify-checkout-prepaid",
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "Indicatief. De korting van de eerste 3 maanden (50% van het maandbedrag) wordt vandaag als apart bedrag verrekend, bovenop de installatiekosten. Uw maandbedrag zelf blijft ongewijzigd. Alle bedragen zijn inclusief btw (21%).",
-    "note": "SUPERSEDED 2026-09-22 (kosten.xlsx + Thijs, confirmed against real orders #1014/#1019): this promo is NOT a reduction applied to SEPA instalments. It is collected today, in Shopify, as a separate positive one-time line item (see each package's promoProduct) priced at promoDiscountTotalCents, alongside the chosen installation option (never discounted). The monthly recurring price is never modified anywhere in this flow. 'disclosure' text above still describes the old SEPA-reduction model and should not be shown as-is; the itemized Overzicht breakdown (labels.breakdownIntro/commitment/monthlyAfter) is the current customer-facing explanation. promoMonthlyCents/promoMonthlyDisplay in pricing.generated.json are retained as harmless derived math (monthly x (1-rate)) but describe this retired mental model and must not be rendered anywhere.",
+    "disclosure": "De eerste 3 maanden betaalt u vooruit met 50% korting, eenmalig bij uw bestelling. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%).",
+    "note": "SUPERSEDED 2026-09-22 (kosten.xlsx + Thijs, confirmed against real orders #1014/#1019): this promo is NOT a reduction applied to SEPA instalments. It is collected today, in Shopify, as a separate positive one-time line item (see each package's promoProduct) priced at promoDiscountTotalCents, alongside the chosen installation option (never discounted). The monthly recurring price is never modified anywhere in this flow. 'disclosure' above was rewritten 2026-09-23 (Thijs) to describe this model and is the approved customer-facing wording; the itemized Overzicht breakdown (labels.breakdownIntro/commitment/monthlyAfter) is the other customer-facing explanation. The 'discounted monthly instalment' figure (promoMonthlyCents) that v3 first modelled this as was removed from the generated output on 2026-09-23, once the last consumer was gone; check_pricing.py asserts it stays gone.",
     "labelCommitmentRepurposed": "labels.commitment was 'Eerste vooruitbetaling' (retired v2 1.5x prepayment label, confirmed unused anywhere in the theme). Repurposed 2026-09-22 as the promo line item's breakdown-row label ('Eerste 3 maanden korting (50%)')."
   },
   "contract": {
@@ -160,6 +160,7 @@
           },
           "termMonths": 12,
           "installGroup": "nami",
+          "productHandle": "langer-thuis-inzicht",
           "promoProduct": { "productHandle": "eerste-3-maanden-inzicht", "sku": "PROMO-INZ" }
         },
         {
@@ -177,6 +178,7 @@
           },
           "termMonths": 12,
           "installGroup": "nami",
+          "productHandle": "langer-thuis-zeker",
           "promoProduct": { "productHandle": "eerste-3-maanden-zeker", "sku": "PROMO-ZEK" }
         },
         {
@@ -193,6 +195,7 @@
           },
           "termMonths": 36,
           "installGroup": "climax",
+          "productHandle": "langer-thuis-beschermd",
           "promoProduct": { "productHandle": "eerste-3-maanden-beschermd", "sku": "PROMO-BES" }
         }
       ]
@@ -218,6 +221,7 @@
           },
           "termMonths": 12,
           "installGroup": "nami",
+          "productHandle": "mijn-thuis-alert",
           "promoProduct": { "productHandle": "eerste-3-maanden-alert", "sku": "PROMO-ALE" }
         },
         {
@@ -235,6 +239,7 @@
           },
           "termMonths": 36,
           "installGroup": "climax",
+          "productHandle": "mijn-thuis-protect",
           "promoProduct": { "productHandle": "eerste-3-maanden-protect", "sku": "PROMO-PRO" }
         },
         {
@@ -461,7 +466,7 @@
     "momentA": {
       "event": "purchase",
       "valueSource": "initialPaymentDueToday",
-      "rule": "The purchase value MUST equal the amount Shopify actually collects today, which is the activation only. The 1.5x prepayment is retired; the intro promo is applied to the SEPA monthly, not collected today.",
+      "rule": "The purchase value MUST equal the amount Shopify actually collects today: the chosen installation option plus the prepaid \"Eerste 3 maanden\" line, i.e. the live cart total. Installation is never discounted; the promo is a separate positive line, not a reduction. The monthly recurring rate is never collected by Shopify and must never be added to this value.",
       "extraParams": [
         "monthlyRecurringPrice",
         "indicativeContractValue",
@@ -539,12 +544,12 @@
     {
       "id": "ODOO_PROMO_DISCOUNT",
       "severity": "high",
-      "summary": "Odoo Subscriptions must apply the intro promo (50% off the first 3 monthly SEPA instalments) on the recurring invoices. The theme only displays it. If Odoo does not apply it, the displayed discount and the actual billing diverge.",
+      "summary": "Odoo SEPA collection must start at month 4 at the full monthly rate; months 1-3 are prepaid via Shopify. Owner: Odoo administrator (outside this repo).",
       "blocks": [
         "Moment B offline conversion value",
         "Shopify to Odoo billing reconciliation"
       ],
-      "owner": "Odoo administrator"
+      "owner": "Odoo administrator (outside this repo)"
     },
     {
       "id": "MIJN_THUIS_PLATFORM_MAPPING",

@@ -55,7 +55,7 @@
 {%- assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id -%}
 {%- assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id -%}
 {%- assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, promo_inzicht_variant_id: promo_inzicht_variant_id, promo_zeker_variant_id: promo_zeker_variant_id, promo_beschermd_variant_id: promo_beschermd_variant_id, promo_alert_variant_id: promo_alert_variant_id, promo_protect_variant_id: promo_protect_variant_id -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, promo_inzicht_variant_id: promo_inzicht_variant_id, promo_zeker_variant_id: promo_zeker_variant_id, promo_beschermd_variant_id: promo_beschermd_variant_id, promo_alert_variant_id: promo_alert_variant_id, promo_protect_variant_id: promo_protect_variant_id, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
