@@ -30,8 +30,9 @@
     line, which zv-cart-guard adds; NAMI: one of the 3 options, which only the customer picks
     in the required radio group below);
   - cart_needs_fix: a package line at a quantity other than zv_promo_package_qty, a second
-    line for the same package, or the Climax installation line in a cart with no Climax
-    package — zv-cart-guard corrects all of these and reloads;
+    line for the same package, an installation line (CL003 or a NAMI variant) at a quantity
+    other than 1, or the Climax installation line in a cart with no Climax package —
+    zv-cart-guard corrects all of these and reloads;
   - cart_pkg_undiscounted: a package line that carries no discount at all (e.g. the Shopify
     discount was deactivated). The guard can't fix that, and a customer must never pay 3
     full months, so checkout stays blocked with a contact message instead.
@@ -82,6 +83,17 @@
       assign selected_nami_install_id = 'huis'
       assign selected_nami_install_cents = zv_nami_install_huis_cents
       assign install_line_item = item
+    endif
+
+    comment
+      An installation line (CL003 or one of the 3 NAMI variants) at any quantity other
+      than 1 blocks checkout the same way as a wrong package quantity; zv-cart-guard
+      resets it to 1 and reloads.
+    endcomment
+    if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id
+      if item.quantity != 1
+        assign cart_needs_fix = true
+      endif
     endif
 
     assign today_cents = today_cents | plus: item.final_line_price
@@ -502,10 +514,11 @@
     if (!checkbox || !btn) return;
 
     // Fail-safe: while the section's Liquid sees a cart that may not go to checkout
-    // (cart_checkout_blocked: a missing installation line, a package quantity or stray
-    // Climax line zv-cart-guard is still fixing, or a package line without its 50%
-    // discount), the checkout button stays disabled no matter what the consent checkbox
-    // does - in the meantime, or if the guard's fix fails (offline, JS disabled elsewhere).
+    // (cart_checkout_blocked: a missing installation line, a package or installation
+    // quantity or stray Climax line zv-cart-guard is still fixing, or a package line
+    // without its 50% discount), the checkout button stays disabled no matter what the
+    // consent checkbox does - in the meantime, or if the guard's fix fails (offline, JS
+    // disabled elsewhere).
     var needsActivation = root.hasAttribute('data-needs-activation');
 
     // Nami installation choice: swap the cart's install-fee line to match the selected
