@@ -42,14 +42,14 @@
               <input type="hidden" name="contact[utm_campaign]" class="js-utm" data-utm="utm_campaign">
               <input type="hidden" name="contact[landing_page]" class="js-landing">
               <div class="frow">
-                <div class="field"><label for="z-naam">Naam</label><input id="z-naam" name="contact[Naam]" type="text" required placeholder="Voor- en achternaam"></div>
-                <div class="field"><label for="z-bedrijf">Bedrijf</label><input id="z-bedrijf" name="contact[Bedrijf]" type="text" required placeholder="Bedrijfsnaam"></div>
+                <div class="zf"><label for="z-naam">Naam</label><input id="z-naam" name="contact[Naam]" type="text" required placeholder="Voor- en achternaam"></div>
+                <div class="zf"><label for="z-bedrijf">Bedrijf</label><input id="z-bedrijf" name="contact[Bedrijf]" type="text" required placeholder="Bedrijfsnaam"></div>
               </div>
               <div class="frow">
-                <div class="field"><label for="z-email">E-mail</label><input id="z-email" name="contact[email]" type="email" required placeholder="naam@bedrijf.nl"></div>
-                <div class="field"><label for="z-tel">Telefoon</label><input id="z-tel" name="contact[Telefoon]" type="tel" placeholder="06 12 34 56 78"></div>
+                <div class="zf"><label for="z-email">E-mail</label><input id="z-email" name="contact[email]" type="email" required placeholder="naam@bedrijf.nl"></div>
+                <div class="zf"><label for="z-tel">Telefoon</label><input id="z-tel" name="contact[Telefoon]" type="tel" placeholder="06 12 34 56 78"></div>
               </div>
-              <div class="field"><label for="z-type">Type locatie</label>
+              <div class="zf"><label for="z-type">Type locatie</label>
                 <select id="z-type" name="contact[Type locatie]">
                   <option>Winkel of retail</option>
                   <option>Kantoor</option>
@@ -58,7 +58,7 @@
                   <option>Anders</option>
                 </select>
               </div>
-              <div class="field"><label for="z-bericht">Waar wilt u mee beginnen?</label><textarea id="z-bericht" name="contact[Bericht]" placeholder="Bijv. toegangscontrole, camerabewaking, of monitoring na sluitingstijd."></textarea></div>
+              <div class="zf"><label for="z-bericht">Waar wilt u mee beginnen?</label><textarea id="z-bericht" name="contact[Bericht]" placeholder="Bijv. toegangscontrole, camerabewaking, of monitoring na sluitingstijd."></textarea></div>
               <label class="consent"><input type="checkbox" id="z-consent" required><span>Ik ga akkoord met het <a href="{% render 'zv-route', key: 'klantenservice' %}">privacybeleid</a> en dat Zo Veilig mijn gegevens gebruikt om contact met me op te nemen over deze aanvraag.</span></label>
               <button class="btn btn--gold submit" type="submit" id="z-submit" disabled>Plan mijn gesprek
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -187,23 +187,29 @@
 .zv-zakelijk .zhc .roadmap i { width:7px; height:7px; border-radius:50%; background:var(--gold); }
 
 /* lead form card */
-.zv-zakelijk .lead { background:var(--cream); color:var(--ink); border:1px solid var(--line); border-radius:18px; padding:clamp(24px,2.6vw,34px); box-shadow:0 50px 100px -42px rgba(0,0,0,.7); }
-.zv-zakelijk .lead h2 { font-size:23px; font-weight:900; color:var(--indigo); letter-spacing:-.01em; }
-.zv-zakelijk .lead .lh { font-size:14px; font-weight:600; color:var(--muted); margin-top:6px; line-height:1.45; }
-.zv-zakelijk .lead form { margin-top:20px; display:flex; flex-direction:column; gap:14px; }
+.zv-zakelijk .lead { position:relative; background:var(--paper); color:var(--ink); border:none; border-radius:20px; padding:clamp(26px,2.8vw,38px); box-shadow:0 40px 90px -36px rgba(10,6,30,.75); overflow:hidden; }
+.zv-zakelijk .lead::before { content:""; position:absolute; left:0; right:0; top:0; height:5px; background:linear-gradient(90deg,var(--gold),var(--gold-lt)); }
+.zv-zakelijk .lead h2 { font-size:25px; font-weight:900; color:var(--indigo); letter-spacing:-.015em; line-height:1.15; }
+.zv-zakelijk .lead .lh { font-size:15px; font-weight:500; color:#4a4363; margin-top:8px; line-height:1.5; }
+.zv-zakelijk .lead form { margin-top:22px; display:flex; flex-direction:column; gap:16px; }
 .zv-zakelijk .lead .form-err { font-size:13px; font-weight:700; color:#c52e2f; }
-.zv-zakelijk .field label { display:block; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
-.zv-zakelijk .field input, .zv-zakelijk .field select, .zv-zakelijk .field textarea { width:100%; font-family:inherit; font-size:15px; font-weight:600; color:var(--ink); background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; transition:border-color .15s,box-shadow .15s; }
-.zv-zakelijk .field input:focus, .zv-zakelijk .field select:focus, .zv-zakelijk .field textarea:focus { outline:none; border-color:var(--indigo); box-shadow:0 0 0 3px rgba(50,36,105,.12); }
-.zv-zakelijk .field textarea { resize:vertical; min-height:84px; }
+/* .zf, not .field: Dawn's base.css styles every .field globally (display:flex + an :after outline box) */
+.zv-zakelijk .zf { display:block; }
+.zv-zakelijk .zf label { display:block; font-family:inherit; font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; color:var(--indigo); margin-bottom:7px; }
+.zv-zakelijk .zf input, .zv-zakelijk .zf select, .zv-zakelijk .zf textarea { display:block; width:100%; min-width:0; font-family:inherit; font-size:15px; font-weight:500; color:var(--ink); background:#f7f5fb; border:1.5px solid transparent; border-radius:12px; padding:13px 15px; box-shadow:none; transition:border-color .15s,box-shadow .15s,background-color .15s; }
+.zv-zakelijk .zf input::placeholder, .zv-zakelijk .zf textarea::placeholder { color:#8f88a8; opacity:1; }
+.zv-zakelijk .zf input:hover, .zv-zakelijk .zf select:hover, .zv-zakelijk .zf textarea:hover { background:#f1eef8; }
+.zv-zakelijk .zf input:focus, .zv-zakelijk .zf select:focus, .zv-zakelijk .zf textarea:focus { outline:none; background:var(--paper); border-color:var(--indigo); box-shadow:0 0 0 4px rgba(50,36,105,.12); }
+.zv-zakelijk .zf select { appearance:none; -webkit-appearance:none; cursor:pointer; padding-right:42px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23322469' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; }
+.zv-zakelijk .zf textarea { resize:vertical; min-height:96px; line-height:1.45; }
 .zv-zakelijk .frow { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 @media(max-width:480px){ .zv-zakelijk .frow{ grid-template-columns:1fr; } }
 .zv-zakelijk .lead .submit { margin-top:4px; width:100%; }
-.zv-zakelijk .lead .priv { font-size:12px; font-weight:600; color:var(--muted); text-align:center; margin-top:4px; line-height:1.4; }
-.zv-zakelijk .lead .consent { display:flex; gap:11px; align-items:flex-start; font-size:12.5px; font-weight:600; color:#3a3550; line-height:1.45; text-align:left; margin-top:2px; }
+.zv-zakelijk .lead .priv { font-size:12.5px; font-weight:500; color:#5d5676; text-align:center; margin-top:4px; line-height:1.4; }
+.zv-zakelijk .lead .consent { display:flex; gap:11px; align-items:flex-start; font-size:13px; font-weight:500; color:#3a3550; line-height:1.45; text-align:left; margin-top:2px; }
 .zv-zakelijk .lead .consent input { margin-top:2px; width:17px; height:17px; flex:none; accent-color:var(--indigo); cursor:pointer; }
-.zv-zakelijk .lead .consent a { color:var(--indigo); font-weight:800; text-decoration:underline; }
-.zv-zakelijk .lead .submit[disabled] { opacity:.5; cursor:not-allowed; transform:none; box-shadow:0 10px 26px -12px rgba(180,126,10,.5); }
+.zv-zakelijk .lead .consent a { color:var(--indigo); font-weight:700; text-decoration:underline; text-underline-offset:2px; }
+.zv-zakelijk .lead .submit[disabled] { opacity:.72; filter:saturate(.75); cursor:not-allowed; transform:none; box-shadow:0 10px 26px -12px rgba(180,126,10,.5); }
 .zv-zakelijk .lead-done { text-align:center; padding:18px 6px 8px; }
 .zv-zakelijk .lead-done .ok { width:58px; height:58px; border-radius:50%; background:var(--ok); display:grid; place-items:center; margin:0 auto 14px; }
 .zv-zakelijk .lead-done .ok svg { width:30px; height:30px; color:#fff; }
