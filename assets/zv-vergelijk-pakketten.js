@@ -60,11 +60,26 @@
     var leadPkgs = (root.getAttribute('data-pm-lead-pkgs') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var leadUrl = root.getAttribute('data-pm-lead-url') || '';
 
-    /* Universal one-time "Activatie en installatie" variant (see pricing.config.json
-       activation.productHandle/sku) — deduped against the live cart so it's only ever
-       added once, same as the Oplossingen page. */
-    function activationLineToAdd(cart) {
-      if (!activationVariantId) return null;
+    /* package product handle -> installGroup ('nami' | 'climax'), from the pricing config
+       JSON island the zv-pricing include renders on every page that uses this matcher. */
+    var installGroupByHandle = {};
+    /* The package line's cart quantity: promo.packageCartQuantity (the 3 prepaid months). */
+    var pkgQty = 0;
+    try {
+      var pricingEl = document.getElementById('zv-pricing-config');
+      var pricingCfg = pricingEl && JSON.parse(pricingEl.textContent || '{}');
+      pkgQty = (pricingCfg && pricingCfg.promo && pricingCfg.promo.packageCartQuantity) || 0;
+      (pricingCfg && pricingCfg.packages || []).forEach(function (p) {
+        if (p && p.productHandle) installGroupByHandle[p.productHandle] = p.installGroup;
+      });
+    } catch (e) { installGroupByHandle = {}; }
+
+    /* One-time Climax installation variant (see pricing.config.json
+       activation.productHandle/sku) — added for a CLIMAX package only, never a NAMI one
+       (NAMI installation is the customer's choice on Overzicht), and deduped against the
+       live cart so it's only ever added once, same as the Oplossingen page. */
+    function activationLineToAdd(cart, prod) {
+      if (!activationVariantId || !prod || installGroupByHandle[prod.handle] !== 'climax') return null;
       var already = (cart && cart.items || []).some(function (it) { return String(it.variant_id) === String(activationVariantId); });
       return already ? null : activationVariantId;
     }
@@ -187,48 +202,34 @@
     }
 
     /* Shared add-to-cart: resolves the real product for `pkg` via the finder_key mapping
-       (data-pm-products), bumps an existing line instead of duplicating it (matches
-       Shopify's merge-on-repeat-add behaviour on the Oplossingen page's own cards), and
-       dedupes the universal activation fee the same way as sections/oplossingen.liquid's
-       addToCart(). Used by both the advies-bar's own add button and, when embedded on
-       Oplossingen, the comparison table's "Kies Inzicht/Zeker/Beschermd" buttons. */
+       (data-pm-products) and adds it at quantity pkgQty — the 3 prepaid months, which
+       Shopify's automatic "Eerste 3 maanden" discount takes 50% off by itself. A package
+       already in the cart is never bumped (that would add months, and the cart guard
+       resets any package line to pkgQty anyway); only a missing Climax installation line
+       is added then. The Climax installation line is added for a CLIMAX package only,
+       deduped the same way as sections/oplossingen.liquid's addToCart(). No pkgQty
+       (pricing config missing) fails closed. Used by both the advies-bar's own add button
+       and, when embedded on Oplossingen, the comparison table's "Kies …" buttons. */
     function addPackageToCart(pkg, btn, opts) {
       var prod = pkg && products[pkg];
-      if (!prod || !btn || btn.dataset.busy === '1') return;
-      /* What goes in the cart is the package's prepaid "Eerste 3 maanden" line, never the
-         plain package product — Shopify only collects today's amount (installation + promo
-         add-on); the monthly rate is billed by Odoo over SEPA. Fails closed if a package
-         has no promo line resolved, rather than falling back to the package product and
-         charging its monthly price today. See CLAUDE.md Pricing pipeline. */
-      if (!prod.promoVariantId) return;
+      if (!prod || !btn || btn.dataset.busy === '1' || !pkgQty) return;
       var cfg = opts || {};
       var ctaLocation = cfg.ctaLocation || 'vergelijk_pakketten', bron = cfg.bron || 'Vergelijk pakketten';
       btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true');
-      var vid = String(prod.promoVariantId);
+      var vid = String(prod.variantId);
       window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
         .then(function (r) { return r.json(); })
         .then(function (cart) {
           var line = (cart && cart.items || []).filter(function (it) { return String(it.variant_id) === vid; })[0];
-          var activationId = activationLineToAdd(cart);
-          if (line) {
-            var changePromise = window.fetch('/cart/change.js', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
-            });
-            if (!activationId) return changePromise;
-            // Promo line already exists but the activation fee doesn't yet (e.g. it was
-            // removed from the cart separately) — bump the promo line, then add the fee.
-            return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
-              return window.fetch('/cart/add.js', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items: [{ id: activationId, quantity: 1 }] })
-              });
-            });
+          var activationId = activationLineToAdd(cart, prod);
+          var items = [];
+          if (!line) {
+            items.push({ id: prod.variantId, quantity: pkgQty, properties: {
+              'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': bron
+            } });
           }
-          var items = [{ id: prod.promoVariantId, quantity: 1, properties: {
-            'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': bron
-          } }];
           if (activationId) items.push({ id: activationId, quantity: 1 });
+          if (!items.length) return { ok: true, json: function () { return {}; } };
           return window.fetch('/cart/add.js', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: items })

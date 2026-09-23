@@ -4,20 +4,30 @@ Zo Veilig pricing builder (v3 intro-promo model).
 
 Reads pricing.config.json (INPUTS only) and derives every money value once:
 
-    promoDiscountTotal      = promo.months * monthly * promo.rate    [half-up]
+    promoDiscountTotal      = promo.months * half_up(monthly * promo.rate)   [per unit]
     promoWas                = promo.months * monthly                 (undiscounted worth)
     dueToday[option]        = install_option + promoDiscountTotal    (per install option)
-    indicativeContractValue = activation + monthly*term - promoDiscountTotal
+    indicativeContractValue = activation + promoDiscountTotal + monthly * (term - promo.months)
 
-What Shopify collects today is the chosen installation option (never discounted) plus a
-prepaid "Eerste 3 maanden" line worth promoDiscountTotal - a separate positive charge,
-not a reduction. The monthly rate is never modified here and is billed by Odoo from
-month 4. The 1.5x 'eerste vooruitbetaling' commitment is RETIRED (v2), and so is the
-'discounted monthly instalment' figure that v3 first modelled the promo as.
+promoDiscountTotal is what the package line costs today. It is rounded PER UNIT, then
+multiplied by promo.months, because that is how Shopify applies the automatic discount:
+each unit of the package line is priced on its own (e.g. 2495 x 50% = 1247.5 -> 1248 per
+unit, x 3 = 3744), not the line as a whole (7485 x 50% = 3742.5 -> 3743). Measured in real
+carts, 2026-09-23; see docs/prepay-qty3-2026-09-23.md.
+
+What Shopify collects today is the chosen installation option (never discounted) plus
+the real package product at quantity promo.months (3), which Shopify's automatic
+"Eerste 3 maanden" discount takes promo.ratePercent (50%) off - so that line costs
+promoDiscountTotal (2026-09-23 model, no separate promo products). The monthly rate is
+never modified here and is billed by Odoo from month 4. The 1.5x 'eerste
+vooruitbetaling' commitment is RETIRED (v2), and so is the 'discounted monthly
+instalment' figure that v3 first modelled the promo as.
 
 Emits:
     pricing.generated.json          machine-readable, for checks / JS / dataLayer
     ../snippets/zv-pricing.liquid   single source the theme renders from
+    ../snippets/zv-item-names.liquid  product handle -> config name JSON, rendered once by
+                                    the layout for JS (cart drawer, GA4 item_name)
 
 Money is integer cents throughout. Rounding is ROUND_HALF_UP, never banker's.
 Run:  python3 scripts/build_pricing.py
@@ -31,6 +41,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "pricing" / "pricing.config.json"
 GENERATED = ROOT / "pricing" / "pricing.generated.json"
 SNIPPET = ROOT / "snippets" / "zv-pricing.liquid"
+ITEM_NAMES = ROOT / "snippets" / "zv-item-names.liquid"
 
 
 def cents_half_up(value: Decimal) -> int:
@@ -79,6 +90,12 @@ def build():
         for o in cfg["installationOptions"]["nami"]["options"]
     ]
 
+    # installation product handle -> the label the theme shows for it (NAMI options by their
+    # own labels, the Climax installation by labels.activation), never the Shopify title.
+    install_names = {o["productHandle"]: o["label"] for o in nami_install_options}
+    if cfg["activation"].get("productHandle"):
+        install_names[cfg["activation"]["productHandle"]] = cfg["labels"]["activation"]
+
     out = {
         "generatedFrom": "pricing.config.json",
         "configVersion": cfg["meta"]["version"],
@@ -98,6 +115,8 @@ def build():
             "cardBadge": promo["cardBadge"],
             "timelineLabel": promo["timelineLabel"],
             "disclosure": promo["disclosure"],
+            # The package line's cart quantity: one unit per prepaid month.
+            "packageCartQuantity": promo_months,
         },
         "contract": {"defaultTermMonths": default_term, "enabledTerms": enabled_terms},
         "labels": cfg["labels"],
@@ -114,6 +133,9 @@ def build():
             row = {
                 "id": pkg["id"],
                 "name": pkg["name"],
+                # custom.finder_key of the Shopify product: how the theme maps a product or
+                # cart line to this package, and so to its name (never the product title).
+                "finderKey": pkg.get("finderKey"),
                 "lineId": line["id"],
                 "lineName": line["displayName"],
                 "cat": line["cat"],
@@ -138,12 +160,15 @@ def build():
             monthly = price["amountCents"]
             term = pkg.get("termMonths", default_term)
 
-            promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
-            icv = activation_cents + (monthly * term) - promo_discount_total
+            # Per unit, then x months - Shopify's own rounding of the package line (see
+            # module docstring). The ICV counts those prepaid months once, at what they
+            # cost, plus the remaining months at the plain rate.
+            promo_discount_total = promo_months * cents_half_up(Decimal(monthly) * promo_rate) if promo_enabled else 0
+            icv = activation_cents + promo_discount_total + monthly * (term - (promo_months if promo_enabled else 0))
 
-            # dueToday (2026-09-22 model, kosten.xlsx + Thijs): installation is NEVER
-            # discounted; the promo is a separate, always-positive, one-time add-on
-            # collected today alongside it. due_today = install_option_cents +
+            # dueToday (kosten.xlsx + Thijs): installation is NEVER discounted; the
+            # package line (qty promo.months, 50% off via Shopify's automatic discount)
+            # is collected today alongside it. due_today = install_option_cents +
             # promo_discount_total, per available install option. NAMI packages offer
             # 3 install options (installationOptions.nami.options); Climax packages
             # keep the single fixed activation fee, emitted under the same 'huis' key
@@ -166,8 +191,6 @@ def build():
             # always starts a package out with the flat activation-equivalent fee).
             due_today_default_cents = due_today["huis"]["amountCents"]
 
-            promo_product_cfg = pkg.get("promoProduct") or {}
-
             # What the prepaid promo period is worth at the undiscounted monthly rate -
             # the "was" figure next to promoDiscountTotal on the actie page. It is a
             # 3-month total, never a monthly figure, so it must never be shown with /mnd.
@@ -179,6 +202,7 @@ def build():
                 "termMonths": term,
                 "installGroup": install_group,
                 "productHandle": pkg.get("productHandle"),
+                "sku": pkg.get("sku"),
                 "monthlyRecurringPriceCents": monthly,
                 "monthlyDisplay": eur(monthly),
                 "promoMonths": promo_months if promo_enabled else 0,
@@ -186,10 +210,6 @@ def build():
                 "promoWasDisplay": eur(promo_was),
                 "promoDiscountTotalCents": promo_discount_total,
                 "promoDiscountTotalDisplay": eur(promo_discount_total),
-                "promoProduct": {
-                    "productHandle": promo_product_cfg.get("productHandle"),
-                    "sku": promo_product_cfg.get("sku"),
-                },
                 "activationPriceCents": activation_cents,
                 "activationDisplay": eur(activation_cents),
                 "dueToday": due_today,
@@ -199,7 +219,7 @@ def build():
                     "status": "CURRENT_WORKING",
                     "cents": icv,
                     "display": eur(icv),
-                    "recurringMonthsBilled": term,
+                    "recurringMonthsBilled": term - (promo_months if promo_enabled else 0),
                     "label": cfg["labels"]["indicativeContractValue"],
                 },
             })
@@ -247,6 +267,7 @@ def build():
         "</script>",
         "",
         f"{{%- assign zv_promo_months = {out['promo']['months']} -%}}",
+        f"{{%- assign zv_promo_package_qty = {out['promo']['packageCartQuantity']} -%}}",
         f"{{%- assign zv_promo_active = {str(promo_active).lower()} -%}}",
         f"{{%- assign zv_promo_badge = '{out['promo']['cardBadge']}' -%}}",
         f"{{%- assign zv_promo_timeline = '{out['promo']['timelineLabel']}' -%}}",
@@ -259,6 +280,13 @@ def build():
         f"{{%- assign zv_label_due_today = '{cfg['labels']['dueToday']}' -%}}",
         f"{{%- assign zv_label_monthly_after = '{cfg['labels']['monthlyAfter']}' -%}}",
         f"{{%- assign zv_label_breakdown_intro = '{cfg['labels']['breakdownIntro']}' -%}}",
+        # finder_key -> package name, for snippets/zv-package-name.liquid. The theme shows
+        # these names, never the Shopify product title (Odoo renames products).
+        "{%- assign zv_package_names_by_fk = '" + "|".join(
+            f"{p['finderKey']}:{p['name']}" for p in out["packages"] if p.get("finderKey")) + "' -%}",
+        # installation product handle -> its config label, for snippets/zv-install-name.liquid.
+        "{%- assign zv_install_names_by_handle = '" + "|".join(
+            f"{h}:{n}" for h, n in install_names.items()) + "' -%}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")
@@ -272,11 +300,13 @@ def build():
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")
         if not p.get("purchasable"):
+            lines.append(f"{{%- assign zv_{pid}_name = '{p['name']}' -%}}")
             lines.append(f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}")
             if p.get("ctaLabel"):
                 lines.append(f"{{%- assign zv_{pid}_cta = '{p['ctaLabel']}' -%}}")
             continue
         lines += [
+            f"{{%- assign zv_{pid}_name = '{p['name']}' -%}}",
             f"{{%- assign zv_{pid}_monthly = '{p['monthlyDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_monthly_cents = {p['monthlyRecurringPriceCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
@@ -284,8 +314,6 @@ def build():
             f"{{%- assign zv_{pid}_promo_was = '{p['promoWasDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_promo_was_cents = {p['promoWasCents']} -%}}",
             f"{{%- assign zv_{pid}_handle = '{p.get('productHandle') or ''}' -%}}",
-            f"{{%- assign zv_{pid}_promo_handle = '{p['promoProduct'].get('productHandle') or ''}' -%}}",
-            f"{{%- assign zv_{pid}_promo_sku = '{p['promoProduct'].get('sku') or ''}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today_cents = {p['initialPaymentDueTodayCents']} -%}}",
@@ -302,15 +330,33 @@ def build():
     SNIPPET.parent.mkdir(parents=True, exist_ok=True)
     SNIPPET.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    # Product handle -> the name the theme shows, for JS that only has Cart AJAX data (no
+    # product metafields, so no finder_key): packages by their config productHandle, which the
+    # config pairs with the finderKey; installation products by their configured handle.
+    item_names = {p["productHandle"]: p["name"] for p in out["packages"] if p.get("productHandle")}
+    item_names.update(install_names)
+    ITEM_NAMES.write_text("\n".join([
+        "{%- comment -%}",
+        "  GENERATED FILE. Do not edit by hand.",
+        "  Source: pricing/pricing.config.json",
+        "  Rebuild: python3 scripts/build_pricing.py",
+        "  Product handle -> the name the theme shows (never the Shopify product title), for JS",
+        "  that only sees Cart AJAX data: the Oplossingen cart drawer and GA4 item_name",
+        "  (assets/zv-track.js). Rendered once per page by layout/theme.liquid.",
+        "{%- endcomment -%}",
+        '<script type="application/json" id="zv-item-names">'
+        + json.dumps(item_names, ensure_ascii=False, separators=(",", ":")) + "</script>",
+    ]) + "\n", encoding="utf-8")
+
     priced = [p for p in out["packages"] if p.get("purchasable")]
-    print(f"wrote {GENERATED.name} and snippets/{SNIPPET.name}")
+    print(f"wrote {GENERATED.name}, snippets/{SNIPPET.name} and snippets/{ITEM_NAMES.name}")
     print(f"  packages: {len(out['packages'])} ({len(priced)} purchasable)")
     print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
     print("  nami install options: " + ", ".join(f"{o['label']} {o['display']}" for o in nami_install_options))
     for p in priced:
         due_today_breakdown = ", ".join(f"{oid}={opt['display']}" for oid, opt in p["dueToday"].items())
         print(f"  - {p['lineName']}/{p['name']} ({p['installGroup']}): monthly {p['monthlyDisplay']}"
-              f" | promo add-on +{p['promoDiscountTotalDisplay']}"
+              f" | package x{out['promo']['packageCartQuantity']} today {p['promoDiscountTotalDisplay']} (was {p['promoWasDisplay']})"
               f" | due today [{due_today_breakdown}]"
               f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']}")
 
