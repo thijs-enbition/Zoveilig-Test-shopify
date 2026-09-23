@@ -315,6 +315,25 @@ for p in gen["packages"]:
 check(cfg["labels"]["pricePending"] == "Prijs volgt",
       "central pending label is 'Prijs volgt'")
 
+print("\n12. Package display order (pricing.config.json, never collection order)")
+# Odoo's product sync appends a new/replacement product to the END of a Shopify collection
+# (confirmed 2026-09-23: Inzicht and Alert) - every theme surface that renders package cards
+# must order by pricing.config.json's lines[].packages[] sequence and skip an unknown
+# finder_key, never trust the collection's own manual sort.
+expected_order = [pkg["finderKey"] for line in cfg["lines"] for pkg in line["packages"] if pkg.get("finderKey")]
+check(gen.get("packageOrder") == expected_order,
+      "generated packageOrder matches pricing.config.json lines[].packages[] order",
+      f"got {gen.get('packageOrder')} expected {expected_order}")
+check(expected_order.index("aware") < expected_order.index("aware_plus") < expected_order.index("care"),
+      "Langer Thuis order is Inzicht, Zeker, Beschermd", f"order={expected_order}")
+check(expected_order.index("secure") < expected_order.index("guard") < expected_order.index("secure_plus"),
+      "Mijn Thuis order is Alert, Protect, Vista", f"order={expected_order}")
+snippet_text = (PRICING.parent / "snippets" / "zv-pricing.liquid").read_text(encoding="utf-8")
+m = re.search(r"zv_package_order_fks = '([^']*)'", snippet_text)
+check(m is not None and m.group(1).split("|") == expected_order,
+      "snippets/zv-pricing.liquid's zv_package_order_fks matches the generated order",
+      f"got {m.group(1) if m else None}")
+
 print("\n" + "=" * 60)
 if failures:
     print(f"FAILED: {len(failures)} check(s)")

@@ -84,6 +84,16 @@
       "Totaal over looptijd": "Hides that one-off charges are included. Use labels.indicativeContractValue."
     }
   },
+  "packageOrder": [
+    "aware",
+    "aware_plus",
+    "care",
+    "secure",
+    "guard",
+    "secure_plus",
+    "liogo_solo",
+    "liogo_guard"
+  ],
   "packages": [
     {
       "id": "inzicht",

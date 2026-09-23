@@ -96,6 +96,21 @@ def build():
     if cfg["activation"].get("productHandle"):
         install_names[cfg["activation"]["productHandle"]] = cfg["labels"]["activation"]
 
+    # The single source of truth for package DISPLAY ORDER: each package's custom.finder_key,
+    # in the order `lines[].packages[]` lists them in pricing.config.json. Any theme surface
+    # that renders package cards from a Shopify collection (Oplossingen, the pakket-matcher,
+    # the homepage Keuzehulp preview) must render in this order and skip a product whose
+    # finder_key isn't in it - never trust the collection's own manual sort. Odoo's product
+    # sync appends a new/replacement product to the END of a collection (confirmed
+    # 2026-09-23: it did this to Inzicht and Alert), which silently reorders any surface that
+    # just loops `for p in collection.products` in collection order.
+    package_order_fks = [
+        pkg["finderKey"]
+        for line in cfg["lines"]
+        for pkg in line["packages"]
+        if pkg.get("finderKey")
+    ]
+
     out = {
         "generatedFrom": "pricing.config.json",
         "configVersion": cfg["meta"]["version"],
@@ -120,6 +135,10 @@ def build():
         },
         "contract": {"defaultTermMonths": default_term, "enabledTerms": enabled_terms},
         "labels": cfg["labels"],
+        # Display order for package cards (see package_order_fks above): the finder_key
+        # values in pricing.config.json order. Theme surfaces must render in this order,
+        # never a Shopify collection's own manual sort.
+        "packageOrder": package_order_fks,
         "packages": [],
         "addons": [],
         "bundles": [],
@@ -287,6 +306,10 @@ def build():
         # installation product handle -> its config label, for snippets/zv-install-name.liquid.
         "{%- assign zv_install_names_by_handle = '" + "|".join(
             f"{h}:{n}" for h, n in install_names.items()) + "' -%}",
+        # Package display order (finder_key values, pricing.config.json order). Every theme
+        # surface that renders package cards from a collection reorders to match this and
+        # skips any product whose finder_key isn't in it - see package_order_fks above.
+        f"{{%- assign zv_package_order_fks = '{'|'.join(package_order_fks)}' -%}}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")

@@ -33,6 +33,12 @@
                             (products JSON, default pkg_meta) come from it via finder_key,
                             never the product title. Optional only for backward
                             compatibility; every caller passes it.
+    package_order_fks       zv_package_order_fks from zv-pricing ('|'-joined finder_keys in
+                            pricing.config.json order). Reorders the pm_products build loop
+                            to match, instead of the collection's own manual sort - Odoo's
+                            product sync appends new/replacement products to the END of a
+                            collection (2026-09-23). Optional; falls back to the
+                            collection's own product order if not passed.
     zv_inzicht_monthly / zv_zeker_monthly / zv_beschermd_monthly, tagline_inzicht /
     tagline_zeker / tagline_beschermd
                             optional. Only used to build the DEFAULT `pkg_meta` (below) when
@@ -132,10 +138,33 @@
 
 {%- comment -%} package id -> real product, via custom.finder_key (same mapping as zv-checkout-overview) {%- endcomment -%}
 {%- assign fk_pairs = finder_key_map | default: 'aware:inzicht,aware_plus:zeker,care:beschermd' | split: ',' -%}
+{%- comment -%}
+  pm_ordered_products: pm_coll.products reordered to pricing.config.json's packages[] order
+  (package_order_fks, new optional param - pass zv_package_order_fks from zv-pricing).
+  This map is looked up by key (products[pkg]) in assets/zv-vergelijk-pakketten.js, so the
+  build order below has no visible effect today, but keeping it config-driven avoids a
+  silent dependency on the collection's own manual sort if that ever changes - Odoo's
+  product sync appends new/replacement products to the END of a collection (2026-09-23).
+  If a caller doesn't pass package_order_fks, this falls back to pm_coll.products' own
+  order (today's behavior, unchanged).
+{%- endcomment -%}
+{%- assign pm_ordered_products = pm_coll.products -%}
+{%- if package_order_fks != blank -%}
+  {%- assign pm_order_fks = package_order_fks | split: '|' -%}
+  {%- assign pm_ordered_products = '' | split: ',' -%}
+  {%- for pm_want_fk in pm_order_fks -%}
+    {%- for pm_cp in pm_coll.products -%}
+      {%- if pm_cp.metafields.custom.finder_key.value == pm_want_fk -%}
+        {%- assign pm_match = pm_coll.products | slice: forloop.index0, 1 -%}
+        {%- assign pm_ordered_products = pm_ordered_products | concat: pm_match -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endif -%}
 {%- capture pm_products -%}
   {%- assign first = true -%}
   {
-  {%- for p in pm_coll.products -%}
+  {%- for p in pm_ordered_products -%}
     {%- assign fk = p.metafields.custom.finder_key.value -%}
     {%- assign pid = '' -%}
     {%- for pair in fk_pairs -%}
