@@ -193,8 +193,9 @@
                 already-approved `hook` line from pricing.config.json / opl-modal-data verbatim
                 (not new marketing copy); their icons are a first engineering draft, NOT yet
                 design-signed-off — see PR description / research doc open question #3. Vista
-                (secure_plus) is intentionally not given ltc_* copy here: it stays on its own
-                lead-form branch below, never the shared card markup. This case block only
+                (secure_plus) gets ltc_tagline/ltc_bullets/ltc_icon here since 2026-09-23 (spec
+                §10), but use_ltc stays false: it stays on its own lead-form branch below and
+                only borrows the ltc__head/ltc__checklist markup, never the shared card. This case block only
                 assembles the data — the markup below still renders it exactly as before
                 (Langer Thuis only) until the next commit switches Alert/Protect over too.
               {%- endcomment -%}
@@ -245,6 +246,11 @@
                   {%- assign ltc_hw_bullets = '1x centrale|1x codebedienpaneel|1x rookmelder|1x fotobewegingsmelder|2x deur/raamsensor' -%}
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
+                {%- when 'secure_plus' -%}
+                  {%- comment -%} Vista. Title/tagline/bullets per docs/pakket-wijzigingen-2026-09-23.md §10 (2026-09-23). use_ltc stays false: these ltc_* values are rendered only by Vista's own lead-form branch (the pcard--tile article below), never the shared ltc card markup. The bullets carry no [tekst](route-key) link markers. Icon: new camera-viewfinder + eye glyph in the ltc icon construction (64x64, --indigo strokes, one --red accent); an engineering draft like the Alert/Protect icons, not yet design-signed-off. {%- endcomment -%}
+                  {%- assign ltc_tagline = 'Zie wat er gebeurt. Weet wat ertoe doet.' -%}
+                  {%- assign ltc_bullets = 'Slimme AI herkent relevante personen, voertuigen en activiteit|Direct gewaarschuwd bij belangrijke gebeurtenissen|Altijd en overal live zicht op uw woning|Bekijk wat er vóór en tijdens een incident gebeurde|Slimme zones voorkomen onnodige meldingen|Kijk en spreek rechtstreeks via de camera|Eenvoudig uit te breiden tot complete camerabeveiliging' -%}
+                  {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M12 22 V17 Q12 12 17 12 H22 M42 12 H47 Q52 12 52 17 V22 M52 42 V47 Q52 52 47 52 H42 M22 52 H17 Q12 52 12 47 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 32 Q32 16 47 32 Q32 48 17 32 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="32" r="4.6" fill="var(--red)"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
               {%- assign ltc_hw_bullet_list = ltc_hw_bullets | split: '|' -%}
@@ -381,13 +387,26 @@
                   {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
                 </article>
               {%- else -%}
-                <article class="pcard pcard--tile{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
+                <article class="pcard pcard--tile{% if is_vista %} pcard--vista{% endif %}{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
                          data-package-sku="{{ v.sku }}" data-product-handle="{{ p.handle }}" data-product-id="{{ p.id }}" data-variant-id="{{ v.id }}"
                          data-finder-key="{{ fk }}" data-popular="{{ popular }}" data-available="{{ v.available }}"
                          data-price-known="{{ price_known }}" data-price="{% if price_known %}{{ p.price | money_without_trailing_zeros }}{% else %}Prijs volgt{% endif %}" data-price-cents="{{ p.price }}" data-per="{% if price_known %}/mnd{% endif %}">
                   {%- if popular -%}<span class="pcard__flag">Meest gekozen</span>{%- endif -%}
                   {%- if tile != blank -%}<span class="pcard__tileimg"><img src="{{ tile | asset_url }}" alt="{{ short_name | escape }}" loading="lazy" width="600" height="820"></span>{%- endif -%}
+                  {%- if is_vista -%}
+                    {%- comment -%} Vista card front (spec §10, 2026-09-23): same ltc__head/ltc__checklist markup as the Alert/Protect cards, copy from the second case block above. Plain escaped bullets (Vista's have no link markers). {%- endcomment -%}
+                    <div class="ltc__head">
+                      <span class="ltc__icon">{{ ltc_icon }}</span>
+                      <div class="ltc__headtext"><h4 class="ltc__name">{{ short_name }}</h4><p class="ltc__tagline">{{ ltc_tagline }}</p></div>
+                    </div>
+                    <ul class="ltc__checklist">
+                      {%- for bullet in ltc_bullet_list -%}
+                        <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>{{ bullet | escape }}</span></li>
+                      {%- endfor -%}
+                    </ul>
+                    <hr class="ltc__div">
+                  {%- endif -%}
                   <div class="pcard__foot">
                     <div class="pcard__price">
                       {%- if price_known -%}<span class="amt">{{ p.price | money_without_trailing_zeros }}</span><span class="per">/mnd</span>{%- elsif is_vista -%}<span class="amt">Geen vast pakket</span>{%- else -%}<span class="amt">Prijs volgt</span>{%- endif -%}
@@ -765,6 +784,9 @@
 .pcard.pop .pcard__flag { background: var(--indigo); color: #fff; border-radius: 999px; padding: 5px 12px; align-self: flex-start; margin-bottom: 14px; }
 .pcard__flag { align-self: flex-start; margin-bottom: 12px; color: var(--belt); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .pcard--tile { padding-top: 14px; }
+/* Vista (2026-09-23): the tile article now opens with the same .ltc__head as Alert/Protect,
+   so give it their top padding, or its header sits 10px higher in the Mijn Thuis row. */
+.pcard--tile.pcard--vista { padding-top: 24px; }
 .pcard__tileimg { border-radius: 6px; overflow: hidden; margin: 0 0 16px; border: 1px solid var(--line); }
 .pcard__tileimg img { width: 100%; height: auto; display: block; }
 .pcard__foot { margin-top: auto; padding-top: 4px; }
