@@ -1329,6 +1329,12 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   // variant id -> card, for the drawer's package name: the card's data-package-name is the
   // pricing.config.json name (resolved via finder_key), never the Shopify product title.
   var cardsByVariant = {};
+  // product handle -> config name (packages and installation products), from the
+  // #zv-item-names island the layout renders — for lines without a card, e.g. the Climax
+  // installation line, which must never show its Shopify title either.
+  var ITEM_NAMES = (function () {
+    try { return JSON.parse((document.getElementById('zv-item-names') || {}).textContent || '{}'); } catch (e) { return {}; }
+  })();
   // .pcard[data-package-sku], not just [data-package-sku] — that attribute is also
   // repeated on the card's own buttons (In winkelwagen / Meer informatie) for their
   // own analytics hooks, and a later match in DOM order would silently overwrite the
@@ -1342,10 +1348,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 
   function cartRowHtml(it) {
     var p = it.properties || {};
-    // Full label = "Oplossing · Pakket" (e.g. "Langer Thuis · Zeker"): the package name is the
-    // config name from that package's card, then the line's own Pakket property, then the title.
+    // Full label = "Oplossing · Pakket" (e.g. "Langer Thuis · Zeker"): the config name from that
+    // package's card, else the config name by handle (installation lines), then the line's own
+    // Pakket property, then the title.
     var card = cardsByVariant[String(it.variant_id)];
-    var pkgName = (card && card.getAttribute('data-package-name')) || p['Pakket'] || it.product_title || '';
+    var pkgName = (card && card.getAttribute('data-package-name')) || ITEM_NAMES[it.handle] || p['Pakket'] || it.product_title || '';
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(pkgName);
     var pkg = pkgName || 'item';
     var woningOn = !!p['Woning'];

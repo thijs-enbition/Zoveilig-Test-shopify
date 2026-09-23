@@ -269,13 +269,15 @@
                 {%- for item in cart.items -%}
                   {%- assign is_sub = false -%}
                   {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
-                  {%- comment -%} A package line shows its pricing.config.json name (via finder_key), never the Shopify product title. {%- endcomment -%}
+                  {%- comment -%} Package and installation lines show their pricing.config.json name (package via finder_key, installation via handle), never the Shopify product title. {%- endcomment -%}
                   {%- assign item_name = item.product.title -%}
                   {%- if is_sub -%}
                     {%- capture cfg_name -%}{%- render 'zv-package-name', finder_key: item.product.metafields.custom.finder_key.value, names: zv_package_names_by_fk -%}{%- endcapture -%}
-                    {%- assign cfg_name = cfg_name | strip -%}
-                    {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
+                  {%- else -%}
+                    {%- capture cfg_name -%}{%- render 'zv-install-name', handle: item.product.handle, names: zv_install_names_by_handle -%}{%- endcapture -%}
                   {%- endif -%}
+                  {%- assign cfg_name = cfg_name | strip -%}
+                  {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
                   <div class="ovitem">
                     <div class="ovi-thumb">
                       {%- if item.image -%}
@@ -712,12 +714,12 @@
     { "type": "textarea", "id": "before_explainer", "label": "Toelichting · promo", "default": "De eerste 3 maanden van uw pakket betaalt u vandaag vooruit, met 50% korting, samen met de eventuele installatiekosten. Daarna betaalt u het vaste maandbedrag via SEPA-incasso. Alle bedragen zijn inclusief btw (21%)." },
     { "type": "text", "id": "cost_card_heading", "label": "Kop · kostenkaart", "default": "Uw kosten in het kort" },
     { "type": "textarea", "id": "cost_card_sub", "label": "Subtitel · kostenkaart", "default": "Alles wat u vastlegt, in het kort. Zo weet u precies waar u aan toe bent." },
-    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eventuele installatiekosten en de eerste 3 maanden van uw pakket vooruit, met 50% korting, via de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "due_today_text", "label": "Toelichting · vandaag te betalen", "default": "Vandaag betaalt u de eventuele installatiekosten en de eerste 3 maanden van uw pakket vooruit, met 50% korting, via onze beveiligde betaalomgeving." },
     { "type": "text", "id": "consent_prefix", "label": "Akkoordtekst · voor de link", "default": "Ik ga akkoord met de", "info": "Gevolgd door een vaste link naar de Algemene Voorwaarden." },
     { "type": "text", "id": "consent_middle", "label": "Akkoordtekst · na de link (met pakket)", "default": ", de contractduur van", "info": "Gevolgd door de contractduur van het pakket, in maanden." },
     { "type": "text", "id": "consent_suffix", "label": "Akkoordtekst · slot", "default": "en de betaalplicht." },
     { "type": "text", "id": "checkout_button_label", "label": "Knoptekst · afrekenen", "default": "Verder naar veilig afrekenen" },
-    { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in de beveiligde Shopify-checkout." },
+    { "type": "textarea", "id": "closing_text", "label": "Slotzin", "default": "U rondt uw betaling van vandaag veilig af in onze beveiligde betaalomgeving." },
     { "type": "text", "id": "continue_shopping_label", "label": "Knoptekst · verder winkelen", "default": "← Verder winkelen" }
   ]
 }

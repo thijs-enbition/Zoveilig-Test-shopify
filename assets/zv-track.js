@@ -80,11 +80,18 @@
     return window.fetch('/cart.js', { headers: { Accept: 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
+  // GA4 item_name is the name from pricing.config.json (#zv-item-names, rendered by the
+  // layout), never the Shopify product title - Odoo renames products. Keyed by product
+  // handle, since Cart AJAX lines carry no metafields; the title is only a fallback for a
+  // product the config doesn't know. item_id stays the SKU.
+  var ITEM_NAMES = (function () {
+    try { return JSON.parse((document.getElementById('zv-item-names') || {}).textContent || '{}'); } catch (e) { return {}; }
+  })();
   function mapCartItems(cart) {
     return ((cart && cart.items) || []).map(function (it) {
       return {
         item_id: it.sku || String(it.product_id),
-        item_name: it.product_title,
+        item_name: ITEM_NAMES[it.handle] || it.product_title,
         item_variant: it.variant_title || undefined,
         item_brand: it.vendor || 'Zo Veilig',
         item_category: it.product_type || undefined,

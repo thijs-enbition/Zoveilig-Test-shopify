@@ -139,9 +139,9 @@ its own package cards and links here via `zv-route` key `vergelijk-pakketten`.
 ## Pricing pipeline
 
 `pricing/pricing.config.json` is the single source of truth for activation fee, intro promo,
-contract terms and indicative contract value. `python3 scripts/build_pricing.py` regenerates
-`pricing/pricing.generated.json` and `snippets/zv-pricing.liquid` (committed, generated —
-don't hand-edit). `python3 scripts/check_pricing.py` verifies the maths and that no theme
+contract terms, indicative contract value and the names the theme shows. `python3
+scripts/build_pricing.py` regenerates `pricing/pricing.generated.json`, `snippets/zv-pricing.liquid`
+and `snippets/zv-item-names.liquid` (committed, generated — don't hand-edit). `python3 scripts/check_pricing.py` verifies the maths and that no theme
 file carries an independent literal price or duration; CI runs both on every push/PR.
 
 **HARD RULE (Thijs, 2026-09-23): never create products.** The only products sold on this site
@@ -165,7 +165,8 @@ at `promo.packageCartQuantity` (= `promo.months`, emitted as `zv_promo_package_q
 a package twice, and adds CL003 only for a climax package (`installGroup` in the config). The
 monthly rate is billed by Odoo over SEPA from month 4. Whether Odoo actually does that (one
 contract at the plain rate, not quantity 3, SEPA from month 4) is **unconfirmed**:
-`unresolved.ODOO_PROMO_DISCOUNT`, a pre-live-push check for Thijs. The Shopify discount is the
+`unresolved.ODOO_PROMO_DISCOUNT`, documentation only: Odoo is out of scope for this repo and
+Thijs handles it with Alex. The Shopify discount is the
 **only** on/off switch; the `zv_promo_live` theme setting is gone. `promo.enabled` only means
 "the mechanism is part of the pricing model". It supersedes the 2026-09-22 PROMO-* product
 model (`docs/prepay-promo-lineitems-2026-09-22.md`); see `docs/prepay-qty3-2026-09-23.md` for
@@ -178,13 +179,18 @@ ROUND_HALF_UP(monthly × rate)` (Zeker €37,44), never `ROUND_HALF_UP(months ×
 + prepaid amount + monthly × (term − 3)). `check_pricing.py` asserts all 11 "vandaag"
 amounts. They were measured equal to real carts on 2026-09-23.
 
-**Package names come from `pricing.config.json`, never the Shopify product title.** Odoo's
-product sync renames products ("Nami Langer Thuis Zeker") and can do it again. Every package in
-the config has a `finderKey`; the build emits `zv_package_names_by_fk`, and
-`snippets/zv-package-name.liquid` maps a product's `custom.finder_key` to its config name. Use it
-on any surface that shows a package name; today that's the Oplossingen cards, the matcher and
-its comparison table, the cart drawer (via the card's `data-package-name`), `/cart` and
-Overzicht. Installation products still show their Shopify titles outside the Overzicht breakdown.
+**Names come from `pricing.config.json`, never the Shopify product title.** Odoo's product sync
+renames products ("Nami Langer Thuis Zeker", "Nami Geen Instalatie") and can do it again.
+- **Packages:** by `custom.finder_key` via `snippets/zv-package-name.liquid`
+  (`zv_package_names_by_fk`; each config package has a `finderKey`).
+- **Installation products:** by handle via `snippets/zv-install-name.liquid`
+  (`zv_install_names_by_handle`).
+- **JS that only has Cart AJAX data** (the cart drawer, GA4 `item_name` in `assets/zv-track.js`)
+  uses the generated `#zv-item-names` island (handle → name) that `layout/theme.liquid` renders.
+
+Use these on any surface that shows a product name. GA4 `item_id` stays the SKU. **Shopify's own
+checkout page and order e-mails show the Shopify product title** (the formal Odoo name). That's
+intended (Thijs, 2026-09-23); don't work around it in the theme.
 
 **Activation fee** (`activation` in the config) is the **Climax** installation product:
 `climax-instalatie`, CL003, €99, since 2026-09-23 (it replaced `activatie-en-installatie` /

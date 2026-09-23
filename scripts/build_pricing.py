@@ -26,6 +26,8 @@ instalment' figure that v3 first modelled the promo as.
 Emits:
     pricing.generated.json          machine-readable, for checks / JS / dataLayer
     ../snippets/zv-pricing.liquid   single source the theme renders from
+    ../snippets/zv-item-names.liquid  product handle -> config name JSON, rendered once by
+                                    the layout for JS (cart drawer, GA4 item_name)
 
 Money is integer cents throughout. Rounding is ROUND_HALF_UP, never banker's.
 Run:  python3 scripts/build_pricing.py
@@ -39,6 +41,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "pricing" / "pricing.config.json"
 GENERATED = ROOT / "pricing" / "pricing.generated.json"
 SNIPPET = ROOT / "snippets" / "zv-pricing.liquid"
+ITEM_NAMES = ROOT / "snippets" / "zv-item-names.liquid"
 
 
 def cents_half_up(value: Decimal) -> int:
@@ -86,6 +89,12 @@ def build():
         }
         for o in cfg["installationOptions"]["nami"]["options"]
     ]
+
+    # installation product handle -> the label the theme shows for it (NAMI options by their
+    # own labels, the Climax installation by labels.activation), never the Shopify title.
+    install_names = {o["productHandle"]: o["label"] for o in nami_install_options}
+    if cfg["activation"].get("productHandle"):
+        install_names[cfg["activation"]["productHandle"]] = cfg["labels"]["activation"]
 
     out = {
         "generatedFrom": "pricing.config.json",
@@ -275,6 +284,9 @@ def build():
         # these names, never the Shopify product title (Odoo renames products).
         "{%- assign zv_package_names_by_fk = '" + "|".join(
             f"{p['finderKey']}:{p['name']}" for p in out["packages"] if p.get("finderKey")) + "' -%}",
+        # installation product handle -> its config label, for snippets/zv-install-name.liquid.
+        "{%- assign zv_install_names_by_handle = '" + "|".join(
+            f"{h}:{n}" for h, n in install_names.items()) + "' -%}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")
@@ -318,8 +330,26 @@ def build():
     SNIPPET.parent.mkdir(parents=True, exist_ok=True)
     SNIPPET.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    # Product handle -> the name the theme shows, for JS that only has Cart AJAX data (no
+    # product metafields, so no finder_key): packages by their config productHandle, which the
+    # config pairs with the finderKey; installation products by their configured handle.
+    item_names = {p["productHandle"]: p["name"] for p in out["packages"] if p.get("productHandle")}
+    item_names.update(install_names)
+    ITEM_NAMES.write_text("\n".join([
+        "{%- comment -%}",
+        "  GENERATED FILE. Do not edit by hand.",
+        "  Source: pricing/pricing.config.json",
+        "  Rebuild: python3 scripts/build_pricing.py",
+        "  Product handle -> the name the theme shows (never the Shopify product title), for JS",
+        "  that only sees Cart AJAX data: the Oplossingen cart drawer and GA4 item_name",
+        "  (assets/zv-track.js). Rendered once per page by layout/theme.liquid.",
+        "{%- endcomment -%}",
+        '<script type="application/json" id="zv-item-names">'
+        + json.dumps(item_names, ensure_ascii=False, separators=(",", ":")) + "</script>",
+    ]) + "\n", encoding="utf-8")
+
     priced = [p for p in out["packages"] if p.get("purchasable")]
-    print(f"wrote {GENERATED.name} and snippets/{SNIPPET.name}")
+    print(f"wrote {GENERATED.name}, snippets/{SNIPPET.name} and snippets/{ITEM_NAMES.name}")
     print(f"  packages: {len(out['packages'])} ({len(priced)} purchasable)")
     print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
     print("  nami install options: " + ", ".join(f"{o['label']} {o['display']}" for o in nami_install_options))

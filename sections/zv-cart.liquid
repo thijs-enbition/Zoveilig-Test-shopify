@@ -65,13 +65,15 @@
             {%- for item in cart.items -%}
               {%- assign is_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
-              {%- comment -%} A package line shows its pricing.config.json name (via finder_key), never the Shopify product title. {%- endcomment -%}
+              {%- comment -%} Package and installation lines show their pricing.config.json name (package via finder_key, installation via handle), never the Shopify product title. {%- endcomment -%}
               {%- assign item_name = item.product.title -%}
               {%- if is_sub -%}
                 {%- capture cfg_name -%}{%- render 'zv-package-name', finder_key: item.product.metafields.custom.finder_key.value, names: zv_package_names_by_fk -%}{%- endcapture -%}
-                {%- assign cfg_name = cfg_name | strip -%}
-                {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
+              {%- else -%}
+                {%- capture cfg_name -%}{%- render 'zv-install-name', handle: item.product.handle, names: zv_install_names_by_handle -%}{%- endcapture -%}
               {%- endif -%}
+              {%- assign cfg_name = cfg_name | strip -%}
+              {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
               {%- assign is_install = false -%}
               {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign is_install = true -%}{%- endif -%}
               <div class="citem">
@@ -142,7 +144,9 @@
                 {%- assign true_month_cents = true_month_cents | plus: item.original_price -%}
                 <div class="srow"><span>{{ row_pkg_name }} × {{ item.quantity }} — {{ zv_label_commitment }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- else -%}
-                <div class="srow"><span>{{ item.product.title | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
+                {%- capture row_name -%}{%- render 'zv-install-name', handle: item.product.handle, names: zv_install_names_by_handle -%}{%- endcapture -%}
+                {%- assign row_name = row_name | strip | default: item.product.title -%}
+                <div class="srow"><span>{{ row_name | escape }}</span><b>{{ item.final_line_price | money }}</b></div>
               {%- endif -%}
             {%- endfor -%}
             {%- if cart.cart_level_discount_applications.size > 0 -%}
