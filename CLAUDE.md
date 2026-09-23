@@ -171,11 +171,20 @@ contract at the plain rate, not quantity 3, SEPA from month 4) is **unconfirmed*
 model (`docs/prepay-promo-lineitems-2026-09-22.md`); see `docs/prepay-qty3-2026-09-23.md` for
 why that was abandoned.
 
-**Rounding: Shopify is 1 cent above the config for half-cent prices.** Shopify applies the 50%
-per unit and rounds each unit's discount down: Zeker is charged 3 × €12,48 = €37,44, where the
-config's half-up figure is €37,43. Cart, Overzicht and checkout always show Shopify's real
-amount; the actie page and `dueToday` show the config's. Measured per combination in the docs
-file. The config was deliberately **not** changed to match; that's Thijs's decision.
+**Rounding follows Shopify: per unit, then x 3** (Thijs, 2026-09-23). Shopify prices each unit
+of the package line on its own (50% of €24,95 → €12,48), so the prepaid amount is `months ×
+ROUND_HALF_UP(monthly × rate)` (Zeker €37,44), never `ROUND_HALF_UP(months × monthly × rate)`
+(€37,43). `build_pricing.py` computes it that way, and the ICV uses the same figure (installation
++ prepaid amount + monthly × (term − 3)). `check_pricing.py` asserts all 11 "vandaag"
+amounts. They were measured equal to real carts on 2026-09-23.
+
+**Package names come from `pricing.config.json`, never the Shopify product title.** Odoo's
+product sync renames products ("Nami Langer Thuis Zeker") and can do it again. Every package in
+the config has a `finderKey`; the build emits `zv_package_names_by_fk`, and
+`snippets/zv-package-name.liquid` maps a product's `custom.finder_key` to its config name. Use it
+on any surface that shows a package name; today that's the Oplossingen cards, the matcher and
+its comparison table, the cart drawer (via the card's `data-package-name`), `/cart` and
+Overzicht. Installation products still show their Shopify titles outside the Overzicht breakdown.
 
 **Activation fee** (`activation` in the config) is the **Climax** installation product:
 `climax-instalatie`, CL003, €99, since 2026-09-23 (it replaced `activatie-en-installatie` /
