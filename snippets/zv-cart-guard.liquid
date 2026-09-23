@@ -104,8 +104,13 @@
     if (Object.keys(qtyUpdates).length) return post('/cart/update.js', { updates: qtyUpdates });
 
     // 3. A Climax package needs the one fixed Climax installation line.
+    //    update.js with an absolute quantity of 1 (it adds the variant when it's missing),
+    //    never add.js: add.js increments, so two overlapping guard runs (a fast /cart ->
+    //    Overzicht click, or two tabs) would each add 1 and stack CL003 to quantity 2.
     if (hasClimaxPkg && ACTIVATION_ID != null && !activationLines.length) {
-      return post('/cart/add.js', { items: [{ id: ACTIVATION_ID, quantity: 1 }] });
+      var setActivation = {};
+      setActivation[ACTIVATION_ID] = 1;
+      return post('/cart/update.js', { updates: setActivation });
     }
 
     // 4. The Climax installation line never stays in a cart without a Climax package.
