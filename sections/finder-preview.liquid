@@ -7,37 +7,15 @@
   answer, so the homepage card is the entry point to the finder.
 {%- endcomment -%}
 
-{%- include 'zv-pricing' -%}
 {%- assign opts = section.blocks | where: 'type', 'option' -%}
 
 <section class="finder-sec" id="keuzehulp">
   {%- comment -%} finder_key -> product map, read by zv-finder.js to route results to real products {%- endcomment -%}
   {%- capture finder_products -%}
     {%- assign kh = collections[section.settings.collection] | default: collections['keuzehulp-pakketten'] -%}
-    {%- comment -%}
-      Build the map in pricing.config.json's packages[] order (zv_package_order_fks),
-      never the collection's own manual sort - Odoo's product sync appends a
-      new/replacement product to the END of a collection (2026-09-23). This is a map
-      looked up by key in assets/zv-finder.js, so order has no visible effect today, but
-      staying config-driven avoids a silent dependency on collection order later. A
-      product with no known finder_key is skipped, same as before.
-    {%- endcomment -%}
-    {%- assign kh_ordered_products = kh.products -%}
-    {%- if zv_package_order_fks != blank -%}
-      {%- assign kh_order_fks = zv_package_order_fks | split: '|' -%}
-      {%- assign kh_ordered_products = '' | split: ',' -%}
-      {%- for kh_want_fk in kh_order_fks -%}
-        {%- for kh_cp in kh.products -%}
-          {%- if kh_cp.metafields.custom.finder_key.value == kh_want_fk -%}
-            {%- assign kh_match = kh.products | slice: forloop.index0, 1 -%}
-            {%- assign kh_ordered_products = kh_ordered_products | concat: kh_match -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endfor -%}
-    {%- endif -%}
     {%- assign first = true -%}
     {
-    {%- for p in kh_ordered_products -%}
+    {%- for p in kh.products -%}
       {%- assign fk = p.metafields.custom.finder_key -%}
       {%- if fk != blank -%}
         {%- unless first %},{% endunless -%}{%- assign first = false -%}
