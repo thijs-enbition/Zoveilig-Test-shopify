@@ -195,10 +195,16 @@
     function addPackageToCart(pkg, btn, opts) {
       var prod = pkg && products[pkg];
       if (!prod || !btn || btn.dataset.busy === '1') return;
+      /* What goes in the cart is the package's prepaid "Eerste 3 maanden" line, never the
+         plain package product — Shopify only collects today's amount (installation + promo
+         add-on); the monthly rate is billed by Odoo over SEPA. Fails closed if a package
+         has no promo line resolved, rather than falling back to the package product and
+         charging its monthly price today. See CLAUDE.md Pricing pipeline. */
+      if (!prod.promoVariantId) return;
       var cfg = opts || {};
       var ctaLocation = cfg.ctaLocation || 'vergelijk_pakketten', bron = cfg.bron || 'Vergelijk pakketten';
       btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true');
-      var vid = String(prod.variantId);
+      var vid = String(prod.promoVariantId);
       window.fetch('/cart.js', { headers: { 'Accept': 'application/json' } })
         .then(function (r) { return r.json(); })
         .then(function (cart) {
@@ -210,8 +216,8 @@
               body: JSON.stringify({ id: line.key, quantity: line.quantity + 1 })
             });
             if (!activationId) return changePromise;
-            // Package line already exists but the activation fee doesn't yet (e.g. it was
-            // removed from the cart separately) — bump the package, then add the fee.
+            // Promo line already exists but the activation fee doesn't yet (e.g. it was
+            // removed from the cart separately) — bump the promo line, then add the fee.
             return changePromise.then(function (r) { if (!r.ok) throw new Error(r.status); return r; }).then(function () {
               return window.fetch('/cart/add.js', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -219,7 +225,7 @@
               });
             });
           }
-          var items = [{ id: prod.variantId, quantity: 1, properties: {
+          var items = [{ id: prod.promoVariantId, quantity: 1, properties: {
             'Pakket': prod.name || NAMES[pkg], 'SKU': prod.sku || '', 'Oplossing': prod.line || '', 'Bron': bron
           } }];
           if (activationId) items.push({ id: activationId, quantity: 1 });

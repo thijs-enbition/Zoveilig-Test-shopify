@@ -53,7 +53,7 @@
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "Indicatief. De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%)."
+    "disclosure": "Indicatief. De korting van de eerste 3 maanden (50% van het maandbedrag) wordt vandaag als apart bedrag verrekend, bovenop de installatiekosten. Uw maandbedrag zelf blijft ongewijzigd. Alle bedragen zijn inclusief btw (21%)."
   },
   "contract": {
     "defaultTermMonths": 36,
@@ -64,7 +64,7 @@
   },
   "labels": {
     "activation": "Eenmalige activatie en installatie",
-    "commitment": "Eerste vooruitbetaling",
+    "commitment": "Eerste 3 maanden korting (50%)",
     "monthlyAfter": "Daarna per maand",
     "dueToday": "Vandaag te betalen",
     "indicativeContractValue": "Indicatieve totale contractwaarde, inclusief eenmalige kosten",
@@ -97,6 +97,7 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
+      "installGroup": "nami",
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
@@ -104,10 +105,28 @@
       "promoMonthlyDisplay": "€ 9,98",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
+      "promoProduct": {
+        "productHandle": "eerste-3-maanden-inzicht",
+        "sku": "PROMO-INZ"
+      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
-      "initialPaymentDueTodayCents": 9900,
-      "initialPaymentDueTodayDisplay": "€ 99,00",
+      "dueToday": {
+        "geen": {
+          "amountCents": 2993,
+          "display": "€ 29,93"
+        },
+        "telefonisch": {
+          "amountCents": 6493,
+          "display": "€ 64,93"
+        },
+        "huis": {
+          "amountCents": 12893,
+          "display": "€ 128,93"
+        }
+      },
+      "initialPaymentDueTodayCents": 12893,
+      "initialPaymentDueTodayDisplay": "€ 128,93",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
         "cents": 30847,
@@ -129,6 +148,7 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
+      "installGroup": "nami",
       "monthlyRecurringPriceCents": 2495,
       "monthlyDisplay": "€ 24,95",
       "promoMonths": 3,
@@ -136,10 +156,28 @@
       "promoMonthlyDisplay": "€ 12,48",
       "promoDiscountTotalCents": 3743,
       "promoDiscountTotalDisplay": "€ 37,43",
+      "promoProduct": {
+        "productHandle": "eerste-3-maanden-zeker",
+        "sku": "PROMO-ZEK"
+      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
-      "initialPaymentDueTodayCents": 9900,
-      "initialPaymentDueTodayDisplay": "€ 99,00",
+      "dueToday": {
+        "geen": {
+          "amountCents": 3743,
+          "display": "€ 37,43"
+        },
+        "telefonisch": {
+          "amountCents": 7243,
+          "display": "€ 72,43"
+        },
+        "huis": {
+          "amountCents": 13643,
+          "display": "€ 136,43"
+        }
+      },
+      "initialPaymentDueTodayCents": 13643,
+      "initialPaymentDueTodayDisplay": "€ 136,43",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
         "cents": 36097,
@@ -161,6 +199,7 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 36,
+      "installGroup": "climax",
       "monthlyRecurringPriceCents": 3995,
       "monthlyDisplay": "€ 39,95",
       "promoMonths": 3,
@@ -168,10 +207,20 @@
       "promoMonthlyDisplay": "€ 19,98",
       "promoDiscountTotalCents": 5993,
       "promoDiscountTotalDisplay": "€ 59,93",
+      "promoProduct": {
+        "productHandle": "eerste-3-maanden-beschermd",
+        "sku": "PROMO-BES"
+      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
-      "initialPaymentDueTodayCents": 9900,
-      "initialPaymentDueTodayDisplay": "€ 99,00",
+      "dueToday": {
+        "huis": {
+          "amountCents": 15893,
+          "display": "€ 158,93"
+        }
+      },
+      "initialPaymentDueTodayCents": 15893,
+      "initialPaymentDueTodayDisplay": "€ 158,93",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
         "cents": 147727,
@@ -193,6 +242,7 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 12,
+      "installGroup": "nami",
       "monthlyRecurringPriceCents": 1995,
       "monthlyDisplay": "€ 19,95",
       "promoMonths": 3,
@@ -200,10 +250,28 @@
       "promoMonthlyDisplay": "€ 9,98",
       "promoDiscountTotalCents": 2993,
       "promoDiscountTotalDisplay": "€ 29,93",
+      "promoProduct": {
+        "productHandle": "eerste-3-maanden-alert",
+        "sku": "PROMO-ALE"
+      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
-      "initialPaymentDueTodayCents": 9900,
-      "initialPaymentDueTodayDisplay": "€ 99,00",
+      "dueToday": {
+        "geen": {
+          "amountCents": 2993,
+          "display": "€ 29,93"
+        },
+        "telefonisch": {
+          "amountCents": 6493,
+          "display": "€ 64,93"
+        },
+        "huis": {
+          "amountCents": 12893,
+          "display": "€ 128,93"
+        }
+      },
+      "initialPaymentDueTodayCents": 12893,
+      "initialPaymentDueTodayDisplay": "€ 128,93",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
         "cents": 30847,
@@ -225,6 +293,7 @@
       "purchasable": true,
       "pricingStatus": "CURRENT_WORKING",
       "termMonths": 36,
+      "installGroup": "climax",
       "monthlyRecurringPriceCents": 3495,
       "monthlyDisplay": "€ 34,95",
       "promoMonths": 3,
@@ -232,10 +301,20 @@
       "promoMonthlyDisplay": "€ 17,48",
       "promoDiscountTotalCents": 5243,
       "promoDiscountTotalDisplay": "€ 52,43",
+      "promoProduct": {
+        "productHandle": "eerste-3-maanden-protect",
+        "sku": "PROMO-PRO"
+      },
       "activationPriceCents": 9900,
       "activationDisplay": "€ 99,00",
-      "initialPaymentDueTodayCents": 9900,
-      "initialPaymentDueTodayDisplay": "€ 99,00",
+      "dueToday": {
+        "huis": {
+          "amountCents": 15143,
+          "display": "€ 151,43"
+        }
+      },
+      "initialPaymentDueTodayCents": 15143,
+      "initialPaymentDueTodayDisplay": "€ 151,43",
       "indicativeContractValue": {
         "status": "CURRENT_WORKING",
         "cents": 130477,

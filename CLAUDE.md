@@ -44,12 +44,15 @@ modal's "Direct afrekenen" button both linked straight to `/checkout`. Both now 
 in the theme, it must go through Overzicht the same way; grep for a literal `/checkout` string
 outside `sections/zv-checkout-overview.liquid` itself as a quick regression check.
 
-**A subscription package must never sit in cart without the activation fee** (see **Pricing
-pipeline** below for what that is). Enforced twice, since nothing stops the fee being removed
-after the fact or a package reaching cart through an entry point that doesn't add it (e.g. the
-standalone Shopify product page): client-side, `snippets/zv-cart-guard.liquid` (rendered on
-`/cart` and `/cart?view=overzicht`) checks the live cart on load and auto-adds the fee, then
-reloads, if a subscription line exists without it; server-side, `zv-checkout-overview.liquid`
+**A package must never sit in cart without its installation line** (see **Pricing pipeline**
+below for what that is). A package is recognized by its prepaid promo line, not by a
+subscription-type product. Enforced twice, since nothing stops the fee being removed after the
+fact or a package reaching cart through an entry point that doesn't add it (e.g. the standalone
+Shopify product page): client-side, `snippets/zv-cart-guard.liquid` (rendered on `/cart` and
+`/cart?view=overzicht`) checks the live cart on load and auto-adds the fixed activation fee for
+a **climax** package, then reloads — it never picks one of the three **nami** install options on
+the customer's behalf, since there's no single correct answer there, only the customer's choice
+in the required radio group on Overzicht; server-side, `zv-checkout-overview.liquid`
 computes `cart_needs_activation` and disables the checkout button outright as a fail-safe if
 the client-side fix hasn't run yet or fails. The standalone product page's own Dynamic
 Checkout buttons (Shop Pay etc., `show_dynamic_checkout` in `templates/product.json`) skip
@@ -140,45 +143,43 @@ setting both being true. Default is off (2026-09-09: the promo product doesn't e
 Shopify yet), with the real 50%/3-months figures already computed and waiting in
 `zv-pricing.liquid` — turning the setting on shows them immediately, nothing else to do.
 
-**Interim intro-promo repricing (planned, not yet live as of 2026-09-10)**: rather than a
-dedicated 3-month-bundle SKU, the plan is to reprice the *existing* package product itself —
-its live Shopify price becomes the 3-month bundle total (`monthly × promo.months`), with a
-real Shopify Discount taking `promo.ratePercent` off that, scoped to package products only
-(never activation) — charged in full today. Ongoing monthly SEPA billing is owned entirely by
-Odoo after the order; Shopify never sees it again. Consequence: once this repricing is live,
-`item.final_line_price` on a package line stops meaning "one month's rate" and starts meaning
-"this bundle's price" — any UI that read that value as a monthly figure would be showing a
-multi-month bundle price labelled as monthly, which is exactly the bug this section's
-`item.final_line_price`-based "per maand" displays used to have.
+**Prepaid intro-promo line item (live model, 2026-09-22 — supersedes the earlier "reprice the
+package as a 3-month bundle" plan, which never shipped):** the promo is **not** a discount on
+anything. It is a separate, always-positive, one-time charge collected today, alongside an
+installation fee that is **never discounted at any tier**:
 
-**Update 2026-09-22 — a real "Eerste 3 maanden" Shopify Discount is live, found by accident,
-not yet reconciled with the above:** while validating an unrelated pricing fix, a real Shopify
-Discount named "Eerste 3 maanden" (50% off, `value_type: percentage`, line-item scoped) was
-observed actively discounting package line items in a live cart — confirmed on both a Climax
-package (Langer Thuis Beschermd) and a Nami package (Langer Thuis Zeker), discount object
-`created_at: 2026-09-22T07:50:12Z`. This does **not** match the repricing plan described just
-above (that plan reprices the *list price* to the bundle total first; this discount instead
-applies 50% off the *current* catalog price directly) and it is **not** gated by the theme's
-own `zv_promo_live` setting, which was off at the time — `zv-checkout-overview.liquid`'s own
-"Daarna per maand" breakdown correctly showed no promo rows (`zv_promo_active` false), while
-`item.final_line_price` / "Vandaag te betalen" already silently reflected the 50% cut, same as
-any other real Shopify discount always has (see "Vandaag te betalen" above — it's always the
-live cart total, discounts included, by design). Not investigated further or touched — flagging
-because it means the live storefront and the theme's own promo display can currently disagree
-about whether a discount is active, and because it wasn't set up through anything this repo's
-history describes. Needs Thijs to confirm whether this discount is intentional, and if so,
-whether `zv_promo_live` should be turned on to match, or whether the discount should be
-reverted until the interim repricing plan above actually ships.
+```
+vandaag = installatie_kosten (€0 / €35 / €99) + promoDiscountTotalCents
+```
 
-**Fix**: `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` now source every
-"per maand" figure from the confirmed monthly rate (`zv_{pkg}_monthly_cents` /
-`zv_{pkg}_promo_monthly_cents`, emitted by `build_pricing.py`) via the shared
-`snippets/zv-package-monthly-cents.liquid` (finder_key → cents lookup, one place instead of
-duplicated per call site), scaled by `item.quantity` — the cart's `+`/`−` stepper works on
-package lines same as anything else, so a flat per-unit figure would silently under-report a
-qty-2 line by half. A line whose finder_key can't be resolved falls back to its own live price
-(degraded, same convention as an unrecognized product elsewhere). "Vandaag te betalen" is
-untouched — it stays 100% live, since it's just today's real charge, bundle price included.
+Each package has its own prepaid promo product ("Eerste 3 maanden korting — <pakket>",
+`pricing.config.json` `packages[].promoProduct`), priced at that package's
+`promoDiscountTotalCents`. **The plain package product is never added to the cart** — a package
+purchase is exactly two lines, the chosen install option plus that package's promo line.
+Shopify therefore never sees the monthly rate at all; the monthly recurring price is never
+modified anywhere in this flow, and SEPA billing is owned entirely by Odoo after the order.
+
+**Package identity comes from the promo line.** Since no subscription-type product is ever in
+the cart, the 5 promo products carry the same `custom.finder_key` values the package products
+do, and every surface that needs "which package is this" reads it off the promo line:
+`zv-checkout-overview.liquid` (contract duration, ICV, consent copy, nami-vs-climax install
+branching), `zv-cart.liquid` (the monthly figure), `zv-cart-guard.liquid` (which fee a cart is
+missing), and both add-to-cart flows. Consequence: the cart shows no line named after the
+subscription package — the promo line's own per-package name identifies the purchase instead.
+See `docs/prepay-promo-lineitems-2026-09-22.md` for the full rationale, the product ids, and
+the follow-ups (notably: the package products are still individually purchasable on the
+storefront, which bypasses this model entirely).
+
+**"Vandaag te betalen" and its breakdown are read live from the cart**, one row per line item,
+so the itemized rows always add up to what Shopify actually charges. The recurring "per maand"
+figure is the confirmed rate from `pricing.config.json` via
+`snippets/zv-package-monthly-cents.liquid` (finder_key → cents, one place instead of duplicated
+per call site) — Shopify has no live signal for it to be read from. KNOWN GAP (unchanged): that
+makes the config the sole source for the ongoing monthly rate, with nothing to cross-check it
+against if it ever drifts from what Odoo bills. Manually-verified sync point.
+
+`promoMonthlyCents` in the generated pricing is **vestigial** — it computes the retired
+"discounted monthly instalment" figure. Nothing renders it and nothing should.
 
 **Known gap, accepted as unavoidable for now**: this makes `pricing.config.json`'s
 `monthlyRecurringPrice` the sole source for "the ongoing monthly rate" shown to the customer,

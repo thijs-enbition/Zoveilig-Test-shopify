@@ -131,8 +131,16 @@
     {%- if pid != blank -%}
       {%- assign v = p.selected_or_first_available_variant -%}
       {%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}
+      {%- comment -%}
+        promoVariantId is what add-to-cart actually adds: the package's prepaid "Eerste 3
+        maanden" line. variantId stays the package product's own variant, kept for
+        reference/analytics only - the package product itself never enters the cart under
+        this model (see CLAUDE.md Pricing pipeline).
+      {%- endcomment -%}
+      {%- capture pm_promo_variant_id -%}{%- render 'zv-package-promo-variant', finder_key: fk, inzicht: promo_inzicht_variant_id, zeker: promo_zeker_variant_id, beschermd: promo_beschermd_variant_id, alert: promo_alert_variant_id, protect: promo_protect_variant_id -%}{%- endcapture -%}
+      {%- assign pm_promo_variant_id = pm_promo_variant_id | strip -%}
       {%- unless first %},{% endunless -%}{%- assign first = false -%}
-      {{ pid | json }}:{"variantId":{{ v.id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
+      {{ pid | json }}:{"variantId":{{ v.id | json }},"promoVariantId":{{ pm_promo_variant_id | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
     {%- endif -%}
   {%- endfor -%}
   }

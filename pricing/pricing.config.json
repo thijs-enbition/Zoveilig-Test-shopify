@@ -111,8 +111,9 @@
     "label": "Korting eerste 3 maanden (50%)",
     "cardBadge": "50% korting",
     "timelineLabel": "Eerste 3 maanden",
-    "disclosure": "Indicatief. De eerste 3 maanden ontvangt u 50% korting op het maandbedrag, verrekend in uw maandtermijnen. Alle bedragen zijn inclusief btw (21%).",
-    "note": "50% off the monthly amount for the first 3 SEPA instalments. Odoo must apply this discount to the first 3 recurring invoices; the theme only displays it. Replaces the retired 1.5x prepayment."
+    "disclosure": "Indicatief. De korting van de eerste 3 maanden (50% van het maandbedrag) wordt vandaag als apart bedrag verrekend, bovenop de installatiekosten. Uw maandbedrag zelf blijft ongewijzigd. Alle bedragen zijn inclusief btw (21%).",
+    "note": "SUPERSEDED 2026-09-22 (kosten.xlsx + Thijs, confirmed against real orders #1014/#1019): this promo is NOT a reduction applied to SEPA instalments. It is collected today, in Shopify, as a separate positive one-time line item (see each package's promoProduct) priced at promoDiscountTotalCents, alongside the chosen installation option (never discounted). The monthly recurring price is never modified anywhere in this flow. 'disclosure' text above still describes the old SEPA-reduction model and should not be shown as-is; the itemized Overzicht breakdown (labels.breakdownIntro/commitment/monthlyAfter) is the current customer-facing explanation. promoMonthlyCents/promoMonthlyDisplay in pricing.generated.json are retained as harmless derived math (monthly x (1-rate)) but describe this retired mental model and must not be rendered anywhere.",
+    "labelCommitmentRepurposed": "labels.commitment was 'Eerste vooruitbetaling' (retired v2 1.5x prepayment label, confirmed unused anywhere in the theme). Repurposed 2026-09-22 as the promo line item's breakdown-row label ('Eerste 3 maanden korting (50%)')."
   },
   "contract": {
     "defaultTermMonths": 36,
@@ -157,7 +158,9 @@
             "display": "€19,95",
             "per": "/mnd"
           },
-          "termMonths": 12
+          "termMonths": 12,
+          "installGroup": "nami",
+          "promoProduct": { "productHandle": "eerste-3-maanden-inzicht", "sku": "PROMO-INZ" }
         },
         {
           "id": "zeker",
@@ -172,7 +175,9 @@
             "display": "€24,95",
             "per": "/mnd"
           },
-          "termMonths": 12
+          "termMonths": 12,
+          "installGroup": "nami",
+          "promoProduct": { "productHandle": "eerste-3-maanden-zeker", "sku": "PROMO-ZEK" }
         },
         {
           "id": "beschermd",
@@ -186,7 +191,9 @@
             "display": "€39,95",
             "per": "/mnd"
           },
-          "termMonths": 36
+          "termMonths": 36,
+          "installGroup": "climax",
+          "promoProduct": { "productHandle": "eerste-3-maanden-beschermd", "sku": "PROMO-BES" }
         }
       ]
     },
@@ -209,7 +216,9 @@
             "display": "€19,95",
             "per": "/mnd"
           },
-          "termMonths": 12
+          "termMonths": 12,
+          "installGroup": "nami",
+          "promoProduct": { "productHandle": "eerste-3-maanden-alert", "sku": "PROMO-ALE" }
         },
         {
           "id": "protect",
@@ -224,7 +233,9 @@
             "display": "€34,95",
             "per": "/mnd"
           },
-          "termMonths": 36
+          "termMonths": 36,
+          "installGroup": "climax",
+          "promoProduct": { "productHandle": "eerste-3-maanden-protect", "sku": "PROMO-PRO" }
         },
         {
           "id": "vista",
@@ -467,7 +478,7 @@
   },
   "labels": {
     "activation": "Eenmalige activatie en installatie",
-    "commitment": "Eerste vooruitbetaling",
+    "commitment": "Eerste 3 maanden korting (50%)",
     "monthlyAfter": "Daarna per maand",
     "dueToday": "Vandaag te betalen",
     "indicativeContractValue": "Indicatieve totale contractwaarde, inclusief eenmalige kosten",

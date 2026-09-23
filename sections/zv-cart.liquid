@@ -50,7 +50,12 @@
 {%- assign nami_install_geen_variant_id = all_products[zv_nami_install_geen_handle].selected_or_first_available_variant.id -%}
 {%- assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id -%}
 {%- assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id -%}
+{%- assign promo_inzicht_variant_id = all_products[zv_inzicht_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_zeker_variant_id = all_products[zv_zeker_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_beschermd_variant_id = all_products[zv_beschermd_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_alert_variant_id = all_products[zv_alert_promo_handle].selected_or_first_available_variant.id -%}
+{%- assign promo_protect_variant_id = all_products[zv_protect_promo_handle].selected_or_first_available_variant.id -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, promo_inzicht_variant_id: promo_inzicht_variant_id, promo_zeker_variant_id: promo_zeker_variant_id, promo_beschermd_variant_id: promo_beschermd_variant_id, promo_alert_variant_id: promo_alert_variant_id, promo_protect_variant_id: promo_protect_variant_id -%}
 <div class="zv-cart">
   <section class="cartbar">
     <div class="wrap">
@@ -127,6 +132,26 @@
               {%- assign li_sub = false -%}
               {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign li_sub = true -%}{%- endif -%}
               {%- assign today_cents = today_cents | plus: item.final_line_price -%}
+              {%- comment -%}
+                The recurring rate comes from the package's own "Eerste 3 maanden" promo
+                line, which is the cart-side package identity anchor under the prepaid
+                line-item model (the plain package product is never added to cart - see
+                CLAUDE.md Pricing pipeline). The promo line itself is a one-time charge,
+                so it renders as a flat price like any other fee line; only the "daarna
+                per maand" summary below is derived from it.
+              {%- endcomment -%}
+              {%- assign li_promo_fk = blank -%}
+              {%- if promo_inzicht_variant_id != blank and item.variant_id == promo_inzicht_variant_id -%}{%- assign li_promo_fk = 'aware' -%}{%- endif -%}
+              {%- if promo_zeker_variant_id != blank and item.variant_id == promo_zeker_variant_id -%}{%- assign li_promo_fk = 'aware_plus' -%}{%- endif -%}
+              {%- if promo_beschermd_variant_id != blank and item.variant_id == promo_beschermd_variant_id -%}{%- assign li_promo_fk = 'care' -%}{%- endif -%}
+              {%- if promo_alert_variant_id != blank and item.variant_id == promo_alert_variant_id -%}{%- assign li_promo_fk = 'secure' -%}{%- endif -%}
+              {%- if promo_protect_variant_id != blank and item.variant_id == promo_protect_variant_id -%}{%- assign li_promo_fk = 'guard' -%}{%- endif -%}
+              {%- if li_promo_fk != blank -%}
+                {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: li_promo_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}
+                {%- assign li_monthly_cents = li_monthly_cents_raw | strip | plus: 0 -%}
+                {%- assign li_month_total_cents = li_monthly_cents | times: item.quantity -%}
+                {%- assign true_month_cents = true_month_cents | plus: li_month_total_cents -%}
+              {%- endif -%}
               {%- if li_sub -%}
                 {%- assign item_fk = item.product.metafields.custom.finder_key.value -%}
                 {%- capture li_monthly_cents_raw -%}{%- render 'zv-package-monthly-cents', finder_key: item_fk, inzicht: zv_inzicht_monthly_cents, zeker: zv_zeker_monthly_cents, beschermd: zv_beschermd_monthly_cents, alert: zv_alert_monthly_cents, protect: zv_protect_monthly_cents -%}{%- endcapture -%}

@@ -139,13 +139,40 @@ def build():
 
             promo_monthly = cents_half_up(Decimal(monthly) * (Decimal(1) - promo_rate)) if promo_enabled else monthly
             promo_discount_total = cents_half_up(Decimal(promo_months) * Decimal(monthly) * promo_rate) if promo_enabled else 0
-            due_today = activation_cents  # activation ONLY; commitment retired
             icv = activation_cents + (monthly * term) - promo_discount_total
+
+            # dueToday (2026-09-22 model, kosten.xlsx + Thijs): installation is NEVER
+            # discounted; the promo is a separate, always-positive, one-time add-on
+            # collected today alongside it. due_today = install_option_cents +
+            # promo_discount_total, per available install option. NAMI packages offer
+            # 3 install options (installationOptions.nami.options); Climax packages
+            # keep the single fixed activation fee, emitted under the same 'huis' key
+            # so callers can use one lookup pattern regardless of platform.
+            install_group = pkg.get("installGroup")
+            due_today = {}
+            if install_group == "nami":
+                for opt in nami_install_options:
+                    due_today[opt["id"]] = {
+                        "amountCents": opt["amountCents"] + promo_discount_total,
+                        "display": eur(opt["amountCents"] + promo_discount_total),
+                    }
+            else:  # climax (or unset, treated as climax's single fixed fee)
+                due_today["huis"] = {
+                    "amountCents": activation_cents + promo_discount_total,
+                    "display": eur(activation_cents + promo_discount_total),
+                }
+            # Scalar default/fallback: what's due today before any cheaper NAMI option
+            # is chosen (matches the pre-existing default add-to-cart behaviour, which
+            # always starts a package out with the flat activation-equivalent fee).
+            due_today_default_cents = due_today["huis"]["amountCents"]
+
+            promo_product_cfg = pkg.get("promoProduct") or {}
 
             row.update({
                 "purchasable": True,
                 "pricingStatus": "CURRENT_WORKING",
                 "termMonths": term,
+                "installGroup": install_group,
                 "monthlyRecurringPriceCents": monthly,
                 "monthlyDisplay": eur(monthly),
                 "promoMonths": promo_months if promo_enabled else 0,
@@ -153,10 +180,15 @@ def build():
                 "promoMonthlyDisplay": eur(promo_monthly),
                 "promoDiscountTotalCents": promo_discount_total,
                 "promoDiscountTotalDisplay": eur(promo_discount_total),
+                "promoProduct": {
+                    "productHandle": promo_product_cfg.get("productHandle"),
+                    "sku": promo_product_cfg.get("sku"),
+                },
                 "activationPriceCents": activation_cents,
                 "activationDisplay": eur(activation_cents),
-                "initialPaymentDueTodayCents": due_today,
-                "initialPaymentDueTodayDisplay": eur(due_today),
+                "dueToday": due_today,
+                "initialPaymentDueTodayCents": due_today_default_cents,
+                "initialPaymentDueTodayDisplay": eur(due_today_default_cents),
                 "indicativeContractValue": {
                     "status": "CURRENT_WORKING",
                     "cents": icv,
@@ -216,6 +248,11 @@ def build():
         f"{{%- assign zv_activation_handle = '{out['activation'].get('productHandle') or ''}' -%}}",
         f"{{%- assign zv_activation_sku = '{out['activation'].get('sku') or ''}' -%}}",
         f"{{%- assign zv_activation_cents = {activation_cents} -%}}",
+        f"{{%- assign zv_label_activation = '{cfg['labels']['activation']}' -%}}",
+        f"{{%- assign zv_label_commitment = '{cfg['labels']['commitment']}' -%}}",
+        f"{{%- assign zv_label_due_today = '{cfg['labels']['dueToday']}' -%}}",
+        f"{{%- assign zv_label_monthly_after = '{cfg['labels']['monthlyAfter']}' -%}}",
+        f"{{%- assign zv_label_breakdown_intro = '{cfg['labels']['breakdownIntro']}' -%}}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")
@@ -239,12 +276,21 @@ def build():
             f"{{%- assign zv_{pid}_promo_monthly = '{p['promoMonthlyDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_promo_monthly_cents = {p['promoMonthlyCents']} -%}}",
             f"{{%- assign zv_{pid}_promo_discount = '{p['promoDiscountTotalDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_promo_handle = '{p['promoProduct'].get('productHandle') or ''}' -%}}",
+            f"{{%- assign zv_{pid}_promo_sku = '{p['promoProduct'].get('sku') or ''}' -%}}",
             f"{{%- assign zv_{pid}_activation = '{p['activationDisplay']}' -%}}",
             f"{{%- assign zv_{pid}_due_today = '{p['initialPaymentDueTodayDisplay']}' -%}}",
+            f"{{%- assign zv_{pid}_due_today_cents = {p['initialPaymentDueTodayCents']} -%}}",
             f"{{%- assign zv_{pid}_term = {p['termMonths']} -%}}",
             f"{{%- assign zv_{pid}_icv = '{p['indicativeContractValue']['display']}' -%}}",
             f"{{%- assign zv_{pid}_icv_cents = {p['indicativeContractValue']['cents']} -%}}",
         ]
+        for opt_id, opt in p["dueToday"].items():
+            oid = opt_id.replace("-", "_")
+            lines += [
+                f"{{%- assign zv_{pid}_due_today_{oid} = '{opt['display']}' -%}}",
+                f"{{%- assign zv_{pid}_due_today_{oid}_cents = {opt['amountCents']} -%}}",
+            ]
     SNIPPET.parent.mkdir(parents=True, exist_ok=True)
     SNIPPET.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -254,9 +300,10 @@ def build():
     print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
     print("  nami install options: " + ", ".join(f"{o['label']} {o['display']}" for o in nami_install_options))
     for p in priced:
-        print(f"  - {p['lineName']}/{p['name']}: monthly {p['monthlyDisplay']}"
-              f" | promo {p['promoMonthlyDisplay']} (-{p['promoDiscountTotalDisplay']})"
-              f" | due today {p['initialPaymentDueTodayDisplay']}"
+        due_today_breakdown = ", ".join(f"{oid}={opt['display']}" for oid, opt in p["dueToday"].items())
+        print(f"  - {p['lineName']}/{p['name']} ({p['installGroup']}): monthly {p['monthlyDisplay']}"
+              f" | promo add-on +{p['promoDiscountTotalDisplay']}"
+              f" | due today [{due_today_breakdown}]"
               f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']}")
 
 
