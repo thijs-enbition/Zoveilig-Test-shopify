@@ -26,7 +26,7 @@
             "hero_cta_url": "/#keuzehulp",
             "collection": "langer-thuis",
             "pak_heading": "Kies uw ondersteuningsniveau",
-            "pak_sub": "Van extra oogje in het zeil tot compleet vangnet. Privacy-first, zonder camera. +€4/mnd per extra verdieping of 100 m².",
+            "pak_sub": "Van extra oogje in het zeil tot compleet vangnet. Privacy-first, zonder camera.",
             "compare_label": "Twijfelt u welk niveau past?",
             "compare_url": "/pages/vergelijk-pakketten",
             "hide_compare_cta": false,
@@ -125,7 +125,7 @@
           "settings": {
             "title": "Zie wanneer er iets verandert",
             "quote": "Vannacht meerdere keren beweging.",
-            "package": "zeker",
+            "package": "inzicht",
             "row": "1"
           }
         },
@@ -141,25 +141,25 @@
         "s4": {
           "type": "scenario",
           "settings": {
-            "title": "Waarschuwing bij iets onverwachts",
+            "title": "Waarschuwing bij iets onverwachts, zoals nachtelijk dwalen",
             "quote": "03:18 — voordeur geopend.",
-            "package": "zeker",
+            "package": "inzicht",
             "row": "1"
           }
         },
-        "s5": {
+        "s10": {
           "type": "scenario",
           "settings": {
-            "title": "Mogelijke val eerder signaleren",
-            "quote": "10:41 — looproute stopt in de gang.",
-            "package": "zeker",
+            "title": "Licht aan bij beweging in de nacht",
+            "quote": "02:14 — nachtlamp tien minuten aan, ter voorkoming van een val.",
+            "package": "inzicht",
             "row": "2"
           }
         },
         "s6": {
           "type": "scenario",
           "settings": {
-            "title": "Zie wanneer een routine verandert",
+            "title": "Melding wanneer een routine verandert",
             "quote": "09:15 — keuken nog niet bezocht.",
             "package": "zeker",
             "row": "2"
@@ -282,7 +282,7 @@
         "s2",
         "s3",
         "s4",
-        "s5",
+        "s10",
         "s6",
         "s7",
         "s8",

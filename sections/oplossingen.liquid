@@ -188,7 +188,8 @@
                 Card-grid redesign (2026-09-11 Langer Thuis, extended 2026-09-14 to Mijn
                 Thuis Alert/Protect — see docs/mijn-thuis-card-redesign-research-2026-09-14.md):
                 icon/tagline/checklist copy keyed by finder_key. Inzicht/Zeker/Beschermd copy
-                was Robi-approved with PR #19. The Alert/Protect tagline text below reuses the
+                was Robi-approved with PR #19 and replaced on 2026-09-23 per
+                docs/pakket-wijzigingen-2026-09-23.md §2–§4. The Alert/Protect tagline text below reuses the
                 already-approved `hook` line from pricing.config.json / opl-modal-data verbatim
                 (not new marketing copy); their icons are a first engineering draft, NOT yet
                 design-signed-off — see PR description / research doc open question #3. Vista
@@ -214,33 +215,34 @@
               {%- assign care_guard_addons = 'Magneetcontact (DC-23)|koop-magneetcontact-dc-23|oneoff§PIR bewegingsdetector|koop-pir-bewegingsdetector|oneoff§Afstandsbediening|koop-afstandsbediening|oneoff§Rookmelder|koop-rookmelder|oneoff§Buitencamera wifi 730|koop-730-buitencamera-wifi|oneoff§Binnencamera met SD kaart|koop-515-binnencamera|oneoff§Videodeurbel 750|koop-video-deurbel-750|oneoff' -%}
               {%- case fk -%}
                 {%- when 'aware' -%}
-                  {%- assign ltc_tagline = 'Rustig eerste inzicht' -%}
-                  {%- assign ltc_bullets = 'Daginzicht in het ritme|Alleen een melding bij afwijking|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
-                  {%- assign ltc_hw_bullets = 'NAMI aiAware|3x activiteiten sensor|1x deur/raamsensor|Geen meldkamer' -%}
+                  {%- assign ltc_tagline = 'Rust, weet dat het goed gaat' -%}
+                  {%- assign ltc_bullets = 'Daginzicht in het leefritme van uw dierbare|Mogelijkheid tot een melding bij de eerste beweging van de dag|En/of een melding bij afwijking van het normale patroon|Automatische nachtverlichting bij beweging|Familie-app voor mantelzorgers|Geen camera of microfoon' -%}
+                  {%- assign ltc_hw_bullets = '3x activiteiten sensor|1x deur/raamsensor|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="20" cy="40" r="3.4" fill="var(--indigo)"/><path d="M29.9 30.1 A14 14 0 0 1 29.9 49.9" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35.6 24.4 A22 22 0 0 1 35.6 55.6" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.2 18.8 A30 30 0 0 1 41.2 61.2" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
                 {%- when 'aware_plus' -%}
-                  {%- assign ltc_tagline = 'Vroeg signaleren' -%}
+                  {%- assign ltc_tagline = 'Vroeg weten geeft rust' -%}
                   {%- assign ltc_intro = 'Alles van Inzicht, plus:' -%}
-                  {%- assign ltc_bullets = 'Dag- en nachtzicht|Bewegingsmelders voor meer zicht|Meerdere contactpersonen' -%}
-                  {%- assign ltc_hw_bullets = 'NAMI aiCare|1x centrale|1x activiteiten sensor|1x deur/raamsensor|2x bewegingsmelder|Geen meldkamer' -%}
+                  {%- assign ltc_bullets = 'Signalering bij meer of minder bezoek aan badkamer, keuken of toilet|Signalering als medicijnen of koelkast niet worden gebruikt|Directe melding als er mogelijk niet meer gegeten of gedronken wordt' -%}
+                  {%- assign ltc_hw_bullets = '3x activiteiten sensor|1x deur/raamsensor|2x locatiesensor|Geen meldkamer' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 14 L49 20 V35 C49 47 32 54 32 54 C32 54 15 47 15 35 V20 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 45 C27 40 20 41.5 20 33.5 C20 28.5 27 27 32 32.5 C37 27 44 28.5 44 33.5 C44 41.5 37 40 32 45 Z" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'care' -%}
                   {%- assign ltc_tagline = 'Snelle hulp bij nood' -%}
-                  {%- assign ltc_bullets = 'Nederlandse meldkamer 24/7|Alarmknop met opvolging|Rookmelders met doormelding|Familie-app en meldingen' -%}
-                  {%- assign ltc_hw_bullets = 'Climax|1x centrale|1x codebedienpaneel|2x deur/raamsensor|2x bewegingsmelder|2x rookmelder|1x paniekknop naar keuze|Incl. meldkamer' -%}
+                  {%- assign ltc_intro = 'Alles van Zeker, plus:' -%}
+                  {%- assign ltc_bullets = 'Nederlandse [meldkamer](kc/hoe-werkt-een-meldkamer) 24/7|Alarmknop met opvolging|Rookmelders met doormelding naar de meldkamer' -%}
+                  {%- assign ltc_hw_bullets = '1x centrale|1x codebedienpaneel|2x deur/raamsensor|2x locatiesensor|2x rookmelder|3x paniekknop naar keuze|Incl. meldkamer' -%}
                   {%- assign ltc_addons = care_guard_addons -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 42 V34 A17 17 0 0 1 49 34 V42" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><rect x="44" y="40" width="9" height="15" rx="3.6" stroke="var(--indigo)" stroke-width="3.4"/><path d="M48 55 V59 Q48 62 41 62 H35" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="62" r="2.8" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'secure' -%}
-                  {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-04.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- comment -%} Alert. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Bullets and "Wat zit erin?" replaced 2026-09-23 per docs/pakket-wijzigingen-2026-09-23.md §5; tagline unchanged. {%- endcomment -%}
                   {%- assign ltc_tagline = 'Directe melding bij inbraak' -%}
-                  {%- assign ltc_bullets = 'Beweging en deur worden direct herkend|Zelf in- en uitschakelen met de app|Geen camera, wel een waakzaam systeem' -%}
-                  {%- assign ltc_hw_bullets = '1x centrale|1x activiteiten sensor|1x bewegingsmelder|1x deur/raamsensor|1x codebedienpaneel' -%}
+                  {%- assign ltc_bullets = 'Slimme detectie met wifi-sensing én bewegingssensoren|Direct gewaarschuwd bij verdachte activiteit|Overal bedienen met de Alarm.com-app|Eenvoudig in- en uitschakelen via het codebedienpaneel|Krachtige ingebouwde sirene|Simuleer aanwezigheid met slimme verlichting|Eenvoudig uit te breiden met extra beveiliging|Geen camera, wel mogelijk als uitbreiding|Geen meldkamer' -%}
+                  {%- assign ltc_hw_bullets = '1x centrale/sirene|1x activiteiten sensor|1x bewegingsmelder|1x deur/raamsensor|1x codebedienpaneel' -%}
                   {%- assign ltc_meldkamer = 'nee' -%}{%- assign ltc_camera = 'nee' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 C24 12 19 18 19 27 V34 L14 42 H50 L45 34 V27 C45 18 40 12 32 12 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 47 A6 6 0 0 0 38 47" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="16" r="4.5" fill="var(--red)"/></svg>{%- endcapture -%}
                 {%- when 'guard' -%}
-                  {%- comment -%} Protect. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Raw hardware list wording unchanged from the retired opl-tile-05.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
+                  {%- comment -%} Protect. Benefit-led headline/bullets (2026-09-14 redesign, replaces the raw hardware list now shown in "Wat zit erin?"). Bullets replaced 2026-09-23 per docs/pakket-wijzigingen-2026-09-23.md §6; tagline unchanged. Raw hardware list wording unchanged from the retired opl-tile-05.jpg "IN HET PAKKET" pill list. {%- endcomment -%}
                   {%- assign ltc_tagline = 'Inbraak én brand, in één systeem bewaakt' -%}
-                  {%- assign ltc_bullets = 'Rookmelder direct gekoppeld aan de meldkamer|Beweging, deur en rook in één overzicht|Meldkamer schakelt direct de hulpdiensten in' -%}
+                  {%- assign ltc_bullets = '24/7 aangesloten op een professionele meldkamer|Directe bescherming tegen inbraak|Bescherming tegen brand en rook|Hulp wordt ingeschakeld wanneer dat nodig is|Overal bedienen via de app|Altijd professionele alarmopvolging als extra vangnet|Uitbreidbaar met surveillance, CO- en waterdetectie' -%}
                   {%- assign ltc_hw_bullets = '1x centrale|1x codebedienpaneel|1x rookmelder|1x fotobewegingsmelder|2x deur/raamsensor' -%}
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
                   {%- assign ltc_addons = care_guard_addons -%}
@@ -270,8 +272,33 @@
                   {%- if term != blank -%}<div class="ltc__term">Looptijd {{ term }} maanden</div>{%- endif -%}
                   <ul class="ltc__checklist">
                     {%- if ltc_intro != blank -%}<li class="ltc__intro">{{ ltc_intro }}</li>{%- endif -%}
+                    {%- comment -%}
+                      Bullet link marker (2026-09-23): a bullet may contain ONE marker
+                      [tekst](route-key), e.g. 'Nederlandse [meldkamer](kc/hoe-werkt-een-meldkamer) 24/7'.
+                      It renders as a link whose href is only ever the zv-route output for
+                      route-key, so no raw URL or HTML can get in; an unknown key gets
+                      zv-route's usual fallback, like any other zv-route call. The link text
+                      and the text around it are escaped. A bullet without a marker, or one
+                      that does not parse as exactly one marker, renders as escaped plain
+                      text. The text sits in its own span because the li is a flex row: bare
+                      text next to an a element would become separate flex columns.
+                    {%- endcomment -%}
                     {%- for bullet in ltc_bullet_list -%}
-                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ bullet }}</li>
+                      {%- liquid
+                        assign bl_link = false
+                        assign bl_parts = bullet | split: ']('
+                        if bl_parts.size == 2 and bl_parts[1] contains ')'
+                          assign bl_pre = bl_parts[0] | split: '['
+                          assign bl_key = bl_parts[1] | split: ')' | first
+                          if bl_pre.size == 2 and bl_pre[1] != blank and bl_key != blank
+                            assign bl_link = true
+                            assign bl_post = bl_parts[1] | remove_first: bl_key | remove_first: ')'
+                          endif
+                        endif
+                      -%}
+                      <li><span class="bchk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>
+                        {%- if bl_link -%}{{ bl_pre[0] | escape }}<a href="{% render 'zv-route', key: bl_key %}">{{ bl_pre[1] | escape }}</a>{{ bl_post | escape }}{%- else -%}{{ bullet | escape }}{%- endif -%}
+                      </span></li>
                     {%- endfor -%}
                   </ul>
                   <hr class="ltc__div">
@@ -344,7 +371,6 @@
                             <div class="ltc__optgroup" data-group="terms">
                               <p class="ltc__optgroup-h">Extra diensten (optioneel)</p>
                               <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
-                              <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                               <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                             </div>
                           </div>
@@ -387,7 +413,6 @@
                       <details class="pcard__plus" data-group="terms">
                         <summary>Extra diensten (optioneel)<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                         <p class="pcard__plus-hint">Maandelijkse diensten naast uw abonnement.</p>
-                        <label class="pcard__plus-opt"><input type="checkbox"><span>Domotica</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                         <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                       </details>
                     {%- endif -%}
@@ -787,6 +812,7 @@
 .ltc__checklist li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; font-weight: 600; color: #4a4458; line-height: 1.4; }
 .ltc__checklist .bchk { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); display: grid; place-items: center; margin-top: 1px; }
 .ltc__checklist .bchk svg { width: 11px; height: 11px; }
+.ltc__checklist a { color: var(--indigo); text-decoration: underline; text-underline-offset: 2px; }
 .ltc__intro { font-weight: 800; color: var(--indigo); }
 .ltc__div { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
