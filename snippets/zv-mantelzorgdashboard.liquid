@@ -2,9 +2,12 @@
   Mantelzorgdashboard (Alarm.com Wellness) — docs/pakket-wijzigingen-2026-09-23.md §12.
 
   Rendered only by sections/oplossingen.liquid, inside the Langer Thuis tab panel
-  (#panel-langer-thuis), directly under the Langer Thuis pakket-matcher and before
-  "Waarom Zo Veilig". Because it sits inside that panel, the tab JS hides it together
-  with the rest of the panel when another tab is active; it has no JS of its own.
+  (#panel-langer-thuis), in .mzd-row together with the Langer Thuis pakket-matcher and
+  before "Waarom Zo Veilig". From 1100px it sits beside the matcher's heading, tiles and
+  advice, with the comparison table full width below both; narrower, it comes after the
+  table, as before (see assets/zv-mantelzorgdashboard.css). Because it sits
+  inside that panel, the tab JS hides it together with the rest of the panel when another
+  tab is active; it has no JS of its own.
 
   Param:
     block   the oplossingen section block of type 'mantelzorgdashboard' (limit 1, so
@@ -15,27 +18,32 @@
   blanking a field in the theme editor hides that element instead of bringing the spec
   copy back.
 
+  Badge: `badge`, a small tag directly under the heading ("Bij alle Langer
+  Thuis-pakketten: …", 2026-09-24). Blank hides it.
+
   Image: image_picker `image`, to be filled with an official Alarm.com asset uploaded to
   Shopify Files. While it is empty the image column is not rendered at all (no
   placeholder) and the `mzd--noimg` modifier lets the text take the full card width.
+  Beside the matcher (≥1100px) the image goes above the four items instead of in a column.
   Alt text: the file's own alt text, else the heading.
 
   Deep link: the Inzicht bullet "Familie-app voor mantelzorgers" links here through the
   zv-route key 'oplossingen/mantelzorgdashboard', which outputs the bare fragment
   '#mantelzorgdashboard'.
 
-  Styles: assets/zv-mantelzorgdashboard.css (loaded below; colour tokens from zv-chrome.css).
+  Styles: assets/zv-mantelzorgdashboard.css, loaded by sections/oplossingen.liquid before
+  .mzd-row (colour tokens from zv-chrome.css).
 {%- endcomment -%}
 {%- liquid
   assign s = block.settings
   assign mzd_img = s.image
   assign mzd_alt = mzd_img.alt | default: s.heading
 -%}
-{{ 'zv-mantelzorgdashboard.css' | asset_url | stylesheet_tag }}
 <section class="mzd{% if mzd_img == blank %} mzd--noimg{% endif %}" id="mantelzorgdashboard" data-section-name="mantelzorgdashboard"{% if s.heading != blank %} aria-labelledby="mzd-heading"{% endif %} {{ block.shopify_attributes }}>
   <div class="mzd__card">
     <div class="mzd__copy">
       {%- if s.heading != blank -%}<h3 class="mzd__h" id="mzd-heading">{{ s.heading | escape }}</h3>{%- endif -%}
+      {%- if s.badge != blank -%}<p class="mzd__badge">{{ s.badge | escape }}</p>{%- endif -%}
       {%- if s.intro != blank -%}<p class="mzd__intro">{{ s.intro | escape }}</p>{%- endif -%}
       <ul class="mzd__list">
         {%- for i in (1..4) -%}

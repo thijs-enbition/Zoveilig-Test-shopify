@@ -181,20 +181,23 @@ Needs: the product handle(s) and SKU(s), whether the monthly part gets its own p
 
 Added 2026-09-23 at Thijs's request.
 
-**What it is:** a new content block on the Langer Thuis tab, placed directly under the pakket-matcher and before the Mijn Thuis tab content (the same position as in the feedback). It applies to all three Langer Thuis packages. It explains the Alarm.com Wellness dashboard that mantelzorgers see in the Familie-app.
+**What it is:** a new content block on the Langer Thuis tab, placed directly under the pakket-matcher and before the Mijn Thuis tab content (the same position as in the feedback). It applies to all three Langer Thuis packages. It explains the Alarm.com Wellness dashboard that mantelzorgers see in the Familie-app. The dashboard, Sensor Summary included, is available with Inzicht, Zeker and Beschermd.
+
+*Placement since 2026-09-24 (Thijs):* from 1100px wide the block sits beside the pakket-matcher (matcher heading, scenario tiles and "Ons advies" on the left ~2/3, this card on the right ~1/3, tops aligned, four items in one column), with the matcher's comparison table full width below both. Narrower, the order stays as before: matcher, its table, then this block.
 
 - **Heading:** "Het mantelzorgdashboard"
+- **Badge line** (added 2026-09-24, Thijs), a small tag directly under the heading: "Bij alle Langer Thuis-pakketten: Inzicht, Zeker en Beschermd". Theme-editor setting; blank hides it.
 - **Intro:** "Via de Familie-app ziet u als mantelzorger in één oogopslag hoe het gaat. Het dashboard is gebouwd op het Wellness-platform van Alarm.com."
 - **Four items** (dashboard names as they appear in the Alarm.com app, text from the feedback):
   1. **Dashboard** — activiteitsniveau van vandaag afgezet tegen het persoonlijke gemiddelde, met kleurcodering: groen is routine, geel is opvallend, rood is ongebruikelijk.
   2. **Activity Detail** — weekgrafiek van het activiteitsniveau.
-  3. **Sensor Summary** — dagoverzicht per ruimte over 24 uur. Small note under this item: "Bij Inzicht en Beschermd." (as in the feedback)
+  3. **Sensor Summary** — dagoverzicht per ruimte over 24 uur. ~~Small note under this item: "Bij Inzicht en Beschermd." (as in the feedback)~~ Note removed 2026-09-24 (Thijs): Sensor Summary works with all three packages, so nothing renders under this item. The note setting stays, empty, so a note can be added later in the editor.
   4. **Behaviors and Trends** — vergelijkt gedrag per categorie (keukenbezoeken, in- en uitgaan, activiteitsniveau) met een opgebouwd persoonlijk profiel. *(stijl: "tegen" → "met")*
 - **Closing line (emphasised):** "Dit is een lerend gedragsprofiel. Van het grootste belang voor mantelzorgers."
 - **Image:** a screenshot of the Alarm.com Wellness dashboard. Use only an official Alarm.com dealer/marketing asset, uploaded by Thijs to Shopify Files — do not pull an image from a random website. The image is a theme-editor `image_picker` setting. While it's empty the image column is not rendered at all (no visible placeholder), and the text takes full width.
 - **Link from the cards:** the "Familie-app voor mantelzorgers" bullet on Inzicht can anchor to this block (`#mantelzorgdashboard`) — only if branch 1's bullet-link mechanism is merged; otherwise skip.
 
-All texts are theme-editor settings (heading, intro, 4 × title/text/note, closing line, image), with the copy above as defaults.
+All texts are theme-editor settings (heading, badge line, intro, 4 × title/text/note, closing line, image), with the copy above as defaults.
 
 ---
 
@@ -204,3 +207,4 @@ All texts are theme-editor settings (heading, intro, 4 × title/text/note, closi
 - **§8 matcher:** the `package` field is the lowest tier that has the scenario. The mockup's "Inzicht+" / "Zeker+" labels confirm it. The docx legend "1. Alert, 2. Inzicht, 3. Beschermd" is a slip; read 1/2/3 as Inzicht/Zeker/Beschermd. s8 "Rook en brand op tijd ontdekt" and s9 "Opvolging aan huis mogelijk" stay two separate blocks. The mockup draws them as one tile, but that's only the drawing.
 - **§10 Vista:** order under the form fields is consent checkbox, then the "Iedere woning en situatie is anders…" text, then the "Plan een vrijblijvend adviesgesprek" button. The docx strikes the consent line, but the checkbox stays on purpose for AVG.
 - **§12 Sensor Summary note:** the docx says "alleen inzicht en bescherm". Confirmed by Thijs: keep "Bij Inzicht en Beschermd." It's a theme-editor setting, so it can be changed later without code.
+  - **Superseded 2026-09-24 (Thijs):** the note is removed (empty in `page.oplossingen.json` and no schema default), because the dashboard, Sensor Summary included, is available with Inzicht, Zeker and Beschermd. A badge line under the heading now says so: "Bij alle Langer Thuis-pakketten: Inzicht, Zeker en Beschermd". Same day, the block moved beside the pakket-matcher from 1100px (see §12).

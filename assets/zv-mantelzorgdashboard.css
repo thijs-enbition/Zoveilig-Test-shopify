@@ -1,16 +1,37 @@
 /* Mantelzorgdashboard block on /pages/oplossingen (Langer Thuis tab), rendered by
    snippets/zv-mantelzorgdashboard.liquid. Colour tokens come from zv-chrome.css :root.
-   Width and side gutter match the embedded pakket-matcher directly above it
-   (.zv-vergelijk .wrap: max 1080px, 0 clamp(20px,3.6vw,52px)); the card border, radius and
-   shadow match its table card (.tbl-wrap); type sizes follow the neighbouring .pak/.why
-   rules; the two-column-to-one switch uses the page's 820px breakpoint (.why__grid).
+   The card border, radius and shadow match the pakket-matcher's table card (.tbl-wrap); type
+   sizes follow the neighbouring .pak/.why rules; the two-column-to-one switch inside the card
+   uses the page's 820px breakpoint (.why__grid).
    .opl-page resets margin/padding on h3/h4/p/ul/li, so every margin here is explicit, and
    headings set their own colour so Dawn's heading colour cannot leak in. */
-.opl-page .mzd { max-width: 1080px; margin: clamp(40px, 4.4vw, 64px) auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); scroll-margin-top: 132px; }
+
+/* Row with the Langer Thuis pakket-matcher (.mzd-row in sections/oplossingen.liquid,
+   2026-09-24). The matcher snippet's two wrappers are display:contents, so its .pm (heading,
+   tiles, "Ons advies") and .tbl-wrap (comparison table) are grid items of this row next to
+   .mzd. The DOM is untouched: assets/zv-vergelijk-pakketten.js finds the table through
+   root.parentNode (.wrap), which still holds both. The row takes over .wrap's width and
+   gutter (max 1080px, 0 clamp(20px,3.6vw,52px)) and .pm's 34px top margin.
+   Below 1100px: one column in DOM order and with the spacing the page had before the row
+   (2026-09-24, Thijs): tiles and advice, the table (the matcher's own 26px top margin), then
+   this block (its old clamp(40px,4.4vw,64px) top margin).
+   From 1100px: tiles and advice (2/3) beside this block (1/3), tops aligned, table full
+   width below both (see the media query at the end). */
+.opl-page .mzd-row { max-width: 1080px; margin: 34px auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "pm" "tbl" "mzd"; }
+.opl-page .mzd-row > .zv-pakket-matcher,
+.opl-page .mzd-row > .zv-pakket-matcher > .wrap { display: contents; }
+.opl-page .mzd-row .pm { grid-area: pm; min-width: 0; margin-top: 0; }
+.opl-page .mzd-row .tbl-wrap { grid-area: tbl; min-width: 0; }
+
+.opl-page .mzd { grid-area: mzd; min-width: 0; margin-top: clamp(40px, 4.4vw, 64px); scroll-margin-top: 132px; }
 .opl-page .mzd__card { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(24px, 3.2vw, 44px); align-items: center; background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 3.2vw, 44px); box-shadow: 0 24px 54px -46px rgba(26, 18, 48, 0.5); }
 .opl-page .mzd--noimg .mzd__card { grid-template-columns: minmax(0, 1fr); }
 
 .opl-page .mzd__h { font-size: clamp(24px, 2.6vw, 32px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; color: var(--indigo); text-wrap: balance; }
+/* Tag under the heading, in the colours of the package cards' "Meest gekozen" flag
+   (.pcard.pop .pcard__flag), sentence case so it fits the narrow column. The 14px radius
+   makes a pill on one line and a rounded tag when it wraps. */
+.opl-page .mzd__badge { display: block; width: fit-content; max-width: 100%; align-self: flex-start; margin-top: 12px; padding: 5px 12px; border-radius: 14px; background: var(--indigo); color: #fff; font-size: 12.5px; font-weight: 800; line-height: 1.35; letter-spacing: 0.02em; }
 .opl-page .mzd__intro { margin-top: 12px; max-width: 68ch; font-size: 15.5px; line-height: 1.6; color: var(--muted); }
 
 .opl-page .mzd__list { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px 32px; }
@@ -28,12 +49,32 @@
 .opl-page .mzd__media { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: clamp(10px, 1.2vw, 14px); }
 .opl-page .mzd__img { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; border-radius: 8px; }
 
-/* Without an image the text spans the whole card, so the four items sit in two columns. */
-@media (min-width: 821px) {
+/* Without an image the text spans the whole card, so the four items sit in two columns
+   (up to 1099px; beside the matcher they are one column). */
+@media (min-width: 821px) and (max-width: 1099px) {
   .opl-page .mzd--noimg .mzd__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Mobile: one column; the image comes after the text in the DOM, so it lands under it. */
 @media (max-width: 820px) {
   .opl-page .mzd__card { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Beside the matcher (≥1100px). The scenario tiles go 2 across in the 2/3 column: its rows
+   hold 4, 3 and 2 tiles, and ~630px can't take row 1's four (842px at the tiles' 200px
+   minimum), so this reuses the matcher's own ≤900px rule (2+2, 2+1, 2). The card stretches
+   to the row, its four items in one column and the closing line at the bottom; .mzd__copy
+   is display:contents so a picked image (order 1) sits above the items, full column width,
+   with the same 560px cap. */
+@media (min-width: 1100px) {
+  .opl-page .mzd-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "pm mzd" "tbl tbl"; column-gap: 32px; row-gap: clamp(40px, 4.4vw, 64px); align-items: start; }
+  .opl-page .mzd-row .tbl-wrap { margin-top: 0; }
+  .opl-page .mzd-row .pm-card { flex-basis: calc(50% - 7px); }
+  .opl-page .mzd { align-self: stretch; margin-top: 0; }
+  .opl-page .mzd__card { height: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 28px 24px; }
+  .opl-page .mzd__copy { display: contents; }
+  .opl-page .mzd__h { font-size: 22px; }
+  .opl-page .mzd__media { order: 1; margin-top: 20px; }
+  .opl-page .mzd__list { order: 2; margin-bottom: 24px; }
+  .opl-page .mzd__closing { order: 3; margin-top: auto; }
 }
