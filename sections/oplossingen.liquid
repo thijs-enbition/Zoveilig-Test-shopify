@@ -698,7 +698,7 @@
       "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
       "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"items":["1 activiteiten sensor","1 sensor"]}},
       "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"items":["1 fotobewegingsmelder","1 deurcontact"]}},
-      "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Zie wat er gebeurt. Weet wat ertoe doet.","noPrice":true,"tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
+      "secure_plus": {"name":"Vista","plat":"Alarm.com · camerabeveiliging","hook":"Camerabeveiliging op maat, na een vrijblijvend adviesgesprek. Meldkamer optioneel.","sub":"Zie wat er gebeurt. Weet wat ertoe doet.","noPrice":true,"tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer","name":"24/7 Securitas meldkamer (optioneel)"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
       "liogo_solo": {"name":"Paniek Meldkamer","plat":"LioGo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
       "liogo_guard": {"name":"Zorgmeldkamer","plat":"LioGo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
     }
@@ -1039,6 +1039,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pbd-soon { display: flex; gap: 10px; margin-top: 16px; background: var(--indigo-soft); border: 1px solid #e2ddf1; border-radius: 8px; padding: 13px 14px; color: var(--indigo); }
 .pbd-soon svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .pbd-soon span { font-size: 12.5px; font-weight: 600; color: #4a4458; line-height: 1.45; }
+.pbd-soon a { color: var(--indigo); font-weight: 800; text-decoration: underline; white-space: nowrap; }
 .pbd-guarantee { display: flex; gap: 11px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 8px; padding: 14px 16px; color: var(--gold-lt); }
 .pbd-guarantee svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .pbd-guarantee span { font-size: 12.5px; font-weight: 600; color: #cdc6e8; line-height: 1.45; }
@@ -1875,7 +1876,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var buyHtml = buyable
       ? '<button class="pb-buy" data-pb-add data-variant="' + esc(d.variantId) + '" data-cta-position="' + esc(d.solutionType) + '_modal">' + ICON.cart + 'In winkelwagen</button>' +
         '<button class="pb-buy-2" data-pb-buy data-variant="' + esc(d.variantId) + '">Direct afrekenen' + ICON.arrow + '</button>'
-      : '<div class="pbd-soon">' + ICON.info + '<span>Prijs en specificaties volgen binnenkort. We bevestigen de prijs bij het afronden.</span></div>';
+      // Not buyable: Vista is a lead package by design (finder key secure_plus, the same key the
+      // page's other Vista checks use); any other package here is temporarily unavailable in Shopify.
+      : (fk === 'secure_plus'
+        ? '<div class="pbd-soon">' + ICON.info + '<span>Vista is maatwerk. Na een vrijblijvend adviesgesprek ontvangt u een voorstel op maat.</span></div>'
+        : '<div class="pbd-soon">' + ICON.info + '<span>Dit pakket is tijdelijk niet direct te bestellen. Bel ons op <a href="tel:0881221111">088 122 11 11</a>, dan helpen we u verder.</span></div>');
 
     var flag = d.popular === 'true' ? '<span class="pbd-flag">Meest gekozen</span>' : '';
     var lead = (plat ? '<b>' + esc(plat) + '. </b>' : '') + esc(pk.hook || '');
