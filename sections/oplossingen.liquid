@@ -666,6 +666,9 @@
     "Ideaal voor / Typische opstelling" and de >100 m²-optie. Canonieke ontwerp-data
     (breakout.jsx), gesleuteld op finder_key. Prijs/voorraad/variant komen live van de
     Shopify-productkaart; deze data levert alleen de beschrijvende inhoud.
+    plus.items (2026-09-24): what each extra verdieping adds, shown under the modal's Woning
+    options. The options and their prices come from pricing.config.json (#zv-pricing-config),
+    not from here; the five buyable packages carry no plus.price any more.
   {%- endcomment -%}
   <script type="application/json" id="opl-modal-data">
   {
@@ -690,11 +693,11 @@
       "deurbel2": {"name":"Videodeurbel","kind":"Camera","sku":"ZV-P016","tagline":"Zie en spreek wie er aanbelt, waar u ook bent.","specs":[["Beeld","1080p, groothoek"],["Audio","Twee-richting"],["Voeding","Bedraad of accu"],["Plaatsing","Bij de voordeur"]]}
     },
     "pkg": {
-      "aware": {"name":"Inzicht","plat":"","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"3x activiteiten sensor · 1x deur/raamsensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"Inzicht biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt Inzicht grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"]]}},
-      "aware_plus": {"name":"Zeker","plat":"","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"3x activiteiten sensor · 1x deur/raamsensor · 2x locatiesensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"Zeker bouwt voort op Inzicht en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft Zeker opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde zorgtechnologieplatformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"],["2× locatiesensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
-      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
-      "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"price":"+€4 p/m","items":["1 SensePlug","1 sensor"]}},
-      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 fotobewegingsmelder","1 deurcontact"]}},
+      "aware": {"name":"Inzicht","plat":"","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"3x activiteiten sensor · 1x deur/raamsensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"Inzicht biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt Inzicht grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"]]}},
+      "aware_plus": {"name":"Zeker","plat":"","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"3x activiteiten sensor · 1x deur/raamsensor · 2x locatiesensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"Zeker bouwt voort op Inzicht en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft Zeker opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde zorgtechnologieplatformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"],["2× locatiesensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
+      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
+      "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"items":["1 activiteiten sensor","1 sensor"]}},
+      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"items":["1 fotobewegingsmelder","1 deurcontact"]}},
       "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Zie wat er gebeurt. Weet wat ertoe doet.","noPrice":true,"tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
       "liogo_solo": {"name":"Paniek Meldkamer","plat":"LioGo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
       "liogo_guard": {"name":"Zorgmeldkamer","plat":"LioGo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
@@ -1021,14 +1024,18 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pbd-per { font-size: 14px; font-weight: 700; color: var(--muted); }
 .pbd-sub { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-top: 5px; line-height: 1.4; }
 .pbd-buy-card .pb-buy { margin-top: 16px; }
-.pbd-plus { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: block; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+/* Woning box (2026-09-24): the question in the old single option's title style, then one row per
+   option (each row is its own label: checkbox, option text, price), then the per-verdieping items. */
+.pbd-plus { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: block; transition: background 0.15s, border-color 0.15s; }
 .pbd-plus.on { background: #eef3ff; border-color: var(--indigo); }
-.pbd-plus-row { display: flex; align-items: flex-start; gap: 11px; }
+.pbd-plus-h { font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--indigo); line-height: 1.35; margin-bottom: 10px; }
+.pbd-plus-row { display: flex; align-items: flex-start; gap: 11px; cursor: pointer; }
+.pbd-plus-row + .pbd-plus-row { margin-top: 8px; }
 .pbd-plus input { width: 19px; height: 19px; margin-top: 1px; accent-color: #322469; flex: none; cursor: pointer; }
-.pbd-plus-t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pbd-plus-t span:first-child { font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--indigo); }
-.pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); }
-.pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.pbd-plus-t { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pbd-plus-t span:first-child { font-size: 13px; font-weight: 700; color: #4a4458; }
+.pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); white-space: nowrap; }
+.pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 10px; line-height: 1.4; }
 .pbd-soon { display: flex; gap: 10px; margin-top: 16px; background: var(--indigo-soft); border: 1px solid #e2ddf1; border-radius: 8px; padding: 13px 14px; color: var(--indigo); }
 .pbd-soon svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .pbd-soon span { font-size: 12.5px; font-weight: 600; color: #4a4458; line-height: 1.45; }
@@ -1854,11 +1861,16 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
 
     var items = (pk.tier || []).map(itemHtml).join('');
+    // Woning: the question, one checkbox per option (value and price from the config island,
+    // one choice, see the change handler below) and what each extra verdieping adds.
     var plusHtml = '';
-    if (pk.plus && buyable) {
-      plusHtml = '<label class="pbd-plus"><div class="pbd-plus-row"><input type="checkbox" data-pb-plus>' +
-        '<div style="flex:1"><div class="pbd-plus-t"><span>Woning groter dan 100 m²</span><span class="pbd-plus-pr">' + esc(pk.plus.price) + '</span></div>' +
-        '<div class="pbd-plus-items">Per extra etage: ' + esc((pk.plus.items || []).join(' + ')) + '</div></div></div></label>';
+    if (pk.plus && buyable && WONING.options.length) {
+      plusHtml = '<div class="pbd-plus" role="group" aria-labelledby="pbd-woning-h"><div class="pbd-plus-h" id="pbd-woning-h">' + esc(WONING.heading) + '</div>' +
+        WONING.options.map(function (o) {
+          return '<label class="pbd-plus-row"><input type="checkbox" data-pb-woning="' + esc(o.floors) + '">' +
+            '<span class="pbd-plus-t"><span>' + esc(o.value) + '</span><span class="pbd-plus-pr">' + esc(woningPrice(o)) + '</span></span></label>';
+        }).join('') +
+        '<div class="pbd-plus-items">Per extra verdieping: ' + esc((pk.plus.items || []).join(' + ')) + '</div></div>';
     }
     var buyHtml = buyable
       ? '<button class="pb-buy" data-pb-add data-variant="' + esc(d.variantId) + '" data-cta-position="' + esc(d.solutionType) + '_modal">' + ICON.cart + 'In winkelwagen</button>' +
@@ -1944,27 +1956,33 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var actor = add || buy;
     if (actor && activePanel) {
       var fk = scrim.dataset.fk, card = cardByFk(activePanel, fk), d = card ? card.dataset : {}, pk = DATA.pkg[fk] || {};
-      var plusChecked = !!scrim.querySelector('[data-pb-plus]:checked');
+      var woningIn = scrim.querySelector('[data-pb-woning]:checked');
+      var woningVal = woningIn ? woningValue(parseInt(woningIn.getAttribute('data-pb-woning'), 10)) : '';
       var props = {
         'Pakket': pk.name || d.packageName || '', 'SKU': d.packageSku || '',
         'Oplossing': activePanel.getAttribute('aria-label') || '', 'Platform': pk.plat || '',
         'Bron': 'Oplossingen'
       };
-      if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
+      if (woningVal) props['Woning'] = woningVal;
       var variant = actor.getAttribute('data-variant');
       closeModal();   // design closes the detail modal, then shows the cart confirmation
       addToCart(variant, props, buy ? 'checkout' : 'drawer', null, fk);
     }
   });
 
-  /* >100 m² checkbox recomputes the shown price live */
+  /* Woning options: one choice (checking one unchecks the other, unchecking the checked one
+     clears it); the shown price becomes base + that option's monthly amount, live. */
   scrim.addEventListener('change', function (e) {
-    var box = e.target.closest('[data-pb-plus]'); if (!box) return;
-    var label = box.closest('.pbd-plus'); if (label) label.classList.toggle('on', box.checked);
+    var box = e.target.closest('[data-pb-woning]'); if (!box) return;
+    var wrap = box.closest('.pbd-plus');
+    if (box.checked && wrap) wrap.querySelectorAll('[data-pb-woning]').forEach(function (o) { if (o !== box) o.checked = false; });
+    var sel = wrap ? wrap.querySelector('[data-pb-woning]:checked') : (box.checked ? box : null);
+    if (wrap) wrap.classList.toggle('on', !!sel);
     var amt = scrim.querySelector('[data-pb-amt]'); if (!amt) return;
     var base = parseInt(amt.getAttribute('data-base'), 10) || 0;
     var card = activePanel && cardByFk(activePanel, scrim.dataset.fk);
-    amt.textContent = box.checked ? fmtCents(base + 400) : (card ? card.dataset.price : amt.textContent);
+    var extra = sel ? woningCents(parseInt(sel.getAttribute('data-pb-woning'), 10)) : 0;
+    amt.textContent = extra ? fmtCents(base + extra) : (card ? card.dataset.price : amt.textContent);
   });
 
   /* Keuzehulp interlink: /pages/oplossingen?pakket=<finder_key> lands here, switches to that
