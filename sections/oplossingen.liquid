@@ -1133,7 +1133,12 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-consent{display:flex;align-items:flex-start;gap:11px;min-height:24px;cursor:pointer;}
 .pcard__vista-consent input{width:19px;height:19px;margin-top:2px;flex:none;accent-color:var(--indigo);}
 .pcard__vista-consent span{font-size:13.5px;font-weight:600;color:#5b5374;line-height:1.5;}
-.pcard__vista-note{font-size:12.5px;font-weight:600;color:#5b5374;line-height:1.45;}
+/* Vista advice text (2026-09-24): secondary text like the card footnotes (.ltc__footnote,
+   .pcard__plus-hint): 12px/600 at line-height 1.5. The colour is var(--muted) rather than
+   their --muted-2, which is only 3.5:1 on the white card, below WCAG AA for 12px text
+   (--muted is 5.3:1). The space before the button is its margin-top, not a margin here:
+   the page reset `.opl-page p { margin: 0 }` outranks a one-class rule on this <p>. */
+.pcard__vista-note{font-size:12px;font-weight:600;color:var(--muted);line-height:1.5;}
 /* Vista submit (2026-09-24): the existing .btn--indigo variant (zv-chrome.css: indigo fill, white
    text, indigo-2 and a 2px lift on hover) at the other card CTAs' size. That means the
    .pcard__cta .btn / .ltc__buy font (14.5px/800), 13px 18px padding, 6px radius and 1.5px border
@@ -1142,8 +1147,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
    classes: the form's markup is part of the byte-identical Vista lead path. No nowrap, so the
    label wraps centred when the card is narrow. text-wrap:pretty rather than balance: for this
    label, Chrome's balance breaks after "een" ("Plan een / vrijblijvend adviesgesprek"), while
-   pretty keeps the even split "Plan een vrijblijvend / adviesgesprek". */
-.pcard__vista-form button{width:100%;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:14.5px;font-weight:800;line-height:18px;text-align:center;text-wrap:pretty;color:#fff;background:var(--indigo);border:1.5px solid transparent;border-radius:6px;padding:13px 18px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,background 0.15s,color 0.15s;}
+   pretty keeps the even split "Plan een vrijblijvend / adviesgesprek". margin-top 7px plus the
+   form's 9px gap leaves 16px between the advice text and the button. */
+.pcard__vista-form button{margin-top:7px;width:100%;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:14.5px;font-weight:800;line-height:18px;text-align:center;text-wrap:pretty;color:#fff;background:var(--indigo);border:1.5px solid transparent;border-radius:6px;padding:13px 18px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,background 0.15s,color 0.15s;}
 .pcard__vista-form button:hover{transform:translateY(-2px);background:var(--indigo-2);color:#fff;}
 .pcard__vista-err{font-size:12px;font-weight:700;color:#e24b4a;}
 .pcard__vista-done{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:#2f8f5b;padding:6px 2px;}
