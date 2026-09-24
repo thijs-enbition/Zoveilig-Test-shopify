@@ -183,7 +183,7 @@ Added 2026-09-23 at Thijs's request.
 
 **What it is:** a new content block on the Langer Thuis tab, placed directly under the pakket-matcher and before the Mijn Thuis tab content (the same position as in the feedback). It applies to all three Langer Thuis packages. It explains the Alarm.com Wellness dashboard that mantelzorgers see in the Familie-app. The dashboard, Sensor Summary included, is available with Inzicht, Zeker and Beschermd.
 
-*Placement since 2026-09-24 (Thijs):* from 1100px wide the block sits beside the pakket-matcher (matcher heading, scenario tiles and "Ons advies" on the left ~2/3, this card on the right ~1/3, tops aligned, four items in one column), with the matcher's comparison table full width below both. Narrower, the order stays as before: matcher, its table, then this block.
+*Placement since 2026-09-24 (Thijs):* from 1100px wide the block sits beside the pakket-matcher (matcher heading, scenario tiles and "Ons advies" on the left ~55%, this card on the right ~45%, tops aligned, four items in one column; first built as 2/3 | 1/3, widened the same day because the card ran ~320px below the tiles), with the matcher's comparison table full width below both. Narrower, the order stays as before: matcher, its table, then this block.
 
 - **Heading:** "Het mantelzorgdashboard"
 - **Badge line** (added 2026-09-24, Thijs), a small tag directly under the heading: "Bij alle Langer Thuis-pakketten: Inzicht, Zeker en Beschermd". Theme-editor setting; blank hides it.

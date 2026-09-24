@@ -15,7 +15,7 @@
    Below 1100px: one column in DOM order and with the spacing the page had before the row
    (2026-09-24, Thijs): tiles and advice, the table (the matcher's own 26px top margin), then
    this block (its old clamp(40px,4.4vw,64px) top margin).
-   From 1100px: tiles and advice (2/3) beside this block (1/3), tops aligned, table full
+   From 1100px: tiles and advice (55%) beside this block (45%), tops aligned, table full
    width below both (see the media query at the end). */
 .opl-page .mzd-row { max-width: 1080px; margin: 34px auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "pm" "tbl" "mzd"; }
 .opl-page .mzd-row > .zv-pakket-matcher,
@@ -60,14 +60,17 @@
   .opl-page .mzd__card { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Beside the matcher (≥1100px). The scenario tiles go 2 across in the 2/3 column: its rows
-   hold 4, 3 and 2 tiles, and ~630px can't take row 1's four (842px at the tiles' 200px
-   minimum), so this reuses the matcher's own ≤900px rule (2+2, 2+1, 2). The card stretches
+/* Beside the matcher (≥1100px). 55/45 rather than 2/3 | 1/3 (2026-09-24, Thijs): at 1/3 the
+   card ran ~320px below the last tile; at 45% the two columns end within ~50px of each
+   other (measured at 1440, 1280 and 1100 with no tile selected). The scenario tiles go 2
+   across in the matcher column: its rows hold 4, 3 and 2 tiles, and ~520-530px can't take
+   row 1's four (842px at the tiles' 200px minimum), so this reuses the matcher's own ≤900px
+   rule (2+2, 2+1, 2). The card stretches
    to the row, its four items in one column and the closing line at the bottom; .mzd__copy
    is display:contents so a picked image (order 1) sits above the items, full column width,
    with the same 560px cap. */
 @media (min-width: 1100px) {
-  .opl-page .mzd-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "pm mzd" "tbl tbl"; column-gap: 32px; row-gap: clamp(40px, 4.4vw, 64px); align-items: start; }
+  .opl-page .mzd-row { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); grid-template-areas: "pm mzd" "tbl tbl"; column-gap: 32px; row-gap: clamp(40px, 4.4vw, 64px); align-items: start; }
   .opl-page .mzd-row .tbl-wrap { margin-top: 0; }
   .opl-page .mzd-row .pm-card { flex-basis: calc(50% - 7px); }
   .opl-page .mzd { align-self: stretch; margin-top: 0; }
