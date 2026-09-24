@@ -836,13 +836,13 @@
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
 .ltc__hw li::before { content: '\2013'; position: absolute; left: 0; }
-.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
-.ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
+.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.ltc__buy { width: 100%; justify-content: center; font-family: inherit; font-size: 14.5px; padding: 0 18px; min-height: 46px; box-sizing: border-box; border-radius: 6px; }
 /* Card actions (2026-09-24, Thijs): "Wat zit erin?" and "Uitbreidingen" are full-width secondary
    buttons, stacked 8px apart, in the outline "In winkelwagen" style: the ghost variant's white
    fill, 1.5px var(--line-2) border, indigo text and cream/indigo hover (zv-chrome.css .btn--ghost),
-   with the 6px radius and the 14.5px/800 size and weight of .pcard__cta .btn, 44px tall
-   (border-box, so every pixel ratio gives 44). No 2px hover lift: the summary would lift away
+   with the 6px radius and the 14.5px/800 size and weight of .pcard__cta .btn, 46px tall like
+   "In winkelwagen" (border-box, so every pixel ratio gives 46; one 8px gap between all three). No 2px hover lift: the summary would lift away
    from its own open panel. The chevron stays. Each panel is inside its own <details>, so it
    opens directly under its button and pushes the next one down. "Meer informatie" stays a
    centred text link underneath. Scoped to .pcard .ltc__cta: the cart drawer never clones these
@@ -850,7 +850,7 @@
    (hydrateLineOptions()), and those keep their own rules below. */
 .pcard .ltc__cta .ltc__links { display: flex; flex-direction: column; gap: 8px; }
 .ltc__watzit, .ltc__uitbreidingen { text-align: center; }
-.pcard .ltc__cta .ltc__watzit summary, .pcard .ltc__cta .ltc__uitbreidingen summary { list-style: none; cursor: pointer; box-sizing: border-box; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; background: #fff; border: 1.5px solid var(--line-2); border-radius: 6px; font-size: 14.5px; font-weight: 800; line-height: 1; color: var(--indigo); transition: background 0.15s, border-color 0.15s; }
+.pcard .ltc__cta .ltc__watzit summary, .pcard .ltc__cta .ltc__uitbreidingen summary { list-style: none; cursor: pointer; box-sizing: border-box; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; background: #fff; border: 1.5px solid var(--line-2); border-radius: 6px; font-size: 14.5px; font-weight: 800; line-height: 1; color: var(--indigo); transition: background 0.15s, border-color 0.15s; }
 .pcard .ltc__cta .ltc__watzit summary:hover, .pcard .ltc__cta .ltc__uitbreidingen summary:hover { background: var(--cream); border-color: var(--indigo); color: var(--indigo); }
 .ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
 .ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
