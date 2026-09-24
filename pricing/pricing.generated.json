@@ -94,6 +94,66 @@
     "liogo_solo",
     "liogo_guard"
   ],
+  "linePackages": [
+    {
+      "lineId": "langer-thuis",
+      "name": "Langer Thuis",
+      "packages": [
+        {
+          "finderKey": "aware",
+          "handle": "langer-thuis-inzicht",
+          "sku": "N0001"
+        },
+        {
+          "finderKey": "aware_plus",
+          "handle": "langer-thuis-zeker",
+          "sku": "N0002"
+        },
+        {
+          "finderKey": "care",
+          "handle": "langer-thuis-beschermd",
+          "sku": "LT-BES"
+        }
+      ]
+    },
+    {
+      "lineId": "mijn-thuis",
+      "name": "Mijn Thuis",
+      "packages": [
+        {
+          "finderKey": "secure",
+          "handle": "mijn-thuis-alert",
+          "sku": "N0003"
+        },
+        {
+          "finderKey": "guard",
+          "handle": "mijn-thuis-protect",
+          "sku": "MT-PRO"
+        },
+        {
+          "finderKey": "secure_plus",
+          "handle": "mijn-thuis-vista",
+          "sku": "MT-VIS"
+        }
+      ]
+    },
+    {
+      "lineId": "veilig-onderweg",
+      "name": "Veilig Onderweg",
+      "packages": [
+        {
+          "finderKey": "liogo_solo",
+          "handle": "veilig-onderweg-paniek-meldkamer",
+          "sku": "VO-SOLO"
+        },
+        {
+          "finderKey": "liogo_guard",
+          "handle": "veilig-onderweg-zorgmeldkamer",
+          "sku": "VO-GUARD"
+        }
+      ]
+    }
+  ],
   "packages": [
     {
       "id": "inzicht",
@@ -351,7 +411,7 @@
       "termMonths": 36,
       "installGroup": "climax",
       "productHandle": "mijn-thuis-protect",
-      "sku": null,
+      "sku": "MT-PRO",
       "monthlyRecurringPriceCents": 3795,
       "monthlyDisplay": "€ 37,95",
       "promoMonths": 3,

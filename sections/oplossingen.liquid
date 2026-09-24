@@ -68,13 +68,32 @@
   {%- for b in sols -%}
     {%- assign anchor = b.settings.anchor -%}
     {%- comment -%}
-      The `collection` setting is stored as a handle string in the JSON template, so
-      `b.settings.collection` is that string — resolve it through the `collections` lookup.
-      (Handle the object form too, in case it's ever set via the theme editor picker.)
-      NOTE: the products must be published to the Online Store channel or this is empty.
+      Packages BY HANDLE (fix/packages-by-handle, 2026-09-24). The block's `collection` setting
+      (a handle string in the JSON template; the object form is handled too) now only says WHICH
+      product line this tab shows. The cards themselves come from pricing.config.json via
+      zv-pricing (zv_line_<line>_handles/_skus), each product looked up with
+      all_products[handle], in config order - never from the tagged smart collection: the Odoo
+      sync cleared the tags on N0001-N0003 on 2026-09-24 and the packages vanished. A product
+      that's missing or whose first variant's SKU isn't the config's skips only its own card,
+      with an HTML comment; an unavailable product still renders without a buy button, as
+      before (Thijs 2026-09-24). No slice/concat on product arrays (PR #95 rendered 0 cards).
+      all_products allows 20 unique handles per page; the 8 packages plus the activation
+      product stay well under that.
     {%- endcomment -%}
-    {%- assign coll = b.settings.collection -%}
-    {%- if coll.products == blank -%}{%- assign coll = collections[b.settings.collection] -%}{%- endif -%}
+    {%- assign line_key = b.settings.collection.handle | default: b.settings.collection -%}
+    {%- assign pkg_handles = '' -%}{%- assign pkg_skus = '' -%}
+    {%- case line_key -%}
+      {%- when 'langer-thuis' -%}{%- assign pkg_handles = zv_line_langer_thuis_handles -%}{%- assign pkg_skus = zv_line_langer_thuis_skus -%}
+      {%- when 'mijn-thuis' -%}{%- assign pkg_handles = zv_line_mijn_thuis_handles -%}{%- assign pkg_skus = zv_line_mijn_thuis_skus -%}
+      {%- when 'veilig-onderweg' -%}{%- assign pkg_handles = zv_line_veilig_onderweg_handles -%}{%- assign pkg_skus = zv_line_veilig_onderweg_skus -%}
+    {%- endcase -%}
+    {%- assign pkg_handle_list = pkg_handles | split: '|' -%}
+    {%- assign pkg_sku_list = pkg_skus | split: '|' -%}
+    {%- assign pkg_card_count = 0 -%}
+    {%- for h in pkg_handle_list -%}
+      {%- assign hp = all_products[h] -%}
+      {%- if hp != blank and hp.id != blank and hp.variants.first.sku == pkg_sku_list[forloop.index0] -%}{%- assign pkg_card_count = pkg_card_count | plus: 1 -%}{%- endif -%}
+    {%- endfor -%}
     <div class="opl-panel" id="panel-{{ anchor }}" role="tabpanel" data-opl-panel="{{ anchor }}"
          aria-label="{{ b.settings.eyebrow | escape }}"{% unless forloop.first %} hidden{% endunless %}>
 
@@ -142,9 +161,14 @@
               <div class="cs-done" data-cs-done hidden><span class="cs-done-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Bedankt.</b> We nemen contact met u op zodra er meer bekend is.</div>
             </div>
           </div>
-        {%- elsif coll and coll.products.size > 0 -%}
-          <div class="pgrid" data-n="{{ coll.products.size }}" data-anchor="{{ anchor }}">
-            {%- for p in coll.products -%}
+        {%- elsif pkg_card_count > 0 -%}
+          <div class="pgrid" data-n="{{ pkg_card_count }}" data-anchor="{{ anchor }}">
+            {%- for h in pkg_handle_list -%}
+              {%- assign p = all_products[h] -%}
+              {%- if p == blank or p.id == blank or p.variants.first.sku != pkg_sku_list[forloop.index0] -%}
+                <!-- zv: package {{ h }} missing or SKU mismatch -->
+                {%- continue -%}
+              {%- endif -%}
               {%- assign fk = p.metafields.custom.finder_key.value -%}
               {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}{%- assign term = '' -%}
               {%- case fk -%}

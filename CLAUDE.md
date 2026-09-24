@@ -111,22 +111,29 @@ sold products**: `custom.finder_key` on all 5 packages (`aware` / `aware_plus` /
 `secure` / `guard`) and `inventoryItem.tracked == false` on every package and installation
 product. Fixing either is a product change — flag it to Thijs, never make it from here.
 
-**Package order is set by pricing.config.json, never by collection order — Odoo swaps
-append new products to the end of collections.** Confirmed 2026-09-23: the Inzicht/Alert
-swap above appended the new products to the end of `langer-thuis`/`mijn-thuis`, which
-would have silently reordered any card grid that just looped `for p in
-collection.products`. Every such surface (`sections/oplossingen.liquid`,
-`snippets/zv-pakket-matcher.liquid`, `sections/finder-preview.liquid`) instead orders by
-`zv_package_order_fks` (from `zv-pricing`, derived from `pricing.config.json`'s
-`lines[].packages[]`) and skips any product whose `custom.finder_key` isn't in it. See
-`docs/package-order-config-2026-09-23.md`. Those three consumers were reverted in PR #96
-on 2026-09-23 and no longer read `zv_package_order_fks`, so the ordering described above
-is not live behavior; the build/check side (`scripts/build_pricing.py` and
-`scripts/check_pricing.py` emitting and checking `packageOrder` and
-`zv_package_order_fks`) was kept on purpose. The revert was because PR #95 rendered 0 package
-cards on live: it built the ordered list with `collection.products | slice: …` + `concat`, which
-returns nothing because `collection.products` is a paginated drop, not a plain array (see
-`bd57117`). A re-do must not build the list that way.
+**Packages come from pricing.config.json handles, never from a collection or its tags.**
+Since `fix/packages-by-handle` (2026-09-24), the Oplossingen cards in
+`sections/oplossingen.liquid` and the product map in `snippets/zv-pakket-matcher.liquid` (also
+used on Vergelijk pakketten) loop the config's `lines[].packages[]` handles in config order and
+look each one up with `all_products[handle]`. The Oplossingen section reads `zv_line_<line>_handles/_skus` from
+`zv-pricing`; render'ed snippets use the generated `snippets/zv-package-handles.liquid`. A
+product that's missing or whose first variant's SKU isn't the config's `sku` skips just that
+card or map entry (`<!-- zv: package <handle> missing or SKU mismatch -->` in the card grid);
+an unavailable product still renders without a buy button. The `collection` settings now only
+pick which product line a tab or matcher shows. Tagged smart collections (`langer-thuis`,
+`mijn-thuis`, `veilig-onderweg`) no longer drive the cards: on 2026-09-24 the Odoo sync cleared
+the tags on N0001-N0003 and the packages vanished from the site, and Odoo swaps append new
+products to the end of a collection, which reordered grids. Not switched: the homepage finder
+map in `sections/finder-preview.liquid` still reads `keuzehulp-pakketten`. That collection is
+not published to the Online Store (checked 2026-09-24), so the map is `{}` and every finder
+result shows "Prijs volgt"; reading the config handles instead would show the product prices,
+Vista's included, so it waits for a decision (`zv-package-handles` already has `line: 'all'`).
+**When Odoo replaces a product, update its `productHandle` (and `sku`) in
+pricing.config.json and rebuild**; `check_pricing.py` section 14 fails if a package has no
+handle or sku. `all_products` allows 20 unique handles per page, so keep lookups well under
+that. Never build the list with `slice`/`concat` on `collection.products`: PR #95 did that,
+rendered 0 package cards on live (a paginated drop, not a plain array, see `bd57117`) and was
+reverted in PR #96.
 
 `sections/zv-cart.liquid` and `sections/zv-checkout-overview.liquid` both classify a line item
 as a subscription via `item.product.type == sub_type or item.product.tags contains sub_tag`
@@ -158,7 +165,8 @@ its own package cards and links here via `zv-route` key `vergelijk-pakketten`.
   cards than every other package; otherwise it is excluded. Zero selected → nothing highlighted.
 - The advice bar's add-to-cart resolves package → real product through the same
   `custom.finder_key` metafield mapping the Overzicht page uses (`aware`→inzicht, `aware_plus`→zeker,
-  `care`→beschermd) on the section's `collection` setting (default `langer-thuis`). No variant ids in
+  `care`→beschermd) over the config handles of the line the `collection` setting names (default
+  `langer-thuis`), see "Packages come from pricing.config.json handles" above. No variant ids in
   code. If the same variant is already in the cart it bumps that line via `/cart/change.js` instead
   of adding a second line (Shopify only merges lines whose properties match exactly, and the
   Oplossingen card-add attaches `Bron: Oplossingen` while this one attaches `Bron: Vergelijk pakketten`).
