@@ -15,7 +15,9 @@
   Prices are never hardcoded here: they come from the finder_key -> product map the
   theme injects (Shopify Products are the single source of truth for price/SKU).
   A package with no purchasable product shows 'Prijs volgt'. The result CTA deep-links
-  to the Oplossingen page and opens that package's "Meer informatie".
+  to the Oplossingen page and opens that package's "Meer informatie". Vista
+  (secure_plus) is maatwerk: its META priceNote replaces the price, and its link goes to
+  the Vista card (META anchor #mijn-thuis-vista), as the pakket-matcher's does.
 */
 (function (window, document) {
   'use strict';
@@ -24,7 +26,7 @@
     // ── MIJN THUIS (huis) ──
     secure: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Alert', platform: 'NAMI Alarm15', h1: 'Slim alarm dat u zelf in de gaten houdt.', sub: 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' },
     guard: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Protect', platform: 'Climax · incl. meldkamer', popular: true, h1: 'Alarm met 24/7 meldkamer die meekijkt.', sub: 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' },
-    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · incl. camera', h1: 'Complete beveiliging met meldkamer én camera.', sub: 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' },
+    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · camerabeveiliging', priceNote: 'Op maat, na een vrijblijvend adviesgesprek', anchor: 'mijn-thuis-vista', h1: 'Complete beveiliging met meldkamer én camera.', sub: 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' },
     // ── LANGER THUIS (dierbare) ──
     aware: { seg: 'B', segLabel: 'Langer Thuis', name: 'Inzicht', platform: 'NAMI aiAware', h1: 'Weet dat de dag normaal en veilig is begonnen.', sub: 'NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer' },
     aware_plus: { seg: 'B', segLabel: 'Langer Thuis', name: 'Zeker', platform: 'NAMI aiCare', popular: true, h1: 'Zie subtiele veranderingen voordat het misgaat.', sub: 'NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR · geen meldkamer' },
@@ -171,7 +173,9 @@
     // Decorative product badge (viewBox 132, red disc behind the icon) from zv-product-icons.js.
     function badgeHtml(key) { return (window.ZVP && window.ZVP.badge) ? window.ZVP.badge(key) : ''; }
     // Price is data-driven: from the Shopify product map (finder_key -> product), never hardcoded.
+    // Vista has no fixed price (as on Oplossingen): its priceNote shows instead.
     function priceLine(key) {
+      if (META[key].priceNote) return esc(META[key].priceNote);
       var prod = products[key];
       if (prod && prod.priceCents) return money(prod.priceCents) + '<span>/mnd</span>';
       return 'Prijs volgt';
@@ -194,8 +198,11 @@
       if (ZV.push) ZV.push('finder_complete', { recommended_pakket: r.primary, segment: m.seg });
 
       // Deep-link to the Oplossingen page and open THIS package's "Meer informatie" modal.
+      // A package with an anchor (Vista) goes to its card instead, the same hash the
+      // pakket-matcher and Vergelijk pakketten use.
       function pkgUrl(fk) {
         var base = resultUrl || '/pages/oplossingen';
+        if (META[fk].anchor) return base.split('#')[0] + '#' + META[fk].anchor;
         return base + (base.indexOf('?') > -1 ? '&' : '?') + 'pakket=' + encodeURIComponent(fk);
       }
       var detailUrl = pkgUrl(r.primary);

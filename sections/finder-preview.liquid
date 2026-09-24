@@ -12,10 +12,21 @@
 <section class="finder-sec" id="keuzehulp">
   {%- comment -%} finder_key -> product map, read by zv-finder.js to route results to real products {%- endcomment -%}
   {%- capture finder_products -%}
-    {%- assign kh = collections[section.settings.collection] | default: collections['keuzehulp-pakketten'] -%}
+    {%- comment -%}
+      Packages by handle (fix/packages-by-handle, 2026-09-24): every package from
+      pricing.config.json via zv-package-handles, looked up with all_products[handle], never the
+      tagged keuzehulp-pakketten collection (the section's `collection` setting is no longer
+      read). A missing product or a first-variant SKU that isn't the config's is left out.
+    {%- endcomment -%}
+    {%- capture fp_handles -%}{%- render 'zv-package-handles', line: 'all', what: 'handles' -%}{%- endcapture -%}
+    {%- capture fp_skus -%}{%- render 'zv-package-handles', line: 'all', what: 'skus' -%}{%- endcapture -%}
+    {%- assign fp_handle_list = fp_handles | strip | split: '|' -%}
+    {%- assign fp_sku_list = fp_skus | strip | split: '|' -%}
     {%- assign first = true -%}
     {
-    {%- for p in kh.products -%}
+    {%- for h in fp_handle_list -%}
+      {%- assign p = all_products[h] -%}
+      {%- if p == blank or p.id == blank or p.variants.first.sku != fp_sku_list[forloop.index0] -%}{%- continue -%}{%- endif -%}
       {%- assign fk = p.metafields.custom.finder_key -%}
       {%- if fk != blank -%}
         {%- unless first %},{% endunless -%}{%- assign first = false -%}
@@ -207,7 +218,7 @@
     { "type": "text", "id": "question_sub", "label": "Vraag-subtekst" },
     { "type": "text", "id": "footer_text", "label": "Voettekst", "default": "Kies een antwoord om verder te gaan" },
     { "type": "url", "id": "finder_url", "label": "Fallback-link (als een pakket geen product heeft)" },
-    { "type": "collection", "id": "collection", "label": "Pakketten-collectie", "info": "Standaard: keuzehulp-pakketten. Producten met een custom.finder_key metafield." }
+    { "type": "collection", "id": "collection", "label": "Pakketten-collectie", "info": "Niet meer gebruikt: de pakketten komen uit pricing.config.json (productHandle per pakket)." }
   ],
   "blocks": [
     {
