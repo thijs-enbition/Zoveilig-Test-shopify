@@ -1113,8 +1113,14 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-form{display:flex;flex-direction:column;gap:9px;}
 .pcard__vista-form input{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a1230;border:1.5px solid #e8e0cd;border-radius:6px;padding:11px 12px;background:#fff;}
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
-.pcard__vista-consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:#5b5374;line-height:1.4;cursor:pointer;}
-.pcard__vista-consent input{width:16px;height:16px;flex:none;margin-top:1px;accent-color:#322469;}
+/* Vista consent (2026-09-24): the same checkbox row as the Overzicht AV consent (.zv-overzicht
+   .ovcheck in zv-checkout-overview.liquid): a 19px indigo checkbox 2px down, an 11px gap and
+   13.5px/1.5 label text, so the box sits on the label's first line exactly as it does there.
+   The label wraps the checkbox, so the whole label is its click/tap target; min-height keeps
+   that target at least 24px tall even if the text ever fits on one line. */
+.pcard__vista-consent{display:flex;align-items:flex-start;gap:11px;min-height:24px;cursor:pointer;}
+.pcard__vista-consent input{width:19px;height:19px;margin-top:2px;flex:none;accent-color:var(--indigo);}
+.pcard__vista-consent span{font-size:13.5px;font-weight:600;color:#5b5374;line-height:1.5;}
 .pcard__vista-note{font-size:12.5px;font-weight:600;color:#5b5374;line-height:1.45;}
 /* Vista submit (2026-09-24): the existing .btn--indigo variant (zv-chrome.css: indigo fill, white
    text, indigo-2 and a 2px lift on hover) at the other card CTAs' size. That means the
