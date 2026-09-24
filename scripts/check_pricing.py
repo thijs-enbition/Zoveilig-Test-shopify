@@ -15,6 +15,8 @@ Covers:
   9 no retired or superseded value appears in a theme file
  10 no theme file carries an independent price or duration
  11 commercial pricing status
+ 12 package display order
+ 13 Woning surcharge: unit, property values, monthly amounts, contract value per term
 
 Run:  python3 scripts/check_pricing.py
 """
@@ -333,6 +335,76 @@ m = re.search(r"zv_package_order_fks = '([^']*)'", snippet_text)
 check(m is not None and m.group(1).split("|") == expected_order,
       "snippets/zv-pricing.liquid's zv_package_order_fks matches the generated order",
       f"got {m.group(1) if m else None}")
+
+print("\n13. Woning surcharge (extra-etage, a line-item property, never a priced cart line)")
+# Spec §7, decisions by Thijs 2026-09-24 (docs/woning-surcharge-research-2026-09-23.md).
+# The unit is surcharges[extra-etage]. Option N = N extra floors (or N x 100 m²) = N x unit per
+# month, billed by Odoo from month 4 and never charged today; it adds N x unit x (termMonths -
+# promo.months) to the indicative contract value.
+etage = next((s for s in cfg["surcharges"] if s["id"] == "extra-etage"), None)
+check(etage is not None, "config has surcharges[extra-etage]")
+unit = etage["price"]["amountCents"] if etage else None
+check(unit == 400, "extra-etage unit is EUR 4,00 per month", f"got {unit}")
+check(addons.get("extra-etage", {}).get("priceCents") == unit,
+      "generated addons[extra-etage] carries the same unit", f"got {addons.get('extra-etage')}")
+woning = gen.get("woning") or {}
+check(woning.get("surchargeId") == "extra-etage" and woning.get("unitCents") == unit,
+      "generated woning block uses the extra-etage unit",
+      f"got {woning.get('surchargeId')} / {woning.get('unitCents')}")
+# The exact Woning property values Odoo must recognise (D1): no price in the value.
+EXPECTED_WONING_VALUES = {1: "1 extra verdieping of 100 m²", 2: "2 extra verdiepingen of 200 m²"}
+EXPECTED_WONING_MONTHLY_CENTS = {1: 400, 2: 800}
+woning_opts = {o["floors"]: o for o in woning.get("options", [])}
+check(sorted(woning_opts) == [1, 2], "exactly two Woning options, 1 and 2 floors",
+      f"got {sorted(woning_opts)}")
+for floors, value in EXPECTED_WONING_VALUES.items():
+    o = woning_opts.get(floors, {})
+    check(o.get("value") == value, f"Woning option {floors} property value is '{value}'",
+          f"got {o.get('value')!r}")
+    check("€" not in (o.get("value") or ""), f"Woning option {floors} value carries no price")
+    check(o.get("monthlyCents") == EXPECTED_WONING_MONTHLY_CENTS[floors] == floors * unit,
+          f"Woning option {floors} = {floors} x unit = {EXPECTED_WONING_MONTHLY_CENTS[floors]} per month",
+          f"got {o.get('monthlyCents')}")
+check(woning.get("legacyValuePrefix") == "Groter dan 100 m²",
+      "legacy Woning values (prefix 'Groter dan 100 m²') are recognised",
+      f"got {woning.get('legacyValuePrefix')!r}")
+# Contract value per Woning option, by term (D3): EUR 36/72 at 12 months, EUR 132/264 at 36.
+EXPECTED_WONING_ICV_CENTS_BY_TERM = {12: {1: 3600, 2: 7200}, 36: {1: 13200, 2: 26400}}
+for p in priced:
+    got = {w["floors"]: w["cents"] for w in p.get("woningContractValue", [])}
+    exp = EXPECTED_WONING_ICV_CENTS_BY_TERM.get(p["termMonths"])
+    check(exp is not None, f"{p['name']} term {p['termMonths']} has expected Woning contract values")
+    for floors in (1, 2):
+        rule = floors * unit * (p["termMonths"] - promo_months)
+        check(exp is not None and got.get(floors) == exp[floors] == rule,
+              f"{p['name']} ({p['termMonths']} mnd) Woning {floors} adds "
+              f"{(exp or {}).get(floors)} = {floors} x unit x (term - {promo_months}) to the ICV",
+              f"got {got.get(floors)} rule {rule}")
+# The Liquid assigns Overzicht, /cart and the cards read (snippets/zv-pricing.liquid).
+def snippet_int(name):
+    mm = re.search(r"\{%- assign " + re.escape(name) + r" = (\d+) -%\}", snippet_text)
+    return int(mm.group(1)) if mm else None
+def snippet_str(name):
+    mm = re.search(r"\{%- assign " + re.escape(name) + r" = '([^']*)' -%\}", snippet_text)
+    return mm.group(1) if mm else None
+check(snippet_int("zv_woning_unit_cents") == unit, "zv_woning_unit_cents matches the unit",
+      f"got {snippet_int('zv_woning_unit_cents')}")
+check(snippet_str("zv_woning_legacy_prefix") == woning.get("legacyValuePrefix"),
+      "zv_woning_legacy_prefix matches the generated prefix")
+check(snippet_str("zv_woning_heading") == woning.get("heading") and bool(woning.get("heading")),
+      "zv_woning_heading matches the generated heading")
+for floors, value in EXPECTED_WONING_VALUES.items():
+    check(snippet_str(f"zv_woning_{floors}_value") == value, f"zv_woning_{floors}_value is '{value}'",
+          f"got {snippet_str(f'zv_woning_{floors}_value')!r}")
+    check(snippet_int(f"zv_woning_{floors}_cents") == EXPECTED_WONING_MONTHLY_CENTS[floors],
+          f"zv_woning_{floors}_cents = {EXPECTED_WONING_MONTHLY_CENTS[floors]}",
+          f"got {snippet_int(f'zv_woning_{floors}_cents')}")
+for p in priced:
+    pid = p["id"].replace("-", "_")
+    for floors in (1, 2):
+        exp = EXPECTED_WONING_ICV_CENTS_BY_TERM.get(p["termMonths"], {}).get(floors)
+        name = f"zv_{pid}_woning_{floors}_icv_cents"
+        check(snippet_int(name) == exp, f"{name} = {exp}", f"got {snippet_int(name)}")
 
 print("\n" + "=" * 60)
 if failures:

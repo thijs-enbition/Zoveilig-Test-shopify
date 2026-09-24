@@ -344,9 +344,18 @@
                         <details class="ltc__uitbreidingen">
                           <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
-                            <div class="ltc__optgroup" data-group="woning">
-                              <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
-                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra verdieping of 100 m² extra</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                            {%- comment -%}
+                              Woning surcharge (spec §7, 2026-09-24): one choice, two checkboxes that
+                              uncheck each other (page change handler below), so unchecking the checked
+                              one clears it, from the keyboard too. Heading, option values (also the
+                              exact Woning property value) and amounts come from pricing.config.json
+                              surcharges[extra-etage] via zv-pricing; data-woning-floors is what
+                              readCardOptions() maps to the value.
+                            {%- endcomment -%}
+                            <div class="ltc__optgroup" data-group="woning" role="group" aria-labelledby="woning-h-{{ anchor }}-{{ p.id }}">
+                              <p class="ltc__optgroup-h" id="woning-h-{{ anchor }}-{{ p.id }}">{{ zv_woning_heading | escape }}</p>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="1"><span>{{ zv_woning_1_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_1_cents | money_without_trailing_zeros }}/mnd</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="2"><span>{{ zv_woning_2_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_2_cents | money_without_trailing_zeros }}/mnd</span></label>
                             </div>
                             {%- if ltc_addons != blank -%}
                               <div class="ltc__optgroup" data-group="addons">
@@ -468,7 +477,7 @@
           </div>
           {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
           {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
-            <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
+            <p class="ltc__footnote">Alle abonnementen: +{{ zv_woning_unit_cents | money_without_trailing_zeros }}/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
           {%- endif -%}
         {%- elsif request.design_mode -%}
           <p class="ph-sub" style="text-align:center;">Koppel de collectie "{{ b.settings.collection }}".</p>
@@ -657,6 +666,9 @@
     "Ideaal voor / Typische opstelling" and de >100 m²-optie. Canonieke ontwerp-data
     (breakout.jsx), gesleuteld op finder_key. Prijs/voorraad/variant komen live van de
     Shopify-productkaart; deze data levert alleen de beschrijvende inhoud.
+    plus.items (2026-09-24): what each extra verdieping adds, shown under the modal's Woning
+    options. The options and their prices come from pricing.config.json (#zv-pricing-config),
+    not from here; the five buyable packages carry no plus.price any more.
   {%- endcomment -%}
   <script type="application/json" id="opl-modal-data">
   {
@@ -681,11 +693,11 @@
       "deurbel2": {"name":"Videodeurbel","kind":"Camera","sku":"ZV-P016","tagline":"Zie en spreek wie er aanbelt, waar u ook bent.","specs":[["Beeld","1080p, groothoek"],["Audio","Twee-richting"],["Voeding","Bedraad of accu"],["Plaatsing","Bij de voordeur"]]}
     },
     "pkg": {
-      "aware": {"name":"Inzicht","plat":"","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"3x activiteiten sensor · 1x deur/raamsensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"Inzicht biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt Inzicht grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"]]}},
-      "aware_plus": {"name":"Zeker","plat":"","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"3x activiteiten sensor · 1x deur/raamsensor · 2x locatiesensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"Zeker bouwt voort op Inzicht en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft Zeker opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde zorgtechnologieplatformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"],["2× locatiesensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
-      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"price":"+€4 p/m","items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
-      "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"price":"+€4 p/m","items":["1 SensePlug","1 sensor"]}},
-      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 fotobewegingsmelder","1 deurcontact"]}},
+      "aware": {"name":"Inzicht","plat":"","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"3x activiteiten sensor · 1x deur/raamsensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"Inzicht biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt Inzicht grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"]]}},
+      "aware_plus": {"name":"Zeker","plat":"","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"3x activiteiten sensor · 1x deur/raamsensor · 2x locatiesensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"Zeker bouwt voort op Inzicht en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft Zeker opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde zorgtechnologieplatformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"],["2× locatiesensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
+      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
+      "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"items":["1 activiteiten sensor","1 sensor"]}},
+      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"items":["1 fotobewegingsmelder","1 deurcontact"]}},
       "secure_plus": {"name":"Vista","plat":"Alarm.com · incl. camera","hook":"Complete beveiliging met meldkamer én camera.","sub":"Zie wat er gebeurt. Weet wat ertoe doet.","noPrice":true,"tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
       "liogo_solo": {"name":"Paniek Meldkamer","plat":"LioGo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
       "liogo_guard": {"name":"Zorgmeldkamer","plat":"LioGo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
@@ -1012,14 +1024,18 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pbd-per { font-size: 14px; font-weight: 700; color: var(--muted); }
 .pbd-sub { font-size: 12.5px; font-weight: 600; color: var(--muted-2); margin-top: 5px; line-height: 1.4; }
 .pbd-buy-card .pb-buy { margin-top: 16px; }
-.pbd-plus { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: block; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+/* Woning box (2026-09-24): the question in the old single option's title style, then one row per
+   option (each row is its own label: checkbox, option text, price), then the per-verdieping items. */
+.pbd-plus { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: block; transition: background 0.15s, border-color 0.15s; }
 .pbd-plus.on { background: #eef3ff; border-color: var(--indigo); }
-.pbd-plus-row { display: flex; align-items: flex-start; gap: 11px; }
+.pbd-plus-h { font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--indigo); line-height: 1.35; margin-bottom: 10px; }
+.pbd-plus-row { display: flex; align-items: flex-start; gap: 11px; cursor: pointer; }
+.pbd-plus-row + .pbd-plus-row { margin-top: 8px; }
 .pbd-plus input { width: 19px; height: 19px; margin-top: 1px; accent-color: #322469; flex: none; cursor: pointer; }
-.pbd-plus-t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pbd-plus-t span:first-child { font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--indigo); }
-.pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); }
-.pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.pbd-plus-t { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pbd-plus-t span:first-child { font-size: 13px; font-weight: 700; color: #4a4458; }
+.pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); white-space: nowrap; }
+.pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 10px; line-height: 1.4; }
 .pbd-soon { display: flex; gap: 10px; margin-top: 16px; background: var(--indigo-soft); border: 1px solid #e2ddf1; border-radius: 8px; padding: 13px 14px; color: var(--indigo); }
 .pbd-soon svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .pbd-soon span { font-size: 12.5px; font-weight: 600; color: #4a4458; line-height: 1.45; }
@@ -1071,6 +1087,13 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .addcart__opt input { width: 18px; height: 18px; accent-color: var(--indigo); flex: none; cursor: pointer; }
 .addcart__opt-label { flex: 1; font-size: 13px; font-weight: 800; color: var(--indigo); }
 .addcart__opt-price { font-size: 13px; font-weight: 900; color: var(--belt); flex: none; }
+/* Woning (2026-09-24): the question and one .addcart__opt row per option share one sand block,
+   rows 16px apart instead of the 24px and divider between separate options; labels in the card's
+   option style (.pcard__plus-opt). The drawer is portaled to <body>, so the p margin is set here. */
+.addcart__woning { background: var(--sand); border-top: 1px solid var(--line); padding: 12px 0 4px; }
+.addcart__woning-h { margin: 0; padding: 0 18px 2px; font-size: 13px; font-weight: 700; color: var(--indigo); line-height: 1.4; }
+.addcart__woning .addcart__opt { border-top: none; padding-top: 8px; padding-bottom: 8px; }
+.addcart__woning .addcart__opt-label { font-weight: 700; color: #4a4458; }
 
 .addcart__note { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 16px; line-height: 1.45; }
 .addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin: 20px 0; text-align: center; }
@@ -1338,6 +1361,36 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     return byFk;
   })();
 
+  /* Woning surcharge (spec §7, 2026-09-24): only ever the `Woning` line-item property on the
+     package line, never a priced cart line. Its heading, the two options (floors, the exact
+     property value, monthlyCents = floors x the extra-etage unit) and the legacy prefix come
+     from pricing.config.json surcharges[extra-etage] via the same #zv-pricing-config island
+     (woning), never hardcoded here. Values written before 2026-09-24 start with
+     legacyValuePrefix and read as 1 floor. Without the island there are no options, so the
+     drawer and modal show no Woning control and nothing is written. */
+  var WONING = (function () {
+    try {
+      var el = document.getElementById('zv-pricing-config');
+      var w = el && JSON.parse(el.textContent || '{}').woning;
+      if (w && w.options && w.options.length) return w;
+    } catch (e) { /* fall through: no options */ }
+    return { heading: '', legacyValuePrefix: '', options: [] };
+  })();
+  function woningOption(floors) {
+    for (var i = 0; i < WONING.options.length; i++) { if (WONING.options[i].floors === floors) return WONING.options[i]; }
+    return null;
+  }
+  function woningValue(floors) { var o = woningOption(floors); return o ? o.value : ''; }
+  function woningCents(floors) { var o = woningOption(floors); return o ? o.monthlyCents : 0; }
+  function woningPrice(o) { return '+' + money(o.monthlyCents).replace(/,00$/, '') + '/mnd'; }   // same format as the card's option price ("+€4/mnd")
+  // A stored Woning value -> floors: 0 (none or unknown), 1 or 2; a legacy value -> 1.
+  function woningFloors(value) {
+    var v = String(value == null ? '' : value);
+    if (!v) return 0;
+    for (var i = 0; i < WONING.options.length; i++) { if (WONING.options[i].value === v) return WONING.options[i].floors; }
+    return (WONING.legacyValuePrefix && v.indexOf(WONING.legacyValuePrefix) === 0) ? 1 : 0;
+  }
+
   /* A package goes in the cart as the real package product at quantity PKG_QTY (the 3
      prepaid months); Shopify's automatic "Eerste 3 maanden" discount takes 50% off that
      line by itself. A CLIMAX package also gets the Climax installation line (qty 1); a
@@ -1452,11 +1505,16 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var pkgName = (card && card.getAttribute('data-package-name')) || ITEM_NAMES[it.handle] || p['Pakket'] || it.product_title || '';
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(pkgName);
     var pkg = pkgName || 'item';
-    var woningOn = !!p['Woning'];
     var isActivation = String(it.variant_id) === String(activationVariantId);
+    // Woning only on a line whose package card offers it (the five package cards), never on an
+    // installation line or anything else: no reader counts Woning there. A legacy value reads
+    // as 1 floor.
+    var offersWoning = !isActivation && !!(card && card.querySelector('[data-group="woning"]')) && WONING.options.length > 0;
+    var woningLevel = offersWoning ? woningFloors(p['Woning']) : 0;
     // A package line holds the 3 prepaid months (quantity 3); its "/mnd" figure is the
-    // line's UNIT price before the discount — the plain monthly rate — never unit x 3.
-    var shown = isActivation ? it.final_line_price : (it.original_price != null ? it.original_price : it.price);
+    // line's UNIT price before the discount — the plain monthly rate — never unit x 3, plus
+    // the chosen Woning option (billed with it from month 4, never charged today).
+    var shown = isActivation ? it.final_line_price : ((it.original_price != null ? it.original_price : it.price) + woningCents(woningLevel));
     return '<li class="addcart__item">' +
       '<div class="addcart__item-head"><div class="addcart__info">' +
         '<span class="addcart__name">' + full + '</span>' +
@@ -1465,11 +1523,23 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
       '</div></div>' +
       (isActivation ? '' :
-      '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(it.key) + '"' + (woningOn ? ' checked' : '') +
-        ' aria-label="Woning groter dan 100 m² voor ' + esc(pkg) + '">' +
-        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>' +
+      (offersWoning ? woningLineHtml(it.key, pkg, woningLevel) : '') +
       '<div class="addcart__lineopts" data-cart-line="' + esc(it.key) + '" data-cart-sku="' + esc(p['SKU'] || '') + '"></div>') +
     '</li>';
+  }
+
+  /* One package line's Woning control: the question and one checkbox per option (value and
+     price from the config island), the stored level checked. The change handler below makes
+     them one choice. */
+  function woningLineHtml(key, pkg, level) {
+    return '<div class="addcart__woning" role="group" aria-label="' + esc(WONING.heading) + '">' +
+      '<p class="addcart__woning-h" aria-hidden="true">' + esc(WONING.heading) + '</p>' +
+      WONING.options.map(function (o) {
+        return '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(key) + '" data-woning-floors="' + esc(o.floors) + '"' + (level === o.floors ? ' checked' : '') +
+          ' aria-label="' + esc(o.value) + ' voor ' + esc(pkg) + '">' +
+          '<span class="addcart__opt-label">' + esc(o.value) + '</span><span class="addcart__opt-price">' + esc(woningPrice(o)) + '</span></label>';
+      }).join('') +
+    '</div>';
   }
 
   /* Populate each line's .addcart__lineopts placeholder with a live clone of that
@@ -1589,14 +1659,22 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var woning = e.target.closest('[data-zv-line-woning]');
     if (woning) {
       var key = woning.getAttribute('data-zv-line-woning'), on = woning.checked;
+      var wgroup = woning.closest('.addcart__woning');
+      var wboxes = wgroup ? [].slice.call(wgroup.querySelectorAll('[data-zv-line-woning]')) : [woning];
       var line = null, its = (cartState && cartState.items) || [];
       for (var i = 0; i < its.length; i++) { if (its[i].key === key) { line = its[i]; break; } }
       if (!line) { woning.checked = !on; return; }
       var props = {}, lp = line.properties || {};
       for (var k in lp) { if (lp.hasOwnProperty(k)) props[k] = lp[k]; }
-      if (on) props['Woning'] = 'Groter dan 100 m²'; else delete props['Woning'];
-      woning.disabled = true;
-      cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
+      // One choice: checking an option writes its value (and unchecks the other); unchecking
+      // the checked one removes the property. A failed write restores the stored level.
+      var wvalue = on ? woningValue(parseInt(woning.getAttribute('data-woning-floors'), 10)) : '';
+      if (wvalue) props['Woning'] = wvalue; else delete props['Woning'];
+      var wprev = woningFloors(lp['Woning']);
+      wboxes.forEach(function (b) { if (b !== woning) b.checked = false; b.disabled = true; });
+      cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () {
+        wboxes.forEach(function (b) { b.checked = parseInt(b.getAttribute('data-woning-floors'), 10) === wprev; b.disabled = false; });
+      });
       return;
     }
     var lineOpt = e.target.closest('.addcart__lineopts .pcard__plus-opt input');
@@ -1650,7 +1728,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
         if (!name) return;
-        if (group === 'woning') out.woning = 'Groter dan 100 m² (+€4/mnd per extra verdieping of per 100 m² extra woonoppervlak)';
+        // Woning: the exact property value for the checked option's level. The tile copy's
+        // single checkbox (no data-woning-floors) means 1 floor.
+        if (group === 'woning') out.woning = woningValue(parseInt(inp.getAttribute('data-woning-floors'), 10) || 1);
         else if (group === 'terms') out.terms.push(name);
         else out.addons.push(name);
       });
@@ -1662,6 +1742,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   page.addEventListener('change', function (e) {
     var inp = e.target.closest && e.target.closest('.pcard__plus-opt input');
     if (!inp) return;
+    // Woning is one choice: checking one option unchecks the other (a programmatic uncheck
+    // fires no change event). Done first, because readCardOptions() and recomputeCardPrice()
+    // read the live checked state.
+    var woningGroup = inp.checked && inp.closest('[data-group="woning"]');
+    if (woningGroup) woningGroup.querySelectorAll('.pcard__plus-opt input').forEach(function (o) { if (o !== inp) o.checked = false; });
     var card = inp.closest('.pcard'), opt = inp.closest('.pcard__plus-opt');
     var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
     var addBtn = card && card.querySelector('[data-zv-add]');
@@ -1776,11 +1861,16 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
 
     var items = (pk.tier || []).map(itemHtml).join('');
+    // Woning: the question, one checkbox per option (value and price from the config island,
+    // one choice, see the change handler below) and what each extra verdieping adds.
     var plusHtml = '';
-    if (pk.plus && buyable) {
-      plusHtml = '<label class="pbd-plus"><div class="pbd-plus-row"><input type="checkbox" data-pb-plus>' +
-        '<div style="flex:1"><div class="pbd-plus-t"><span>Woning groter dan 100 m²</span><span class="pbd-plus-pr">' + esc(pk.plus.price) + '</span></div>' +
-        '<div class="pbd-plus-items">Per extra etage: ' + esc((pk.plus.items || []).join(' + ')) + '</div></div></div></label>';
+    if (pk.plus && buyable && WONING.options.length) {
+      plusHtml = '<div class="pbd-plus" role="group" aria-labelledby="pbd-woning-h"><div class="pbd-plus-h" id="pbd-woning-h">' + esc(WONING.heading) + '</div>' +
+        WONING.options.map(function (o) {
+          return '<label class="pbd-plus-row"><input type="checkbox" data-pb-woning="' + esc(o.floors) + '">' +
+            '<span class="pbd-plus-t"><span>' + esc(o.value) + '</span><span class="pbd-plus-pr">' + esc(woningPrice(o)) + '</span></span></label>';
+        }).join('') +
+        '<div class="pbd-plus-items">Per extra verdieping: ' + esc((pk.plus.items || []).join(' + ')) + '</div></div>';
     }
     var buyHtml = buyable
       ? '<button class="pb-buy" data-pb-add data-variant="' + esc(d.variantId) + '" data-cta-position="' + esc(d.solutionType) + '_modal">' + ICON.cart + 'In winkelwagen</button>' +
@@ -1866,27 +1956,33 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var actor = add || buy;
     if (actor && activePanel) {
       var fk = scrim.dataset.fk, card = cardByFk(activePanel, fk), d = card ? card.dataset : {}, pk = DATA.pkg[fk] || {};
-      var plusChecked = !!scrim.querySelector('[data-pb-plus]:checked');
+      var woningIn = scrim.querySelector('[data-pb-woning]:checked');
+      var woningVal = woningIn ? woningValue(parseInt(woningIn.getAttribute('data-pb-woning'), 10)) : '';
       var props = {
         'Pakket': pk.name || d.packageName || '', 'SKU': d.packageSku || '',
         'Oplossing': activePanel.getAttribute('aria-label') || '', 'Platform': pk.plat || '',
         'Bron': 'Oplossingen'
       };
-      if (plusChecked) props['Woning'] = 'Groter dan 100 m² (+€4/mnd per etage)';
+      if (woningVal) props['Woning'] = woningVal;
       var variant = actor.getAttribute('data-variant');
       closeModal();   // design closes the detail modal, then shows the cart confirmation
       addToCart(variant, props, buy ? 'checkout' : 'drawer', null, fk);
     }
   });
 
-  /* >100 m² checkbox recomputes the shown price live */
+  /* Woning options: one choice (checking one unchecks the other, unchecking the checked one
+     clears it); the shown price becomes base + that option's monthly amount, live. */
   scrim.addEventListener('change', function (e) {
-    var box = e.target.closest('[data-pb-plus]'); if (!box) return;
-    var label = box.closest('.pbd-plus'); if (label) label.classList.toggle('on', box.checked);
+    var box = e.target.closest('[data-pb-woning]'); if (!box) return;
+    var wrap = box.closest('.pbd-plus');
+    if (box.checked && wrap) wrap.querySelectorAll('[data-pb-woning]').forEach(function (o) { if (o !== box) o.checked = false; });
+    var sel = wrap ? wrap.querySelector('[data-pb-woning]:checked') : (box.checked ? box : null);
+    if (wrap) wrap.classList.toggle('on', !!sel);
     var amt = scrim.querySelector('[data-pb-amt]'); if (!amt) return;
     var base = parseInt(amt.getAttribute('data-base'), 10) || 0;
     var card = activePanel && cardByFk(activePanel, scrim.dataset.fk);
-    amt.textContent = box.checked ? fmtCents(base + 400) : (card ? card.dataset.price : amt.textContent);
+    var extra = sel ? woningCents(parseInt(sel.getAttribute('data-pb-woning'), 10)) : 0;
+    amt.textContent = extra ? fmtCents(base + extra) : (card ? card.dataset.price : amt.textContent);
   });
 
   /* Keuzehulp interlink: /pages/oplossingen?pakket=<finder_key> lands here, switches to that

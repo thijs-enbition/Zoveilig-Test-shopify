@@ -1,0 +1,33 @@
+{%- comment -%}
+  zv-woning-floors: prints 0, 1 or 2, the number of extra floors a cart line's `Woning`
+  line-item property stands for (spec §7, docs/woning-surcharge-research-2026-09-23.md).
+
+  The two values come from pricing.config.json via zv-pricing (zv_woning_1_value,
+  zv_woning_2_value). A legacy value from carts opened before 2026-09-24 starts with
+  zv_woning_legacy_prefix ("Groter dan 100 m²", e.g. "Groter dan 100 m² (+€4/mnd per extra
+  verdieping of per 100 m² extra woonoppervlak)") and counts as 1 floor. Anything else,
+  including blank, is 0.
+
+  Params (render scope can't see the section's zv_* variables, so pass them in):
+    value  - the property value, e.g. item.properties['Woning']
+    v1, v2 - zv_woning_1_value, zv_woning_2_value
+    legacy - zv_woning_legacy_prefix
+  Usage: capture it, then `| strip | plus: 0` to get a number.
+{%- endcomment -%}
+{%- liquid
+  assign n = 0
+  if value != blank
+    if value == v2
+      assign n = 2
+    elsif value == v1
+      assign n = 1
+    elsif legacy != blank
+      assign legacy_len = legacy | size
+      assign head = value | slice: 0, legacy_len
+      if head == legacy
+        assign n = 1
+      endif
+    endif
+  endif
+  echo n
+-%}
