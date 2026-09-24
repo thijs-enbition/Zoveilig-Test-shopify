@@ -862,7 +862,16 @@
 .ltc__optgroup-h { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--indigo); }
 .ltc__more { display: inline-flex; align-items: center; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer; padding: 4px 2px; transition: color 0.14s; }
 .ltc__more:hover { color: var(--belt); }
-.ltc__footnote { max-width: 760px; margin: 22px auto 0; font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.5; text-align: center; }
+/* Grid footnote (2026-09-24): one full-width line centred directly under the cards, exactly as
+   wide as the .pgrid above it. It used to be `.ltc__footnote { max-width: 760px; margin: 22px auto 0 }`,
+   but the page reset `.opl-page p { margin: 0 }` (0,1,1) beat that rule (0,1,0), so the auto
+   margins never applied: the 760px box sat at the left edge of .pak's content box, left of the
+   centred 1080px grid at 1280px and up, with no gap under the cards. Two classes (0,2,0) now
+   win over the reset. max-width repeats the grid's own calc(var(--cols) * 360px), and 420px at
+   720px and below, with --cols taken from the grid's data-n, so both boxes stay the same width. */
+.pgrid[data-n="1"] + .ltc__footnote { --cols: 1; } .pgrid[data-n="2"] + .ltc__footnote { --cols: 2; }
+.pak .ltc__footnote { max-width: calc(var(--cols, 3) * 360px); margin: 22px auto 0; font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.5; text-align: center; }
+@media (max-width: 720px) { .pak .ltc__footnote { max-width: 420px; } }
 .ltc__buy[aria-busy="true"] { opacity: 0.6; cursor: default; }
 
 .pgnote { display: flex; align-items: center; gap: 12px; margin: 26px auto 0; background: var(--indigo-soft); border: 1px solid #ddd5f0; border-radius: 14px; padding: 14px 18px; max-width: 760px; }
