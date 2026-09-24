@@ -123,11 +123,14 @@ an unavailable product still renders without a buy button. The `collection` sett
 pick which product line a tab or matcher shows. Tagged smart collections (`langer-thuis`,
 `mijn-thuis`, `veilig-onderweg`) no longer drive the cards: on 2026-09-24 the Odoo sync cleared
 the tags on N0001-N0003 and the packages vanished from the site, and Odoo swaps append new
-products to the end of a collection, which reordered grids. Not switched: the homepage finder
-map in `sections/finder-preview.liquid` still reads `keuzehulp-pakketten`. That collection is
-not published to the Online Store (checked 2026-09-24), so the map is `{}` and every finder
-result shows "Prijs volgt"; reading the config handles instead would show the product prices,
-Vista's included, so it waits for a decision (`zv-package-handles` already has `line: 'all'`).
+products to the end of a collection, which reordered grids. The homepage finder map in
+`sections/finder-preview.liquid` reads all lines the same way (`zv-package-handles`,
+`line: 'all'`) since `fix/finder-by-handle` (2026-09-24); before that it read
+`keuzehulp-pakketten`, which is not published to the Online Store, so every finder result
+showed "Prijs volgt". `assets/zv-finder.js` shows each package's product price, except Vista
+(secure_plus): no price but "Op maat, na een vrijblijvend adviesgesprek", and its link goes to
+the Vista card (`#mijn-thuis-vista`), like the matcher's. Veilig Onderweg (product price 0)
+shows "Prijs volgt".
 **When Odoo replaces a product, update its `productHandle` (and `sku`) in
 pricing.config.json and rebuild**; `check_pricing.py` section 14 fails if a package has no
 handle or sku. `all_products` allows 20 unique handles per page, so keep lookups well under
