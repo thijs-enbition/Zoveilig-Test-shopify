@@ -62,6 +62,7 @@
   assign has_nami_install_line = false
   assign selected_nami_install_id = nil
   assign selected_nami_install_cents = 0
+  assign pkg_woning_floors = 0
   assign cart_needs_fix = false
   assign cart_pkg_undiscounted = false
   for item in cart.items
@@ -113,6 +114,17 @@
     endif
 
     if item_pkg_fk != blank
+      comment
+        Woning surcharge (spec §7): a property only, never a priced line, so Shopify charges
+        nothing for it today. Odoo bills it from month 4 with the package, so it counts in
+        "Daarna" (+zv_woning_unit_cents per floor) and in the ICV below. zv-woning-floors
+        reads the legacy "Groter dan 100 m²…" value as 1 floor.
+      endcomment
+      capture item_woning_floors
+        render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix
+      endcapture
+      assign item_woning_floors = item_woning_floors | strip | plus: 0
+      assign item_woning_cents = zv_woning_unit_cents | times: item_woning_floors
       if item_pkg_fk == 'aware' or item_pkg_fk == 'aware_plus' or item_pkg_fk == 'secure'
         assign has_nami_pkg = true
       else
@@ -121,6 +133,7 @@
       if pkg_line_item == nil
         assign pkg_line_item = item
         assign pkg_item_fk = item_pkg_fk
+        assign pkg_woning_floors = item_woning_floors
       endif
       if item.quantity != zv_promo_package_qty
         assign cart_needs_fix = true
@@ -128,7 +141,7 @@
       if item.final_line_price >= item.original_line_price
         assign cart_pkg_undiscounted = true
       endif
-      assign true_month_cents = true_month_cents | plus: item.original_price
+      assign true_month_cents = true_month_cents | plus: item.original_price | plus: item_woning_cents
       assign fk_token = item_pkg_fk | append: '|'
       if distinct_pkg_fks contains fk_token
         assign cart_needs_fix = true
@@ -188,6 +201,8 @@
         assign pkg_term = zv_inzicht_term
         assign pkg_icv = zv_inzicht_icv
         assign pkg_icv_cents_base = zv_inzicht_icv_cents
+        assign pkg_woning_icv_1 = zv_inzicht_woning_1_icv_cents
+        assign pkg_woning_icv_2 = zv_inzicht_woning_2_icv_cents
         assign pkg_meldkamer = false
       when 'aware_plus'
         assign pkg_available = true
@@ -195,12 +210,17 @@
         assign pkg_term = zv_zeker_term
         assign pkg_icv = zv_zeker_icv
         assign pkg_icv_cents_base = zv_zeker_icv_cents
+        assign pkg_woning_icv_1 = zv_zeker_woning_1_icv_cents
+        assign pkg_woning_icv_2 = zv_zeker_woning_2_icv_cents
         assign pkg_meldkamer = false
       when 'care'
         assign pkg_available = true
         assign pkg_install_group = 'climax'
         assign pkg_term = zv_beschermd_term
         assign pkg_icv = zv_beschermd_icv
+        assign pkg_icv_cents_base = zv_beschermd_icv_cents
+        assign pkg_woning_icv_1 = zv_beschermd_woning_1_icv_cents
+        assign pkg_woning_icv_2 = zv_beschermd_woning_2_icv_cents
         assign pkg_meldkamer = true
       when 'secure'
         assign pkg_available = true
@@ -208,12 +228,17 @@
         assign pkg_term = zv_alert_term
         assign pkg_icv = zv_alert_icv
         assign pkg_icv_cents_base = zv_alert_icv_cents
+        assign pkg_woning_icv_1 = zv_alert_woning_1_icv_cents
+        assign pkg_woning_icv_2 = zv_alert_woning_2_icv_cents
         assign pkg_meldkamer = false
       when 'guard'
         assign pkg_available = true
         assign pkg_install_group = 'climax'
         assign pkg_term = zv_protect_term
         assign pkg_icv = zv_protect_icv
+        assign pkg_icv_cents_base = zv_protect_icv_cents
+        assign pkg_woning_icv_1 = zv_protect_woning_1_icv_cents
+        assign pkg_woning_icv_2 = zv_protect_woning_2_icv_cents
         assign pkg_meldkamer = true
     endcase
   endif
@@ -231,11 +256,30 @@
     rest of the page (eur()-formatted strings include it, the shop's money_format does not)
     in that narrow case.
   endcomment
+  assign pkg_icv_cents_final = pkg_icv_cents_base
   if pkg_install_group == 'nami' and selected_nami_install_id != nil
     assign pkg_icv_cents_adjusted = pkg_icv_cents_base | minus: zv_activation_cents | plus: selected_nami_install_cents
     if pkg_icv_cents_adjusted != pkg_icv_cents_base
       assign pkg_icv = pkg_icv_cents_adjusted | money
     endif
+    assign pkg_icv_cents_final = pkg_icv_cents_adjusted
+  endif
+
+  comment
+    Woning surcharge in the ICV: the build's per-package value for 1 or 2 floors,
+    zv_woning_unit_cents x floors x (termMonths - 3), i.e. the months after the 3 prepaid
+    ones (Thijs 2026-09-24). Only when the package line carries a Woning choice, so a cart
+    without one keeps the pre-formatted pkg_icv string untouched.
+  endcomment
+  assign pkg_woning_icv_cents = 0
+  if pkg_available and pkg_woning_floors == 1
+    assign pkg_woning_icv_cents = pkg_woning_icv_1
+  elsif pkg_available and pkg_woning_floors == 2
+    assign pkg_woning_icv_cents = pkg_woning_icv_2
+  endif
+  if pkg_woning_icv_cents > 0
+    assign pkg_icv_cents_final = pkg_icv_cents_final | plus: pkg_woning_icv_cents
+    assign pkg_icv = pkg_icv_cents_final | money
   endif
 -%}
 {%- capture av_url -%}{% render 'zv-route', key: 'algemene-voorwaarden' %}{%- endcapture -%}
@@ -307,6 +351,13 @@
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                       {%- if is_sub -%}
                         <div class="ovi-meta">Eerste {{ item.quantity }} maanden vooruit, {{ zv_promo_badge }}</div>
+                        {%- capture ovi_wf -%}{%- render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix -%}{%- endcapture -%}
+                        {%- assign ovi_wf = ovi_wf | strip | plus: 0 -%}
+                        {%- if ovi_wf > 0 -%}
+                          {%- if ovi_wf == 2 -%}{%- assign ovi_wl = zv_woning_2_value -%}{%- else -%}{%- assign ovi_wl = zv_woning_1_value -%}{%- endif -%}
+                          {%- assign ovi_wc = zv_woning_unit_cents | times: ovi_wf -%}
+                          <div class="ovi-meta">Woning: {{ ovi_wl | escape }} (+{{ ovi_wc | money }}/mnd)</div>
+                        {%- endif -%}
                       {%- else -%}
                         <div class="ovi-meta">Aantal: {{ item.quantity }}</div>
                       {%- endif -%}
