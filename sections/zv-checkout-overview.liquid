@@ -346,7 +346,10 @@
                       {%- endif -%}
                     </div>
                     <div>
-                      {%- if item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
+                      {%- comment -%} Installation lines (CL003 and the 3 NAMI options) always read "Installatie": Odoo sets their product type (e.g. "All"), which isn't customer copy. {%- endcomment -%}
+                      {%- assign ovi_is_install = false -%}
+                      {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign ovi_is_install = true -%}{%- endif -%}
+                      {%- if ovi_is_install -%}<span class="ovi-line">Installatie</span>{%- elsif item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
                       <div class="ovi-name">{{ item_name | escape }}</div>
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                       {%- if is_sub -%}
