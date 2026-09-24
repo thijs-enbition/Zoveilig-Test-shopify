@@ -277,6 +277,7 @@
           "type": "mantelzorgdashboard",
           "settings": {
             "heading": "Het mantelzorgdashboard",
+            "badge": "Bij alle Langer Thuis-pakketten: Inzicht, Zeker en Beschermd",
             "intro": "Via de Familie-app ziet u als mantelzorger in één oogopslag hoe het gaat. Het dashboard is gebouwd op het Wellness-platform van Alarm.com.",
             "item_1_title": "Dashboard",
             "item_1_text": "Activiteitsniveau van vandaag afgezet tegen het persoonlijke gemiddelde, met kleurcodering: groen is routine, geel is opvallend, rood is ongebruikelijk.",
@@ -284,7 +285,7 @@
             "item_2_text": "Weekgrafiek van het activiteitsniveau.",
             "item_3_title": "Sensor Summary",
             "item_3_text": "Dagoverzicht per ruimte over 24 uur.",
-            "item_3_note": "Bij Inzicht en Beschermd.",
+            "item_3_note": "",
             "item_4_title": "Behaviors and Trends",
             "item_4_text": "Vergelijkt gedrag per categorie (keukenbezoeken, in- en uitgaan, activiteitsniveau) met een opgebouwd persoonlijk profiel.",
             "closing": "Dit is een lerend gedragsprofiel. Van het grootste belang voor mantelzorgers."

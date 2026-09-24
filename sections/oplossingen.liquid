@@ -516,6 +516,17 @@
       </section>
 
       {%- if anchor == 'langer-thuis' -%}
+        {%- comment -%}
+          Mantelzorgdashboard (§12): block type 'mantelzorgdashboard', see
+          snippets/zv-mantelzorgdashboard.liquid. .mzd-row holds the matcher and the dashboard
+          so assets/zv-mantelzorgdashboard.css can put the dashboard beside the matcher (≥1100px)
+          without touching the shared matcher snippet. Its stylesheet loads before the row, so
+          the matcher never paints in the old layout first. Without the block, the row is a
+          plain div and the matcher renders as before.
+        {%- endcomment -%}
+        {%- assign mzd_block = section.blocks | where: 'type', 'mantelzorgdashboard' | first -%}
+        {%- if mzd_block -%}{{ 'zv-mantelzorgdashboard.css' | asset_url | stylesheet_tag }}{%- endif -%}
+        <div class="mzd-row">
         {%- render 'zv-pakket-matcher',
           scenarios: matcher_scenarios,
           activation_variant_id: activation_variant_id,
@@ -525,9 +536,8 @@
           zv_beschermd_monthly: zv_beschermd_monthly,
           embedded: true
         -%}
-        {%- comment -%} Mantelzorgdashboard (§12): block type 'mantelzorgdashboard', see snippets/zv-mantelzorgdashboard.liquid. {%- endcomment -%}
-        {%- assign mzd_block = section.blocks | where: 'type', 'mantelzorgdashboard' | first -%}
         {%- if mzd_block -%}{%- render 'zv-mantelzorgdashboard', block: mzd_block -%}{%- endif -%}
+        </div>
       {%- endif -%}
 
       {%- if anchor == 'mijn-thuis' -%}
@@ -2228,8 +2238,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       "name": "Mantelzorgdashboard",
       "limit": 1,
       "settings": [
-        { "type": "paragraph", "content": "Wordt getoond op het Langer Thuis-tabblad, direct onder de pakket-matcher. Anker: #mantelzorgdashboard — zie snippets/zv-mantelzorgdashboard.liquid." },
+        { "type": "paragraph", "content": "Wordt getoond op het Langer Thuis-tabblad, naast de pakket-matcher (vanaf 1100px breed; smaller eronder, boven de vergelijkingstabel). Anker: #mantelzorgdashboard — zie snippets/zv-mantelzorgdashboard.liquid." },
         { "type": "text", "id": "heading", "label": "Kop", "default": "Het mantelzorgdashboard" },
+        { "type": "text", "id": "badge", "label": "Label onder de kop (optioneel)", "default": "Bij alle Langer Thuis-pakketten: Inzicht, Zeker en Beschermd", "info": "Leeg: geen label." },
         { "type": "textarea", "id": "intro", "label": "Intro", "default": "Via de Familie-app ziet u als mantelzorger in één oogopslag hoe het gaat. Het dashboard is gebouwd op het Wellness-platform van Alarm.com." },
         { "type": "header", "content": "Onderdeel 1" },
         { "type": "text", "id": "item_1_title", "label": "1 · Titel", "default": "Dashboard" },
@@ -2242,7 +2253,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         { "type": "header", "content": "Onderdeel 3" },
         { "type": "text", "id": "item_3_title", "label": "3 · Titel", "default": "Sensor Summary" },
         { "type": "textarea", "id": "item_3_text", "label": "3 · Tekst", "default": "Dagoverzicht per ruimte over 24 uur." },
-        { "type": "text", "id": "item_3_note", "label": "3 · Notitie (klein, optioneel)", "default": "Bij Inzicht en Beschermd." },
+        { "type": "text", "id": "item_3_note", "label": "3 · Notitie (klein, optioneel)" },
         { "type": "header", "content": "Onderdeel 4" },
         { "type": "text", "id": "item_4_title", "label": "4 · Titel", "default": "Behaviors and Trends" },
         { "type": "textarea", "id": "item_4_text", "label": "4 · Tekst", "default": "Vergelijkt gedrag per categorie (keukenbezoeken, in- en uitgaan, activiteitsniveau) met een opgebouwd persoonlijk profiel." },
