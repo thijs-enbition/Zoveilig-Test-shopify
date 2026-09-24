@@ -89,18 +89,19 @@
                   <div class="ci-name"><a href="{{ item.url }}">{{ item_name | escape }}</a></div>
                   {%- unless item.variant.title contains 'Default' -%}<div class="ci-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                   {%- if item.selling_plan_allocation -%}<div class="ci-meta">{{ item.selling_plan_allocation.selling_plan.name | escape }}</div>{%- endif -%}
+                  {%- if is_sub -%}
+                    {%- comment -%} Woning (spec §7): its own line, not a generic property tag. The generic tags below never render (item.properties has no .size), and enabling them would also show internal keys like SKU and Bron. A legacy "Groter dan 100 m²…" value reads as option 1. {%- endcomment -%}
+                    {%- capture ci_wf -%}{%- render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix -%}{%- endcapture -%}
+                    {%- assign ci_wf = ci_wf | strip | plus: 0 -%}
+                    {%- if ci_wf > 0 -%}
+                      {%- if ci_wf == 2 -%}{%- assign ci_wl = zv_woning_2_value -%}{%- else -%}{%- assign ci_wl = zv_woning_1_value -%}{%- endif -%}
+                      {%- assign ci_wc = zv_woning_unit_cents | times: ci_wf -%}
+                      <div class="ci-meta">Woning: {{ ci_wl | escape }} (+{{ ci_wc | money_without_trailing_zeros }}/mnd)</div>
+                    {%- endif -%}
+                  {%- endif -%}
                   {%- if item.properties.size > 0 -%}
                     <div class="ci-tags">
-                      {%- for p in item.properties -%}{%- unless p.last == blank or p.first contains '_' -%}
-                        {%- if p.first == 'Woning' -%}
-                          {%- comment -%} Woning (spec §7): the option label from pricing.config.json plus its monthly amount; a legacy "Groter dan 100 m²…" value reads as option 1. {%- endcomment -%}
-                          {%- capture ci_wf -%}{%- render 'zv-woning-floors', value: p.last, v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix -%}{%- endcapture -%}
-                          {%- assign ci_wf = ci_wf | strip | plus: 0 -%}
-                          {%- if ci_wf == 2 -%}{%- assign ci_wl = zv_woning_2_value -%}{%- elsif ci_wf == 1 -%}{%- assign ci_wl = zv_woning_1_value -%}{%- else -%}{%- assign ci_wl = p.last -%}{%- endif -%}
-                          {%- assign ci_wc = zv_woning_unit_cents | times: ci_wf -%}
-                          <span class="ci-tag">Woning: {{ ci_wl | escape }}{% if ci_wf > 0 %} (+{{ ci_wc | money_without_trailing_zeros }}/mnd){% endif %}</span>
-                        {%- else -%}<span class="ci-tag">{{ p.first | escape }}: {{ p.last | escape }}</span>{%- endif -%}
-                      {%- endunless -%}{%- endfor -%}
+                      {%- for p in item.properties -%}{%- unless p.last == blank or p.first contains '_' -%}<span class="ci-tag">{{ p.first | escape }}: {{ p.last | escape }}</span>{%- endunless -%}{%- endfor -%}
                     </div>
                   {%- endif -%}
                   <div class="ci-actions">
