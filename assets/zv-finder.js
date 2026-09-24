@@ -26,7 +26,7 @@
     // ── MIJN THUIS (huis) ──
     secure: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Alert', platform: 'NAMI Alarm15', h1: 'Slim alarm dat u zelf in de gaten houdt.', sub: 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' },
     guard: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Protect', platform: 'Climax · incl. meldkamer', popular: true, h1: 'Alarm met 24/7 meldkamer die meekijkt.', sub: 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' },
-    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · camerabeveiliging', priceNote: 'Op maat, na een vrijblijvend adviesgesprek', anchor: 'mijn-thuis-vista', h1: 'Complete beveiliging met meldkamer én camera.', sub: 'Alarm.com · hub, binnencamera, buitencamera en videodeurbel · incl. meldkamer en camera' },
+    secure_plus: { seg: 'A', segLabel: 'Mijn Thuis', name: 'Vista', platform: 'Alarm.com · camerabeveiliging', priceNote: 'Op maat, na een vrijblijvend adviesgesprek', anchor: 'mijn-thuis-vista', h1: 'Camerabeveiliging op maat, meldkamer optioneel', sub: 'Alarm.com · camerabeveiliging op maat · meldkamer optioneel' },
     // ── LANGER THUIS (dierbare) ──
     aware: { seg: 'B', segLabel: 'Langer Thuis', name: 'Inzicht', platform: 'NAMI aiAware', h1: 'Weet dat de dag normaal en veilig is begonnen.', sub: 'NAMI aiAware · 3 Wi-Fi sensing plugs + 1 deursensor · geen meldkamer' },
     aware_plus: { seg: 'B', segLabel: 'Langer Thuis', name: 'Zeker', platform: 'NAMI aiCare', popular: true, h1: 'Zie subtiele veranderingen voordat het misgaat.', sub: 'NAMI aiCare · 3 Wi-Fi activity sensoren (~100 m²), deursensor per toegang en 2 PIR · geen meldkamer' },
