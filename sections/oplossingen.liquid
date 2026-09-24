@@ -1080,6 +1080,13 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .addcart__opt input { width: 18px; height: 18px; accent-color: var(--indigo); flex: none; cursor: pointer; }
 .addcart__opt-label { flex: 1; font-size: 13px; font-weight: 800; color: var(--indigo); }
 .addcart__opt-price { font-size: 13px; font-weight: 900; color: var(--belt); flex: none; }
+/* Woning (2026-09-24): the question and one .addcart__opt row per option share one sand block,
+   rows 16px apart instead of the 24px and divider between separate options; labels in the card's
+   option style (.pcard__plus-opt). The drawer is portaled to <body>, so the p margin is set here. */
+.addcart__woning { background: var(--sand); border-top: 1px solid var(--line); padding: 12px 0 4px; }
+.addcart__woning-h { margin: 0; padding: 0 18px 2px; font-size: 13px; font-weight: 700; color: var(--indigo); line-height: 1.4; }
+.addcart__woning .addcart__opt { border-top: none; padding-top: 8px; padding-bottom: 8px; }
+.addcart__woning .addcart__opt-label { font-weight: 700; color: #4a4458; }
 
 .addcart__note { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 16px; line-height: 1.45; }
 .addcart__empty { font-size: 14px; font-weight: 600; color: var(--muted); margin: 20px 0; text-align: center; }
@@ -1491,11 +1498,16 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var pkgName = (card && card.getAttribute('data-package-name')) || ITEM_NAMES[it.handle] || p['Pakket'] || it.product_title || '';
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(pkgName);
     var pkg = pkgName || 'item';
-    var woningOn = !!p['Woning'];
     var isActivation = String(it.variant_id) === String(activationVariantId);
+    // Woning only on a line whose package card offers it (the five package cards), never on an
+    // installation line or anything else: no reader counts Woning there. A legacy value reads
+    // as 1 floor.
+    var offersWoning = !isActivation && !!(card && card.querySelector('[data-group="woning"]')) && WONING.options.length > 0;
+    var woningLevel = offersWoning ? woningFloors(p['Woning']) : 0;
     // A package line holds the 3 prepaid months (quantity 3); its "/mnd" figure is the
-    // line's UNIT price before the discount — the plain monthly rate — never unit x 3.
-    var shown = isActivation ? it.final_line_price : (it.original_price != null ? it.original_price : it.price);
+    // line's UNIT price before the discount — the plain monthly rate — never unit x 3, plus
+    // the chosen Woning option (billed with it from month 4, never charged today).
+    var shown = isActivation ? it.final_line_price : ((it.original_price != null ? it.original_price : it.price) + woningCents(woningLevel));
     return '<li class="addcart__item">' +
       '<div class="addcart__item-head"><div class="addcart__info">' +
         '<span class="addcart__name">' + full + '</span>' +
@@ -1504,11 +1516,23 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         '<button type="button" class="addcart__rm" data-cart-remove="' + esc(it.key) + '" aria-label="Verwijder ' + esc(pkg) + '">×</button>' +
       '</div></div>' +
       (isActivation ? '' :
-      '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(it.key) + '"' + (woningOn ? ' checked' : '') +
-        ' aria-label="Woning groter dan 100 m² voor ' + esc(pkg) + '">' +
-        '<span class="addcart__opt-label">Woning groter dan 100 m²</span><span class="addcart__opt-price">+€4/mnd</span></label>' +
+      (offersWoning ? woningLineHtml(it.key, pkg, woningLevel) : '') +
       '<div class="addcart__lineopts" data-cart-line="' + esc(it.key) + '" data-cart-sku="' + esc(p['SKU'] || '') + '"></div>') +
     '</li>';
+  }
+
+  /* One package line's Woning control: the question and one checkbox per option (value and
+     price from the config island), the stored level checked. The change handler below makes
+     them one choice. */
+  function woningLineHtml(key, pkg, level) {
+    return '<div class="addcart__woning" role="group" aria-label="' + esc(WONING.heading) + '">' +
+      '<p class="addcart__woning-h" aria-hidden="true">' + esc(WONING.heading) + '</p>' +
+      WONING.options.map(function (o) {
+        return '<label class="addcart__opt"><input type="checkbox" data-zv-line-woning="' + esc(key) + '" data-woning-floors="' + esc(o.floors) + '"' + (level === o.floors ? ' checked' : '') +
+          ' aria-label="' + esc(o.value) + ' voor ' + esc(pkg) + '">' +
+          '<span class="addcart__opt-label">' + esc(o.value) + '</span><span class="addcart__opt-price">' + esc(woningPrice(o)) + '</span></label>';
+      }).join('') +
+    '</div>';
   }
 
   /* Populate each line's .addcart__lineopts placeholder with a live clone of that
@@ -1628,14 +1652,22 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var woning = e.target.closest('[data-zv-line-woning]');
     if (woning) {
       var key = woning.getAttribute('data-zv-line-woning'), on = woning.checked;
+      var wgroup = woning.closest('.addcart__woning');
+      var wboxes = wgroup ? [].slice.call(wgroup.querySelectorAll('[data-zv-line-woning]')) : [woning];
       var line = null, its = (cartState && cartState.items) || [];
       for (var i = 0; i < its.length; i++) { if (its[i].key === key) { line = its[i]; break; } }
       if (!line) { woning.checked = !on; return; }
       var props = {}, lp = line.properties || {};
       for (var k in lp) { if (lp.hasOwnProperty(k)) props[k] = lp[k]; }
-      if (on) props['Woning'] = 'Groter dan 100 m²'; else delete props['Woning'];
-      woning.disabled = true;
-      cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () { woning.checked = !on; woning.disabled = false; });
+      // One choice: checking an option writes its value (and unchecks the other); unchecking
+      // the checked one removes the property. A failed write restores the stored level.
+      var wvalue = on ? woningValue(parseInt(woning.getAttribute('data-woning-floors'), 10)) : '';
+      if (wvalue) props['Woning'] = wvalue; else delete props['Woning'];
+      var wprev = woningFloors(lp['Woning']);
+      wboxes.forEach(function (b) { if (b !== woning) b.checked = false; b.disabled = true; });
+      cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () {
+        wboxes.forEach(function (b) { b.checked = parseInt(b.getAttribute('data-woning-floors'), 10) === wprev; b.disabled = false; });
+      });
       return;
     }
     var lineOpt = e.target.closest('.addcart__lineopts .pcard__plus-opt input');
