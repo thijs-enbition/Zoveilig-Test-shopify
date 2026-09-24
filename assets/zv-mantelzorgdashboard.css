@@ -12,16 +12,18 @@
    .mzd. The DOM is untouched: assets/zv-vergelijk-pakketten.js finds the table through
    root.parentNode (.wrap), which still holds both. The row takes over .wrap's width and
    gutter (max 1080px, 0 clamp(20px,3.6vw,52px)) and .pm's 34px top margin.
-   Below 1100px: one column, tiles and advice, then this block, then the table.
+   Below 1100px: one column in DOM order and with the spacing the page had before the row
+   (2026-09-24, Thijs): tiles and advice, the table (the matcher's own 26px top margin), then
+   this block (its old clamp(40px,4.4vw,64px) top margin).
    From 1100px: tiles and advice (2/3) beside this block (1/3), tops aligned, table full
    width below both (see the media query at the end). */
-.opl-page .mzd-row { max-width: 1080px; margin: 34px auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "pm" "mzd" "tbl"; row-gap: clamp(40px, 4.4vw, 64px); }
+.opl-page .mzd-row { max-width: 1080px; margin: 34px auto clamp(48px, 5vw, 80px); padding: 0 clamp(20px, 3.6vw, 52px); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "pm" "tbl" "mzd"; }
 .opl-page .mzd-row > .zv-pakket-matcher,
 .opl-page .mzd-row > .zv-pakket-matcher > .wrap { display: contents; }
 .opl-page .mzd-row .pm { grid-area: pm; min-width: 0; margin-top: 0; }
-.opl-page .mzd-row .tbl-wrap { grid-area: tbl; min-width: 0; margin-top: 0; }
+.opl-page .mzd-row .tbl-wrap { grid-area: tbl; min-width: 0; }
 
-.opl-page .mzd { grid-area: mzd; min-width: 0; scroll-margin-top: 132px; }
+.opl-page .mzd { grid-area: mzd; min-width: 0; margin-top: clamp(40px, 4.4vw, 64px); scroll-margin-top: 132px; }
 .opl-page .mzd__card { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(24px, 3.2vw, 44px); align-items: center; background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 3.2vw, 44px); box-shadow: 0 24px 54px -46px rgba(26, 18, 48, 0.5); }
 .opl-page .mzd--noimg .mzd__card { grid-template-columns: minmax(0, 1fr); }
 
@@ -65,9 +67,10 @@
    is display:contents so a picked image (order 1) sits above the items, full column width,
    with the same 560px cap. */
 @media (min-width: 1100px) {
-  .opl-page .mzd-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "pm mzd" "tbl tbl"; column-gap: 32px; align-items: start; }
+  .opl-page .mzd-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "pm mzd" "tbl tbl"; column-gap: 32px; row-gap: clamp(40px, 4.4vw, 64px); align-items: start; }
+  .opl-page .mzd-row .tbl-wrap { margin-top: 0; }
   .opl-page .mzd-row .pm-card { flex-basis: calc(50% - 7px); }
-  .opl-page .mzd { align-self: stretch; }
+  .opl-page .mzd { align-self: stretch; margin-top: 0; }
   .opl-page .mzd__card { height: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 28px 24px; }
   .opl-page .mzd__copy { display: contents; }
   .opl-page .mzd__h { font-size: 22px; }
