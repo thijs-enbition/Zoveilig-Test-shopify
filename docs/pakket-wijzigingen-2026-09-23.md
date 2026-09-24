@@ -142,23 +142,26 @@ The old Inzicht/Zeker taglines also appear as defaults in `sections/vergelijk-pa
 
 ## 10. Vista card — branch 5
 
+*Copy revised 2026-09-24 (Thijs): the bullets, the text below the form, the time-field label and the consent wording below are his final text and replace the 2026-09-23 copy.*
+
 Replace the "Geen vast pakket" price area, the "Alarm.com · hub, binnencamera…" subline and the "Bekijk de camerahardware" link with:
 
 - **Title:** Vista
 - **Tagline:** "Zie wat er gebeurt. Weet wat ertoe doet."
 - **Icon:** new, in the same style as the other ltc card icons (camera/eye motif, `--indigo` + `--red`)
 - **Bullets:**
-  1. Slimme AI herkent relevante personen, voertuigen en activiteit
-  2. Direct gewaarschuwd bij belangrijke gebeurtenissen
-  3. Altijd en overal live zicht op uw woning *(stijl: je → uw)*
+  1. Slimme AI herkent personen
+  2. Direct gewaarschuwd bij gebeurtenissen
+  3. Altijd live zicht op uw woning
   4. Bekijk wat er vóór en tijdens een incident gebeurde
   5. Slimme zones voorkomen onnodige meldingen
   6. Kijk en spreek rechtstreeks via de camera
-  7. Eenvoudig uit te breiden tot complete camerabeveiliging
+  7. Maatwerk
 - **Text below the form:**
-  > Iedere woning en situatie is anders. Daarom begint goede camerabeveiliging met persoonlijk advies. Samen bepalen we waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is – niet meer en niet minder.
+  > Iedere woning en situatie is anders. Daarom bepalen we samen waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is.
+- **Time field label:** "Wanneer mogen wij bellen?", without "(optioneel)", in both the label and the placeholder
 - **Submit button:** "Plan een vrijblijvend adviesgesprek" (was "Verstuur terugbelverzoek")
-- **Consent checkbox stays** (AVG). Wording: "Ik geef toestemming dat Zo Veilig contact met mij opneemt over Vista." Form fields, `lead_type: 'vista'` and webhook payload are unchanged.
+- **Consent checkbox stays** (AVG). Wording: "Ik geef toestemming dat Zo Veilig contact met mij opneemt." Form fields, `lead_type: 'vista'` and webhook payload are unchanged.
 
 ## 11. Koop option — branch 6, blocked until Thijs creates the product(s)
 
