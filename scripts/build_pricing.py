@@ -8,6 +8,8 @@ Reads pricing.config.json (INPUTS only) and derives every money value once:
     promoWas                = promo.months * monthly                 (undiscounted worth)
     dueToday[option]        = install_option + promoDiscountTotal    (per install option)
     indicativeContractValue = activation + promoDiscountTotal + monthly * (term - promo.months)
+    woning option N         = N * extra-etage per month (never charged today)
+    woningContractValue[N]  = N * extra-etage * (term - promo.months)   [added to the ICV]
 
 promoDiscountTotal is what the package line costs today. It is rounded PER UNIT, then
 multiplied by promo.months, because that is how Shopify applies the automatic discount:
@@ -111,6 +113,33 @@ def build():
         if pkg.get("finderKey")
     ]
 
+    # Woning surcharge (spec §7, Thijs 2026-09-24): the `Woning` line-item property on the
+    # package line, never a priced cart line, so Shopify never charges it and "Vandaag te
+    # betalen" never includes it. Odoo bills it with the package from month 4. The unit is
+    # surcharges[extra-etage]; option N (N extra floors or N x 100 m²) costs N x unit per
+    # month, and the theme adds woningContractValue[N] = N x unit x (term - promo.months) to a
+    # package's indicative contract value. options[].value is the exact property value.
+    etage = next(s for s in cfg["surcharges"] if s["id"] == "extra-etage")
+    woning_cfg = etage["woning"]
+    woning_unit_cents = etage["price"]["amountCents"]
+    woning_options = [
+        {
+            "floors": o["floors"],
+            "value": o["value"],
+            "monthlyCents": woning_unit_cents * o["floors"],
+            "monthlyDisplay": eur(woning_unit_cents * o["floors"]),
+        }
+        for o in woning_cfg["options"]
+    ]
+    woning = {
+        "surchargeId": etage["id"],
+        "unitCents": woning_unit_cents,
+        "unitDisplay": eur(woning_unit_cents),
+        "heading": woning_cfg["heading"],
+        "legacyValuePrefix": woning_cfg["legacyValuePrefix"],
+        "options": woning_options,
+    }
+
     out = {
         "generatedFrom": "pricing.config.json",
         "configVersion": cfg["meta"]["version"],
@@ -141,6 +170,7 @@ def build():
         "packageOrder": package_order_fks,
         "packages": [],
         "addons": [],
+        "woning": woning,
         "bundles": [],
         "tracking": cfg["tracking"],
         "unresolved": cfg["unresolved"],
@@ -215,6 +245,18 @@ def build():
             # 3-month total, never a monthly figure, so it must never be shown with /mnd.
             promo_was = monthly * promo_months if promo_enabled else 0
 
+            # Woning adds its monthly amount for the months Odoo bills, the same months the
+            # ICV bills the package at the plain rate (the prepaid months are billed without it).
+            recurring_months = term - (promo_months if promo_enabled else 0)
+            woning_contract_value = [
+                {
+                    "floors": o["floors"],
+                    "cents": o["monthlyCents"] * recurring_months,
+                    "display": eur(o["monthlyCents"] * recurring_months),
+                }
+                for o in woning_options
+            ]
+
             row.update({
                 "purchasable": True,
                 "pricingStatus": "CURRENT_WORKING",
@@ -238,9 +280,10 @@ def build():
                     "status": "CURRENT_WORKING",
                     "cents": icv,
                     "display": eur(icv),
-                    "recurringMonthsBilled": term - (promo_months if promo_enabled else 0),
+                    "recurringMonthsBilled": recurring_months,
                     "label": cfg["labels"]["indicativeContractValue"],
                 },
+                "woningContractValue": woning_contract_value,
             })
             out["packages"].append(row)
 
@@ -320,6 +363,18 @@ def build():
             f"{{%- assign zv_nami_install_{oid}_handle = '{o['productHandle']}' -%}}",
             f"{{%- assign zv_nami_install_{oid}_sku = '{o['sku']}' -%}}",
         ]
+    # Woning surcharge: the unit, the heading, the legacy prefix and, per option, the exact
+    # property value and its monthly amount (zv_woning_<floors>_value / _cents).
+    lines += [
+        f"{{%- assign zv_woning_unit_cents = {woning['unitCents']} -%}}",
+        f"{{%- assign zv_woning_heading = '{woning['heading']}' -%}}",
+        f"{{%- assign zv_woning_legacy_prefix = '{woning['legacyValuePrefix']}' -%}}",
+    ]
+    for o in woning["options"]:
+        lines += [
+            f"{{%- assign zv_woning_{o['floors']}_value = '{o['value']}' -%}}",
+            f"{{%- assign zv_woning_{o['floors']}_cents = {o['monthlyCents']} -%}}",
+        ]
     for p in out["packages"]:
         pid = p["id"].replace("-", "_")
         if not p.get("purchasable"):
@@ -344,6 +399,9 @@ def build():
             f"{{%- assign zv_{pid}_icv = '{p['indicativeContractValue']['display']}' -%}}",
             f"{{%- assign zv_{pid}_icv_cents = {p['indicativeContractValue']['cents']} -%}}",
         ]
+        # What each Woning option adds to this package's ICV (Overzicht adds it to zv_<pid>_icv_cents).
+        for wcv in p["woningContractValue"]:
+            lines.append(f"{{%- assign zv_{pid}_woning_{wcv['floors']}_icv_cents = {wcv['cents']} -%}}")
         for opt_id, opt in p["dueToday"].items():
             oid = opt_id.replace("-", "_")
             lines += [
@@ -376,12 +434,15 @@ def build():
     print(f"  packages: {len(out['packages'])} ({len(priced)} purchasable)")
     print(f"  activation: {eur(activation_cents)} | promo: {promo_months}m @ {promo['ratePercent']}% | terms: {enabled_terms}")
     print("  nami install options: " + ", ".join(f"{o['label']} {o['display']}" for o in nami_install_options))
+    print("  woning: " + ", ".join(f"{o['floors']}={o['monthlyDisplay']}/mnd" for o in woning_options)
+          + f" (unit {woning['unitDisplay']}, {woning['surchargeId']})")
     for p in priced:
         due_today_breakdown = ", ".join(f"{oid}={opt['display']}" for oid, opt in p["dueToday"].items())
+        woning_icv = ", ".join(f"{w['floors']}=+{w['display']}" for w in p["woningContractValue"])
         print(f"  - {p['lineName']}/{p['name']} ({p['installGroup']}): monthly {p['monthlyDisplay']}"
               f" | package x{out['promo']['packageCartQuantity']} today {p['promoDiscountTotalDisplay']} (was {p['promoWasDisplay']})"
               f" | due today [{due_today_breakdown}]"
-              f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']}")
+              f" | {p['termMonths']}m | ICV {p['indicativeContractValue']['display']} | woning ICV [{woning_icv}]")
 
 
 if __name__ == "__main__":

@@ -307,6 +307,21 @@
         "amountCents": 400,
         "display": "+€4",
         "per": "/mnd"
+      },
+      "woning": {
+        "heading": "Woning groter dan 100 m² en/of meer dan 1 verdieping?",
+        "options": [
+          {
+            "floors": 1,
+            "value": "1 extra verdieping of 100 m²"
+          },
+          {
+            "floors": 2,
+            "value": "2 extra verdiepingen of 200 m²"
+          }
+        ],
+        "legacyValuePrefix": "Groter dan 100 m²",
+        "note": "Woning surcharge (docs/pakket-wijzigingen-2026-09-23.md §7; decisions by Thijs 2026-09-24, see docs/woning-surcharge-research-2026-09-23.md). Sold ONLY as the `Woning` line-item property on the package line, never as a priced cart line: Shopify never charges it; Odoo bills it with the package from month 4. options[].value is written verbatim as that property value (no price in it) and is what Odoo must recognise. Option N costs N x price.amountCents per month and adds N x price.amountCents x (termMonths - promo.months) to the indicative contract value; build_pricing.py derives both. A stored value that starts with legacyValuePrefix (written before 2026-09-24) reads as 1 floor. heading is the question above the options on the package card, in the Oplossingen cart drawer and in the Meer informatie modal."
       }
     }
   ],
