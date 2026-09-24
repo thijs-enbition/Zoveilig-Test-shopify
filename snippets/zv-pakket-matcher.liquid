@@ -99,10 +99,30 @@
   assign tag_beschermd = tagline_beschermd | default: 'Snelle hulp bij nood'
   assign match_badge = match_badge | default: 'Past bij uw situatie'
   assign recommended = recommended_pkg | default: 'zeker'
-  assign pm_coll = collections[collection]
-  if pm_coll == blank or pm_coll.products_count == 0
-    assign pm_coll = collections['langer-thuis']
-  endif
+  comment
+    Packages by handle (fix/packages-by-handle, 2026-09-24): `collection` (a collection object
+    or its handle string) only names the product line, default Langer Thuis. The product map
+    below comes from pricing.config.json via zv-package-handles, each product looked up with
+    all_products[handle] in config order, never from a tagged collection. A missing product or
+    a first-variant SKU that isn't the config's is left out of the map; an unavailable one
+    stays in with "available": false, as before.
+  endcomment
+  assign pm_line = collection.handle | default: collection | default: 'langer-thuis'
+  unless pm_line == 'langer-thuis' or pm_line == 'mijn-thuis' or pm_line == 'veilig-onderweg'
+    assign pm_line = 'langer-thuis'
+  endunless
+  capture pm_handles
+    render 'zv-package-handles', line: pm_line, what: 'handles'
+  endcapture
+  capture pm_skus
+    render 'zv-package-handles', line: pm_line, what: 'skus'
+  endcapture
+  capture pm_line_name
+    render 'zv-package-handles', line: pm_line, what: 'name'
+  endcapture
+  assign pm_handle_list = pm_handles | strip | split: '|'
+  assign pm_sku_list = pm_skus | strip | split: '|'
+  assign pm_line_name = pm_line_name | strip
 -%}
 
 {%- comment -%}
@@ -138,7 +158,9 @@
 {%- capture pm_products -%}
   {%- assign first = true -%}
   {
-  {%- for p in pm_coll.products -%}
+  {%- for h in pm_handle_list -%}
+    {%- assign p = all_products[h] -%}
+    {%- if p == blank or p.id == blank or p.variants.first.sku != pm_sku_list[forloop.index0] -%}{%- continue -%}{%- endif -%}
     {%- assign fk = p.metafields.custom.finder_key.value -%}
     {%- assign pid = '' -%}
     {%- for pair in fk_pairs -%}
@@ -149,7 +171,7 @@
       {%- assign v = p.selected_or_first_available_variant -%}
       {%- capture short_name -%}{%- render 'zv-package-name', finder_key: fk, names: package_names -%}{%- endcapture -%}
       {%- assign short_name = short_name | strip -%}
-      {%- if short_name == blank -%}{%- assign short_name = p.title | remove_first: pm_coll.title | strip -%}{%- endif -%}
+      {%- if short_name == blank -%}{%- assign short_name = p.title | remove_first: pm_line_name | strip -%}{%- endif -%}
       {%- comment -%}
         variantId is what add-to-cart adds: the real package product, at the promo quantity
         (the 3 prepaid months, see assets/zv-vergelijk-pakketten.js). handle maps it to its
@@ -157,7 +179,7 @@
         line is added too (see CLAUDE.md Pricing pipeline).
       {%- endcomment -%}
       {%- unless first %},{% endunless -%}{%- assign first = false -%}
-      {{ pid | json }}:{"variantId":{{ v.id | json }},"handle":{{ p.handle | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_coll.title | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
+      {{ pid | json }}:{"variantId":{{ v.id | json }},"handle":{{ p.handle | json }},"sku":{{ v.sku | json }},"name":{{ short_name | json }},"line":{{ pm_line_name | json }},"available":{{ p.available | default: false }},"url":{{ p.url | json }}}
     {%- endif -%}
   {%- endfor -%}
   }
