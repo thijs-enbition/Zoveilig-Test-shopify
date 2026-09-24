@@ -381,7 +381,6 @@
                       <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
                     </div>
                   </div>
-                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
                 </article>
               {%- else -%}
                 <article class="pcard pcard--tile{% if is_vista %} pcard--vista{% endif %}{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
@@ -461,7 +460,6 @@
                       {%- endif -%}
                     </div>
                   </div>
-                  {%- if anchor == 'mijn-thuis' -%}<div class="ltc__spacer" aria-hidden="true"></div>{%- endif -%}
                 </article>
               {%- endif -%}
             {%- endfor -%}
@@ -757,27 +755,14 @@
 .pak__head .compare svg { width: 16px; height: 16px; }
 .pgrid { display: grid; gap: 20px; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); max-width: calc(var(--cols, 3) * 360px); margin-left: auto; margin-right: auto; }
 .pgrid[data-n="1"] { --cols: 1; } .pgrid[data-n="2"] { --cols: 2; } .pgrid[data-n="3"] { --cols: 3; }
-/* Mijn Thuis only, 2026-09-15, revised: the align-items:start fix from the prior
-   commit removed the dead-space gap but left the three cards at visibly uneven
-   heights (Alert/Protect/Vista are naturally 510/569/452px tall), which read as
-   broken rather than intentional. Reverted back to the grid's default
-   align-items:stretch (all three cards equal-height again, matching Protect, the
-   naturally tallest), and instead the leftover height is collapsed into an
-   explicit trailing spacer (.ltc__spacer, flex:1 1 auto, rendered only for Mijn
-   Thuis cards — see the Liquid markup below) placed after
-   all real content, so it sits below "Meer informatie" (ltc cards) or the lead
-   form (Vista) instead of between the badges and the CTA. .ltc__cta and
-   .pcard__foot keep their base margin-top:auto rule (used by Langer Thuis and
-   Veilig Onderweg respectively) — both are overridden back to a normal margin
-   only inside the Mijn Thuis grid, so neither shared class's default behavior
-   changes anywhere else. */
-.pgrid[data-anchor="mijn-thuis"] .ltc__cta { margin-top: 0; }
-.pgrid[data-anchor="mijn-thuis"] .pcard__foot { margin-top: 0; }
-/* .pcard .ltc__spacer (2 classes) outranks the base reset `div:empty{display:none}`
-   (element+pseudo-class), same fix already used for .addcart__scrim below — the
-   spacer has no children by design, so without this override the base reset hides
-   it and flex:1 1 auto never gets a chance to apply. */
-.pcard .ltc__spacer { display: block; flex: 1 1 auto; }
+/* Equal-height cards, actions pinned to the bottom (2026-09-24, every tab). The grid's default
+   align-items:stretch keeps each row's cards the same height, and each card is a flex column
+   whose action block has margin-top:auto (.ltc__cta for the ltc cards, .pcard__foot for the
+   tile/Vista card). Any extra height therefore sits between the bullets and the actions, and
+   the "In winkelwagen" buttons line up across a row. Mijn Thuis used to override both margins
+   to 0 and grow a trailing .ltc__spacer instead, which put the space under the actions
+   (195px under Alert and 249px under Protect at 1280, next to the taller Vista). That
+   override and the spacer are gone. */
 .pcard { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 26px 24px 24px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(26, 18, 48, 0.04); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .pcard:hover { border-color: var(--line-2); box-shadow: 0 6px 20px -12px rgba(26, 18, 48, 0.22); }
 .pcard.pop { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 18px 44px -22px rgba(50, 36, 105, 0.45); }
@@ -813,6 +798,11 @@
 .pcard__term { font-size: 12.5px; font-weight: 700; color: var(--muted-2); padding: 10px 2px; border-top: 1px solid var(--line); margin-top: 2px; }
 .pcard__cta .btn { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
 .pcard__cta .btn--ghost { border-width: 1.5px; }
+/* Same border box as the ghost button (2026-09-24): .btn has border:none, so the gold button
+   was one ghost border shorter (44 vs 46px at 1x, 47px at 2x). Next to a ghost card, its
+   bottom-pinned action block started lower and the buttons didn't line up. A transparent
+   border of the same width makes both variants the same height. */
+.pcard__cta .btn--gold { border: 1.5px solid transparent; }
 .pcard__direct { width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 7px; border: none; background: none; font-family: inherit; font-weight: 800; font-size: 13.5px; color: var(--indigo); cursor: pointer; padding: 5px 4px; transition: color 0.14s; }
 .pcard__direct svg { width: 15px; height: 15px; transition: transform 0.16s; }
 .pcard__direct:hover { color: var(--belt); }
