@@ -344,9 +344,18 @@
                         <details class="ltc__uitbreidingen">
                           <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
-                            <div class="ltc__optgroup" data-group="woning">
-                              <p class="ltc__optgroup-h">Woning groter dan 100 m²?</p>
-                              <label class="pcard__plus-opt"><input type="checkbox"><span>Ja, per extra verdieping of 100 m² extra</span><span class="pcard__plus-pr">+€4/mnd</span></label>
+                            {%- comment -%}
+                              Woning surcharge (spec §7, 2026-09-24): one choice, two checkboxes that
+                              uncheck each other (page change handler below), so unchecking the checked
+                              one clears it, from the keyboard too. Heading, option values (also the
+                              exact Woning property value) and amounts come from pricing.config.json
+                              surcharges[extra-etage] via zv-pricing; data-woning-floors is what
+                              readCardOptions() maps to the value.
+                            {%- endcomment -%}
+                            <div class="ltc__optgroup" data-group="woning" role="group" aria-labelledby="woning-h-{{ anchor }}-{{ p.id }}">
+                              <p class="ltc__optgroup-h" id="woning-h-{{ anchor }}-{{ p.id }}">{{ zv_woning_heading | escape }}</p>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="1"><span>{{ zv_woning_1_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_1_cents | money }}/mnd</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="2"><span>{{ zv_woning_2_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_2_cents | money }}/mnd</span></label>
                             </div>
                             {%- if ltc_addons != blank -%}
                               <div class="ltc__optgroup" data-group="addons">
@@ -1338,6 +1347,36 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     return byFk;
   })();
 
+  /* Woning surcharge (spec §7, 2026-09-24): only ever the `Woning` line-item property on the
+     package line, never a priced cart line. Its heading, the two options (floors, the exact
+     property value, monthlyCents = floors x the extra-etage unit) and the legacy prefix come
+     from pricing.config.json surcharges[extra-etage] via the same #zv-pricing-config island
+     (woning), never hardcoded here. Values written before 2026-09-24 start with
+     legacyValuePrefix and read as 1 floor. Without the island there are no options, so the
+     drawer and modal show no Woning control and nothing is written. */
+  var WONING = (function () {
+    try {
+      var el = document.getElementById('zv-pricing-config');
+      var w = el && JSON.parse(el.textContent || '{}').woning;
+      if (w && w.options && w.options.length) return w;
+    } catch (e) { /* fall through: no options */ }
+    return { heading: '', legacyValuePrefix: '', options: [] };
+  })();
+  function woningOption(floors) {
+    for (var i = 0; i < WONING.options.length; i++) { if (WONING.options[i].floors === floors) return WONING.options[i]; }
+    return null;
+  }
+  function woningValue(floors) { var o = woningOption(floors); return o ? o.value : ''; }
+  function woningCents(floors) { var o = woningOption(floors); return o ? o.monthlyCents : 0; }
+  function woningPrice(o) { return '+' + money(o.monthlyCents) + '/mnd'; }   // same format as the card's option price
+  // A stored Woning value -> floors: 0 (none or unknown), 1 or 2; a legacy value -> 1.
+  function woningFloors(value) {
+    var v = String(value == null ? '' : value);
+    if (!v) return 0;
+    for (var i = 0; i < WONING.options.length; i++) { if (WONING.options[i].value === v) return WONING.options[i].floors; }
+    return (WONING.legacyValuePrefix && v.indexOf(WONING.legacyValuePrefix) === 0) ? 1 : 0;
+  }
+
   /* A package goes in the cart as the real package product at quantity PKG_QTY (the 3
      prepaid months); Shopify's automatic "Eerste 3 maanden" discount takes 50% off that
      line by itself. A CLIMAX package also gets the Climax installation line (qty 1); a
@@ -1650,7 +1689,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
         if (!name) return;
-        if (group === 'woning') out.woning = 'Groter dan 100 m² (+€4/mnd per extra verdieping of per 100 m² extra woonoppervlak)';
+        // Woning: the exact property value for the checked option's level. The tile copy's
+        // single checkbox (no data-woning-floors) means 1 floor.
+        if (group === 'woning') out.woning = woningValue(parseInt(inp.getAttribute('data-woning-floors'), 10) || 1);
         else if (group === 'terms') out.terms.push(name);
         else out.addons.push(name);
       });
@@ -1662,6 +1703,11 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   page.addEventListener('change', function (e) {
     var inp = e.target.closest && e.target.closest('.pcard__plus-opt input');
     if (!inp) return;
+    // Woning is one choice: checking one option unchecks the other (a programmatic uncheck
+    // fires no change event). Done first, because readCardOptions() and recomputeCardPrice()
+    // read the live checked state.
+    var woningGroup = inp.checked && inp.closest('[data-group="woning"]');
+    if (woningGroup) woningGroup.querySelectorAll('.pcard__plus-opt input').forEach(function (o) { if (o !== inp) o.checked = false; });
     var card = inp.closest('.pcard'), opt = inp.closest('.pcard__plus-opt');
     var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
     var addBtn = card && card.querySelector('[data-zv-add]');
