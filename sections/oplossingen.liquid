@@ -244,9 +244,9 @@
                   {%- assign ltc_meldkamer = 'ja' -%}{%- assign ltc_camera = 'optioneel' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M32 12 L48 18 V32 C48 44 32 52 32 52 C32 52 16 44 16 32 V18 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 32 L29.5 37.5 L41 25" stroke="var(--red)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
                 {%- when 'secure_plus' -%}
-                  {%- comment -%} Vista. Title/tagline/bullets per docs/pakket-wijzigingen-2026-09-23.md §10 (2026-09-23). use_ltc stays false: these ltc_* values are rendered only by Vista's own lead-form branch (the pcard--tile article below), never the shared ltc card markup. The bullets carry no [tekst](route-key) link markers. Icon: new camera-viewfinder + eye glyph in the ltc icon construction (64x64, --indigo strokes, one --red accent); an engineering draft like the Alert/Protect icons, not yet design-signed-off. {%- endcomment -%}
+                  {%- comment -%} Vista. Title/tagline/bullets per docs/pakket-wijzigingen-2026-09-23.md §10 (2026-09-23; bullets revised 2026-09-24 by Thijs). use_ltc stays false: these ltc_* values are rendered only by Vista's own lead-form branch (the pcard--tile article below), never the shared ltc card markup. The bullets carry no [tekst](route-key) link markers. Icon: new camera-viewfinder + eye glyph in the ltc icon construction (64x64, --indigo strokes, one --red accent); an engineering draft like the Alert/Protect icons, not yet design-signed-off. {%- endcomment -%}
                   {%- assign ltc_tagline = 'Zie wat er gebeurt. Weet wat ertoe doet.' -%}
-                  {%- assign ltc_bullets = 'Slimme AI herkent relevante personen, voertuigen en activiteit|Direct gewaarschuwd bij belangrijke gebeurtenissen|Altijd en overal live zicht op uw woning|Bekijk wat er vóór en tijdens een incident gebeurde|Slimme zones voorkomen onnodige meldingen|Kijk en spreek rechtstreeks via de camera|Eenvoudig uit te breiden tot complete camerabeveiliging' -%}
+                  {%- assign ltc_bullets = 'Slimme AI herkent personen|Direct gewaarschuwd bij gebeurtenissen|Altijd live zicht op uw woning|Bekijk wat er vóór en tijdens een incident gebeurde|Slimme zones voorkomen onnodige meldingen|Kijk en spreek rechtstreeks via de camera|Maatwerk' -%}
                   {%- capture ltc_icon -%}<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M16 24 V20 Q16 16 20 16 H24 M40 16 H44 Q48 16 48 20 V24 M48 40 V44 Q48 48 44 48 H40 M24 48 H20 Q16 48 16 44 V40" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 32 Q32 19.2 44 32 Q32 44.8 20 32 Z" stroke="var(--indigo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="32" r="4" fill="var(--red)"/></svg>{%- endcapture -%}
               {%- endcase -%}
               {%- assign ltc_bullet_list = ltc_bullets | split: '|' -%}
@@ -443,12 +443,12 @@
                             <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
                             <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
                             <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
-                            <label class="pcard__vista-time"><span>Wanneer mogen wij bellen? (optioneel)</span>
-                            <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
+                            <label class="pcard__vista-time"><span>Wanneer mogen wij bellen?</span>
+                            <input type="text" name="time" placeholder="Wanneer mogen wij bellen?">
                             </label>
-                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig contact met mij opneemt over Vista.</span></label>
+                            <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig contact met mij opneemt.</span></label>
                             <div class="pcard__vista-err" data-vista-err hidden></div>
-                            <p class="pcard__vista-note">Iedere woning en situatie is anders. Daarom begint goede camerabeveiliging met persoonlijk advies. Samen bepalen we waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is – niet meer en niet minder.</p>
+                            <p class="pcard__vista-note">Iedere woning en situatie is anders. Daarom bepalen we samen waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is.</p>
                             <button type="submit">Plan een vrijblijvend adviesgesprek</button>
                           </form>
                           <div class="pcard__vista-done" data-vista-done hidden><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Bedankt. Wij nemen contact met u op voor een vrijblijvend adviesgesprek over Vista.</div>
@@ -836,24 +836,34 @@
 .ltc__hw { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .ltc__hw li { font-size: 12.5px; font-weight: 600; color: var(--muted-2); line-height: 1.4; padding-left: 13px; position: relative; }
 .ltc__hw li::before { content: '\2013'; position: absolute; left: 0; }
-.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
-.ltc__buy { width: 100%; justify-content: center; font-size: 14.5px; padding: 13px 18px; border-radius: 6px; }
-.ltc__links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+.ltc__cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.ltc__buy { width: 100%; justify-content: center; font-family: inherit; font-size: 14.5px; padding: 0 18px; min-height: 46px; box-sizing: border-box; border-radius: 6px; }
+/* Card actions (2026-09-24, Thijs): "Wat zit erin?" and "Uitbreidingen" are full-width secondary
+   buttons, stacked 8px apart, in the outline "In winkelwagen" style: the ghost variant's white
+   fill, 1.5px var(--line-2) border, indigo text and cream/indigo hover (zv-chrome.css .btn--ghost),
+   with the 6px radius and the 14.5px/800 size and weight of .pcard__cta .btn, 46px tall like
+   "In winkelwagen" (border-box, so every pixel ratio gives 46; one 8px gap between all three). No 2px hover lift: the summary would lift away
+   from its own open panel. The chevron stays. Each panel is inside its own <details>, so it
+   opens directly under its button and pushes the next one down. "Meer informatie" stays a
+   centred text link underneath. Scoped to .pcard .ltc__cta: the cart drawer never clones these
+   summaries, only the .ltc__optgroup blocks inside the Uitbreidingen panel
+   (hydrateLineOptions()), and those keep their own rules below. */
+.pcard .ltc__cta .ltc__links { display: flex; flex-direction: column; gap: 8px; }
 .ltc__watzit, .ltc__uitbreidingen { text-align: center; }
-.ltc__watzit summary, .ltc__uitbreidingen summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--indigo); padding: 4px 2px; }
-.ltc__watzit summary:hover, .ltc__uitbreidingen summary:hover { color: var(--belt); }
+.pcard .ltc__cta .ltc__watzit summary, .pcard .ltc__cta .ltc__uitbreidingen summary { list-style: none; cursor: pointer; box-sizing: border-box; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; background: #fff; border: 1.5px solid var(--line-2); border-radius: 6px; font-size: 14.5px; font-weight: 800; line-height: 1; color: var(--indigo); transition: background 0.15s, border-color 0.15s; }
+.pcard .ltc__cta .ltc__watzit summary:hover, .pcard .ltc__cta .ltc__uitbreidingen summary:hover { background: var(--cream); border-color: var(--indigo); color: var(--indigo); }
 .ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
 .ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
 .ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
-/* row is "Wat zit erin? - Uitbreidingen - Meer informatie" — each item after the first gets a leading dot. */
-.ltc__watzit + .ltc__uitbreidingen summary::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
-.ltc__uitbreidingen + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
 .ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 .ltc__optgroup-h { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--indigo); }
 .ltc__more { display: inline-flex; align-items: center; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer; padding: 4px 2px; transition: color 0.14s; }
 .ltc__more:hover { color: var(--belt); }
+/* In the stacked column above, keep the text link its own width and centred (a column flex item
+   would otherwise stretch to full width, with the text at the left). */
+.pcard .ltc__cta .ltc__more { align-self: center; }
 /* Grid footnote (2026-09-24): one full-width line centred directly under the cards, exactly as
    wide as the .pgrid above it. It used to be `.ltc__footnote { max-width: 760px; margin: 22px auto 0 }`,
    but the page reset `.opl-page p { margin: 0 }` (0,1,1) beat that rule (0,1,0), so the auto
@@ -1115,14 +1125,15 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-form{display:flex;flex-direction:column;gap:9px;}
 .pcard__vista-form input{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a1230;border:1.5px solid #e8e0cd;border-radius:6px;padding:11px 12px;background:#fff;}
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
-/* Vista call-time field (2026-09-24). Its placeholder "Wanneer mogen wij bellen? (optioneel)" is
+/* Vista call-time field (2026-09-24). Its placeholder, then "Wanneer mogen wij bellen? (optioneel)", was
    about 227px wide at 13.5px, but in the 3-column tablet range the field is only 135-149px wide
    (721-768px viewport; still tight at 1024), so the text was cut off. No legible font size fits
    there (it would need about 8.9px at 768). Instead, a visible label above the field carries the
    same wording and wraps, in this page's existing form-label style (.cs-form label, the Veilig
    Onderweg form). The label wraps the unchanged input (same name and placeholder, no id), so it
    is also the input's accessible name. The in-field placeholder is transparent, so the wording
-   never shows twice or cut off. */
+   never shows twice or cut off. Later on 2026-09-24 (Thijs), label and placeholder both became
+   "Wanneer mogen wij bellen?" without "(optioneel)"; the label approach stays. */
 .pcard__vista-time{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:800;color:#1a1230;line-height:1.4;}
 .pcard__vista-time input::placeholder{color:transparent;}
 /* Vista consent (2026-09-24): the same checkbox row as the Overzicht AV consent (.zv-overzicht
