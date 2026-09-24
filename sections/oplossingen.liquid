@@ -855,9 +855,6 @@
 .ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
 .ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
 .ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
-/* row is "Wat zit erin? - Uitbreidingen - Meer informatie" — each item after the first gets a leading dot. */
-.ltc__watzit + .ltc__uitbreidingen summary::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
-.ltc__uitbreidingen + .ltc__more::before { content: '·'; margin-right: 6px; color: var(--line-2); font-weight: 700; }
 .ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
