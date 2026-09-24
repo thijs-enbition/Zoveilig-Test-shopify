@@ -113,6 +113,25 @@ def build():
         if pkg.get("finderKey")
     ]
 
+    # Packages BY HANDLE (2026-09-24, fix/packages-by-handle): the theme renders package
+    # cards, the pakket-matcher's product map and the homepage finder's product map from
+    # these lists, looking each product up with all_products[handle] in this order - never
+    # from a tagged smart collection (the Odoo sync cleared the tags on N0001-N0003 on
+    # 2026-09-24 and the packages vanished from the site). Each entry carries the SKU the
+    # product's first variant must have; a missing product or a SKU mismatch skips that one
+    # card. When Odoo replaces a product, update its productHandle (and sku) in the config.
+    line_packages = [
+        {
+            "lineId": line["id"],
+            "name": line.get("displayName") or line["id"],
+            "packages": [
+                {"finderKey": pkg.get("finderKey"), "handle": pkg.get("productHandle"), "sku": pkg.get("sku")}
+                for pkg in line["packages"]
+            ],
+        }
+        for line in cfg["lines"]
+    ]
+
     # Woning surcharge (spec §7, Thijs 2026-09-24): the `Woning` line-item property on the
     # package line, never a priced cart line, so Shopify never charges it and "Vandaag te
     # betalen" never includes it. Odoo bills it with the package from month 4. The unit is
@@ -168,6 +187,9 @@ def build():
         # values in pricing.config.json order. Theme surfaces must render in this order,
         # never a Shopify collection's own manual sort.
         "packageOrder": package_order_fks,
+        # Per product line, in display order: finderKey, product handle and expected SKU
+        # (see line_packages above). The theme's only source for which packages exist.
+        "linePackages": line_packages,
         "packages": [],
         "addons": [],
         "woning": woning,
@@ -353,6 +375,19 @@ def build():
         # surface that renders package cards from a collection reorders to match this and
         # skips any product whose finder_key isn't in it - see package_order_fks above.
         f"{{%- assign zv_package_order_fks = '{'|'.join(package_order_fks)}' -%}}",
+    ]
+    # Packages by handle (see line_packages): per line the ordered handles and the SKU each
+    # product's first variant must have, plus the same over all lines for the homepage finder.
+    for ln in line_packages:
+        lid = ln["lineId"].replace("-", "_")
+        lines += [
+            f"{{%- assign zv_line_{lid}_handles = '{'|'.join(p['handle'] for p in ln['packages'])}' -%}}",
+            f"{{%- assign zv_line_{lid}_skus = '{'|'.join(p['sku'] for p in ln['packages'])}' -%}}",
+            f"{{%- assign zv_line_{lid}_name = '{ln['name']}' -%}}",
+        ]
+    lines += [
+        f"{{%- assign zv_all_package_handles = '{'|'.join(p['handle'] for ln in line_packages for p in ln['packages'])}' -%}}",
+        f"{{%- assign zv_all_package_skus = '{'|'.join(p['sku'] for ln in line_packages for p in ln['packages'])}' -%}}",
     ]
     for o in out["installationOptions"]["nami"]["options"]:
         oid = o["id"].replace("-", "_")

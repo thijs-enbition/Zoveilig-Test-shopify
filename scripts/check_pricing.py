@@ -181,7 +181,7 @@ for pkg_id, expected_options in EXPECTED_DUE_TODAY_CENTS.items():
 EXPECTED_PACKAGE_PRODUCTS = {
     "inzicht": ("langer-thuis-inzicht", "N0001"), "zeker": ("langer-thuis-zeker", "N0002"),
     "alert": ("mijn-thuis-alert", "N0003"), "beschermd": ("langer-thuis-beschermd", "LT-BES"),
-    "protect": ("mijn-thuis-protect", None),  # MT-PRO in Shopify; no sku field in config (unchanged)
+    "protect": ("mijn-thuis-protect", "MT-PRO"),  # sku added to the config 2026-09-24 (packages by handle)
 }
 for pkg_id, (handle, sku) in EXPECTED_PACKAGE_PRODUCTS.items():
     p = by_id[pkg_id]
@@ -405,6 +405,34 @@ for p in priced:
         exp = EXPECTED_WONING_ICV_CENTS_BY_TERM.get(p["termMonths"], {}).get(floors)
         name = f"zv_{pid}_woning_{floors}_icv_cents"
         check(snippet_int(name) == exp, f"{name} = {exp}", f"got {snippet_int(name)}")
+
+print("\n14. Packages by handle (pricing.config.json, never a tagged collection)")
+# The theme renders package cards, the pakket-matcher's product map and the homepage finder's
+# product map by looping these handles with all_products[handle] (fix/packages-by-handle,
+# 2026-09-24), so every package needs a product handle and the SKU its first variant carries.
+all_pkgs = [(line["id"], pkg) for line in cfg["lines"] for pkg in line["packages"]]
+for line_id, pkg in all_pkgs:
+    check(bool(pkg.get("productHandle")), f"{line_id}/{pkg['id']} has a productHandle", f"got {pkg.get('productHandle')!r}")
+    check(bool(pkg.get("sku")), f"{line_id}/{pkg['id']} has a sku", f"got {pkg.get('sku')!r}")
+handles = [pkg.get("productHandle") for _, pkg in all_pkgs]
+skus = [pkg.get("sku") for _, pkg in all_pkgs]
+check(len(set(handles)) == len(handles), "package handles are unique", f"got {handles}")
+check(len(set(skus)) == len(skus), "package skus are unique", f"got {skus}")
+gen_lines = gen.get("linePackages") or []
+check([l["lineId"] for l in gen_lines] == [l["id"] for l in cfg["lines"]],
+      "generated linePackages follows pricing.config.json lines[] order")
+for line in cfg["lines"]:
+    gl = next((l for l in gen_lines if l["lineId"] == line["id"]), None)
+    exp = [(p.get("finderKey"), p.get("productHandle"), p.get("sku")) for p in line["packages"]]
+    got = [(p.get("finderKey"), p.get("handle"), p.get("sku")) for p in (gl or {}).get("packages", [])]
+    check(got == exp, f"generated linePackages[{line['id']}] matches the config order, handles and skus", f"got {got}")
+    lid = line["id"].replace("-", "_")
+    check(snippet_str(f"zv_line_{lid}_handles") == "|".join(p.get("productHandle") or "" for p in line["packages"]),
+          f"zv_line_{lid}_handles matches the config", f"got {snippet_str(f'zv_line_{lid}_handles')!r}")
+    check(snippet_str(f"zv_line_{lid}_skus") == "|".join(p.get("sku") or "" for p in line["packages"]),
+          f"zv_line_{lid}_skus matches the config", f"got {snippet_str(f'zv_line_{lid}_skus')!r}")
+check(snippet_str("zv_all_package_handles") == "|".join(handles), "zv_all_package_handles lists every package in config order")
+check(snippet_str("zv_all_package_skus") == "|".join(skus), "zv_all_package_skus lists every package sku in config order")
 
 print("\n" + "=" * 60)
 if failures:
