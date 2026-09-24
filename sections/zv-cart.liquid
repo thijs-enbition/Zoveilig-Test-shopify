@@ -98,7 +98,7 @@
                           {%- assign ci_wf = ci_wf | strip | plus: 0 -%}
                           {%- if ci_wf == 2 -%}{%- assign ci_wl = zv_woning_2_value -%}{%- elsif ci_wf == 1 -%}{%- assign ci_wl = zv_woning_1_value -%}{%- else -%}{%- assign ci_wl = p.last -%}{%- endif -%}
                           {%- assign ci_wc = zv_woning_unit_cents | times: ci_wf -%}
-                          <span class="ci-tag">Woning: {{ ci_wl | escape }}{% if ci_wf > 0 %} (+{{ ci_wc | money }}/mnd){% endif %}</span>
+                          <span class="ci-tag">Woning: {{ ci_wl | escape }}{% if ci_wf > 0 %} (+{{ ci_wc | money_without_trailing_zeros }}/mnd){% endif %}</span>
                         {%- else -%}<span class="ci-tag">{{ p.first | escape }}: {{ p.last | escape }}</span>{%- endif -%}
                       {%- endunless -%}{%- endfor -%}
                     </div>

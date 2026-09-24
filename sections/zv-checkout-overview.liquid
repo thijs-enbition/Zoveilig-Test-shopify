@@ -359,7 +359,7 @@
                         {%- if ovi_wf > 0 -%}
                           {%- if ovi_wf == 2 -%}{%- assign ovi_wl = zv_woning_2_value -%}{%- else -%}{%- assign ovi_wl = zv_woning_1_value -%}{%- endif -%}
                           {%- assign ovi_wc = zv_woning_unit_cents | times: ovi_wf -%}
-                          <div class="ovi-meta">Woning: {{ ovi_wl | escape }} (+{{ ovi_wc | money }}/mnd)</div>
+                          <div class="ovi-meta">Woning: {{ ovi_wl | escape }} (+{{ ovi_wc | money_without_trailing_zeros }}/mnd)</div>
                         {%- endif -%}
                       {%- else -%}
                         <div class="ovi-meta">Aantal: {{ item.quantity }}</div>

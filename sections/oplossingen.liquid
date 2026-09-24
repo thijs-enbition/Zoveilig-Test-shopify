@@ -354,8 +354,8 @@
                             {%- endcomment -%}
                             <div class="ltc__optgroup" data-group="woning" role="group" aria-labelledby="woning-h-{{ anchor }}-{{ p.id }}">
                               <p class="ltc__optgroup-h" id="woning-h-{{ anchor }}-{{ p.id }}">{{ zv_woning_heading | escape }}</p>
-                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="1"><span>{{ zv_woning_1_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_1_cents | money }}/mnd</span></label>
-                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="2"><span>{{ zv_woning_2_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_2_cents | money }}/mnd</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="1"><span>{{ zv_woning_1_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_1_cents | money_without_trailing_zeros }}/mnd</span></label>
+                              <label class="pcard__plus-opt"><input type="checkbox" data-woning-floors="2"><span>{{ zv_woning_2_value | escape }}</span><span class="pcard__plus-pr">+{{ zv_woning_2_cents | money_without_trailing_zeros }}/mnd</span></label>
                             </div>
                             {%- if ltc_addons != blank -%}
                               <div class="ltc__optgroup" data-group="addons">
@@ -477,7 +477,7 @@
           </div>
           {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
           {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
-            <p class="ltc__footnote">Alle abonnementen: +€4/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
+            <p class="ltc__footnote">Alle abonnementen: +{{ zv_woning_unit_cents | money_without_trailing_zeros }}/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
           {%- endif -%}
         {%- elsif request.design_mode -%}
           <p class="ph-sub" style="text-align:center;">Koppel de collectie "{{ b.settings.collection }}".</p>
@@ -1382,7 +1382,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
   }
   function woningValue(floors) { var o = woningOption(floors); return o ? o.value : ''; }
   function woningCents(floors) { var o = woningOption(floors); return o ? o.monthlyCents : 0; }
-  function woningPrice(o) { return '+' + money(o.monthlyCents) + '/mnd'; }   // same format as the card's option price
+  function woningPrice(o) { return '+' + money(o.monthlyCents).replace(/,00$/, '') + '/mnd'; }   // same format as the card's option price ("+€4/mnd")
   // A stored Woning value -> floors: 0 (none or unknown), 1 or 2; a legacy value -> 1.
   function woningFloors(value) {
     var v = String(value == null ? '' : value);
