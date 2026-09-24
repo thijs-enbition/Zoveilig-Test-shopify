@@ -443,7 +443,9 @@
                             <input type="text" name="name" placeholder="Naam" autocomplete="name" required>
                             <input type="email" name="email" placeholder="E-mailadres" autocomplete="email" required>
                             <input type="tel" name="phone" placeholder="Telefoonnummer" autocomplete="tel" required>
+                            <label class="pcard__vista-time"><span>Wanneer mogen wij bellen? (optioneel)</span>
                             <input type="text" name="time" placeholder="Wanneer mogen wij bellen? (optioneel)">
+                            </label>
                             <label class="pcard__vista-consent"><input type="checkbox" name="consent"><span>Ik geef toestemming dat Zo Veilig contact met mij opneemt over Vista.</span></label>
                             <div class="pcard__vista-err" data-vista-err hidden></div>
                             <p class="pcard__vista-note">Iedere woning en situatie is anders. Daarom begint goede camerabeveiliging met persoonlijk advies. Samen bepalen we waar camera's het meeste effect hebben en welke camera het beste past bij iedere plek. Zo krijgt u precies de beveiliging die nodig is – niet meer en niet minder.</p>
@@ -1113,6 +1115,16 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pcard__vista-form{display:flex;flex-direction:column;gap:9px;}
 .pcard__vista-form input{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a1230;border:1.5px solid #e8e0cd;border-radius:6px;padding:11px 12px;background:#fff;}
 .pcard__vista-form input:focus{outline:none;border-color:#322469;}
+/* Vista call-time field (2026-09-24). Its placeholder "Wanneer mogen wij bellen? (optioneel)" is
+   about 227px wide at 13.5px, but in the 3-column tablet range the field is only 135-149px wide
+   (721-768px viewport; still tight at 1024), so the text was cut off. No legible font size fits
+   there (it would need about 8.9px at 768). Instead, a visible label above the field carries the
+   same wording and wraps, in this page's existing form-label style (.cs-form label, the Veilig
+   Onderweg form). The label wraps the unchanged input (same name and placeholder, no id), so it
+   is also the input's accessible name. The in-field placeholder is transparent, so the wording
+   never shows twice or cut off. */
+.pcard__vista-time{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:800;color:#1a1230;line-height:1.4;}
+.pcard__vista-time input::placeholder{color:transparent;}
 /* Vista consent (2026-09-24): the same checkbox row as the Overzicht AV consent (.zv-overzicht
    .ovcheck in zv-checkout-overview.liquid): a 19px indigo checkbox 2px down, an 11px gap and
    13.5px/1.5 label text, so the box sits on the label's first line exactly as it does there.
