@@ -44,6 +44,7 @@ CONFIG = ROOT / "pricing" / "pricing.config.json"
 GENERATED = ROOT / "pricing" / "pricing.generated.json"
 SNIPPET = ROOT / "snippets" / "zv-pricing.liquid"
 ITEM_NAMES = ROOT / "snippets" / "zv-item-names.liquid"
+PACKAGE_HANDLES = ROOT / "snippets" / "zv-package-handles.liquid"
 
 
 def cents_half_up(value: Decimal) -> int:
@@ -463,6 +464,40 @@ def build():
         '<script type="application/json" id="zv-item-names">'
         + json.dumps(item_names, ensure_ascii=False, separators=(",", ":")) + "</script>",
     ]) + "\n", encoding="utf-8")
+
+    # Packages by handle for render'ed snippets that can't see zv-pricing's variables (the
+    # pakket-matcher, the homepage finder): echoes one line's ordered handles, skus or name.
+    ph = [
+        "{%- comment -%}",
+        "  GENERATED FILE. Do not edit by hand.",
+        "  Source: pricing/pricing.config.json (lines[].packages[].productHandle / sku)",
+        "  Rebuild: python3 scripts/build_pricing.py",
+        "  Usage: capture the output of: render 'zv-package-handles', line: 'langer-thuis', what: 'handles'",
+        "  line: a pricing.config.json line id, or 'all'; what: 'handles' (default), 'skus' or 'name'.",
+        "  Pipe-separated, in display order. Packages are looked up with all_products[handle],",
+        "  never from a tagged collection (fix/packages-by-handle, 2026-09-24).",
+        "{%- endcomment -%}",
+        "{%- liquid",
+        "  case line",
+    ]
+    def _ph_branch(key, handles, skus, name):
+        return [
+            f"    when '{key}'",
+            "      if what == 'skus'",
+            f"        echo '{skus}'",
+            "      elsif what == 'name'",
+            f"        echo '{name}'",
+            "      else",
+            f"        echo '{handles}'",
+            "      endif",
+        ]
+    for ln in line_packages:
+        ph += _ph_branch(ln["lineId"], "|".join(p["handle"] for p in ln["packages"]),
+                         "|".join(p["sku"] for p in ln["packages"]), ln["name"])
+    ph += _ph_branch("all", "|".join(p["handle"] for ln in line_packages for p in ln["packages"]),
+                     "|".join(p["sku"] for ln in line_packages for p in ln["packages"]), "")
+    ph += ["  endcase", "-%}"]
+    PACKAGE_HANDLES.write_text("\n".join(ph) + "\n", encoding="utf-8")
 
     priced = [p for p in out["packages"] if p.get("purchasable")]
     print(f"wrote {GENERATED.name}, snippets/{SNIPPET.name} and snippets/{ITEM_NAMES.name}")

@@ -1,0 +1,45 @@
+{%- comment -%}
+  GENERATED FILE. Do not edit by hand.
+  Source: pricing/pricing.config.json (lines[].packages[].productHandle / sku)
+  Rebuild: python3 scripts/build_pricing.py
+  Usage: capture the output of: render 'zv-package-handles', line: 'langer-thuis', what: 'handles'
+  line: a pricing.config.json line id, or 'all'; what: 'handles' (default), 'skus' or 'name'.
+  Pipe-separated, in display order. Packages are looked up with all_products[handle],
+  never from a tagged collection (fix/packages-by-handle, 2026-09-24).
+{%- endcomment -%}
+{%- liquid
+  case line
+    when 'langer-thuis'
+      if what == 'skus'
+        echo 'N0001|N0002|LT-BES'
+      elsif what == 'name'
+        echo 'Langer Thuis'
+      else
+        echo 'langer-thuis-inzicht|langer-thuis-zeker|langer-thuis-beschermd'
+      endif
+    when 'mijn-thuis'
+      if what == 'skus'
+        echo 'N0003|MT-PRO|MT-VIS'
+      elsif what == 'name'
+        echo 'Mijn Thuis'
+      else
+        echo 'mijn-thuis-alert|mijn-thuis-protect|mijn-thuis-vista'
+      endif
+    when 'veilig-onderweg'
+      if what == 'skus'
+        echo 'VO-SOLO|VO-GUARD'
+      elsif what == 'name'
+        echo 'Veilig Onderweg'
+      else
+        echo 'veilig-onderweg-paniek-meldkamer|veilig-onderweg-zorgmeldkamer'
+      endif
+    when 'all'
+      if what == 'skus'
+        echo 'N0001|N0002|LT-BES|N0003|MT-PRO|MT-VIS|VO-SOLO|VO-GUARD'
+      elsif what == 'name'
+        echo ''
+      else
+        echo 'langer-thuis-inzicht|langer-thuis-zeker|langer-thuis-beschermd|mijn-thuis-alert|mijn-thuis-protect|mijn-thuis-vista|veilig-onderweg-paniek-meldkamer|veilig-onderweg-zorgmeldkamer'
+      endif
+  endcase
+-%}

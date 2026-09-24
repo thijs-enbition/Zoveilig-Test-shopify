@@ -434,6 +434,14 @@ for line in cfg["lines"]:
 check(snippet_str("zv_all_package_handles") == "|".join(handles), "zv_all_package_handles lists every package in config order")
 check(snippet_str("zv_all_package_skus") == "|".join(skus), "zv_all_package_skus lists every package sku in config order")
 
+ph_text = (PRICING.parent / "snippets" / "zv-package-handles.liquid").read_text(encoding="utf-8")
+for line in cfg["lines"]:
+    hs = "|".join(p.get("productHandle") or "" for p in line["packages"])
+    ss = "|".join(p.get("sku") or "" for p in line["packages"])
+    blk = ph_text.split(f"when '{line['id']}'", 1)[1].split("when '", 1)[0] if f"when '{line['id']}'" in ph_text else ""
+    check(f"echo '{hs}'" in blk and f"echo '{ss}'" in blk, f"zv-package-handles.liquid has {line['id']} handles and skus from the config")
+check(f"echo '{'|'.join(handles)}'" in ph_text and f"echo '{'|'.join(skus)}'" in ph_text, "zv-package-handles.liquid 'all' lists every package in config order")
+
 print("\n" + "=" * 60)
 if failures:
     print(f"FAILED: {len(failures)} check(s)")
