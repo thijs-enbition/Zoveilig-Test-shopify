@@ -204,16 +204,17 @@
         "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       },
+      "woningApplies": true,
       "woningContractValue": [
         {
           "floors": 1,
-          "cents": 3600,
-          "display": "€ 36,00"
+          "cents": 4200,
+          "display": "€ 42,00"
         },
         {
           "floors": 2,
-          "cents": 7200,
-          "display": "€ 72,00"
+          "cents": 8400,
+          "display": "€ 84,00"
         }
       ]
     },
@@ -266,16 +267,17 @@
         "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       },
+      "woningApplies": true,
       "woningContractValue": [
         {
           "floors": 1,
-          "cents": 3600,
-          "display": "€ 36,00"
+          "cents": 4200,
+          "display": "€ 42,00"
         },
         {
           "floors": 2,
-          "cents": 7200,
-          "display": "€ 72,00"
+          "cents": 8400,
+          "display": "€ 84,00"
         }
       ]
     },
@@ -320,18 +322,8 @@
         "recurringMonthsBilled": 33,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       },
-      "woningContractValue": [
-        {
-          "floors": 1,
-          "cents": 13200,
-          "display": "€ 132,00"
-        },
-        {
-          "floors": 2,
-          "cents": 26400,
-          "display": "€ 264,00"
-        }
-      ]
+      "woningApplies": false,
+      "woningContractValue": []
     },
     {
       "id": "alert",
@@ -382,16 +374,17 @@
         "recurringMonthsBilled": 9,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       },
+      "woningApplies": true,
       "woningContractValue": [
         {
           "floors": 1,
-          "cents": 3600,
-          "display": "€ 36,00"
+          "cents": 4200,
+          "display": "€ 42,00"
         },
         {
           "floors": 2,
-          "cents": 7200,
-          "display": "€ 72,00"
+          "cents": 8400,
+          "display": "€ 84,00"
         }
       ]
     },
@@ -436,18 +429,8 @@
         "recurringMonthsBilled": 33,
         "label": "Indicatieve totale contractwaarde, inclusief eenmalige kosten"
       },
-      "woningContractValue": [
-        {
-          "floors": 1,
-          "cents": 13200,
-          "display": "€ 132,00"
-        },
-        {
-          "floors": 2,
-          "cents": 26400,
-          "display": "€ 264,00"
-        }
-      ]
+      "woningApplies": false,
+      "woningContractValue": []
     },
     {
       "id": "vista",
@@ -610,7 +593,23 @@
         "monthlyCents": 800,
         "monthlyDisplay": "€ 8,00"
       }
-    ]
+    ],
+    "shopify": {
+      "handle": "extra-etage-of-100m2",
+      "sku": "N0008"
+    },
+    "appliesTo": [
+      "langer-thuis-inzicht",
+      "langer-thuis-zeker",
+      "mijn-thuis-alert"
+    ],
+    "appliesToFinderKeys": [
+      "aware",
+      "aware_plus",
+      "secure"
+    ],
+    "cartQuantityPerFloor": 3,
+    "todayCentsPerFloor": 600
   },
   "bundles": [
     {

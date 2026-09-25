@@ -307,7 +307,7 @@
     {
       "id": "extra-etage",
       "name": "Per extra etage",
-      "description": "Alle abonnementen: +€4 p/m per extra etage.",
+      "description": "Alleen Inzicht, Zeker en Alert: +€4 p/m per extra etage.",
       "billing": "monthly",
       "purchasable": true,
       "price": {
@@ -315,6 +315,16 @@
         "display": "+€4",
         "per": "/mnd"
       },
+      "shopify": {
+        "handle": "extra-etage-of-100m2",
+        "sku": "N0008"
+      },
+      "appliesTo": [
+        "langer-thuis-inzicht",
+        "langer-thuis-zeker",
+        "mijn-thuis-alert"
+      ],
+      "collectedVia": "NAMI packages only (appliesTo: Inzicht, Zeker, Alert; Thijs, 2026-09-25). Two records per choice. (1) The `Woning` line-item property on the NAMI package line, unchanged from 2026-09-24 (same values, same legacy prefix, same writers): the per-package record for Odoo. (2) ONE priced cart line for the Shopify product shopify.handle / shopify.sku (N0008, 'Extra etage of >100m2'), at quantity promo.months x the sum of floors over the NAMI package lines (1 floor = 3, 2 floors = 6, no Woning = no line). N0008 is in the 'Eerste 3 maanden' automatic discount (set in Shopify Admin, never from this repo), so each floor costs promo.months x half_up(price.amountCents x promo.ratePercent) today (600 cents at 400 / 50%); Odoo bills price.amountCents per floor per month from month 4. Climax packages (Beschermd, Protect) never get a Woning choice, a Woning property or an N0008 line: a larger Climax home is extended with extra sensors via the hardware page (/pages/camera-hardware#grotere-woning). Supersedes 'property only, never a priced line' (2026-09-24).",
       "woning": {
         "heading": "Woning groter dan 100 m² en/of meer dan 1 verdieping?",
         "options": [
@@ -328,7 +338,7 @@
           }
         ],
         "legacyValuePrefix": "Groter dan 100 m²",
-        "note": "Woning surcharge (docs/pakket-wijzigingen-2026-09-23.md §7; decisions by Thijs 2026-09-24, see docs/woning-surcharge-research-2026-09-23.md). Sold ONLY as the `Woning` line-item property on the package line, never as a priced cart line: Shopify never charges it; Odoo bills it with the package from month 4. options[].value is written verbatim as that property value (no price in it) and is what Odoo must recognise. Option N costs N x price.amountCents per month and adds N x price.amountCents x (termMonths - promo.months) to the indicative contract value; build_pricing.py derives both. A stored value that starts with legacyValuePrefix (written before 2026-09-24) reads as 1 floor. heading is the question above the options on the package card, in the Oplossingen cart drawer and in the Meer informatie modal."
+        "note": "Woning surcharge (docs/pakket-wijzigingen-2026-09-23.md §7; decisions by Thijs 2026-09-24 and 2026-09-25, see docs/woning-surcharge-research-2026-09-23.md and docs/woning-n0008-line-2026-09-25.md). NAMI packages only (appliesTo): Beschermd and Protect never offer it. The choice is written as the `Woning` line-item property on the NAMI package line, exactly as since 2026-09-24 (the per-package record for Odoo), AND collected as one priced N0008 cart line (see collectedVia above), so Shopify charges its first 3 months today with the promo discount and Odoo bills it from month 4. options[].value is written verbatim as that property value (no price in it) and is what Odoo must recognise. Option N costs N x price.amountCents per month from month 4 and adds N x (promo.months x half_up(price.amountCents x promo.ratePercent) + price.amountCents x (termMonths - promo.months)) to the indicative contract value; build_pricing.py derives both. A stored value that starts with legacyValuePrefix (written before 2026-09-24) reads as 1 floor. heading is the question above the options on the NAMI package cards, in the Oplossingen cart drawer and in the Meer informatie modal."
       }
     }
   ],
