@@ -302,9 +302,10 @@
                 "Uitbreiding hardware" link to the hardware page's #grotere-woning block, where the
                 extra sensors per verdieping live, plus one hint line. So the cart drawer finds no
                 addons/terms group to clone for them and readCardOptions() writes no Woning,
-                Abonnement or Uitbreidingen property. The if / elsif / endif tags around the panel
-                below carry no whitespace control on purpose: that keeps the NAMI cards' output
-                byte-identical.
+                Abonnement or Uitbreidingen property. The opening if and the elsif around the panel
+                below carry no whitespace control on purpose, and the closing endif does: that keeps
+                the NAMI cards' output byte-identical (a whitespace-only text token that a
+                whitespace-control tag empties gets its first byte back in Shopify's Liquid).
               {%- endcomment -%}
               {%- assign offers_woning = false -%}{%- if woning_applies_list contains p.handle -%}{%- assign offers_woning = true -%}{%- endif -%}
               {%- assign climax_pakket = '' -%}
@@ -438,7 +439,7 @@
                             </div>
                           </div>
                         </details>{% elsif climax_pakket != blank %}<a class="ltc__hwlink" href="/pages/camera-hardware?pakket={{ climax_pakket }}#grotere-woning" data-zv-event="climax_hardware_link" data-cta-name="uitbreiding_hardware" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}">Uitbreiding hardware<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-                        <p class="pcard__plus-hint ltc__hwhint">Grotere woning of meer verdiepingen? U breidt uit met extra sensoren, zonder toeslag per maand.</p>{% endif %}
+                        <p class="pcard__plus-hint ltc__hwhint">Grotere woning of meer verdiepingen? U breidt uit met extra sensoren, zonder toeslag per maand.</p>{%- endif -%}
                       {%- endif -%}
                       {%- comment -%} Kept as its own separate, untouched feature alongside "Wat zit erin?" — see functional mapping doc's "Meer informatie" decision. {%- endcomment -%}
                       <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
