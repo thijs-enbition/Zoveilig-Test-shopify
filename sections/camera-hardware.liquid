@@ -4,6 +4,19 @@
   camera set (per line: kopen/huren), then "Bel om te bestellen" (tel:) or leaves a
   callback. The callback POSTs a lead to window.ZV_LEAD_ENDPOINT (Odoo CRM). Header/
   footer come from the theme layout; the design's own nav is dropped.
+
+  Grotere woning (2026-09-25, Thijs): Beschermd and Protect (Climax) have no Woning surcharge;
+  a larger home or more floors is covered with extra sensors, bought here. The #grotere-woning
+  block above the product rows shows one set per package per extra verdieping, each item mapped
+  to an existing HW row by its `k` (decisions by Thijs, 2026-09-25):
+    Beschermd: 1 rookmelder (rookmelder), 2 magneetcontacten (magneetcontact_dc23 x 2),
+               1 locatiesensor (no row on this page: "Op aanvraag", no price or SKU invented);
+    Protect:   1 fotobewegingsmelder (foto_bewegingsdetector_868), 1 deurcontact
+               (magneetcontact_dc23).
+  "Voeg set toe" adds those rows to state.lines as Kopen, on top of what is there (one click per
+  extra verdieping). The Oplossingen Climax cards link here with ?pakket=beschermd|protect
+  #grotere-woning: the page scrolls to the block and highlights that set, and captureSource()
+  keeps pakket_intent for the callback payload. Conversion stays phone/callback only.
 {%- endcomment -%}
 
 <div class="zv-camera">
@@ -25,6 +38,32 @@
 
     <section class="shop">
       <div>
+        <div class="gw" id="grotere-woning" aria-labelledby="gw-h">
+          <h2 id="gw-h">Grotere woning? Extra sensoren voor Beschermd en Protect</h2>
+          <p class="gw-lead">Heeft u Beschermd (Langer Thuis) of Protect (Mijn Thuis) en is uw woning groter dan 100 m² of heeft u meer verdiepingen? Dan breidt u uit met extra sensoren. Er komt geen toeslag per maand bij. Per extra verdieping raden wij deze set aan.</p>
+          <div class="gw-sets">
+            <div class="gw-set" data-gw-set="beschermd">
+              <div class="gw-set-h"><b>Beschermd</b><span>Per extra verdieping</span></div>
+              <ul class="gw-items">
+                <li data-gw-k="rookmelder" data-gw-qty="1"><span class="gw-q">1×</span><span class="gw-n">Rookmelder</span><span class="gw-v" data-gw-price></span></li>
+                <li data-gw-k="magneetcontact_dc23" data-gw-qty="2"><span class="gw-q">2×</span><span class="gw-n">Magneetcontact</span><span class="gw-v" data-gw-price></span></li>
+                <li class="gw-onreq"><span class="gw-q">1×</span><span class="gw-n">Locatiesensor</span><span class="gw-v">Op aanvraag, uw adviseur neemt dit mee</span></li>
+              </ul>
+              <button type="button" class="gw-add" data-gw-add="beschermd" data-zv-event="grotere_woning_set" data-cta-name="voeg_set_toe" data-solution-type="beschermd">Voeg set toe</button>
+              <span class="gw-done" data-gw-done hidden>Toegevoegd aan uw setup</span>
+            </div>
+            <div class="gw-set" data-gw-set="protect">
+              <div class="gw-set-h"><b>Protect</b><span>Per extra verdieping</span></div>
+              <ul class="gw-items">
+                <li data-gw-k="foto_bewegingsdetector_868" data-gw-qty="1"><span class="gw-q">1×</span><span class="gw-n">Fotobewegingsmelder</span><span class="gw-v" data-gw-price></span></li>
+                <li data-gw-k="magneetcontact_dc23" data-gw-qty="1"><span class="gw-q">1×</span><span class="gw-n">Deurcontact</span><span class="gw-v" data-gw-price></span></li>
+              </ul>
+              <button type="button" class="gw-add" data-gw-add="protect" data-zv-event="grotere_woning_set" data-cta-name="voeg_set_toe" data-solution-type="protect">Voeg set toe</button>
+              <span class="gw-done" data-gw-done hidden>Toegevoegd aan uw setup</span>
+            </div>
+          </div>
+          <p class="gw-note">Prijzen zijn eenmalig (kopen). Bestellen gaat via een kort telefoongesprek of een terugbelverzoek, zoals alles op deze pagina.</p>
+        </div>
         <div class="cat-head">
           <span class="step-n">2</span>
           <h2>Kies uw camerahardware</h2>
@@ -267,6 +306,34 @@
     document.getElementById('ccDone').style.display='flex';
   });
 
+  /* Grotere woning (#grotere-woning): each set item points at an HW row by its k (data-gw-k)
+     and shows that row's koop price x its quantity; the locatiesensor has no row (op aanvraag).
+     "Voeg set toe" adds the mapped rows to state.lines as Kopen, on top of what is there, so
+     the existing summary, "Bel om te bestellen" and the callback carry them. No second cart. */
+  var gw=document.getElementById('grotere-woning');
+  if(gw){
+    gw.querySelectorAll('[data-gw-k]').forEach(function(li){
+      var h=HW.find(function(x){return x.k===li.getAttribute('data-gw-k');}), q=parseInt(li.getAttribute('data-gw-qty'),10)||1;
+      var v=li.querySelector('[data-gw-price]'); if(h && v) v.textContent=euro(h.koop*q);
+    });
+    gw.addEventListener('click',function(e){
+      var btn=e.target.closest('[data-gw-add]'); if(!btn) return;
+      var set=btn.closest('[data-gw-set]');
+      set.querySelectorAll('[data-gw-k]').forEach(function(li){
+        var k=li.getAttribute('data-gw-k'), q=parseInt(li.getAttribute('data-gw-qty'),10)||1;
+        if(!HW.some(function(x){return x.k===k;})) return;
+        var l=state.lines[k]||{mode:'koop',qty:0}; l.mode='koop'; l.qty+=q; state.lines[k]=l;
+      });
+      renderRows(); renderSummary();
+      var done=set.querySelector('[data-gw-done]'); if(done) done.hidden=false;
+    });
+    // ?pakket=beschermd|protect (the Oplossingen Climax cards' "Uitbreiding hardware" link):
+    // highlight that package's set and bring the block into view.
+    var want=(new URLSearchParams(location.search).get('pakket')||'').toLowerCase();
+    var hl=(want==='beschermd'||want==='protect') && gw.querySelector('[data-gw-set="'+want+'"]');
+    if(hl){ hl.classList.add('is-hl'); gw.scrollIntoView({block:'start'}); }
+  }
+
   renderRows(); renderSummary();
 })();
 </script>
@@ -294,6 +361,27 @@
 .zv-camera .lede p { font-size:16.5px; font-weight:600; color:var(--muted); margin-top:12px; max-width:640px; line-height:1.5; }
 .zv-camera .shop { display:grid; grid-template-columns:1fr 340px; gap:26px; padding:clamp(28px,3.4vw,44px) 0 80px; align-items:start; }
 @media(max-width:920px){ .zv-camera .shop { grid-template-columns:1fr; } }
+/* Grotere woning (2026-09-25): extra sensor sets for Beschermd and Protect, above the product rows. */
+.zv-camera .gw { background:var(--paper); border:1.5px solid var(--line); border-radius:16px; padding:clamp(18px,2.2vw,24px); margin-bottom:28px; scroll-margin-top:110px; }
+.zv-camera .gw h2 { font-size:clamp(19px,2.2vw,24px); font-weight:900; color:var(--indigo); letter-spacing:-.015em; line-height:1.15; margin:0; }
+.zv-camera .gw-lead { font-size:14px; font-weight:600; color:var(--muted); line-height:1.5; margin:8px 0 0; max-width:640px; }
+.zv-camera .gw-sets { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+@media(max-width:680px){ .zv-camera .gw-sets { grid-template-columns:1fr; } }
+.zv-camera .gw-set { display:flex; flex-direction:column; gap:12px; background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; transition:border-color .14s,box-shadow .14s,background .14s; }
+.zv-camera .gw-set.is-hl { border-color:var(--indigo); background:var(--indigo-soft); box-shadow:0 10px 26px -18px rgba(50,36,105,.6); }
+.zv-camera .gw-set-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.zv-camera .gw-set-h b { font-size:16px; font-weight:900; color:var(--indigo); }
+.zv-camera .gw-set-h span { font-size:11px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); }
+.zv-camera .gw-items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+.zv-camera .gw-items li { display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:baseline; font-size:13.5px; font-weight:700; color:#3a3550; }
+.zv-camera .gw-q { color:var(--muted); font-weight:800; }
+.zv-camera .gw-v { font-weight:800; color:var(--belt); white-space:nowrap; text-align:right; }
+.zv-camera .gw-onreq .gw-v { white-space:normal; color:var(--muted); font-size:12px; font-weight:700; max-width:150px; }
+.zv-camera .gw-add { align-self:flex-start; font-family:inherit; font-size:14px; font-weight:800; color:#fff; background:var(--indigo); border:none; border-radius:9px; padding:10px 16px; cursor:pointer; transition:background .14s; }
+.zv-camera .gw-add:hover { background:var(--indigo-2); }
+.zv-camera .gw-done { font-size:12px; font-weight:800; color:var(--ok); }
+.zv-camera .gw-done[hidden] { display:none; }
+.zv-camera .gw-note { font-size:12px; font-weight:600; color:var(--muted); line-height:1.5; margin:14px 0 0; }
 .zv-camera .cat-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
 .zv-camera .step-n { width:30px; height:30px; border-radius:50%; background:var(--indigo); color:#fff; font-size:14px; font-weight:900; display:grid; place-items:center; flex:none; }
 .zv-camera .cat-head h2 { font-size:clamp(19px,2.2vw,25px); font-weight:900; color:var(--indigo); letter-spacing:-.015em; }
