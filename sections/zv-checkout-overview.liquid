@@ -31,11 +31,16 @@
     in the required radio group below);
   - cart_needs_fix: a package line at a quantity other than zv_promo_package_qty, a second
     line for the same package, an installation line (CL003 or a NAMI variant) at a quantity
-    other than 1, or the Climax installation line in a cart with no Climax package —
-    zv-cart-guard corrects all of these and reloads;
+    other than 1, the Climax installation line in a cart with no Climax package, or a Climax
+    package line that still carries a Woning property — zv-cart-guard corrects all of these
+    and reloads;
   - cart_pkg_undiscounted: a package line that carries no discount at all (e.g. the Shopify
     discount was deactivated). The guard can't fix that, and a customer must never pay 3
-    full months, so checkout stays blocked with a contact message instead.
+    full months, so checkout stays blocked with a contact message instead;
+  - cart_woning_bad (only when the Woning line's product resolves, 2026-09-25): the Woning
+    line's quantity isn't zv_promo_package_qty x the NAMI floors (or it's split over several
+    lines), it carries no discount, or its unit price isn't zv_woning_unit_cents. Same
+    contact message: never overcharge for Woning.
   The gate reflects the cart at render time, so on click the button also re-reads /cart.js
   and reloads this page instead of navigating to /checkout when the cart no longer matches
   data-cart-sig or zv-cart-guard's rules (window.zvCartGuard.planFix) find a fix.
@@ -50,6 +55,25 @@
   assign nami_install_geen_variant_id = all_products[zv_nami_install_geen_handle].selected_or_first_available_variant.id
   assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id
   assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id
+
+  comment
+    Woning line (2026-09-25, NAMI packages only): resolved by handle, only if its first
+    variant's SKU is zv_woning_sku. Unresolved, woning_variant_id stays nil and the page keeps
+    the property-only behaviour: no Woning row, no Woning gate.
+  endcomment
+  assign woning_variant_id = nil
+  assign woning_product = all_products[zv_woning_handle]
+  if zv_woning_handle != blank and woning_product != blank and woning_product.id != blank and woning_product.variants.first.sku == zv_woning_sku
+    assign woning_variant_id = woning_product.variants.first.id
+  endif
+  assign woning_applies_list = zv_woning_applies_handles | split: '|'
+  assign woning_label = ''
+  assign woning_line_count = 0
+  assign woning_line_qty = 0
+  assign woning_line_undiscounted = false
+  assign woning_line_price_off = false
+  assign nami_woning_floors = 0
+  assign cart_woning_bad = false
   assign today_cents = 0
   assign true_month_cents = 0
   assign install_line_item = nil
@@ -103,6 +127,23 @@
     assign today_cents = today_cents | plus: item.final_line_price
 
     comment
+      The Woning line: counted in today_cents above like every line, never in "Daarna" (the
+      NAMI package lines' Woning property carries the surcharge there). Collected for the gate:
+      how many lines, their quantity, whether the promo discount reached it, and whether its
+      unit price is the config's unit (never charge more than zv_woning_unit_cents per floor).
+    endcomment
+    if woning_variant_id != blank and item.variant_id == woning_variant_id
+      assign woning_line_count = woning_line_count | plus: 1
+      assign woning_line_qty = woning_line_qty | plus: item.quantity
+      if item.final_line_price >= item.original_line_price
+        assign woning_line_undiscounted = true
+      endif
+      if item.original_price != zv_woning_unit_cents
+        assign woning_line_price_off = true
+      endif
+    endif
+
+    comment
       A package line: product type sub_type plus one of the 5 purchasable finder_keys.
     endcomment
     assign item_pkg_fk = blank
@@ -115,15 +156,34 @@
 
     if item_pkg_fk != blank
       comment
-        Woning surcharge (spec §7): a property only, never a priced line, so Shopify charges
-        nothing for it today. Odoo bills it from month 4 with the package, so it counts in
-        "Daarna" (+zv_woning_unit_cents per floor) and in the ICV below. zv-woning-floors
-        reads the legacy "Groter dan 100 m²…" value as 1 floor.
+        Woning surcharge (spec §7; NAMI only since 2026-09-25): the Woning property on a NAMI
+        package line (zv_woning_applies_handles). Its first 3 months are the Woning line, charged
+        today; Odoo bills it from month 4 with the package, so it counts in "Daarna"
+        (+zv_woning_unit_cents per floor) and in the ICV below. zv-woning-floors reads the
+        legacy "Groter dan 100 m²…" value as 1 floor. A Climax line never counts it: a legacy
+        Woning there is something zv-cart-guard deletes, so checkout waits (cart_needs_fix).
       endcomment
-      capture item_woning_floors
-        render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix
-      endcapture
-      assign item_woning_floors = item_woning_floors | strip | plus: 0
+      assign item_woning_floors = 0
+      if woning_applies_list contains item.product.handle
+        capture item_woning_floors
+          render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix
+        endcapture
+        assign item_woning_floors = item_woning_floors | strip | plus: 0
+        if item_woning_floors == 2
+          assign item_woning_label = zv_woning_2_value
+        elsif item_woning_floors == 1
+          assign item_woning_label = zv_woning_1_value
+        endif
+        if item_woning_floors > 0
+          if woning_label != ''
+            assign woning_label = woning_label | append: ' + '
+          endif
+          assign woning_label = woning_label | append: item_woning_label
+        endif
+      elsif item.properties['Woning'] != blank
+        assign cart_needs_fix = true
+      endif
+      assign nami_woning_floors = nami_woning_floors | plus: item_woning_floors
       assign item_woning_cents = zv_woning_unit_cents | times: item_woning_floors
       if item_pkg_fk == 'aware' or item_pkg_fk == 'aware_plus' or item_pkg_fk == 'secure'
         assign has_nami_pkg = true
@@ -173,12 +233,31 @@
   if has_activation_line and has_climax_pkg == false
     assign cart_needs_fix = true
   endif
+
+  comment
+    cart_woning_bad (next to cart_pkg_undiscounted, same contact message), only when the Woning
+    line resolves: its quantity isn't pkg_qty x the NAMI floors (or it's split over several
+    lines), it carries no discount, or its unit price isn't zv_woning_unit_cents. The last one
+    means the Shopify product's price differs from the config; never overcharge for it.
+  endcomment
+  if woning_variant_id != blank
+    assign woning_target_qty = nami_woning_floors | times: zv_promo_package_qty
+    if woning_line_qty != woning_target_qty or woning_line_count > 1
+      assign cart_woning_bad = true
+    endif
+    if woning_line_count > 0 and woning_line_undiscounted
+      assign cart_woning_bad = true
+    endif
+    if woning_line_count > 0 and woning_line_price_off
+      assign cart_woning_bad = true
+    endif
+  endif
   assign cart_checkout_blocked = false
-  if cart_needs_activation or cart_needs_fix or cart_pkg_undiscounted
+  if cart_needs_activation or cart_needs_fix or cart_pkg_undiscounted or cart_woning_bad
     assign cart_checkout_blocked = true
   endif
 -%}
-{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, pkg_qty: zv_promo_package_qty, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle -%}
+{%- render 'zv-cart-guard', activation_variant_id: activation_variant_id, sub_type: sub_type, nami_geen_variant_id: nami_install_geen_variant_id, nami_telefonisch_variant_id: nami_install_telefonisch_variant_id, nami_huis_variant_id: nami_install_huis_variant_id, pkg_qty: zv_promo_package_qty, inzicht_handle: zv_inzicht_handle, zeker_handle: zv_zeker_handle, beschermd_handle: zv_beschermd_handle, alert_handle: zv_alert_handle, protect_handle: zv_protect_handle, woning_variant_id: woning_variant_id, woning_v1: zv_woning_1_value, woning_v2: zv_woning_2_value, woning_legacy: zv_woning_legacy_prefix, woning_applies: zv_woning_applies_handles -%}
 {%- liquid
 
   comment
@@ -193,6 +272,8 @@
   assign distinct_pkg_fk_count = distinct_pkg_fks | split: '|' | size
   assign pkg_available = false
   assign pkg_install_group = 'climax'
+  assign pkg_woning_icv_1 = 0
+  assign pkg_woning_icv_2 = 0
   if pkg_line_item != nil and distinct_pkg_fk_count == 1
     case pkg_item_fk
       when 'aware'
@@ -219,8 +300,6 @@
         assign pkg_term = zv_beschermd_term
         assign pkg_icv = zv_beschermd_icv
         assign pkg_icv_cents_base = zv_beschermd_icv_cents
-        assign pkg_woning_icv_1 = zv_beschermd_woning_1_icv_cents
-        assign pkg_woning_icv_2 = zv_beschermd_woning_2_icv_cents
         assign pkg_meldkamer = true
       when 'secure'
         assign pkg_available = true
@@ -237,8 +316,6 @@
         assign pkg_term = zv_protect_term
         assign pkg_icv = zv_protect_icv
         assign pkg_icv_cents_base = zv_protect_icv_cents
-        assign pkg_woning_icv_1 = zv_protect_woning_1_icv_cents
-        assign pkg_woning_icv_2 = zv_protect_woning_2_icv_cents
         assign pkg_meldkamer = true
     endcase
   endif
@@ -266,10 +343,12 @@
   endif
 
   comment
-    Woning surcharge in the ICV: the build's per-package value for 1 or 2 floors,
-    zv_woning_unit_cents x floors x (termMonths - 3), i.e. the months after the 3 prepaid
-    ones (Thijs 2026-09-24). Only when the package line carries a Woning choice, so a cart
-    without one keeps the pre-formatted pkg_icv string untouched.
+    Woning surcharge in the ICV (NAMI packages only): the build's per-package value for 1 or 2
+    floors, floors x (3 x half_up(zv_woning_unit_cents x 50%) + zv_woning_unit_cents x
+    (termMonths - 3)): the Woning line's 3 prepaid months at what they cost today plus the
+    months Odoo bills (Thijs 2026-09-25). Only when the NAMI package line carries a Woning
+    choice, so a cart without one keeps the pre-formatted pkg_icv string untouched. Climax
+    packages have no Woning contract value (pkg_woning_floors stays 0 for them).
   endcomment
   assign pkg_woning_icv_cents = 0
   if pkg_available and pkg_woning_floors == 1
@@ -326,6 +405,22 @@
               </div>
               <div class="ovitems">
                 {%- for item in cart.items -%}
+                  {%- if woning_variant_id != blank and item.variant_id == woning_variant_id -%}
+                    {%- comment -%} The Woning line: one non-editable row, "Woning: <option value>" from the NAMI package lines' Woning values (never the product title), at its real final_line_price. {%- endcomment -%}
+                    <div class="ovitem ovitem--woning">
+                      <div class="ovi-thumb">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 11l9-7 9 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </div>
+                      <div>
+                        <div class="ovi-name">Woning{% if woning_label != '' %}: {{ woning_label | escape }}{% endif %}</div>
+                        <div class="ovi-meta">Eerste {{ zv_promo_months }} maanden vooruit, daarna in het maandbedrag van uw pakket</div>
+                      </div>
+                      <div class="ovi-right">
+                        <div class="ovi-price">{{ item.final_line_price | money }}</div>
+                      </div>
+                    </div>
+                    {%- continue -%}
+                  {%- endif -%}
                   {%- assign is_sub = false -%}
                   {%- if item.product.type == sub_type or item.product.tags contains sub_tag -%}{%- assign is_sub = true -%}{%- endif -%}
                   {%- comment -%} Package and installation lines show their pricing.config.json name (package via finder_key, installation via handle), never the Shopify product title. {%- endcomment -%}
@@ -354,7 +449,11 @@
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                       {%- if is_sub -%}
                         <div class="ovi-meta">Eerste {{ item.quantity }} maanden vooruit, {{ zv_promo_badge }}</div>
-                        {%- capture ovi_wf -%}{%- render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix -%}{%- endcapture -%}
+                        {%- comment -%} Woning meta on NAMI package lines only; a Climax line's Woning is ignored. {%- endcomment -%}
+                        {%- assign ovi_wf = 0 -%}
+                        {%- if woning_applies_list contains item.product.handle -%}
+                          {%- capture ovi_wf -%}{%- render 'zv-woning-floors', value: item.properties['Woning'], v1: zv_woning_1_value, v2: zv_woning_2_value, legacy: zv_woning_legacy_prefix -%}{%- endcapture -%}
+                        {%- endif -%}
                         {%- assign ovi_wf = ovi_wf | strip | plus: 0 -%}
                         {%- if ovi_wf > 0 -%}
                           {%- if ovi_wf == 2 -%}{%- assign ovi_wl = zv_woning_2_value -%}{%- else -%}{%- assign ovi_wl = zv_woning_1_value -%}{%- endif -%}
@@ -459,7 +558,12 @@
                           assign row_pkg_name = row_pkg_name | strip
                         endif
                       endif
-                      if activation_variant_id != blank and item.variant_id == activation_variant_id
+                      if woning_variant_id != blank and item.variant_id == woning_variant_id
+                        assign row_label = 'Woning'
+                        if woning_label != ''
+                          assign row_label = 'Woning: ' | append: woning_label | escape
+                        endif
+                      elsif activation_variant_id != blank and item.variant_id == activation_variant_id
                         assign row_label = zv_label_activation
                       elsif nami_install_geen_variant_id != blank and item.variant_id == nami_install_geen_variant_id
                         assign row_label = zv_nami_install_geen_label
@@ -529,7 +633,7 @@
             </div>
 
             <div class="ovcard ovconsent">
-              {%- if cart_pkg_undiscounted -%}
+              {%- if cart_pkg_undiscounted or cart_woning_bad -%}
                 <div class="ovconsent-err" data-ov-needs-activation role="alert">Er ging iets mis met uw bestelling. Neem contact op via 088 122 11 11.</div>
               {%- elsif cart_needs_activation -%}
                 <div class="ovconsent-err" data-ov-needs-activation role="alert">Er ontbreekt een onderdeel van uw bestelling (activatie en installatie). We herstellen dit automatisch — ververs de pagina als dit blijft staan.</div>

@@ -43,7 +43,8 @@ in the theme, it must go through Overzicht the same way; grep for a literal `/ch
 outside `sections/zv-checkout-overview.liquid` itself as a quick regression check.
 
 **A package must never reach checkout in any shape other than "package × 3 + one installation
-line"** (see **Pricing pipeline** below). Enforced twice, since nothing stops a line being changed
+line"**, plus, for NAMI packages with a Woning choice, one Woning line (N0008) at 3 x the floors
+(see **Pricing pipeline** below). Enforced twice, since nothing stops a line being changed
 after the fact or a package reaching the cart through an unexpected route:
 - **Client-side:** `snippets/zv-cart-guard.liquid` (rendered on `/cart` and `/cart?view=overzicht`)
   checks the live cart on load, fixes one thing and reloads:
@@ -51,17 +52,28 @@ after the fact or a package reaching the cart through an unexpected route:
   - a duplicate package line is removed;
   - an installation line is reset to quantity 1;
   - a **climax** package gets the Climax installation line (CL003) added;
-  - CL003 is removed from a cart without a climax package.
+  - CL003 is removed from a cart without a climax package;
+  - (lowest priority, since 2026-09-25) the **Woning line** (N0008, see **Pricing pipeline**) is
+    kept at `pkg_qty` x the floors over the NAMI package lines' `Woning` properties: several
+    lines are merged into one, a wrong quantity is set, target 0 removes it, and a legacy NAMI
+    cart with Woning but no line gets it added;
+  - a **climax** package line that still carries a `Woning` property (legacy carts) has it
+    deleted via `/cart/change.js`, quantity kept. A legacy `Abonnement` property is left alone.
 
   It never picks one of the three **nami** install options on the customer's behalf; that's
-  the customer's choice in the required radio group on Overzicht.
+  the customer's choice in the required radio group on Overzicht. The Woning line never
+  matches the package or installation rules (product type `NAMI_abonnementen`, not
+  `Beveiligingsabonnement`).
 - **Server-side:** `zv-checkout-overview.liquid` disables the checkout button while any of
   these is true:
   - `cart_needs_activation`: an installation line is missing;
-  - `cart_needs_fix`: something the guard is still fixing;
+  - `cart_needs_fix`: something the guard is still fixing (including Woning on a climax line);
   - `cart_pkg_undiscounted`: a package line carries no discount at all. The guard can't fix
     that, so checkout stays blocked with a contact message. A customer must never pay 3 full
-    months.
+    months;
+  - `cart_woning_bad` (only when the N0008 product resolves, same contact message): the Woning
+    line's quantity isn't `pkg_qty` x the NAMI floors, it carries no discount, or its unit
+    `original_price` isn't `zv_woning_unit_cents`. Never overcharge for Woning.
 
 **Known limitation: both checks run in the theme, so any route to Shopify checkout that skips
 Overzicht bypasses them.** A cart permalink (`/cart/<variant>:<qty>`) and typing or bookmarking
@@ -96,6 +108,14 @@ none of them carry `abonnement`:
 | Mijn Thuis Vista | `mijn-thuis-vista` | Beveiligingsabonnement | keuzehulp, Mijn Thuis | `secure_plus` | MT-VIS |
 | Veilig Onderweg Paniek Meldkamer | `veilig-onderweg-paniek-meldkamer` | Beveiligingsabonnement | keuzehulp, prijs-volgt, Veilig Onderweg | `liogo_solo` | — |
 | Veilig Onderweg Zorgmeldkamer | `veilig-onderweg-zorgmeldkamer` | Beveiligingsabonnement | keuzehulp, prijs-volgt, Veilig Onderweg | `liogo_guard` | — |
+| Extra etage of >100m2 (the Woning line, not a package) | `extra-etage-of-100m2` | NAMI_abonnementen | — | — | N0008 |
+
+N0008 (created in Shopify Admin on 2026-09-25, not from this repo): one variant, inventory
+**untracked**, published to the Online Store. It is the priced Woning line for the NAMI packages
+only (see **Pricing pipeline**), resolved by `surcharges[extra-etage].shopify` handle + SKU.
+Preflight 2026-09-25: its price is **€40,00** (the config unit is €4,00) and it is **not** in the
+"Eerste 3 maanden" discount yet; Overzicht blocks checkout on both (`cart_woning_bad`). See
+`docs/woning-n0008-line-2026-09-25.md`.
 
 Installation products (2026-09-23): NAMI `geen-installatie-nami` N0006 €0,
 `telefonische-ondersteuning-installatie-nami` N0005 €35, `installatie-nami` N0004 €99 (customer
@@ -109,7 +129,10 @@ to N000x, renamed titles to "Nami …", **dropped `custom.finder_key`** from the
 and they can't be added to a cart). After any product swap, check read-only (Admin API) on **all
 sold products**: `custom.finder_key` on all 5 packages (`aware` / `aware_plus` / `care` /
 `secure` / `guard`) and `inventoryItem.tracked == false` on every package and installation
-product. Fixing either is a product change — flag it to Thijs, never make it from here.
+product and on N0008. Fixing either is a product change — flag it to Thijs, never make it from here.
+(It happened again: on 2026-09-25 N0001-N0003 were `tracked: true` with DENY and stock <= 0,
+last updated 2026-09-24 13:51 UTC, so the three NAMI cards rendered without a buy button, on
+live too.)
 
 **Packages come from pricing.config.json handles, never from a collection or its tags.**
 Since `fix/packages-by-handle` (2026-09-24), the Oplossingen cards in
@@ -187,7 +210,8 @@ and `snippets/zv-item-names.liquid` (committed, generated — don't hand-edit). 
 file carries an independent literal price or duration; CI runs both on every push/PR.
 
 **HARD RULE (Thijs, 2026-09-23): never create products.** The only products sold on this site
-are the 5 packages and their installation products listed in `docs/prepay-qty3-2026-09-23.md`.
+are the 5 packages and their installation products listed in `docs/prepay-qty3-2026-09-23.md`,
+plus the Woning line N0008 (created in Shopify Admin on 2026-09-25, never from here).
 Odoo's contract automation keys off these products, and every new Shopify product becomes a stub
 product in Odoo (the retired PROMO-* products left a `PROMO-ZEK` stub there). Never create
 products, and never modify products or the "Eerste 3 maanden" discount from this repo either. If
@@ -233,6 +257,38 @@ renames products ("Nami Langer Thuis Zeker", "Nami Geen Instalatie") and can do 
 Use these on any surface that shows a product name. GA4 `item_id` stays the SKU. **Shopify's own
 checkout page and order e-mails show the Shopify product title** (the formal Odoo name). That's
 intended (Thijs, 2026-09-23); don't work around it in the theme.
+
+**Woning surcharge: NAMI only, collected by one priced N0008 line (Thijs, 2026-09-25).** It
+supersedes "property only, never a priced line" (2026-09-24). `surcharges[extra-etage]` holds the
+unit (400 cents), `shopify` {handle `extra-etage-of-100m2`, sku N0008}, `appliesTo` (Inzicht,
+Zeker, Alert handles; `check_pricing.py` fails on a Climax package there) and `woning` (heading,
+the two option values, the legacy prefix).
+- The `Woning` line-item property on a NAMI package line is unchanged (same values, same legacy
+  prefix, same three writers in `sections/oplossingen.liquid`): the per-package record for Odoo.
+- The cart also carries ONE N0008 line at `promo.months` x the floors over all NAMI package lines
+  (1 floor = 3, 2 floors = 6, none = no line). It is meant to be in the "Eerste 3 maanden"
+  discount, so a floor costs 3 x half_up(400 x 50%) = 600 cents today; Odoo bills 400 per floor
+  per month from month 4.
+- `build_pricing.py` emits `zv_woning_handle`, `zv_woning_sku`, `zv_woning_applies_handles` and,
+  for the NAMI packages only, `zv_<pakket>_woning_<n>_icv_cents` = n x (3 x half_up(unit x rate)
+  + unit x (term - 3)): +4200 / +8400. There are no Climax Woning assigns.
+- The theme resolves N0008 with `all_products[zv_woning_handle]` and checks its first variant's SKU.
+  Unresolved: property only, no line, no Woning gate, one `console.warn` on Oplossingen.
+- Oplossingen: `syncWoningLine(cart)` (card add, where N0008 rides in the same `/cart/add.js`
+  items array right after the package; modal add/buy; the drawer's Woning choice and remove)
+  applies one add/change/remove. The drawer never shows N0008 as a row.
+- `/cart` and Overzicht show it as one non-editable row "Woning: <option value>"; its
+  `final_line_price` counts in "Vandaag te betalen", while "Daarna" and the ICV keep counting
+  the surcharge from the NAMI property only (never the line too). Woning on a Climax line is
+  ignored there and deleted by the guard.
+- No theme file outside the generated snippets names the N0008 SKU or handle (`check_pricing.py`).
+
+**Climax packages (Beschermd, Protect) have no Woning and no Uitbreidingen panel** (Thijs,
+2026-09-25). Their Oplossingen cards show "Uitbreiding hardware" (link to
+`/pages/camera-hardware?pakket=beschermd|protect#grotere-woning`) plus a hint in `.ltc__links`
+instead, and so does their Meer informatie modal. The hardware page's `#grotere-woning` block
+lists the extra sensors per verdieping, mapped to its HW rows. So Beschermd and Protect no longer
+offer the Ontzorgpakket either. The NAMI cards keep the panel, byte-identical.
 
 **Activation fee** (`activation` in the config) is the **Climax** installation product:
 `climax-instalatie`, CL003, €99, since 2026-09-23 (it replaced `activatie-en-installatie` /

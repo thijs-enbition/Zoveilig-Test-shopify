@@ -1,5 +1,10 @@
 # Woning surcharge: research (Prompt 4, spec §7)
 
+> **Superseded in part (2026-09-25):** Woning is now NAMI only and is also collected by one
+> priced N0008 cart line; Beschermd and Protect have no Woning. See
+> `docs/woning-n0008-line-2026-09-25.md`. The property, its values and its writers below are
+> unchanged.
+
 Research for **Prompt 4**, `docs/pakket-wijzigingen-2026-09-23.md` §7 "Woning surcharge", done
 before any change on branch `feature/woning-surcharge-2026-09-23`.
 
