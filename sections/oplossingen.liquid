@@ -33,6 +33,20 @@
 
 {%- include 'zv-pricing' -%}
 {%- assign activation_variant_id = all_products[zv_activation_handle].selected_or_first_available_variant.id -%}
+{%- comment -%}
+  Woning line (2026-09-25): the priced cart line for the Woning surcharge, NAMI packages only
+  (zv_woning_applies_handles). Resolved like the packages: all_products[zv_woning_handle], and
+  only if its first variant's SKU is zv_woning_sku. Unresolved, woning_variant_id stays nil and
+  the page falls back to the Woning property alone (no line), with one console.warn.
+{%- endcomment -%}
+{%- liquid
+  assign woning_variant_id = nil
+  assign woning_product = all_products[zv_woning_handle]
+  if zv_woning_handle != blank and woning_product != blank and woning_product.id != blank and woning_product.variants.first.sku == zv_woning_sku
+    assign woning_variant_id = woning_product.variants.first.id
+  endif
+  assign woning_applies_list = zv_woning_applies_handles | split: '|'
+-%}
 {%- assign partners = shop.metaobjects.partner.values | where: 'active', true | sort: 'display_order' -%}
 {%- assign sols = section.blocks | where: 'type', 'solution' -%}
 {%- comment -%}
@@ -49,7 +63,7 @@
 <script src="{{ 'zv-vergelijk-pakketten.js' | asset_url }}" defer="defer"></script>
 
 {%- if sols.size > 0 -%}
-<div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}" data-cart-url="{{ routes.cart_url }}">
+<div class="opl-page" id="oplossingen-page" data-zv-oplossingen data-activation-variant-id="{{ activation_variant_id }}" data-woning-variant-id="{{ woning_variant_id }}" data-cart-url="{{ routes.cart_url }}">
 
   <div class="catnav" role="tablist" aria-label="Onze oplossingen">
     <span class="catnav__lbl">Onze oplossingen</span>
@@ -280,6 +294,21 @@
               {%- if fk == 'aware' or fk == 'aware_plus' or fk == 'care' or fk == 'secure' or fk == 'guard' -%}
                 {%- assign use_ltc = true -%}
               {%- endif -%}
+              {%- comment -%}
+                Woning is NAMI only (Thijs, 2026-09-25): only a card whose product handle is in
+                zv_woning_applies_handles (Inzicht, Zeker, Alert) keeps the Uitbreidingen panel
+                (Woning + Extra diensten), byte-identical to before. The Climax cards (Beschermd,
+                Protect) have no Uitbreidingen panel: in its place, in the same .ltc__links row, an
+                "Uitbreiding hardware" link to the hardware page's #grotere-woning block, where the
+                extra sensors per verdieping live, plus one hint line. So the cart drawer finds no
+                addons/terms group to clone for them and readCardOptions() writes no Woning,
+                Abonnement or Uitbreidingen property. The if / elsif / endif tags around the panel
+                below carry no whitespace control on purpose: that keeps the NAMI cards' output
+                byte-identical.
+              {%- endcomment -%}
+              {%- assign offers_woning = false -%}{%- if woning_applies_list contains p.handle -%}{%- assign offers_woning = true -%}{%- endif -%}
+              {%- assign climax_pakket = '' -%}
+              {%- case fk -%}{%- when 'care' -%}{%- assign climax_pakket = 'beschermd' -%}{%- when 'guard' -%}{%- assign climax_pakket = 'protect' -%}{%- endcase -%}
               {%- if use_ltc -%}
                 <article class="pcard pcard--ltc{% if popular %} pop{% endif %}" data-odoo-sku="{{ v.sku }}"
                          data-zv-event="package_view" data-solution-type="{{ anchor }}" data-solution-name="{{ b.settings.eyebrow | escape }}" data-package-name="{{ short_name | escape }}"
@@ -365,7 +394,7 @@
                             {%- endif -%}
                           </div>
                         </details>
-                        <details class="ltc__uitbreidingen">
+                        {% if offers_woning %}<details class="ltc__uitbreidingen">
                           <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
                           <div class="ltc__panel">
                             {%- comment -%}
@@ -408,7 +437,8 @@
                               <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                             </div>
                           </div>
-                        </details>
+                        </details>{% elsif climax_pakket != blank %}<a class="ltc__hwlink" href="/pages/camera-hardware?pakket={{ climax_pakket }}#grotere-woning" data-zv-event="climax_hardware_link" data-cta-name="uitbreiding_hardware" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}">Uitbreiding hardware<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                        <p class="pcard__plus-hint ltc__hwhint">Grotere woning of meer verdiepingen? U breidt uit met extra sensoren, zonder toeslag per maand.</p>{% endif %}
                       {%- endif -%}
                       {%- comment -%} Kept as its own separate, untouched feature alongside "Wat zit erin?" — see functional mapping doc's "Meer informatie" decision. {%- endcomment -%}
                       <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
@@ -499,9 +529,20 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
-          {%- comment -%} Any anchor whose grid has at least one ltc-branch card gets this footnote — the "Woning groter dan 100 m²?" +€4/mnd option in "Wat zit erin?" is shared markup, not Langer-Thuis-specific (now also true for Mijn Thuis Alert/Protect, 2026-09-14). {%- endcomment -%}
+          {%- comment -%}
+            Footnote under the Langer Thuis and Mijn Thuis grids. Since 2026-09-25 (Thijs) the Woning
+            surcharge applies to the NAMI packages only (Inzicht, Zeker, Alert); Beschermd and
+            Protect are extended with extra sensors via the hardware page. Package names come from
+            pricing.config.json via zv-package-name, the amount from zv_woning_unit_cents; the rest
+            of the line (lease/koop, installatie, bedenktijd) is unchanged.
+          {%- endcomment -%}
           {%- if anchor == 'langer-thuis' or anchor == 'mijn-thuis' -%}
-            <p class="ltc__footnote">Alle abonnementen: +{{ zv_woning_unit_cents | money_without_trailing_zeros }}/mnd per extra verdieping of per 100 m² extra woonoppervlak. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
+            {%- capture fn_inzicht -%}{%- render 'zv-package-name', finder_key: 'aware', names: zv_package_names_by_fk -%}{%- endcapture -%}
+            {%- capture fn_zeker -%}{%- render 'zv-package-name', finder_key: 'aware_plus', names: zv_package_names_by_fk -%}{%- endcapture -%}
+            {%- capture fn_alert -%}{%- render 'zv-package-name', finder_key: 'secure', names: zv_package_names_by_fk -%}{%- endcapture -%}
+            {%- capture fn_beschermd -%}{%- render 'zv-package-name', finder_key: 'care', names: zv_package_names_by_fk -%}{%- endcapture -%}
+            {%- capture fn_protect -%}{%- render 'zv-package-name', finder_key: 'guard', names: zv_package_names_by_fk -%}{%- endcapture -%}
+            <p class="ltc__footnote">Alleen bij {{ fn_inzicht | strip }}, {{ fn_zeker | strip }} en {{ fn_alert | strip }}: +{{ zv_woning_unit_cents | money_without_trailing_zeros }}/mnd per extra verdieping of per 100 m² extra woonoppervlak. {{ fn_beschermd | strip }} en {{ fn_protect | strip }} breidt u uit met extra sensoren. Apparatuur zit in uw maandbedrag (lease) of koopt u los. Alles wordt vakkundig geïnstalleerd. U hebt 14 dagen bedenktijd na levering.</p>
           {%- endif -%}
         {%- elsif request.design_mode -%}
           <p class="ph-sub" style="text-align:center;">Koppel de collectie "{{ b.settings.collection }}".</p>
@@ -702,7 +743,10 @@
     Shopify-productkaart; deze data levert alleen de beschrijvende inhoud.
     plus.items (2026-09-24): what each extra verdieping adds, shown under the modal's Woning
     options. The options and their prices come from pricing.config.json (#zv-pricing-config),
-    not from here; the five buyable packages carry no plus.price any more.
+    not from here; the five buyable packages carry no plus.price any more. Since 2026-09-25
+    only the NAMI packages (aware, aware_plus, secure) have plus: care and guard (Beschermd,
+    Protect) have no Woning, their extra sensors per verdieping moved to the hardware page
+    (sections/camera-hardware.liquid, #grotere-woning).
   {%- endcomment -%}
   <script type="application/json" id="opl-modal-data">
   {
@@ -729,9 +773,9 @@
     "pkg": {
       "aware": {"name":"Inzicht","plat":"","hook":"Weet dat de dag normaal en veilig is begonnen.","sub":"3x activiteiten sensor · 1x deur/raamsensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Begrijp aanwezigheid, routines en dagelijkse activiteit, op schaal van de hele woning.","body":"Inzicht biedt een basislaag van algemeen activiteitsinzicht: of iemand thuis, actief of weg is, en hoe het dagritme in de loop van de tijd verandert. Dankzij wifi-sensing dekt Inzicht grote leefruimtes niet-intrusief, zonder een sensor per kamer. Geïnstalleerd in ~10 minuten, zonder technische kennis.","idealFor":"Teleassistentie, mantelzorg-apps, verzekeraars en instap-inzichtdiensten die snel en schaalbaar willen uitrollen.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"]]}},
       "aware_plus": {"name":"Zeker","plat":"","hook":"Zie subtiele veranderingen vóór het misgaat.","sub":"3x activiteiten sensor · 1x deur/raamsensor · 2x locatiesensor · geen meldkamer","tier":[{"id":"wifisensor","qty":3,"name":"Activiteiten sensor"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"familieapp"}],"plus":{"items":["1 sensor","2 pluggen"]},"info":{"introTitle":"Dieper inzicht in Activiteiten van het Dagelijks Leven, rust en gezondheidssignalen.","body":"Zeker bouwt voort op Inzicht en voegt inzicht op kamerniveau en gedragsintelligentie toe, waarmee subtiele veranderingen in rustpatronen, badkamergebruik en nachtelijke routines vroeg worden opgemerkt. Ondanks die diepgang blijft Zeker opmerkelijk eenvoudig uit te rollen. Geïnstalleerd in ~15 minuten, inclusief sensoren op kamerniveau, nog steeds zonder training.","idealFor":"Professionele zorgdiensten, publieke programma’s en geavanceerde zorgtechnologieplatformen die ADL-inzicht willen, zonder ADL-complexiteit.","deployment":[["3× activiteiten sensor","~100 m² / 1.200 ft² dekking"],["Deur/raamsensor","per toegangspunt"],["2× locatiesensor","voor slaapkamer en badkamer, uitbreidbaar"]]}},
-      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}],"plus":{"items":["1 rookmelder","2 magneetcontacten en 1 locatiesensor"]}},
+      "care": {"name":"Beschermd","plat":"","hook":"Complete bescherming met 24/7 meldkamer.","sub":"1x centrale · 1x codebedienpaneel · 2x deur/raamsensor · 2x locatiesensor · 2x rookmelder · 3x paniekknop naar keuze · incl. meldkamer","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"pir","qty":2,"name":"Locatiesensor"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"rook","qty":2,"name":"Rookmelder"},{"id":"paniek","qty":3,"name":"Paniekknop naar keuze"},{"id":"zorgmeld"},{"id":"familieapp"}]},
       "secure": {"name":"Alert","plat":"","hook":"Slim alarm dat u zelf in de gaten houdt.","sub":"1x centrale/sirene · 1x activiteiten sensor · 1x bewegingsmelder · 1x deur/raamsensor · 1x codebedienpaneel · geen meldkamer of camera","tier":[{"id":"alarmpod","name":"Centrale/sirene"},{"id":"senseplug","name":"Activiteiten sensor"},{"id":"pir","name":"Bewegingsmelder"},{"id":"deursensor","name":"Deur/raamsensor"},{"id":"codepaneel","name":"Codebedienpaneel"}],"plus":{"items":["1 activiteiten sensor","1 sensor"]}},
-      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}],"plus":{"items":["1 fotobewegingsmelder","1 deurcontact"]}},
+      "guard": {"name":"Protect","plat":"","hook":"Alarm met 24/7 meldkamer die meekijkt.","sub":"1x centrale · 1x codebedienpaneel · 1x rookmelder · 1x fotobewegingsmelder · 2x deur/raamsensor · incl. meldkamer, camera optioneel","tier":[{"id":"hub","name":"Centrale"},{"id":"codepaneel","name":"Codebedienpaneel"},{"id":"rook","name":"Rookmelder"},{"id":"pir","name":"Fotobewegingsmelder"},{"id":"deursensor","qty":2,"name":"Deur/raamsensor"},{"id":"meldkamer"}]},
       "secure_plus": {"name":"Vista","plat":"Alarm.com · camerabeveiliging","hook":"Camerabeveiliging op maat, na een vrijblijvend adviesgesprek. Meldkamer optioneel.","sub":"Zie wat er gebeurt. Weet wat ertoe doet.","noPrice":true,"tier":[{"id":"alarmhub"},{"id":"cam_in"},{"id":"cam_out"},{"id":"deurbel2"},{"id":"meldkamer","name":"24/7 Securitas meldkamer (optioneel)"}],"plus":{"price":"+€4 p/m","items":["1 PIR","1 deurcontact"]}},
       "liogo_solo": {"name":"Paniek Meldkamer","plat":"LioGo","hook":"Eén druk verbindt u met de meldkamer.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"meldkamer"}]},
       "liogo_guard": {"name":"Zorgmeldkamer","plat":"LioGo","hook":"24/7 zorgprofessionals regelen opvolging.","sub":"Prijs en specificaties volgen","tier":[{"id":"gpsknop"},{"id":"valdetectie"},{"id":"zorgmeld"}]}
@@ -901,6 +945,15 @@
 .ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
 .ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
 .ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
+/* "Uitbreiding hardware" (2026-09-25): on the Climax cards (Beschermd, Protect) it takes the
+   Uitbreidingen button's place in .ltc__links, so it gets that button's look (white fill,
+   1.5px var(--line-2) border, 6px radius, 46px, 14.5px/800 indigo, cream/indigo hover), with a
+   right arrow instead of the chevron because it opens another page. The hint under it is the
+   existing .pcard__plus-hint text style, centred like the buttons. */
+.pcard .ltc__cta .ltc__hwlink { box-sizing: border-box; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; background: #fff; border: 1.5px solid var(--line-2); border-radius: 6px; font-size: 14.5px; font-weight: 800; line-height: 1; color: var(--indigo); text-decoration: none; transition: background 0.15s, border-color 0.15s; }
+.pcard .ltc__cta .ltc__hwlink:hover { background: var(--cream); border-color: var(--indigo); color: var(--indigo); }
+.pcard .ltc__cta .ltc__hwlink svg { width: 14px; height: 14px; }
+.pcard .ltc__cta .ltc__hwhint { text-align: center; line-height: 1.45; }
 .ltc__panel { text-align: left; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
 .ltc__optgroup { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .ltc__optgroup:first-child { border-top: none; padding-top: 0; margin-top: 0; }
@@ -1070,6 +1123,13 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
 .pbd-plus-t span:first-child { font-size: 13px; font-weight: 700; color: #4a4458; }
 .pbd-plus-pr { font-size: 13px; font-weight: 900; color: var(--belt); white-space: nowrap; }
 .pbd-plus-items { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+/* Climax packages (2026-09-25): the modal shows the card's "Uitbreiding hardware" link and hint
+   instead of a Woning box, in the same sand block. */
+.pbd-hw { margin-top: 12px; padding: 13px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.pbd-hw .ltc__hwlink { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 800; color: var(--indigo); text-decoration: none; }
+.pbd-hw .ltc__hwlink:hover { color: var(--belt); }
+.pbd-hw .ltc__hwlink svg { width: 15px; height: 15px; }
+.pbd-hw .ltc__hwhint { margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.4; }
 .pbd-soon { display: flex; gap: 10px; margin-top: 16px; background: var(--indigo-soft); border: 1px solid #e2ddf1; border-radius: 8px; padding: 13px 14px; color: var(--indigo); }
 .pbd-soon svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
 .pbd-soon span { font-size: 12.5px; font-weight: 600; color: #4a4458; line-height: 1.45; }
@@ -1426,23 +1486,86 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     return (WONING.legacyValuePrefix && v.indexOf(WONING.legacyValuePrefix) === 0) ? 1 : 0;
   }
 
+  /* Woning line (2026-09-25, Thijs): NAMI packages only. WONING.appliesTo (product handles) and
+     appliesToFinderKeys come from surcharges[extra-etage].appliesTo; nothing else ever carries
+     Woning. Besides the property on the package line, the cart holds ONE line of the Woning
+     product (resolved server-side by handle + SKU into data-woning-variant-id, never a hardcoded
+     id) at PKG_QTY x the floors over all NAMI package lines: 1 floor = 3, 2 floors = 6, none = no
+     line. Without a resolved variant the page keeps the property-only behaviour: no line. */
+  var WONING_VARIANT_ID = page.dataset.woningVariantId || null;
+  var WONING_APPLIES = WONING.appliesTo || [];
+  var WONING_APPLIES_FK = WONING.appliesToFinderKeys || [];
+  if (!WONING_VARIANT_ID && WONING.options.length) {
+    try { console.warn('zv: Woning product not resolved (handle or SKU); Woning stays a line property only, without its priced line.'); } catch (e) {}
+  }
+  function woningAppliesHandle(handle) { return WONING_APPLIES.indexOf(handle) !== -1; }
+  function woningAppliesFk(fk) { return WONING_APPLIES_FK.indexOf(fk) !== -1; }
+  function isWoningLine(it) { return !!WONING_VARIANT_ID && String(it.variant_id) === String(WONING_VARIANT_ID); }
+  // Target quantity of the Woning line: PKG_QTY x the floors over the NAMI package lines only.
+  function woningTargetQty(items) {
+    var floors = 0;
+    (items || []).forEach(function (it) { if (woningAppliesHandle(it.handle)) floors += woningFloors((it.properties || {})['Woning']); });
+    return PKG_QTY * floors;
+  }
+  /* The one request that brings the Woning line to its target, or null when it's right:
+     several lines -> merged into one at the target (update.js by line key); none -> added;
+     wrong quantity -> set (0 removes it). */
+  function woningLinePlan(cart) {
+    if (!WONING_VARIANT_ID || !PKG_QTY) return null;
+    var items = (cart && cart.items) || [];
+    var target = woningTargetQty(items);
+    var lines = items.filter(isWoningLine);
+    if (lines.length > 1) {
+      var merge = {};
+      lines.forEach(function (it, i) { merge[it.key] = i === 0 ? target : 0; });
+      return { url: '/cart/update.js', body: { updates: merge } };
+    }
+    if (!lines.length) return target > 0 ? { url: '/cart/add.js', body: { items: [{ id: WONING_VARIANT_ID, quantity: target }] } } : null;
+    if (lines[0].quantity !== target) return { url: '/cart/change.js', body: { id: lines[0].key, quantity: target } };
+    return null;
+  }
+  /* Shared by the card add, the modal add/buy, the drawer's Woning choice and the drawer's
+     remove: apply woningLinePlan(cart) and resolve with the fresh cart. A failed write resolves
+     with the cart as it was; the cart guard on /cart and Overzicht corrects it, and Overzicht
+     blocks checkout until the line is right. */
+  function syncWoningLine(cart) {
+    var plan = woningLinePlan(cart);
+    if (!plan) return Promise.resolve(cart);
+    return window.fetch(plan.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(plan.body) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (res) {
+        // add.js answers with the added items, change.js and update.js with the whole cart.
+        return plan.url === '/cart/add.js' ? window.fetch('/cart.js').then(function (r) { return r.json(); }) : res;
+      })
+      .catch(function () { return cart; });
+  }
+
   /* A package goes in the cart as the real package product at quantity PKG_QTY (the 3
      prepaid months); Shopify's automatic "Eerste 3 maanden" discount takes 50% off that
      line by itself. A CLIMAX package also gets the Climax installation line (qty 1); a
      NAMI package never does, its installation is chosen on Overzicht. A package that is
      already in the cart is not added again (that would make it 6 months) — only a missing
      installation line is. No PKG_QTY (pricing config missing) fails closed: nothing is
-     added. See CLAUDE.md Pricing pipeline. */
+     added. A NAMI package with a Woning choice brings the Woning line along in the same
+     /cart/add.js items array, right after it (PKG_QTY x its floors); syncWoningLine() then
+     corrects the line against the whole cart. Woning is never written for any other
+     package: this is the one place both the card and the modal add through. See CLAUDE.md
+     Pricing pipeline. */
   function addToCart(variantId, properties, mode, btn, finderKey) {
     if (!variantId || !PKG_QTY || (btn && btn.dataset.busy === '1')) return;
     var label = '';
     if (btn) { btn.dataset.busy = '1'; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); label = btn.innerHTML; btn.dataset.label = label; }
     var errEl = btn && btn.parentNode && btn.parentNode.querySelector('.pcard__err'); if (errEl) errEl.remove();
     var isClimax = (PKG_BY_FK[finderKey] || {}).installGroup === 'climax';
+    if (properties && !woningAppliesFk(finderKey)) delete properties['Woning'];
+    var addFloors = properties ? woningFloors(properties['Woning']) : 0;
     return window.fetch('/cart.js').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (cart) {
       var inCart = function (id) { return (cart.items || []).some(function (it) { return String(it.variant_id) === String(id); }); };
       var items = [];
-      if (!inCart(variantId)) items.push({ id: variantId, quantity: PKG_QTY, properties: properties || {} });
+      if (!inCart(variantId)) {
+        items.push({ id: variantId, quantity: PKG_QTY, properties: properties || {} });
+        if (WONING_VARIANT_ID && addFloors > 0) items.push({ id: WONING_VARIANT_ID, quantity: PKG_QTY * addFloors });
+      }
       if (isClimax && activationVariantId && !inCart(activationVariantId)) items.push({ id: activationVariantId, quantity: 1 });
       if (!items.length) return { ok: true, json: function () { return { items: [] }; } };
       return window.fetch('/cart/add.js', {
@@ -1461,10 +1584,14 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         var itemPrice = staticCents ? (staticCents / 100) : ((line && line.price) ? line.price / 100 : undefined);
         if (ZV && ZV.addToCart) ZV.addToCart({ item_id: (properties && properties['SKU']) || (line && line.sku), item_name: properties && properties['Pakket'], item_brand: 'Zo Veilig', price: itemPrice, quantity: 1 }, { cta_location: (btn && btn.getAttribute('data-cta-position')) || 'oplossingen' });
         if (btn) { btn.dataset.busy = ''; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = btn.dataset.label || label; }
-        if (mode === 'checkout') { window.location.href = overzichtUrl; return; }
-        return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+        return window.fetch('/cart.js').then(function (r) { return r.json(); }).then(syncWoningLine).then(function (cart) {
+          if (mode === 'checkout') { window.location.href = overzichtUrl; return; }
           updateCartCount(cart);
           openCart(cart);
+        }, function (err) {
+          // The package is in the cart; Overzicht's guard and gate take it from there.
+          if (mode === 'checkout') { window.location.href = overzichtUrl; return; }
+          throw err;
         });
       })
       .catch(function () {
@@ -1495,12 +1622,15 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     e.textContent = 'Bijwerken mislukt. Probeer het opnieuw.';
   }
 
-  /* Serialise cart writes so overlapping toggles cannot race; revert the control on failure. */
-  function cartWrite(url, payload, revert) {
+  /* Serialise cart writes so overlapping toggles cannot race; revert the control on failure.
+     `after` (optional) runs on the written cart and resolves with the cart to render, e.g.
+     syncWoningLine after a Woning property write; the write stays serialised until it's done. */
+  function cartWrite(url, payload, revert, after) {
     if (cartWriting) { if (revert) revert(); return; }
     cartWriting = true;
     window.fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (cart) { return after ? after(cart) : cart; })
       .then(function (cart) { cartWriting = false; updateCartCount(cart); renderCart(cart, true); })
       .catch(function () { cartWriting = false; if (revert) revert(); showCartError(); });
   }
@@ -1541,10 +1671,10 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var full = (p['Oplossing'] ? esc(p['Oplossing']) + ' · ' : '') + esc(pkgName);
     var pkg = pkgName || 'item';
     var isActivation = String(it.variant_id) === String(activationVariantId);
-    // Woning only on a line whose package card offers it (the five package cards), never on an
-    // installation line or anything else: no reader counts Woning there. A legacy value reads
-    // as 1 floor.
-    var offersWoning = !isActivation && !!(card && card.querySelector('[data-group="woning"]')) && WONING.options.length > 0;
+    // Woning only on a NAMI package line (WONING.appliesTo) whose card offers it, never on a
+    // Climax package (its card has no Woning group since 2026-09-25), an installation line or
+    // anything else: no reader counts Woning there. A legacy value reads as 1 floor.
+    var offersWoning = !isActivation && woningAppliesHandle(it.handle) && !!(card && card.querySelector('[data-group="woning"]')) && WONING.options.length > 0;
     var woningLevel = offersWoning ? woningFloors(p['Woning']) : 0;
     // A package line holds the 3 prepaid months (quantity 3); its "/mnd" figure is the
     // line's UNIT price before the discount — the plain monthly rate — never unit x 3, plus
@@ -1618,7 +1748,10 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var prev = 0;
     if (preserveScroll) { var old = cartEl.querySelector('.addcart__scroll'); if (old) prev = old.scrollTop; }
     cartState = cart;
-    var items = (cart && cart.items) || [];
+    // The Woning line is never a row of its own here (no quantity, no remove, no Woning control,
+    // no "/mnd"): the NAMI package row already shows its monthly price plus the surcharge and
+    // carries the Woning choice, and syncWoningLine() keeps the line in step with it.
+    var items = ((cart && cart.items) || []).filter(function (it) { return !isWoningLine(it); });
     var list = items.map(cartRowHtml).join('');
     var n = items.length;   // number of line items (== cards shown), per spec
     var count = n + (n === 1 ? ' item in winkelwagen' : ' items in winkelwagen');
@@ -1677,6 +1810,8 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       cartWriting = true; rm.disabled = true;
       window.fetch('/cart/change.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: rm.getAttribute('data-cart-remove'), quantity: 0 }) })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        // A removed NAMI package takes its floors off the Woning line (none left: the line goes).
+        .then(syncWoningLine)
         .then(function (cart) {
           cartWriting = false; updateCartCount(cart);
           if (cart.item_count === 0) { closeCart(); }
@@ -1698,18 +1833,20 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
       var wboxes = wgroup ? [].slice.call(wgroup.querySelectorAll('[data-zv-line-woning]')) : [woning];
       var line = null, its = (cartState && cartState.items) || [];
       for (var i = 0; i < its.length; i++) { if (its[i].key === key) { line = its[i]; break; } }
-      if (!line) { woning.checked = !on; return; }
+      // Only a NAMI package line ever takes Woning (the control is only rendered there).
+      if (!line || !woningAppliesHandle(line.handle)) { woning.checked = !on; return; }
       var props = {}, lp = line.properties || {};
       for (var k in lp) { if (lp.hasOwnProperty(k)) props[k] = lp[k]; }
       // One choice: checking an option writes its value (and unchecks the other); unchecking
-      // the checked one removes the property. A failed write restores the stored level.
+      // the checked one removes the property. A failed write restores the stored level. After
+      // the property write, syncWoningLine brings the Woning line to the new floors.
       var wvalue = on ? woningValue(parseInt(woning.getAttribute('data-woning-floors'), 10)) : '';
       if (wvalue) props['Woning'] = wvalue; else delete props['Woning'];
       var wprev = woningFloors(lp['Woning']);
       wboxes.forEach(function (b) { if (b !== woning) b.checked = false; b.disabled = true; });
       cartWrite('/cart/change.js', { id: key, quantity: line.quantity, properties: props }, function () {
         wboxes.forEach(function (b) { b.checked = parseInt(b.getAttribute('data-woning-floors'), 10) === wprev; b.disabled = false; });
-      });
+      }, syncWoningLine);
       return;
     }
     var lineOpt = e.target.closest('.addcart__lineopts .pcard__plus-opt input');
@@ -1763,9 +1900,9 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
         var opt = inp.closest('.pcard__plus-opt');
         var name = opt && opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : '';
         if (!name) return;
-        // Woning: the exact property value for the checked option's level. The tile copy's
-        // single checkbox (no data-woning-floors) means 1 floor.
-        if (group === 'woning') out.woning = woningValue(parseInt(inp.getAttribute('data-woning-floors'), 10) || 1);
+        // Woning: the exact property value for the checked option's level, NAMI cards only
+        // (WONING.appliesTo). The tile copy's single checkbox (no data-woning-floors) means 1 floor.
+        if (group === 'woning') { if (woningAppliesHandle(card.getAttribute('data-product-handle'))) out.woning = woningValue(parseInt(inp.getAttribute('data-woning-floors'), 10) || 1); }
         else if (group === 'terms') out.terms.push(name);
         else out.addons.push(name);
       });
@@ -1896,10 +2033,15 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     }
 
     var items = (pk.tier || []).map(itemHtml).join('');
-    // Woning: the question, one checkbox per option (value and price from the config island,
-    // one choice, see the change handler below) and what each extra verdieping adds.
+    // Woning (NAMI packages only): the question, one checkbox per option (value and price from
+    // the config island, one choice, see the change handler below) and what each extra
+    // verdieping adds. A Climax package (Beschermd, Protect) has no Woning: it shows its card's
+    // "Uitbreiding hardware" link and hint instead (same href and data-* hooks).
     var plusHtml = '';
-    if (pk.plus && buyable && WONING.options.length) {
+    var hwLink = card.querySelector('.ltc__hwlink'), hwHint = card.querySelector('.ltc__hwhint');
+    if (buyable && !woningAppliesFk(fk) && hwLink) {
+      plusHtml = '<div class="pbd-hw">' + hwLink.outerHTML + (hwHint ? hwHint.outerHTML : '') + '</div>';
+    } else if (pk.plus && buyable && WONING.options.length && woningAppliesFk(fk)) {
       plusHtml = '<div class="pbd-plus" role="group" aria-labelledby="pbd-woning-h"><div class="pbd-plus-h" id="pbd-woning-h">' + esc(WONING.heading) + '</div>' +
         WONING.options.map(function (o) {
           return '<label class="pbd-plus-row"><input type="checkbox" data-pb-woning="' + esc(o.floors) + '">' +
@@ -1995,7 +2137,7 @@ body.zv-drawer-open { position: fixed; left: 0; right: 0; width: 100%; overflow:
     var actor = add || buy;
     if (actor && activePanel) {
       var fk = scrim.dataset.fk, card = cardByFk(activePanel, fk), d = card ? card.dataset : {}, pk = DATA.pkg[fk] || {};
-      var woningIn = scrim.querySelector('[data-pb-woning]:checked');
+      var woningIn = woningAppliesFk(fk) ? scrim.querySelector('[data-pb-woning]:checked') : null;
       var woningVal = woningIn ? woningValue(parseInt(woningIn.getAttribute('data-pb-woning'), 10)) : '';
       var props = {
         'Pakket': pk.name || d.packageName || '', 'SKU': d.packageSku || '',
