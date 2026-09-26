@@ -57,6 +57,16 @@
   assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id
 
   comment
+    Videodeurbel/Afstandsbediening add-on lines (2026-09-26): resolved by handle only, never a
+    hardcoded variant id or price. Used only for the itemized breakdown's row label below (the
+    "Uw pakket en configuratie" listing already gets the clean name generically via
+    zv-install-name/zv_install_names_by_handle) — these two never take part in any checkout gate,
+    unlike the package/installation/Woning lines above.
+  endcomment
+  assign zv_addon_videodeurbel_variant_id = all_products['koop-video-deurbel-750'].variants.first.id
+  assign zv_addon_afstandsbediening_variant_id = all_products['huur-afstandsbediening'].variants.first.id
+
+  comment
     Woning line (2026-09-25, NAMI packages only): resolved by handle, only if its first
     variant's SKU is zv_woning_sku. Unresolved, woning_variant_id stays nil and the page keeps
     the property-only behaviour: no Woning row, no Woning gate.
@@ -444,7 +454,9 @@
                       {%- comment -%} Installation lines (CL003 and the 3 NAMI options) always read "Installatie": Odoo sets their product type (e.g. "All"), which isn't customer copy. {%- endcomment -%}
                       {%- assign ovi_is_install = false -%}
                       {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign ovi_is_install = true -%}{%- endif -%}
-                      {%- if ovi_is_install -%}<span class="ovi-line">Installatie</span>{%- elsif item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
+                      {%- assign ovi_is_addon = false -%}
+                      {%- if item.variant_id == zv_addon_videodeurbel_variant_id or item.variant_id == zv_addon_afstandsbediening_variant_id -%}{%- assign ovi_is_addon = true -%}{%- endif -%}
+                      {%- if ovi_is_install -%}<span class="ovi-line">Installatie</span>{%- elsif ovi_is_addon -%}<span class="ovi-line">Uitbreiding</span>{%- elsif item.product.type != blank -%}<span class="ovi-line">{{ item.product.type | escape }}</span>{%- endif -%}
                       <div class="ovi-name">{{ item_name | escape }}</div>
                       {%- unless item.variant.title contains 'Default' -%}<div class="ovi-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                       {%- if is_sub -%}
@@ -571,6 +583,10 @@
                         assign row_label = zv_nami_install_telefonisch_label
                       elsif nami_install_huis_variant_id != blank and item.variant_id == nami_install_huis_variant_id
                         assign row_label = zv_nami_install_huis_label
+                      elsif zv_addon_videodeurbel_variant_id != blank and item.variant_id == zv_addon_videodeurbel_variant_id
+                        assign row_label = 'Videodeurbel'
+                      elsif zv_addon_afstandsbediening_variant_id != blank and item.variant_id == zv_addon_afstandsbediening_variant_id
+                        assign row_label = 'Afstandsbediening'
                       elsif row_pkg_name != blank
                         assign row_label = row_pkg_name | append: ' × ' | append: item.quantity | append: ' — ' | append: zv_label_commitment
                       endif

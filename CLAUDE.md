@@ -296,6 +296,16 @@ ACT-INSTALL, which no longer exists). It is resolved by handle (`all_products[zv
 never a hardcoded variant id, for Beschermd/Protect only. NAMI packages use
 `installationOptions.nami` instead, chosen by the customer on Overzicht.
 
+**Videodeurbel (ADC-750, `koop-video-deurbel-750`) and Afstandsbediening (H0010,
+`huur-afstandsbediening`)** are real Shopify products with a live-priced checkbox in the
+Uitbreidingen accordion on every package card except Vista (Beschermd/Protect get a minimal
+version of the accordion, no Woning/Ontzorgpakket). Checking one keeps one shared cart line at
+`zv_promo_package_qty`, same discount mechanic as Woning. Both were confirmed "sold out"
+(inventory tracked, DENY, stock <= 0) on 2026-09-26 — the checkbox and its live price still
+work, but no line can be added until that's fixed in Shopify Admin. Clean names come from a
+name-only `addonNames` array in pricing.config.json (deliberately not the pre-existing
+`addons[]` array, which hardcodes a price). See `docs/uitbreidingen-checkboxes-2026-09-26.md`.
+
 **Package identity comes from the package line**: `product.type == "Beveiligingsabonnement"`
 plus its `custom.finder_key` (Liquid), or product type + handle in the Cart AJAX guard, which
 can't see metafields. It drives Overzicht's contract duration, ICV, consent copy and nami-vs-climax
