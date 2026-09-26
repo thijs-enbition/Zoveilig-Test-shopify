@@ -11,16 +11,21 @@ Protect):
 
 Both resolved live from `all_products[handle]` in `sections/oplossingen.liquid` (never a
 hardcoded price, variant id or purchase type) via the existing `ltc_addons` mechanism that
-was already built for exactly this (see the comment above `ltc_addons` in that file). Beschermd
-and Protect (Climax) keep their existing "Uitbreiding hardware →" link and get a new **minimal**
-Uitbreidingen accordion holding only these two checkboxes — never Woning or Ontzorgpakket,
-which still don't apply to Climax pricing (Thijs, 2026-09-25 decision, unchanged). Vista is
+was already built for exactly this (see the comment above `ltc_addons` in that file). Vista is
 skipped entirely: it has no real add-to-cart (lead-capture only), so a priced checkbox there
 would have nothing to attach to.
 
-A new **"Extra uitbreidingen →"** link (reusing the existing `.ltc__hwlink` markup/style) sits
-under the accordion on all 5 cards, linking to
-`/pages/camera-hardware?pakket={inzicht|zeker|beschermd|alert|protect}#grotere-woning`.
+**Corrected 2026-09-26** (Thijs saw the first version live and it was wrong — three stacked
+buttons on Climax doing overlapping things): there is no "Extra uitbreidingen" link anywhere
+any more. Beschermd and Protect (Climax) get a **single** Uitbreidingen accordion: the two
+checkboxes first, then — as the panel's last row, below a divider — their existing "Uitbreiding
+hardware →" link, folded in from what used to be a separate button after the accordion. That
+accordion renders even if no add-on resolves (unlike the NAMI one, which has nothing else to
+show without at least Woning), since the hardware link alone still needs somewhere to live.
+NAMI cards (Inzicht, Zeker, Alert) are unchanged from before this correction: their existing
+accordion (Woning + the two checkboxes + Ontzorgpakket) is all they get — no hardware-style
+link inside or outside it; a generic "browse more add-ons" link never fit a NAMI package to
+begin with.
 
 Checking a box keeps ONE shared priced cart line for that product in the cart, at quantity
 `zv_promo_package_qty` (3) — the same qty-3/"Eerste 3 maanden" discount mechanic the Woning

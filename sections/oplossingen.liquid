@@ -199,18 +199,18 @@
               {%- assign fk = p.metafields.custom.finder_key.value -%}
               {%- assign tile = '' -%}{%- assign sub = '' -%}{%- assign popular = false -%}{%- assign term = '' -%}
               {%- comment -%}
-                pakket_slug/climax_pakket (2026-09-26): the /pages/camera-hardware?pakket=…
-                slug for the "Extra uitbreidingen"/"Uitbreiding hardware" links below, folded
-                into this existing case block rather than a separate one — same 6 branches.
-                climax_pakket stays blank for the 3 NAMI packages and Vista/Veilig Onderweg.
+                climax_pakket (2026-09-26): the /pages/camera-hardware?pakket=… slug for the
+                "Uitbreiding hardware" link inside the Climax accordion below, folded into this
+                existing case block rather than a separate one — same 6 branches. Stays blank
+                for the 3 NAMI packages and Vista/Veilig Onderweg.
               {%- endcomment -%}
-              {%- assign pakket_slug = '' -%}{%- assign climax_pakket = '' -%}
+              {%- assign climax_pakket = '' -%}
               {%- case fk -%}
-                {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}{%- assign pakket_slug = 'inzicht' -%}
-                {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}{%- assign pakket_slug = 'zeker' -%}
-                {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}{%- assign pakket_slug = 'beschermd' -%}{%- assign climax_pakket = 'beschermd' -%}
-                {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}{%- assign pakket_slug = 'alert' -%}
-                {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}{%- assign pakket_slug = 'protect' -%}{%- assign climax_pakket = 'protect' -%}
+                {%- when 'aware' -%}{%- assign tile = 'opl-tile-01.jpg' -%}{%- assign sub = 'NAMI aiAware · 3 wifi-sensorstekkers + 1 deursensor · geen meldkamer' -%}{%- assign term = zv_inzicht_term -%}
+                {%- when 'aware_plus' -%}{%- assign tile = 'opl-tile-02.jpg' -%}{%- assign popular = true -%}{%- assign sub = 'NAMI aiCare · 3 wifi-sensorstekkers (~100 m²), deursensor per toegang en 2 bewegingsmelders voor slaapkamer en badkamer (uitbreidbaar) · geen meldkamer' -%}{%- assign term = zv_zeker_term -%}
+                {%- when 'care' -%}{%- assign tile = 'opl-tile-03.jpg' -%}{%- assign sub = 'Climax · 1 centrale, 2 deur-/raamsensoren, 2 bewegingsmelders, keuze uit 3 paniekknoppen en 2 rookmelders · incl. meldkamer' -%}{%- assign term = zv_beschermd_term -%}{%- assign climax_pakket = 'beschermd' -%}
+                {%- when 'secure' -%}{%- assign sub = 'NAMI Alarm15 · Alarm Pod, SensePlug, PIR, deursensor en codepaneel · geen meldkamer of camera' -%}{%- assign term = zv_alert_term -%}
+                {%- when 'guard' -%}{%- assign popular = true -%}{%- assign sub = 'Climax · hub, codepaneel, rookmelder, PIR en deurcontact · incl. meldkamer, camera optioneel' -%}{%- assign term = zv_protect_term -%}{%- assign climax_pakket = 'protect' -%}
                 {%- when 'secure_plus' -%}
                   {%- comment -%}
                     Vista, 2026-09-15: product-photo tile image removed (was
@@ -324,16 +324,19 @@
                 zv_woning_applies_handles (Inzicht, Zeker, Alert) keeps the full Uitbreidingen
                 panel (Woning + Uitbreidingen toevoegen + Extra diensten), byte-identical to
                 before. The Climax cards (Beschermd, Protect) still have no Woning and no Extra
-                diensten (Ontzorgpakket): in their place, in the same .ltc__links row, an
-                "Uitbreiding hardware" link to the hardware page's #grotere-woning block, plus
-                (since 2026-09-26) a MINIMAL Uitbreidingen accordion holding only the real,
-                live-priced add-ons (Videodeurbel, Afstandsbediening) — so the cart drawer now
-                does find an addons group to clone for a Climax card too, and readCardOptions()
-                can write an Uitbreidingen property there, just never Woning or Abonnement. The
-                opening if and the elsif around the panel below carry no whitespace control on
-                purpose, and the closing endif does: that keeps the NAMI cards' output
-                byte-identical (a whitespace-only text token that a whitespace-control tag empties
-                gets its first byte back in Shopify's Liquid).
+                diensten (Ontzorgpakket): they get their OWN single Uitbreidingen accordion
+                instead — the real, live-priced add-ons (Videodeurbel, Afstandsbediening) first,
+                then, as the panel's last row (2026-09-26, folded in from what was a separate
+                "Uitbreiding hardware" button, per Thijs's mockup feedback), the link to the
+                hardware page's #grotere-woning block. So the cart drawer now does find an
+                addons group to clone for a Climax card too, and readCardOptions() can write an
+                Uitbreidingen property there, just never Woning or Abonnement. This accordion
+                renders for Climax even with no add-ons resolved (unlike NAMI, whose panel has
+                nothing to show without at least Woning) — the hardware link alone is reason
+                enough for the panel to exist. The opening if and the elsif around the panel
+                below carry no whitespace control on purpose, and the closing endif does: that
+                keeps the NAMI cards' output byte-identical (a whitespace-only text token that a
+                whitespace-control tag empties gets its first byte back in Shopify's Liquid).
               {%- endcomment -%}
               {%- assign offers_woning = false -%}{%- if woning_applies_list contains p.handle -%}{%- assign offers_woning = true -%}{%- endif -%}
               {%- comment -%}
@@ -466,12 +469,27 @@
                               <label class="pcard__plus-opt"><input type="checkbox"><span>Ontzorgpakket</span><span class="pcard__plus-pr">Prijs volgt</span></label>
                             </div>
                           </div>
-                        </details>{% elsif climax_pakket != blank %}{% if ltc_addons_group_html != blank %}<details class="ltc__uitbreidingen">
+                        </details>{% elsif climax_pakket != blank %}<details class="ltc__uitbreidingen">
                           <summary>Uitbreidingen<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-                          <div class="ltc__panel">{{ ltc_addons_group_html }}</div>
-                        </details>{% endif %}<a class="ltc__hwlink" href="/pages/camera-hardware?pakket={{ climax_pakket }}#grotere-woning" data-zv-event="climax_hardware_link" data-cta-name="uitbreiding_hardware" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}">Uitbreiding hardware<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                          <div class="ltc__panel">
+                            {{ ltc_addons_group_html }}
+                            {%- comment -%}
+                              "Uitbreiding hardware" (2026-09-26): folded into this panel as its
+                              last row, below the checkboxes — a plain .ltc__optgroup wrapper
+                              (no data-group, it holds no checkbox) gets it the same automatic
+                              top-border divider every other group in this panel already has via
+                              CSS (.ltc__optgroup + .ltc__optgroup), so no separate divider
+                              markup is needed. This <details> must still render for a Climax
+                              card even when ltc_addons_group_html is blank (unlike the NAMI
+                              branch above): the hardware link needs the panel to exist either
+                              way, and it's the only thing Beschermd/Protect show here now — no
+                              separate "Extra uitbreidingen" button any more (removed 2026-09-26,
+                              Thijs: redundant with this link, and never fit NAMI at all).
+                            {%- endcomment -%}
+                            <div class="ltc__optgroup"><a class="ltc__hwlink" href="/pages/camera-hardware?pakket={{ climax_pakket }}#grotere-woning" data-zv-event="climax_hardware_link" data-cta-name="uitbreiding_hardware" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}">Uitbreiding hardware<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+                          </div>
+                        </details>
                         {%- endif -%}
-                        {%- if pakket_slug != blank -%}<a class="ltc__hwlink" href="/pages/camera-hardware?pakket={{ pakket_slug }}#grotere-woning" data-zv-event="extra_uitbreidingen_link" data-cta-name="extra_uitbreidingen" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}">Extra uitbreidingen<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>{%- endif -%}
                       {%- endif -%}
                       {%- comment -%} Kept as its own separate, untouched feature alongside "Wat zit erin?" — see functional mapping doc's "Meer informatie" decision. {%- endcomment -%}
                       <button type="button" class="ltc__more" data-zv-detail data-finder-key="{{ fk }}" data-product-url="{{ p.url }}" data-zv-event="package_detail_open" data-solution-type="{{ anchor }}" data-package-sku="{{ v.sku }}" data-cta-name="meer_informatie" data-cta-position="{{ anchor }}_paks" aria-haspopup="dialog">Meer informatie</button>
@@ -978,11 +996,12 @@
 .ltc__watzit summary::-webkit-details-marker, .ltc__uitbreidingen summary::-webkit-details-marker { display: none; }
 .ltc__watzit summary svg, .ltc__uitbreidingen summary svg { width: 14px; height: 14px; transition: transform 0.2s; }
 .ltc__watzit[open] summary svg, .ltc__uitbreidingen[open] summary svg { transform: rotate(180deg); }
-/* "Uitbreiding hardware" (2026-09-25): on the Climax cards (Beschermd, Protect) it takes the
-   Uitbreidingen button's place in .ltc__links, so it gets that button's look (white fill,
-   1.5px var(--line-2) border, 6px radius, 46px, 14.5px/800 indigo, cream/indigo hover), with a
-   right arrow instead of the chevron because it opens another page. The hint under it is the
-   existing .pcard__plus-hint text style, centred like the buttons. */
+/* "Uitbreiding hardware" (2025-09-25, moved inside the Climax Uitbreidingen panel 2026-09-26):
+   it keeps its own button look (white fill, 1.5px var(--line-2) border, 6px radius, 46px,
+   14.5px/800 indigo, cream/indigo hover) even nested in .ltc__panel, since this selector only
+   requires it be somewhere inside .ltc__cta, with a right arrow instead of the chevron because
+   it opens another page. The hint under it is the existing .pcard__plus-hint text style,
+   centred like the buttons. */
 .pcard .ltc__cta .ltc__hwlink { box-sizing: border-box; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; background: #fff; border: 1.5px solid var(--line-2); border-radius: 6px; font-size: 14.5px; font-weight: 800; line-height: 1; color: var(--indigo); text-decoration: none; transition: background 0.15s, border-color 0.15s; }
 .pcard .ltc__cta .ltc__hwlink:hover { background: var(--cream); border-color: var(--indigo); color: var(--indigo); }
 .pcard .ltc__cta .ltc__hwlink svg { width: 14px; height: 14px; }
