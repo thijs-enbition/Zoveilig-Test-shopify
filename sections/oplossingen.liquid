@@ -257,7 +257,7 @@
               {%- assign ltc_tagline = '' -%}{%- assign ltc_intro = '' -%}{%- assign ltc_bullets = '' -%}{%- assign ltc_icon = '' -%}
               {%- assign ltc_meldkamer = '' -%}{%- assign ltc_camera = '' -%}{%- assign ltc_hw_bullets = '' -%}
               {%- comment -%}
-                ltc_addons: per-package "Uitbreidingen toevoegen" list, replacing the old
+                ltc_addons: per-package "Veel gekozen uitbreidingen" list, replacing the old
                 b.settings.uitbreidingen shared textarea (2026-09-16). One item per '§', each
                 item 'Name|shopify-handle' — the rendering loop below resolves the live price
                 (and, since 2026-09-26, whether the product is available) via all_products,
@@ -349,7 +349,7 @@
               {%- capture ltc_addons_group_html -%}
                 {%- if ltc_addon_list.size > 0 -%}
                   <div class="ltc__optgroup" data-group="addons">
-                    <p class="ltc__optgroup-h">Uitbreidingen toevoegen</p>
+                    <p class="ltc__optgroup-h">Veel gekozen uitbreidingen</p>
                     {%- for a in ltc_addon_list -%}
                       {%- assign aparts = a | split: '|' -%}
                       {%- assign a_name = aparts[0] -%}
