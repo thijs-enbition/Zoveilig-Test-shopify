@@ -439,6 +439,20 @@
       "note": "Price not confirmed. Must NOT enter the cart with any amount. The EUR 4,95 on the confirmation mockup is not authorised."
     }
   ],
+  "addonNames": [
+    {
+      "productHandle": "koop-video-deurbel-750",
+      "sku": "ADC-750",
+      "name": "Videodeurbel",
+      "note": "Real Shopify product (2026-09-26), rendered as a checkbox in the Uitbreidingen accordion on every Langer Thuis/Mijn Thuis package card except Vista. Name-only entry, deliberately separate from `addons` above: that array's price is a static config literal (amountCents/display), which is exactly what this add-on must NOT use — it's currently a one-time purchase and Alex is converting it to a rental shortly, so its price and purchase type are read live from all_products['koop-video-deurbel-750'] in the theme, never duplicated here. This entry exists only so /cart, Overzicht and the cart drawer can show the clean name instead of the raw Shopify admin title (which currently still carries a '***' placeholder) — see sections/oplossingen.liquid, zv-cart.liquid, zv-checkout-overview.liquid."
+    },
+    {
+      "productHandle": "huur-afstandsbediening",
+      "sku": "H0010",
+      "name": "Afstandsbediening",
+      "note": "Real Shopify product (2026-09-26), same treatment as Videodeurbel above: name-only, no price here — live price and the qty-3/discount cart mechanic read straight from all_products['huur-afstandsbediening']."
+    }
+  ],
   "bundles": [
     {
       "id": "camera-deurbel",

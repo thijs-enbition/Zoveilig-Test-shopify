@@ -99,6 +99,12 @@ def build():
     install_names = {o["productHandle"]: o["label"] for o in nami_install_options}
     if cfg["activation"].get("productHandle"):
         install_names[cfg["activation"]["productHandle"]] = cfg["labels"]["activation"]
+    # Name-only add-ons (cfg["addonNames"], e.g. Videodeurbel/Afstandsbediening): a real Shopify
+    # product's display name, deliberately with no price field — their price is never config data,
+    # always read live from the product. Merged into the same handle -> name map installation
+    # products use, so /cart, Overzicht and the cart drawer show it instead of the raw admin title.
+    for a in cfg.get("addonNames", []):
+        install_names[a["productHandle"]] = a["name"]
 
     # The single source of truth for package DISPLAY ORDER: each package's custom.finder_key,
     # in the order `lines[].packages[]` lists them in pricing.config.json. Any theme surface

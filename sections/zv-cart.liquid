@@ -49,6 +49,16 @@
 {%- assign nami_install_telefonisch_variant_id = all_products[zv_nami_install_telefonisch_handle].selected_or_first_available_variant.id -%}
 {%- assign nami_install_huis_variant_id = all_products[zv_nami_install_huis_handle].selected_or_first_available_variant.id -%}
 {%- comment -%}
+  Videodeurbel/Afstandsbediening add-on lines (2026-09-26): resolved by handle only, never a
+  hardcoded variant id or price — see CLAUDE.md. Each shows as a normal line (own name via
+  zv_install_names_by_handle below, no +/- stepper since its quantity is fixed at the same
+  qty-3/discount mechanic the package line uses, same as an installation line) — but, unlike
+  the Woning line above, it keeps its remove link: it's a standalone product a customer might
+  simply not want any more, not a per-package attribute.
+{%- endcomment -%}
+{%- assign zv_addon_videodeurbel_variant_id = all_products['koop-video-deurbel-750'].variants.first.id -%}
+{%- assign zv_addon_afstandsbediening_variant_id = all_products['huur-afstandsbediening'].variants.first.id -%}
+{%- comment -%}
   Woning line (2026-09-25, NAMI packages only): resolved like the packages, by handle and only
   if its first variant's SKU is zv_woning_sku. It renders as one non-editable row, "Woning:
   <option value>", from the NAMI package lines' Woning properties (zv_woning_* values, never
@@ -131,6 +141,8 @@
               {%- if cfg_name != blank -%}{%- assign item_name = cfg_name -%}{%- endif -%}
               {%- assign is_install = false -%}
               {%- if item.variant_id == activation_variant_id or item.variant_id == nami_install_geen_variant_id or item.variant_id == nami_install_telefonisch_variant_id or item.variant_id == nami_install_huis_variant_id -%}{%- assign is_install = true -%}{%- endif -%}
+              {%- assign is_addon = false -%}
+              {%- if item.variant_id == zv_addon_videodeurbel_variant_id or item.variant_id == zv_addon_afstandsbediening_variant_id -%}{%- assign is_addon = true -%}{%- endif -%}
               <div class="citem">
                 <div class="ci-thumb">
                   {%- if item.image -%}
@@ -140,7 +152,7 @@
                   {%- endif -%}
                 </div>
                 <div>
-                  {%- if item.product.type != blank -%}<span class="ci-line">{{ item.product.type | escape }}</span>{%- endif -%}
+                  {%- if is_addon -%}<span class="ci-line">Uitbreiding</span>{%- elsif item.product.type != blank -%}<span class="ci-line">{{ item.product.type | escape }}</span>{%- endif -%}
                   <div class="ci-name"><a href="{{ item.url }}">{{ item_name | escape }}</a></div>
                   {%- unless item.variant.title contains 'Default' -%}<div class="ci-meta">{{ item.variant.title | escape }}</div>{%- endunless -%}
                   {%- if item.selling_plan_allocation -%}<div class="ci-meta">{{ item.selling_plan_allocation.selling_plan.name | escape }}</div>{%- endif -%}
@@ -160,7 +172,7 @@
                     </div>
                   {%- endif -%}
                   <div class="ci-actions">
-                    {%- unless is_sub or is_install -%}
+                    {%- unless is_sub or is_install or is_addon -%}
                     <div class="qty">
                       <a href="{{ routes.cart_change_url }}?id={{ item.key }}&quantity={{ item.quantity | minus: 1 }}" aria-label="Aantal verlagen" class="qbtn">−</a>
                       <span>{{ item.quantity }}</span>
